@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useData } from '../context/DataContext';
-import { ListingType } from '../types';
+import React, { useState } from "react";
+import { Link } from "../components/ui/Link";
+import { useData } from "../context/DataContext";
+import { ListingType } from "../types";
 import {
   Compass,
   Anchor,
@@ -12,26 +12,27 @@ import {
   Coins,
   MapPin,
   ArrowRight,
-} from 'lucide-react';
+} from "lucide-react";
 
 export const HostWithUsPage: React.FC = () => {
   const { addProposal } = useData();
 
-  const [applicantName, setApplicantName] = useState('');
-  const [village, setVillage] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [proposalTitle, setProposalTitle] = useState('');
-  const [proposalType, setProposalType] = useState<ListingType>('experience');
-  const [summary, setSummary] = useState('');
-  const [estimatedPrice, setEstimatedPrice] = useState('');
-  const [samplePhoto, setSamplePhoto] = useState('');
+  const [applicantName, setApplicantName] = useState("");
+  const [village, setVillage] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [proposalTitle, setProposalTitle] = useState("");
+  const [proposalType, setProposalType] = useState<ListingType>("experience");
+  const [summary, setSummary] = useState("");
+  const [estimatedPrice, setEstimatedPrice] = useState("");
+  const [samplePhoto, setSamplePhoto] = useState("");
 
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!applicantName || !village || !phone || !proposalTitle || !summary) return;
+    if (!applicantName || !village || !phone || !proposalTitle || !summary)
+      return;
 
     addProposal({
       applicant_name: applicantName,
@@ -50,7 +51,6 @@ export const HostWithUsPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-      
       {/* Header & Manifesto */}
       <div className="text-center space-y-4 max-w-2xl mx-auto">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-ocean-100 text-ocean-800 text-xs font-semibold">
@@ -63,7 +63,10 @@ export const HostWithUsPage: React.FC = () => {
         </h1>
 
         <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-          Are you a Koli elder, young boatman, artisan, or member of a Mahila Bachat Gat? MatsyaMart connects you directly to respectful urban travelers, students, and food enthusiasts with zero platform middlemen fees.
+          Are you a Koli elder, young boatman, artisan, or member of a Mahila
+          Bachat Gat? MatsyaMart connects you directly to respectful urban
+          travelers, students, and food enthusiasts with zero platform middlemen
+          fees.
         </p>
       </div>
 
@@ -73,9 +76,12 @@ export const HostWithUsPage: React.FC = () => {
           <div className="w-9 h-9 rounded-xl bg-ocean-100 text-ocean-800 flex items-center justify-center font-bold text-sm">
             100%
           </div>
-          <h4 className="font-display font-bold text-sm text-slate-900">Direct Host Earnings</h4>
+          <h4 className="font-display font-bold text-sm text-slate-900">
+            Direct Host Earnings
+          </h4>
           <p className="text-xs text-slate-500 leading-relaxed">
-            All ticket revenues and product sales transfer straight to your bank account without aggregators slicing your profit.
+            All ticket revenues and product sales transfer straight to your bank
+            account without aggregators slicing your profit.
           </p>
         </div>
 
@@ -83,9 +89,12 @@ export const HostWithUsPage: React.FC = () => {
           <div className="w-9 h-9 rounded-xl bg-sun-100 text-ocean-950 flex items-center justify-center font-bold text-sm">
             🛡️
           </div>
-          <h4 className="font-display font-bold text-sm text-slate-900">Safety & Insurance Support</h4>
+          <h4 className="font-display font-bold text-sm text-slate-900">
+            Safety & Insurance Support
+          </h4>
           <p className="text-xs text-slate-500 leading-relaxed">
-            Bhoomiputra Foundation provides verified guest waivers, life jackets, and attendee manifests for every tour.
+            Bhoomiputra Foundation provides verified guest waivers, life
+            jackets, and attendee manifests for every tour.
           </p>
         </div>
 
@@ -93,9 +102,12 @@ export const HostWithUsPage: React.FC = () => {
           <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm">
             🤝
           </div>
-          <h4 className="font-display font-bold text-sm text-slate-900">Dignified Storytelling</h4>
+          <h4 className="font-display font-bold text-sm text-slate-900">
+            Dignified Storytelling
+          </h4>
           <p className="text-xs text-slate-500 leading-relaxed">
-            You set the itinerary, dates, and maximum guest caps according to lunar tides and village customs.
+            You set the itinerary, dates, and maximum guest caps according to
+            lunar tides and village customs.
           </p>
         </div>
       </div>
@@ -111,7 +123,11 @@ export const HostWithUsPage: React.FC = () => {
               Proposal Received! Welcome to MatsyaMart.
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-              Thank you, <strong>{applicantName}</strong>. Your proposal for "<strong>{proposalTitle}</strong>" has been submitted to the Bhoomiputra coordinator team. A local coordinator will contact you on <strong>{phone}</strong> to arrange a community verification visit.
+              Thank you, <strong>{applicantName}</strong>. Your proposal for "
+              <strong>{proposalTitle}</strong>" has been submitted to the
+              Bhoomiputra coordinator team. A local coordinator will contact you
+              on <strong>{phone}</strong> to arrange a community verification
+              visit.
             </p>
             <div className="pt-4 flex justify-center gap-3">
               <Link
@@ -123,8 +139,8 @@ export const HostWithUsPage: React.FC = () => {
               <button
                 onClick={() => {
                   setIsSubmitted(false);
-                  setProposalTitle('');
-                  setSummary('');
+                  setProposalTitle("");
+                  setSummary("");
                 }}
                 className="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-200 transition-colors"
               >
@@ -223,11 +239,11 @@ export const HostWithUsPage: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
-                    onClick={() => setProposalType('experience')}
+                    onClick={() => setProposalType("experience")}
                     className={`p-3 rounded-xl border text-left text-xs transition-all ${
-                      proposalType === 'experience'
-                        ? 'border-ocean-700 bg-ocean-50 text-ocean-950 font-bold ring-2 ring-ocean-600/20'
-                        : 'border-slate-200 bg-white text-slate-700'
+                      proposalType === "experience"
+                        ? "border-ocean-700 bg-ocean-50 text-ocean-950 font-bold ring-2 ring-ocean-600/20"
+                        : "border-slate-200 bg-white text-slate-700"
                     }`}
                   >
                     🧭 Coastal Tour / Experience
@@ -238,11 +254,11 @@ export const HostWithUsPage: React.FC = () => {
 
                   <button
                     type="button"
-                    onClick={() => setProposalType('product')}
+                    onClick={() => setProposalType("product")}
                     className={`p-3 rounded-xl border text-left text-xs transition-all ${
-                      proposalType === 'product'
-                        ? 'border-amber-600 bg-amber-50 text-amber-950 font-bold ring-2 ring-amber-600/20'
-                        : 'border-slate-200 bg-white text-slate-700'
+                      proposalType === "product"
+                        ? "border-amber-600 bg-amber-50 text-amber-950 font-bold ring-2 ring-amber-600/20"
+                        : "border-slate-200 bg-white text-slate-700"
                     }`}
                   >
                     🐟 Artisan Good / Pantry
@@ -326,7 +342,6 @@ export const HostWithUsPage: React.FC = () => {
           </form>
         )}
       </div>
-
     </div>
   );
 };

@@ -1,31 +1,47 @@
-import React, { useState } from 'react';
-import { Calendar, Plus, Clock, Users, AlertTriangle, CheckCircle, Sparkles } from 'lucide-react';
-import { ExperienceSlot, Listing } from '../../types';
-import { useData } from '../../context/DataContext';
-import { formatDate, formatSlotRange } from '../../lib/utils';
+import React, { useState } from "react";
+import {
+  Calendar,
+  Plus,
+  Clock,
+  Users,
+  AlertTriangle,
+  CheckCircle,
+  Sparkles,
+} from "lucide-react";
+import { ExperienceSlot, Listing } from "../../types";
+import { useData } from "../../context/DataContext";
+import { formatDate, formatSlotRange } from "../../lib/utils";
 
 interface SlotManagerProps {
   slots: ExperienceSlot[];
   listings: Listing[];
 }
 
-export const SlotManager: React.FC<SlotManagerProps> = ({ slots, listings }) => {
+export const SlotManager: React.FC<SlotManagerProps> = ({
+  slots,
+  listings,
+}) => {
   const { addSlot, addRecurringWeekendSlots, toggleCancelSlot } = useData();
 
-  const experienceListings = listings.filter((l) => l.type === 'experience');
-  const [selectedListingId, setSelectedListingId] = useState<string>(experienceListings[0]?.id || '');
+  const experienceListings = listings.filter((l) => l.type === "experience");
+  const [selectedListingId, setSelectedListingId] = useState<string>(
+    experienceListings[0]?.id || "",
+  );
 
   // Form State for Single Slot
-  const [slotDate, setSlotDate] = useState<string>('');
-  const [startTime, setStartTime] = useState<string>('06:30');
-  const [endTime, setEndTime] = useState<string>('09:00');
+  const [slotDate, setSlotDate] = useState<string>("");
+  const [startTime, setStartTime] = useState<string>("06:30");
+  const [endTime, setEndTime] = useState<string>("09:00");
   const [capacity, setCapacity] = useState<number>(14);
   const [showAddForm, setShowAddForm] = useState<boolean>(false);
-  const [successMsg, setSuccessMsg] = useState<string>('');
+  const [successMsg, setSuccessMsg] = useState<string>("");
 
-  const filteredSlots = slots.filter(
-    (s) => !selectedListingId || s.listing_id === selectedListingId
-  ).sort((a, b) => new Date(a.slot_start).getTime() - new Date(b.slot_start).getTime());
+  const filteredSlots = slots
+    .filter((s) => !selectedListingId || s.listing_id === selectedListingId)
+    .sort(
+      (a, b) =>
+        new Date(a.slot_start).getTime() - new Date(b.slot_start).getTime(),
+    );
 
   const handleCreateSlot = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,21 +57,22 @@ export const SlotManager: React.FC<SlotManagerProps> = ({ slots, listings }) => 
       capacity: Number(capacity),
     });
 
-    setSuccessMsg('Slot created successfully!');
+    setSuccessMsg("Slot created successfully!");
     setShowAddForm(false);
-    setTimeout(() => setSuccessMsg(''), 3000);
+    setTimeout(() => setSuccessMsg(""), 3000);
   };
 
   const handleGenerateWeekendBatches = () => {
     if (!selectedListingId) return;
     addRecurringWeekendSlots(selectedListingId, 4, 14);
-    setSuccessMsg('Generated next 4 weeks of Saturday & Sunday dawn slots (8 new batches)!');
-    setTimeout(() => setSuccessMsg(''), 4000);
+    setSuccessMsg(
+      "Generated next 4 weeks of Saturday & Sunday dawn slots (8 new batches)!",
+    );
+    setTimeout(() => setSuccessMsg(""), 4000);
   };
 
   return (
     <div className="space-y-6">
-      
       {/* Top Filter and Actions */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200">
         <div>
@@ -103,11 +120,18 @@ export const SlotManager: React.FC<SlotManagerProps> = ({ slots, listings }) => 
 
       {/* Add Slot Modal / Inline Form */}
       {showAddForm && (
-        <form onSubmit={handleCreateSlot} className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-4">
-          <div className="font-display font-bold text-sm text-slate-800">Create New Time Slot</div>
+        <form
+          onSubmit={handleCreateSlot}
+          className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-4"
+        >
+          <div className="font-display font-bold text-sm text-slate-800">
+            Create New Time Slot
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div>
-              <label className="text-xs font-medium text-slate-600 block mb-1">Date</label>
+              <label className="text-xs font-medium text-slate-600 block mb-1">
+                Date
+              </label>
               <input
                 type="date"
                 required
@@ -117,7 +141,9 @@ export const SlotManager: React.FC<SlotManagerProps> = ({ slots, listings }) => 
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-600 block mb-1">Start Time</label>
+              <label className="text-xs font-medium text-slate-600 block mb-1">
+                Start Time
+              </label>
               <input
                 type="time"
                 required
@@ -127,7 +153,9 @@ export const SlotManager: React.FC<SlotManagerProps> = ({ slots, listings }) => 
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-600 block mb-1">End Time</label>
+              <label className="text-xs font-medium text-slate-600 block mb-1">
+                End Time
+              </label>
               <input
                 type="time"
                 required
@@ -137,7 +165,9 @@ export const SlotManager: React.FC<SlotManagerProps> = ({ slots, listings }) => 
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-600 block mb-1">Guest Capacity</label>
+              <label className="text-xs font-medium text-slate-600 block mb-1">
+                Guest Capacity
+              </label>
               <input
                 type="number"
                 min="1"
@@ -184,8 +214,8 @@ export const SlotManager: React.FC<SlotManagerProps> = ({ slots, listings }) => 
                 key={slot.id}
                 className={`p-4 rounded-2xl border transition-all ${
                   slot.is_cancelled
-                    ? 'bg-rose-50/60 border-rose-200 opacity-75'
-                    : 'bg-white border-slate-200 hover:shadow-xs'
+                    ? "bg-rose-50/60 border-rose-200 opacity-75"
+                    : "bg-white border-slate-200 hover:shadow-xs"
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -196,20 +226,26 @@ export const SlotManager: React.FC<SlotManagerProps> = ({ slots, listings }) => 
                     </div>
                     <div className="flex items-center gap-1.5 text-xs text-slate-600">
                       <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{formatSlotRange(slot.slot_start, slot.slot_end)}</span>
+                      <span>
+                        {formatSlotRange(slot.slot_start, slot.slot_end)}
+                      </span>
                     </div>
                   </div>
 
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
                       slot.is_cancelled
-                        ? 'bg-rose-100 text-rose-800'
+                        ? "bg-rose-100 text-rose-800"
                         : isFull
-                        ? 'bg-amber-100 text-amber-800'
-                        : 'bg-emerald-100 text-emerald-800'
+                          ? "bg-amber-100 text-amber-800"
+                          : "bg-emerald-100 text-emerald-800"
                     }`}
                   >
-                    {slot.is_cancelled ? 'Cancelled' : isFull ? 'Full' : 'Active'}
+                    {slot.is_cancelled
+                      ? "Cancelled"
+                      : isFull
+                        ? "Full"
+                        : "Active"}
                   </span>
                 </div>
 
@@ -217,7 +253,8 @@ export const SlotManager: React.FC<SlotManagerProps> = ({ slots, listings }) => 
                   <div className="flex items-center gap-1 text-slate-600">
                     <Users className="w-3.5 h-3.5 text-slate-400" />
                     <span>
-                      <strong className="text-slate-900">{booked}</strong> / {cap} booked
+                      <strong className="text-slate-900">{booked}</strong> /{" "}
+                      {cap} booked
                     </span>
                   </div>
 
@@ -225,11 +262,11 @@ export const SlotManager: React.FC<SlotManagerProps> = ({ slots, listings }) => 
                     onClick={() => toggleCancelSlot(slot.id)}
                     className={`text-[11px] font-semibold px-2 py-1 rounded-md transition-colors ${
                       slot.is_cancelled
-                        ? 'text-emerald-700 hover:bg-emerald-50'
-                        : 'text-rose-600 hover:bg-rose-50'
+                        ? "text-emerald-700 hover:bg-emerald-50"
+                        : "text-rose-600 hover:bg-rose-50"
                     }`}
                   >
-                    {slot.is_cancelled ? 'Restore Slot' : 'Emergency Cancel'}
+                    {slot.is_cancelled ? "Restore Slot" : "Emergency Cancel"}
                   </button>
                 </div>
               </div>
@@ -237,7 +274,6 @@ export const SlotManager: React.FC<SlotManagerProps> = ({ slots, listings }) => 
           })
         )}
       </div>
-
     </div>
   );
 };

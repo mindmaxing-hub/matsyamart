@@ -1,12 +1,14 @@
-import React from 'react';
-import { Clock } from 'lucide-react';
-import { ItineraryItem } from '../../types';
+import React from "react";
+import { Clock } from "lucide-react";
+import { ItineraryItem } from "../../types";
 
 interface ItineraryTimelineProps {
   itinerary: ItineraryItem[];
 }
 
-export const ItineraryTimeline: React.FC<ItineraryTimelineProps> = ({ itinerary }) => {
+export const ItineraryTimeline: React.FC<ItineraryTimelineProps> = ({
+  itinerary,
+}) => {
   if (!itinerary || itinerary.length === 0) return null;
 
   return (
@@ -21,7 +23,7 @@ export const ItineraryTimeline: React.FC<ItineraryTimelineProps> = ({ itinerary 
           <div key={idx} className="relative pl-6 group">
             {/* Timeline Dot */}
             <div className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-white border-2 border-ocean-600 group-hover:bg-sun-300 transition-colors" />
-            
+
             <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 shadow-xs">
               <span className="text-xs font-bold text-ocean-800 bg-ocean-100/80 px-2.5 py-0.5 rounded-full inline-block mb-1">
                 {item.time}

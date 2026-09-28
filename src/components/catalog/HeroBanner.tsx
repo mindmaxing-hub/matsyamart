@@ -1,5 +1,5 @@
-import React from 'react';
-import { Search, Compass, ShieldCheck, MapPin, Sparkles } from 'lucide-react';
+import React from "react";
+import { Search, Compass, ShieldCheck, MapPin, Sparkles } from "lucide-react";
 
 interface HeroBannerProps {
   searchQuery: string;
@@ -20,7 +20,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
     <div className="relative bg-ocean-950 text-white overflow-hidden py-16 md:py-24 border-b border-ocean-800">
       {/* Background Graphic & Texture Overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-ocean-950 via-ocean-900 to-ocean-800 opacity-95"></div>
-      <div 
+      <div
         className="absolute inset-0 opacity-20 bg-cover bg-center mix-blend-overlay"
         style={{
           backgroundImage: `url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=2000&q=80')`,
@@ -28,7 +28,6 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       ></div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         {/* Eyebrow Badge */}
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-ocean-800/80 border border-ocean-700/80 backdrop-blur-md mb-6 text-xs text-sun-300 font-semibold shadow-xs">
           <Sparkles className="w-3.5 h-3.5" />
@@ -42,13 +41,15 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             <span className="text-sun-300">Support Indigenous Guardians.</span>
           </h1>
           <p className="text-sm sm:text-base text-ocean-100/90 leading-relaxed font-normal max-w-2xl">
-            Book authentic dawn harbor walks, tidal mangrove boat safaris, net-weaving workshops, and sun-dried coastal pantry goods. Direct revenue straight to Koli elders, fishermen, and women’s self-help collectives.
+            Book authentic dawn harbor walks, tidal mangrove boat safaris,
+            net-weaving workshops, and sun-dried coastal pantry goods. Direct
+            revenue straight to Koli elders, fishermen, and women’s self-help
+            collectives.
           </p>
         </div>
 
         {/* Search & Location Bar */}
         <div className="mt-8 max-w-3xl bg-white p-2.5 rounded-2xl shadow-modal flex flex-col sm:flex-row items-center gap-2.5 text-slate-800 border border-slate-200">
-          
           {/* Text Search */}
           <div className="flex items-center gap-2.5 px-3 py-2 flex-1 w-full border-b sm:border-b-0 sm:border-r border-slate-200">
             <Search className="w-5 h-5 text-ocean-700 shrink-0" />
@@ -79,9 +80,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           </div>
 
           {/* Action Trigger */}
-          <button 
-            className="w-full sm:w-auto px-6 py-2.5 bg-ocean-800 hover:bg-ocean-900 text-white rounded-xl text-xs sm:text-sm font-semibold transition-colors shrink-0 flex items-center justify-center gap-2"
-          >
+          <button className="w-full sm:w-auto px-6 py-2.5 bg-ocean-800 hover:bg-ocean-900 text-white rounded-xl text-xs sm:text-sm font-semibold transition-colors shrink-0 flex items-center justify-center gap-2">
             <Compass className="w-4 h-4 text-sun-300" />
             <span>Search</span>
           </button>
@@ -102,7 +101,6 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             <span>Verified Indigenous Storytellers</span>
           </div>
         </div>
-
       </div>
     </div>
   );

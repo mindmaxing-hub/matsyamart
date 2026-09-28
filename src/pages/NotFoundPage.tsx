@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Compass, ArrowLeft } from 'lucide-react';
+import React from "react";
+import { Link } from "../components/ui/Link";
+import { Compass, ArrowLeft } from "lucide-react";
 
 export const NotFoundPage: React.FC = () => {
   return (
@@ -12,7 +12,8 @@ export const NotFoundPage: React.FC = () => {
         404 — Shore Not Found
       </h1>
       <p className="text-xs sm:text-sm text-slate-500 max-w-sm">
-        The page you navigated to doesn't exist on MatsyaMart or has shifted with the tide.
+        The page you navigated to doesn't exist on MatsyaMart or has shifted
+        with the tide.
       </p>
       <Link
         to="/"

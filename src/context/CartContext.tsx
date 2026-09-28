@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Listing, CartItem } from '../types';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { Listing, CartItem } from "../types";
 
 interface CartContextType {
   items: CartItem[];
@@ -15,9 +15,11 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const CART_STORAGE_KEY = 'matsyamart_cart_v1';
+const CART_STORAGE_KEY = "matsyamart_cart_v1";
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [items, setItems] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem(CART_STORAGE_KEY);
@@ -33,7 +35,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
     } catch (err) {
-      console.error('Failed to save cart to localStorage', err);
+      console.error("Failed to save cart to localStorage", err);
     }
   }, [items]);
 
@@ -44,7 +46,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return prev.map((item) =>
           item.listing.id === listing.id
             ? { ...item, quantity: item.quantity + quantity }
-            : item
+            : item,
         );
       }
       return [...prev, { listing, quantity }];
@@ -63,8 +65,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setItems((prev) =>
       prev.map((item) =>
-        item.listing.id === listingId ? { ...item, quantity } : item
-      )
+        item.listing.id === listingId ? { ...item, quantity } : item,
+      ),
     );
   };
 
@@ -74,7 +76,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const totalAmount = items.reduce(
     (sum, item) => sum + item.listing.price_inr * item.quantity,
-    0
+    0,
   );
 
   const totalItemsCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -101,7 +103,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
+    throw new Error("useCart must be used within a CartProvider");
   }
   return context;
 };

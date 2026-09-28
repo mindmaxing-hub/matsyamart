@@ -1,31 +1,56 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, Menu, X, Compass, Anchor, ShieldCheck } from 'lucide-react';
-import { useCart } from '../../context/CartContext';
+import React, { useState } from "react";
+import { useRouterState } from "@tanstack/react-router";
+import { Link } from "../ui/Link";
+import {
+  ShoppingBag,
+  Menu,
+  X,
+  Compass,
+  Anchor,
+  ShieldCheck,
+} from "lucide-react";
+import { useCart } from "../../context/CartContext";
 
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { totalItemsCount, setIsCartOpen } = useCart();
-  const location = useLocation();
 
-  const isActive = (path: string) => location.pathname === path;
+  let currentPath = "/";
+  try {
+    const routerState = useRouterState();
+    currentPath = routerState?.location?.pathname || "/";
+  } catch {
+    if (typeof window !== "undefined") {
+      currentPath = window.location.pathname;
+    }
+  }
+
+  const isActive = (path: string) => currentPath === path;
 
   return (
     <>
-      {/* Top Indigenous Stewardship Banner */}
+      {/* Top Indigenous Stewardship Announcement Bar */}
       <div className="bg-ocean-950 text-white text-[11px] py-1.5 px-4 tracking-wide font-medium border-b border-ocean-800">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-2 h-2 rounded-full bg-sun-300 animate-pulse"></span>
-            <span>Direct Community Revenue — 100% of tour fees & goods payouts go directly to Koli hosts & women's collectives</span>
+            <span className="inline-block w-2 h-2 rounded-full bg-sun-300 animate-pulse shrink-0" />
+            <span className="truncate">
+              Direct Community Revenue — 100% of tour fees & goods payouts go
+              directly to Koli hosts & women's collectives
+            </span>
           </div>
-          <div className="hidden sm:flex items-center gap-4 text-ocean-200">
+          <div className="hidden sm:flex items-center gap-4 text-ocean-200 shrink-0">
             <span className="flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5 text-sun-300" />
               Verified Koliwada Guides
             </span>
             <span className="text-ocean-500">|</span>
-            <a href="https://bhoomiputra.org" target="_blank" rel="noreferrer" className="hover:text-sun-300 transition-colors">
+            <a
+              href="https://bhoomiputra.org"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-sun-300 transition-colors"
+            >
               Bhoomiputra Foundation ↗
             </a>
           </div>
@@ -35,15 +60,14 @@ export const Navbar: React.FC = () => {
       {/* Main Navigation Bar */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          
           {/* Brand Identity */}
           <Link to="/" className="flex items-center gap-3.5 group">
             {/* Origami Chevron Logo Mark */}
-            <div className="w-11 h-11 rounded-xl bg-ocean-900 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform overflow-hidden relative border border-ocean-700">
-              <div className="absolute inset-0 bg-gradient-to-tr from-ocean-900 via-ocean-800 to-ocean-600 opacity-90"></div>
+            <div className="w-11 h-11 rounded-xl bg-ocean-900 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform overflow-hidden relative border border-ocean-700 shrink-0">
+              <div className="absolute inset-0 bg-gradient-to-tr from-ocean-900 via-ocean-800 to-ocean-600 opacity-90" />
               <Anchor className="w-6 h-6 text-sun-300 relative z-10 stroke-[2.2]" />
             </div>
-            
+
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
                 <span className="font-display font-bold text-2xl text-ocean-900 tracking-tight">
@@ -64,12 +88,14 @@ export const Navbar: React.FC = () => {
             <Link
               to="/"
               className={`text-sm font-medium transition-colors ${
-                isActive('/') ? 'text-ocean-900 font-semibold' : 'text-slate-600 hover:text-ocean-800'
+                isActive("/")
+                  ? "text-ocean-900 font-semibold"
+                  : "text-slate-600 hover:text-ocean-800"
               }`}
             >
               Explore Experiences
             </Link>
-            
+
             <a
               href="/#artisan-goods"
               className="text-sm font-medium text-slate-600 hover:text-ocean-800 transition-colors"
@@ -80,9 +106,9 @@ export const Navbar: React.FC = () => {
             <Link
               to="/host-with-us"
               className={`text-sm font-medium flex items-center gap-1.5 transition-colors ${
-                isActive('/host-with-us')
-                  ? 'text-ocean-900 font-semibold'
-                  : 'text-slate-600 hover:text-ocean-800'
+                isActive("/host-with-us")
+                  ? "text-ocean-900 font-semibold"
+                  : "text-slate-600 hover:text-ocean-800"
               }`}
             >
               <Compass className="w-4 h-4 text-ocean-600" />
@@ -92,9 +118,9 @@ export const Navbar: React.FC = () => {
             <Link
               to="/admin"
               className={`text-xs uppercase tracking-wider font-semibold px-2.5 py-1 rounded-md transition-colors ${
-                isActive('/admin')
-                  ? 'bg-ocean-900 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                isActive("/admin")
+                  ? "bg-ocean-900 text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
               Admin Portal
@@ -106,7 +132,7 @@ export const Navbar: React.FC = () => {
             {/* Bag Button */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 rounded-xl border border-slate-200/80 bg-slate-50 hover:bg-slate-100 text-ocean-900 transition-colors flex items-center justify-center shadow-xs"
+              className="relative p-2.5 rounded-xl border border-slate-200/80 bg-slate-50 hover:bg-slate-100 text-ocean-900 transition-colors flex items-center justify-center shadow-xs cursor-pointer"
               aria-label="View Cart"
             >
               <ShoppingBag className="w-5 h-5 text-ocean-800" />
@@ -120,13 +146,16 @@ export const Navbar: React.FC = () => {
             {/* Mobile Hamburger Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors"
+              className="md:hidden p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
               aria-label="Toggle Navigation"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
             </button>
           </div>
-
         </div>
 
         {/* Mobile Flyout Menu */}

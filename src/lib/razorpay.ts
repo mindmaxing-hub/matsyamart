@@ -1,6 +1,21 @@
+export interface RazorpaySuccessResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id?: string;
+  razorpay_signature?: string;
+}
+
+export interface RazorpayModalInstance {
+  open: () => void;
+  on: (event: string, callback: () => void) => void;
+}
+
+export interface RazorpayConstructor {
+  new (options: Record<string, unknown>): RazorpayModalInstance;
+}
+
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay?: RazorpayConstructor;
   }
 }
 
@@ -11,28 +26,33 @@ export interface RazorpayCheckoutOptions {
   customerEmail: string;
   customerPhone: string;
   description: string;
-  onSuccess: (response: { razorpay_payment_id: string; razorpay_order_id?: string }) => void;
+  onSuccess: (response: {
+    razorpay_payment_id: string;
+    razorpay_order_id?: string | undefined;
+  }) => void;
   onDismiss?: () => void;
 }
 
 export function loadRazorpayScript(): Promise<boolean> {
   return new Promise((resolve) => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return resolve(false);
     }
     if (window.Razorpay) {
       return resolve(true);
     }
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.onload = () => resolve(true);
     script.onerror = () => resolve(false);
     document.body.appendChild(script);
   });
 }
 
-export async function initiatePayment(options: RazorpayCheckoutOptions): Promise<void> {
-  const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+export async function initiatePayment(
+  options: RazorpayCheckoutOptions,
+): Promise<void> {
+  const razorpayKey = import.meta.env["VITE_RAZORPAY_KEY_ID"];
 
   // If live key is provided, use actual Razorpay modal
   if (razorpayKey) {
@@ -41,19 +61,19 @@ export async function initiatePayment(options: RazorpayCheckoutOptions): Promise
       const rzpOptions = {
         key: razorpayKey,
         amount: Math.round(options.amountInr * 100), // amount in paise
-        currency: 'INR',
-        name: 'MatsyaMart',
+        currency: "INR",
+        name: "MatsyaMart",
         description: options.description,
-        image: 'https://experience.bhoomiputra.org/favicon.svg',
+        image: "https://experience.bhoomiputra.org/favicon.svg",
         prefill: {
           name: options.customerName,
           email: options.customerEmail,
           contact: options.customerPhone,
         },
         theme: {
-          color: '#004A63',
+          color: "#004A63",
         },
-        handler: function (response: any) {
+        handler: function (response: RazorpaySuccessResponse) {
           options.onSuccess({
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_order_id: response.razorpay_order_id,
@@ -78,14 +98,15 @@ export async function initiatePayment(options: RazorpayCheckoutOptions): Promise
 }
 
 function triggerMockRazorpayModal(options: RazorpayCheckoutOptions) {
-  const modalId = 'matsyamart-mock-rzp-modal';
+  const modalId = "matsyamart-mock-rzp-modal";
   const existing = document.getElementById(modalId);
   if (existing) existing.remove();
 
-  const container = document.createElement('div');
+  const container = document.createElement("div");
   container.id = modalId;
-  container.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in';
-  
+  container.className =
+    "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in";
+
   container.innerHTML = `
     <div class="bg-white rounded-2xl shadow-modal w-full max-w-md overflow-hidden border border-slate-200">
       <div class="bg-ocean-900 text-white p-5 flex items-center justify-between">
@@ -98,7 +119,7 @@ function triggerMockRazorpayModal(options: RazorpayCheckoutOptions) {
         </div>
         <div class="text-right">
           <div class="text-xs text-ocean-200">Amount</div>
-          <div class="text-xl font-bold font-display text-sun-300">₹${options.amountInr.toLocaleString('en-IN')}</div>
+          <div class="text-xl font-bold font-display text-sun-300">₹${options.amountInr.toLocaleString("en-IN")}</div>
         </div>
       </div>
 
@@ -143,7 +164,7 @@ function triggerMockRazorpayModal(options: RazorpayCheckoutOptions) {
             Cancel
           </button>
           <button id="rzp-mock-pay" class="flex-1 px-4 py-2.5 text-xs font-semibold text-white bg-ocean-800 hover:bg-ocean-900 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5">
-            <span>Pay ₹${options.amountInr.toLocaleString('en-IN')}</span>
+            <span>Pay ₹${options.amountInr.toLocaleString("en-IN")}</span>
             <span class="text-sun-300">✓</span>
           </button>
         </div>
@@ -153,20 +174,22 @@ function triggerMockRazorpayModal(options: RazorpayCheckoutOptions) {
 
   document.body.appendChild(container);
 
-  const payBtn = document.getElementById('rzp-mock-pay');
-  const cancelBtn = document.getElementById('rzp-mock-cancel');
+  const payBtn = document.getElementById("rzp-mock-pay");
+  const cancelBtn = document.getElementById("rzp-mock-cancel");
 
-  payBtn?.addEventListener('click', () => {
+  payBtn?.addEventListener("click", () => {
     container.remove();
-    const fakePaymentId = 'pay_sim_' + Math.random().toString(36).substring(2, 12);
-    const fakeOrderId = 'order_sim_' + Math.random().toString(36).substring(2, 12);
+    const fakePaymentId =
+      "pay_sim_" + Math.random().toString(36).substring(2, 12);
+    const fakeOrderId =
+      "order_sim_" + Math.random().toString(36).substring(2, 12);
     options.onSuccess({
       razorpay_payment_id: fakePaymentId,
       razorpay_order_id: fakeOrderId,
     });
   });
 
-  cancelBtn?.addEventListener('click', () => {
+  cancelBtn?.addEventListener("click", () => {
     container.remove();
     if (options.onDismiss) options.onDismiss();
   });

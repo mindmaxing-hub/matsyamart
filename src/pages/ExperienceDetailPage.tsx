@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { useData } from '../context/DataContext';
-import { SlotBookingSheet } from '../components/experience/SlotBookingSheet';
-import { ItineraryTimeline } from '../components/experience/ItineraryTimeline';
-import { HostProfileCard } from '../components/experience/HostProfileCard';
+import React, { useState } from "react";
+import { Link } from "../components/ui/Link";
+import { useData } from "../context/DataContext";
+import { SlotBookingSheet } from "../components/experience/SlotBookingSheet";
+import { ItineraryTimeline } from "../components/experience/ItineraryTimeline";
+import { HostProfileCard } from "../components/experience/HostProfileCard";
 import {
   ArrowLeft,
   MapPin,
@@ -14,11 +14,22 @@ import {
   Camera,
   Utensils,
   Backpack,
-} from 'lucide-react';
-import { formatDuration } from '../lib/utils';
+} from "lucide-react";
+import { formatDuration } from "../lib/utils";
 
-export const ExperienceDetailPage: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
+interface ExperienceDetailPageProps {
+  slug?: string;
+}
+
+export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
+  slug: slugProp,
+}) => {
+  let slug = slugProp;
+  if (!slug && typeof window !== "undefined") {
+    const parts = window.location.pathname.split("/");
+    slug = parts[parts.length - 1];
+  }
+
   const { getListingBySlug, getSlotsByListingId } = useData();
 
   const listing = slug ? getListingBySlug(slug) : undefined;
@@ -29,8 +40,13 @@ export const ExperienceDetailPage: React.FC = () => {
   if (!listing) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-20 text-center space-y-4">
-        <h2 className="font-display font-bold text-2xl text-slate-800">Experience Not Found</h2>
-        <p className="text-xs text-slate-500">The coastal tour you are looking for may have concluded or been relocated.</p>
+        <h2 className="font-display font-bold text-2xl text-slate-800">
+          Experience Not Found
+        </h2>
+        <p className="text-xs text-slate-500">
+          The coastal tour you are looking for may have concluded or been
+          relocated.
+        </p>
         <Link
           to="/"
           className="inline-flex items-center gap-1.5 px-4 py-2 bg-ocean-800 text-white rounded-xl text-xs font-semibold"
@@ -43,7 +59,6 @@ export const ExperienceDetailPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      
       {/* Breadcrumb & Back Link */}
       <div>
         <Link
@@ -102,10 +117,16 @@ export const ExperienceDetailPage: React.FC = () => {
                 key={idx}
                 onClick={() => setActiveImageIdx(idx)}
                 className={`w-20 h-14 rounded-xl overflow-hidden border-2 transition-all shrink-0 ${
-                  activeImageIdx === idx ? 'border-ocean-600 ring-2 ring-ocean-600/30' : 'border-transparent opacity-70 hover:opacity-100'
+                  activeImageIdx === idx
+                    ? "border-ocean-600 ring-2 ring-ocean-600/30"
+                    : "border-transparent opacity-70 hover:opacity-100"
                 }`}
               >
-                <img src={img} alt="Thumbnail" className="w-full h-full object-cover" />
+                <img
+                  src={img}
+                  alt="Thumbnail"
+                  className="w-full h-full object-cover"
+                />
               </button>
             ))}
           </div>
@@ -114,10 +135,8 @@ export const ExperienceDetailPage: React.FC = () => {
 
       {/* Main Two-Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start pt-4">
-        
         {/* Left Column: Full Narrative, Timeline, Host (7 Cols) */}
         <div className="lg:col-span-7 space-y-10">
-          
           {/* Host Card */}
           <HostProfileCard listing={listing} />
 
@@ -132,7 +151,9 @@ export const ExperienceDetailPage: React.FC = () => {
           </div>
 
           {/* Itinerary Timeline */}
-          {listing.itinerary && <ItineraryTimeline itinerary={listing.itinerary} />}
+          {listing.itinerary && (
+            <ItineraryTimeline itinerary={listing.itinerary} />
+          )}
 
           {/* What's Included */}
           {listing.included_items && listing.included_items.length > 0 && (
@@ -169,7 +190,6 @@ export const ExperienceDetailPage: React.FC = () => {
               </ul>
             </div>
           )}
-
         </div>
 
         {/* Right Column: Sticky Slot Booking Sheet (5 Cols) */}
@@ -183,13 +203,13 @@ export const ExperienceDetailPage: React.FC = () => {
               <span>Bhoomiputra Direct Payouts Guarantee</span>
             </div>
             <p className="text-[11px] leading-relaxed">
-              Ticket payments go directly into community accounts. If a tidal boat tour is cancelled due to adverse weather or marine warnings, 100% refund or free date rescheduling is provided instantly.
+              Ticket payments go directly into community accounts. If a tidal
+              boat tour is cancelled due to adverse weather or marine warnings,
+              100% refund or free date rescheduling is provided instantly.
             </p>
           </div>
         </div>
-
       </div>
-
     </div>
   );
 };

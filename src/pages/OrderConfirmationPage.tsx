@@ -1,13 +1,23 @@
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { useData } from '../context/DataContext';
-import { DigitalPass } from '../components/order/DigitalPass';
-import { ArrowLeft, AlertCircle } from 'lucide-react';
+import React from "react";
+import { Link } from "../components/ui/Link";
+import { useData } from "../context/DataContext";
+import { DigitalPass } from "../components/order/DigitalPass";
+import { ArrowLeft, AlertCircle } from "lucide-react";
 
-export const OrderConfirmationPage: React.FC = () => {
-  const { orderRef } = useParams<{ orderRef: string }>();
+interface OrderConfirmationPageProps {
+  orderRef?: string;
+}
+
+export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
+  orderRef: refProp,
+}) => {
+  let orderRef = refProp;
+  if (!orderRef && typeof window !== "undefined") {
+    const parts = window.location.pathname.split("/");
+    orderRef = parts[parts.length - 1];
+  }
+
   const { getOrderByRef } = useData();
-
   const order = orderRef ? getOrderByRef(orderRef) : undefined;
 
   if (!order) {
@@ -20,7 +30,12 @@ export const OrderConfirmationPage: React.FC = () => {
           Order Pass Not Found
         </h2>
         <p className="text-xs text-slate-500">
-          We could not locate reference <code className="font-mono bg-slate-100 px-2 py-0.5 rounded">{orderRef}</code>. If you recently completed payment, please check your WhatsApp or return home.
+          We could not locate reference{" "}
+          <code className="font-mono bg-slate-100 px-2 py-0.5 rounded">
+            {orderRef}
+          </code>
+          . If you recently completed payment, please check your WhatsApp or
+          return home.
         </p>
         <Link
           to="/"

@@ -1,6 +1,9 @@
 node_modules
 dist
 dist-ssr
+.output
+.wrangler
+*.tsbuildinfo
 *.local
 .env
 .DS_Store

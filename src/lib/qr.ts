@@ -1,4 +1,4 @@
-import QRCode from 'qrcode';
+import QRCode from "qrcode";
 
 export async function generateQrDataUrl(text: string): Promise<string> {
   try {
@@ -6,13 +6,13 @@ export async function generateQrDataUrl(text: string): Promise<string> {
       width: 280,
       margin: 2,
       color: {
-        dark: '#004A63',
-        light: '#FFFFFF',
+        dark: "#004A63",
+        light: "#FFFFFF",
       },
-      errorCorrectionLevel: 'M',
+      errorCorrectionLevel: "M",
     });
   } catch (err) {
-    console.error('Failed to generate QR code', err);
-    return '';
+    console.error("Failed to generate QR code", err);
+    return "";
   }
 }

@@ -1,15 +1,21 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Anchor, Heart, Shield, Waves, MapPin, Mail, Phone } from 'lucide-react';
+import React from "react";
+import { Link } from "../ui/Link";
+import {
+  Anchor,
+  Heart,
+  Shield,
+  Waves,
+  MapPin,
+  Mail,
+  Phone,
+} from "lucide-react";
 
 export const Footer: React.FC = () => {
   return (
     <footer className="bg-ocean-950 text-slate-300 pt-16 pb-12 border-t border-ocean-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         {/* Main Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-ocean-800/80">
-          
           {/* Col 1: Mission & Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
@@ -21,7 +27,9 @@ export const Footer: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-ocean-200 leading-relaxed">
-              Dedicated experiential tourism and indigenous artisan marketplace supporting Koliwadas, Gaothans, and mangrove guardians along the Konkan coastline.
+              Dedicated experiential tourism and indigenous artisan marketplace
+              supporting Koliwadas, Gaothans, and mangrove guardians along the
+              Konkan coastline.
             </p>
             <div className="pt-2 text-xs text-sun-300 font-medium flex items-center gap-2">
               <Shield className="w-4 h-4 text-sun-300 shrink-0" />
@@ -70,22 +78,36 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <a href="/#artisan-goods" className="hover:text-sun-300 transition-colors">
+                <a
+                  href="/#artisan-goods"
+                  className="hover:text-sun-300 transition-colors"
+                >
                   Artisanal Pantry & Sun-Dried Seafood
                 </a>
               </li>
               <li>
-                <Link to="/host-with-us" className="hover:text-sun-300 transition-colors">
+                <Link
+                  to="/host-with-us"
+                  className="hover:text-sun-300 transition-colors"
+                >
                   List Your Craft or Tour (Host With Us)
                 </Link>
               </li>
               <li>
-                <Link to="/admin" className="hover:text-sun-300 transition-colors">
+                <Link
+                  to="/admin"
+                  className="hover:text-sun-300 transition-colors"
+                >
                   Host & Manifest Management Portal
                 </Link>
               </li>
               <li>
-                <a href="https://bhoomiputra.org" target="_blank" rel="noreferrer" className="hover:text-sun-300 transition-colors">
+                <a
+                  href="https://bhoomiputra.org"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-sun-300 transition-colors"
+                >
                   Bhoomiputra Foundation Main Site ↗
                 </a>
               </li>
@@ -107,32 +129,39 @@ export const Footer: React.FC = () => {
                 <span>coordinator@bhoomiputra.org</span>
               </div>
               <div className="pt-2 text-[11px] text-ocean-300 border-t border-ocean-800/80 leading-relaxed">
-                Tours are strictly community-led and weather dependent according to the lunar tidal calendar.
+                Tours are strictly community-led and weather dependent according
+                to the lunar tidal calendar.
               </div>
             </div>
           </div>
-
         </div>
 
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-ocean-400 gap-4">
           <div className="flex items-center gap-1.5">
             <span>© {new Date().getFullYear()} MatsyaMart. Powered by</span>
-            <span className="text-white font-medium">Bhoomiputra Foundation</span>
+            <span className="text-white font-medium">
+              Bhoomiputra Foundation
+            </span>
             <span>• Built with</span>
             <Heart className="w-3.5 h-3.5 text-rose-400 inline" />
             <span>for coastal indigenous communities</span>
           </div>
 
           <div className="flex items-center gap-4 text-ocean-300">
-            <span className="hover:text-white cursor-pointer">Ethical Tourism Charter</span>
+            <span className="hover:text-white cursor-pointer">
+              Ethical Tourism Charter
+            </span>
             <span>•</span>
-            <span className="hover:text-white cursor-pointer">Cancellation & Weather Policy</span>
+            <span className="hover:text-white cursor-pointer">
+              Cancellation & Weather Policy
+            </span>
             <span>•</span>
-            <span className="hover:text-white cursor-pointer">Bachat Gat Fair Wage Pledge</span>
+            <span className="hover:text-white cursor-pointer">
+              Bachat Gat Fair Wage Pledge
+            </span>
           </div>
         </div>
-
       </div>
     </footer>
   );

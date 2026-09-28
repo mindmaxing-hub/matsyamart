@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import confetti from 'canvas-confetti';
+import React, { useState, useEffect } from "react";
+import confetti from "canvas-confetti";
 import {
   ShieldCheck,
   MapPin,
@@ -12,17 +12,17 @@ import {
   Anchor,
   CheckCircle,
   ExternalLink,
-} from 'lucide-react';
-import { Order } from '../../types';
-import { formatINR, formatDate, formatTime } from '../../lib/utils';
-import { generateQrDataUrl } from '../../lib/qr';
+} from "lucide-react";
+import { Order } from "../../types";
+import { formatINR, formatDate, formatTime } from "../../lib/utils";
+import { generateQrDataUrl } from "../../lib/qr";
 
 interface DigitalPassProps {
   order: Order;
 }
 
 export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
-  const [qrDataUrl, setQrDataUrl] = useState<string>('');
+  const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
         particleCount: 60,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#004A63', '#00AFEF', '#FFDE59'],
+        colors: ["#004A63", "#00AFEF", "#FFDE59"],
       });
     } catch {
       // Ignore if canvas-confetti is not loaded
@@ -49,9 +49,9 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
 
   const handleShareWhatsApp = () => {
     const text = encodeURIComponent(
-      `⚓ My MatsyaMart Coastal Pass for ${order.items[0]?.listing?.title || 'Bhoomiputra Tour'} is confirmed! Ticket Code: ${order.order_ref}. View pass: ${window.location.href}`
+      `⚓ My MatsyaMart Coastal Pass for ${order.items[0]?.listing?.title || "Bhoomiputra Tour"} is confirmed! Ticket Code: ${order.order_ref}. View pass: ${window.location.href}`,
     );
-    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
   };
 
   const handleCopyLink = () => {
@@ -63,11 +63,10 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
   const primaryItem = order.items[0];
   const listing = primaryItem?.listing;
   const slot = primaryItem?.slot;
-  const isExperience = listing?.type === 'experience';
+  const isExperience = listing?.type === "experience";
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      
       {/* Confirmation Banner */}
       <div className="text-center space-y-2">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
@@ -78,33 +77,40 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
           Your Verified Coastal Digital Pass
         </h1>
         <p className="text-xs text-slate-500 max-w-md mx-auto">
-          Please present this pass on your phone or provide ticket code <span className="font-mono font-bold text-ocean-900">{order.order_ref}</span> upon arrival.
+          Please present this pass on your phone or provide ticket code{" "}
+          <span className="font-mono font-bold text-ocean-900">
+            {order.order_ref}
+          </span>{" "}
+          upon arrival.
         </p>
       </div>
 
       {/* Maritime Permit Card */}
       <div className="bg-white rounded-3xl border-2 border-ocean-800 shadow-modal overflow-hidden relative">
-        
         {/* Pass Header Band */}
         <div className="bg-ocean-900 text-white p-6 flex items-start justify-between relative overflow-hidden border-b border-ocean-700">
           <div className="relative z-10 space-y-1">
             <div className="flex items-center gap-2">
-              <span className="font-display font-bold text-lg text-sun-300">MatsyaMart</span>
+              <span className="font-display font-bold text-lg text-sun-300">
+                MatsyaMart
+              </span>
               <span className="text-[10px] uppercase font-bold tracking-wider bg-ocean-800 px-2 py-0.5 rounded border border-ocean-600">
                 Official Boarding Permit
               </span>
             </div>
             <h2 className="font-display font-bold text-xl text-white pt-1">
-              {listing?.title || 'Community Experience'}
+              {listing?.title || "Community Experience"}
             </h2>
             <div className="text-xs text-ocean-200 flex items-center gap-1.5 pt-0.5">
               <Anchor className="w-3.5 h-3.5 text-sun-300" />
-              <span>Host: {listing?.host_name || 'Indigenous Collective'}</span>
+              <span>Host: {listing?.host_name || "Indigenous Collective"}</span>
             </div>
           </div>
 
           <div className="relative z-10 text-right shrink-0">
-            <span className="text-[10px] uppercase tracking-wider text-ocean-300 block">Ticket Ref</span>
+            <span className="text-[10px] uppercase tracking-wider text-ocean-300 block">
+              Ticket Ref
+            </span>
             <span className="font-mono font-bold text-sm text-sun-300 bg-ocean-950 px-2.5 py-1 rounded-lg border border-ocean-700 block mt-0.5">
               {order.order_ref}
             </span>
@@ -113,13 +119,13 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
 
         {/* Pass Core Body */}
         <div className="p-6 sm:p-8 space-y-6">
-          
           {/* Schedule & Timing Grid */}
           {slot && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-ocean-50/70 border border-ocean-100">
               <div className="space-y-1">
                 <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-ocean-700" /> Date of Experience
+                  <Calendar className="w-3.5 h-3.5 text-ocean-700" /> Date of
+                  Experience
                 </span>
                 <span className="font-display font-bold text-base text-ocean-950 block">
                   {formatDate(slot.slot_start)}
@@ -128,7 +134,8 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
 
               <div className="space-y-1">
                 <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-ocean-700" /> Reporting Time
+                  <Clock className="w-3.5 h-3.5 text-ocean-700" /> Reporting
+                  Time
                 </span>
                 <span className="font-display font-bold text-base text-ocean-950 block">
                   {formatTime(slot.slot_start)} sharp
@@ -155,7 +162,7 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
               <div className="pt-2">
                 <a
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                    listing.secret_meeting_point
+                    listing.secret_meeting_point,
                   )}`}
                   target="_blank"
                   rel="noreferrer"
@@ -172,26 +179,45 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4 border-t border-dashed border-slate-300">
             <div className="space-y-3 w-full sm:w-auto">
               <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400">Lead Attendee</span>
-                <div className="font-display font-bold text-base text-slate-900">{order.customer_name}</div>
-                <div className="text-xs text-slate-600">{order.customer_phone}</div>
+                <span className="text-[10px] uppercase font-bold text-slate-400">
+                  Lead Attendee
+                </span>
+                <div className="font-display font-bold text-base text-slate-900">
+                  {order.customer_name}
+                </div>
+                <div className="text-xs text-slate-600">
+                  {order.customer_phone}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400">Guests</span>
-                  <div className="font-semibold text-slate-800">{primaryItem?.quantity || 1} Person(s)</div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400">
+                    Guests
+                  </span>
+                  <div className="font-semibold text-slate-800">
+                    {primaryItem?.quantity || 1} Person(s)
+                  </div>
                 </div>
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400">Amount Paid</span>
-                  <div className="font-semibold text-ocean-900 font-display">{formatINR(order.total_amount_inr)}</div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400">
+                    Amount Paid
+                  </span>
+                  <div className="font-semibold text-ocean-900 font-display">
+                    {formatINR(order.total_amount_inr)}
+                  </div>
                 </div>
               </div>
 
               {listing?.host_phone && (
                 <div className="pt-2 text-xs flex items-center gap-2 text-slate-700">
                   <Phone className="w-3.5 h-3.5 text-ocean-700" />
-                  <span>Host Support WhatsApp: <strong className="text-ocean-900">{listing.host_phone}</strong></span>
+                  <span>
+                    Host Support WhatsApp:{" "}
+                    <strong className="text-ocean-900">
+                      {listing.host_phone}
+                    </strong>
+                  </span>
                 </div>
               )}
             </div>
@@ -209,21 +235,25 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
                   Generating QR...
                 </div>
               )}
-              <span className="text-[10px] text-slate-400 font-mono mt-1">Scan for Gate Entry</span>
+              <span className="text-[10px] text-slate-400 font-mono mt-1">
+                Scan for Gate Entry
+              </span>
             </div>
           </div>
-
         </div>
 
         {/* Card Tear-off Footer */}
         <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
           <div className="flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span>Community-Verified Booking • Weather monitored by harbour port</span>
+            <span>
+              Community-Verified Booking • Weather monitored by harbour port
+            </span>
           </div>
-          <span className="font-mono text-[11px] text-slate-400">{new Date(order.created_at).toLocaleDateString()}</span>
+          <span className="font-mono text-[11px] text-slate-400">
+            {new Date(order.created_at).toLocaleDateString()}
+          </span>
         </div>
-
       </div>
 
       {/* Action Buttons: Print, WhatsApp Share, Copy Link */}
@@ -248,10 +278,9 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
           onClick={handleCopyLink}
           className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-2 shadow-xs transition-colors"
         >
-          <span>{copied ? 'Link Copied! ✓' : 'Copy Pass Link'}</span>
+          <span>{copied ? "Link Copied! ✓" : "Copy Pass Link"}</span>
         </button>
       </div>
-
     </div>
   );
 };

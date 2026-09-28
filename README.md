@@ -1,8 +1,9 @@
 # MatsyaMart (`matsyamart.com`)
+
 ### Coastal Experiences & Community Marketplace — Bhoomiputra Foundation
 
 > **Platform Mission:** Dedicated community-led experiential tourism and artisan goods marketplace built for indigenous coastal communities (Koliwadas, Gaothans, and mangrove ecosystems across Mumbai, Thane, Navi Mumbai, and the Konkan coast).
-> 
+>
 > **Zero-Middlemen Payouts:** 100% direct-to-community revenue model.
 
 ---
@@ -62,6 +63,7 @@ Because this repository strictly follows Lovable's client-side build rules (Reac
 ## ⚡ Deploying to Vercel / Netlify / Cloudflare Pages
 
 This project is standard Vite SPA:
+
 - **Build Command:** `npm run build`
 - **Output Directory:** `dist`
 - **Install Command:** `npm install`

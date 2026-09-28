@@ -1,22 +1,33 @@
-import React, { useState } from 'react';
-import { Download, Printer, Search, Users, Phone, ShieldAlert, CheckCircle2 } from 'lucide-react';
-import { Order, Listing } from '../../types';
-import { formatINR, formatDate } from '../../lib/utils';
+import React, { useState } from "react";
+import {
+  Download,
+  Printer,
+  Search,
+  Users,
+  Phone,
+  ShieldAlert,
+  CheckCircle2,
+} from "lucide-react";
+import { Order, Listing } from "../../types";
+import { formatINR, formatDate } from "../../lib/utils";
 
 interface ManifestTableProps {
   orders: Order[];
   listings: Listing[];
 }
 
-export const ManifestTable: React.FC<ManifestTableProps> = ({ orders, listings }) => {
-  const [filterListingId, setFilterListingId] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState<string>('');
+export const ManifestTable: React.FC<ManifestTableProps> = ({
+  orders,
+  listings,
+}) => {
+  const [filterListingId, setFilterListingId] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const experienceListings = listings.filter((l) => l.type === 'experience');
+  const experienceListings = listings.filter((l) => l.type === "experience");
 
   const filteredOrders = orders.filter((order) => {
     // Filter by listing
-    if (filterListingId !== 'all') {
+    if (filterListingId !== "all") {
       const match = order.items.some((i) => i.listing_id === filterListingId);
       if (!match) return false;
     }
@@ -38,20 +49,23 @@ export const ManifestTable: React.FC<ManifestTableProps> = ({ orders, listings }
     return sum + expCount;
   }, 0);
 
-  const totalRevenue = filteredOrders.reduce((sum, order) => sum + order.total_amount_inr, 0);
+  const totalRevenue = filteredOrders.reduce(
+    (sum, order) => sum + order.total_amount_inr,
+    0,
+  );
 
   const exportCSV = () => {
     const headers = [
-      'Order Ref',
-      'Date Booked',
-      'Experience Title',
-      'Customer Name',
-      'Phone',
-      'Email',
-      'Guests Count',
-      'Emergency Contact',
-      'Total Amount (INR)',
-      'Status',
+      "Order Ref",
+      "Date Booked",
+      "Experience Title",
+      "Customer Name",
+      "Phone",
+      "Email",
+      "Guests Count",
+      "Emergency Contact",
+      "Total Amount (INR)",
+      "Status",
     ];
 
     const rows = filteredOrders.map((o) => {
@@ -59,22 +73,26 @@ export const ManifestTable: React.FC<ManifestTableProps> = ({ orders, listings }
       return [
         o.order_ref,
         new Date(o.created_at).toLocaleDateString(),
-        `"${firstItem?.listing?.title || 'Tour'}"`,
+        `"${firstItem?.listing?.title || "Tour"}"`,
         `"${o.customer_name}"`,
         `"${o.customer_phone}"`,
         `"${o.customer_email}"`,
         firstItem?.quantity || 1,
-        `"${o.emergency_contact || 'N/A'}"`,
+        `"${o.emergency_contact || "N/A"}"`,
         o.total_amount_inr,
         o.status,
-      ].join(',');
+      ].join(",");
     });
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n');
+    const csvContent =
+      "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
     const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `MatsyaMart_Manifest_${new Date().toISOString().split('T')[0]}.csv`);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute(
+      "download",
+      `MatsyaMart_Manifest_${new Date().toISOString().split("T")[0]}.csv`,
+    );
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -82,28 +100,38 @@ export const ManifestTable: React.FC<ManifestTableProps> = ({ orders, listings }
 
   return (
     <div className="space-y-5">
-      
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
-          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Filtered Bookings</div>
-          <div className="font-display font-bold text-2xl text-ocean-950 mt-1">{filteredOrders.length}</div>
+          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            Filtered Bookings
+          </div>
+          <div className="font-display font-bold text-2xl text-ocean-950 mt-1">
+            {filteredOrders.length}
+          </div>
         </div>
 
         <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
-          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Attendees Confirmed</div>
-          <div className="font-display font-bold text-2xl text-ocean-700 mt-1">{totalAttendees}</div>
+          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            Total Attendees Confirmed
+          </div>
+          <div className="font-display font-bold text-2xl text-ocean-700 mt-1">
+            {totalAttendees}
+          </div>
         </div>
 
         <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
-          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Direct Community Payout</div>
-          <div className="font-display font-bold text-2xl text-emerald-700 mt-1">{formatINR(totalRevenue)}</div>
+          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            Direct Community Payout
+          </div>
+          <div className="font-display font-bold text-2xl text-emerald-700 mt-1">
+            {formatINR(totalRevenue)}
+          </div>
         </div>
       </div>
 
       {/* Filter and Action Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200">
-        
         {/* Search Input */}
         <div className="relative w-full sm:w-64">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -149,7 +177,6 @@ export const ManifestTable: React.FC<ManifestTableProps> = ({ orders, listings }
             <Printer className="w-4 h-4" />
           </button>
         </div>
-
       </div>
 
       {/* Manifest Table */}
@@ -179,12 +206,15 @@ export const ManifestTable: React.FC<ManifestTableProps> = ({ orders, listings }
                 filteredOrders.map((order) => {
                   const item = order.items[0];
                   return (
-                    <tr key={order.id} className="hover:bg-slate-50/80 transition-colors">
+                    <tr
+                      key={order.id}
+                      className="hover:bg-slate-50/80 transition-colors"
+                    >
                       <td className="py-3.5 px-4 font-mono font-bold text-ocean-900">
                         {order.order_ref}
                       </td>
                       <td className="py-3.5 px-4 max-w-[200px] truncate text-slate-900 font-semibold">
-                        {item?.listing?.title || 'Community Item'}
+                        {item?.listing?.title || "Community Item"}
                       </td>
                       <td className="py-3.5 px-4 text-slate-800">
                         {order.customer_name}
@@ -199,7 +229,7 @@ export const ManifestTable: React.FC<ManifestTableProps> = ({ orders, listings }
                         {item?.quantity || 1}
                       </td>
                       <td className="py-3.5 px-4 text-slate-500 text-[11px]">
-                        {order.emergency_contact || 'None registered'}
+                        {order.emergency_contact || "None registered"}
                       </td>
                       <td className="py-3.5 px-4 text-right font-display font-bold text-ocean-950">
                         {formatINR(order.total_amount_inr)}
@@ -217,7 +247,6 @@ export const ManifestTable: React.FC<ManifestTableProps> = ({ orders, listings }
           </table>
         </div>
       </div>
-
     </div>
   );
 };

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Check, X, Phone, Mail, MapPin, Tag, AlertCircle } from 'lucide-react';
-import { CommunityVendorProposal } from '../../types';
-import { useData } from '../../context/DataContext';
-import { formatINR } from '../../lib/utils';
+import React, { useState } from "react";
+import { Check, X, Phone, Mail, MapPin, Tag, AlertCircle } from "lucide-react";
+import { CommunityVendorProposal } from "../../types";
+import { useData } from "../../context/DataContext";
+import { formatINR } from "../../lib/utils";
 
 interface ProposalQueueProps {
   proposals: CommunityVendorProposal[];
@@ -13,11 +13,19 @@ export const ProposalQueue: React.FC<ProposalQueueProps> = ({ proposals }) => {
   const [adminNotes, setAdminNotes] = useState<Record<string, string>>({});
 
   const handleApprove = (id: string) => {
-    updateProposalStatus(id, 'approved', adminNotes[id] || 'Approved by Bhoomiputra coordinator');
+    updateProposalStatus(
+      id,
+      "approved",
+      adminNotes[id] || "Approved by Bhoomiputra coordinator",
+    );
   };
 
   const handleReject = (id: string) => {
-    updateProposalStatus(id, 'rejected', adminNotes[id] || 'Rejected after review');
+    updateProposalStatus(
+      id,
+      "rejected",
+      adminNotes[id] || "Rejected after review",
+    );
   };
 
   return (
@@ -28,7 +36,8 @@ export const ProposalQueue: React.FC<ProposalQueueProps> = ({ proposals }) => {
             Community Self-Listing Proposals Queue
           </h3>
           <p className="text-xs text-slate-500">
-            Proposals submitted by local boatmen, guides, and women's self-help groups (Bachat Gats).
+            Proposals submitted by local boatmen, guides, and women's self-help
+            groups (Bachat Gats).
           </p>
         </div>
         <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-ocean-100 text-ocean-800">
@@ -43,8 +52,8 @@ export const ProposalQueue: React.FC<ProposalQueueProps> = ({ proposals }) => {
           </div>
         ) : (
           proposals.map((prop) => {
-            const isPending = prop.status === 'pending_review';
-            const isApproved = prop.status === 'approved';
+            const isPending = prop.status === "pending_review";
+            const isApproved = prop.status === "approved";
 
             return (
               <div
@@ -59,9 +68,9 @@ export const ProposalQueue: React.FC<ProposalQueueProps> = ({ proposals }) => {
                       </span>
                       <span
                         className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                          prop.proposal_type === 'experience'
-                            ? 'bg-ocean-100 text-ocean-800'
-                            : 'bg-amber-100 text-amber-800'
+                          prop.proposal_type === "experience"
+                            ? "bg-ocean-100 text-ocean-800"
+                            : "bg-amber-100 text-amber-800"
                         }`}
                       >
                         {prop.proposal_type}
@@ -69,7 +78,9 @@ export const ProposalQueue: React.FC<ProposalQueueProps> = ({ proposals }) => {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1">
-                      <span className="font-semibold text-slate-800">{prop.applicant_name}</span>
+                      <span className="font-semibold text-slate-800">
+                        {prop.applicant_name}
+                      </span>
                       <span>•</span>
                       <span className="flex items-center gap-1">
                         <MapPin className="w-3 h-3 text-ocean-600" />
@@ -86,13 +97,13 @@ export const ProposalQueue: React.FC<ProposalQueueProps> = ({ proposals }) => {
                   <span
                     className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider self-start sm:self-auto ${
                       isApproved
-                        ? 'bg-emerald-100 text-emerald-800'
+                        ? "bg-emerald-100 text-emerald-800"
                         : isPending
-                        ? 'bg-amber-100 text-amber-800'
-                        : 'bg-rose-100 text-rose-800'
+                          ? "bg-amber-100 text-amber-800"
+                          : "bg-rose-100 text-rose-800"
                     }`}
                   >
-                    {prop.status.replace('_', ' ')}
+                    {prop.status.replace("_", " ")}
                   </span>
                 </div>
 
@@ -102,7 +113,10 @@ export const ProposalQueue: React.FC<ProposalQueueProps> = ({ proposals }) => {
 
                 {prop.estimated_price_inr && (
                   <div className="text-xs font-semibold text-slate-700">
-                    Proposed Pricing: <span className="text-ocean-900 font-display font-bold">{formatINR(prop.estimated_price_inr)}</span>
+                    Proposed Pricing:{" "}
+                    <span className="text-ocean-900 font-display font-bold">
+                      {formatINR(prop.estimated_price_inr)}
+                    </span>
                   </div>
                 )}
 
@@ -112,8 +126,13 @@ export const ProposalQueue: React.FC<ProposalQueueProps> = ({ proposals }) => {
                     <input
                       type="text"
                       placeholder="Add coordinator notes or site-visit date..."
-                      value={adminNotes[prop.id] || ''}
-                      onChange={(e) => setAdminNotes({ ...adminNotes, [prop.id]: e.target.value })}
+                      value={adminNotes[prop.id] || ""}
+                      onChange={(e) =>
+                        setAdminNotes({
+                          ...adminNotes,
+                          [prop.id]: e.target.value,
+                        })
+                      }
                       className="w-full sm:w-80 text-xs p-2 bg-slate-50 border border-slate-200 rounded-xl outline-none"
                     />
 

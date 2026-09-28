@@ -1,11 +1,27 @@
-import React, { useState } from 'react';
-import { X, Trash2, Plus, Minus, ArrowRight, ShoppingBag, ShieldCheck } from 'lucide-react';
-import { useCart } from '../../context/CartContext';
-import { formatINR } from '../../lib/utils';
-import { CheckoutModal } from '../order/CheckoutModal';
+import React, { useState } from "react";
+import {
+  X,
+  Trash2,
+  Plus,
+  Minus,
+  ArrowRight,
+  ShoppingBag,
+  ShieldCheck,
+} from "lucide-react";
+import { useCart } from "../../context/CartContext";
+import { formatINR } from "../../lib/utils";
+import { CheckoutModal } from "../order/CheckoutModal";
 
 export const CartDrawer: React.FC = () => {
-  const { items, removeItem, updateQuantity, clearCart, totalAmount, isCartOpen, setIsCartOpen } = useCart();
+  const {
+    items,
+    removeItem,
+    updateQuantity,
+    clearCart,
+    totalAmount,
+    isCartOpen,
+    setIsCartOpen,
+  } = useCart();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   if (!isCartOpen) return null;
@@ -26,7 +42,6 @@ export const CartDrawer: React.FC = () => {
       {/* Drawer */}
       <div className="fixed inset-y-0 right-0 max-w-full flex z-50">
         <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col">
-          
           {/* Header */}
           <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-ocean-50">
             <div className="flex items-center gap-2.5">
@@ -34,8 +49,12 @@ export const CartDrawer: React.FC = () => {
                 <ShoppingBag className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="font-display font-bold text-lg text-ocean-900">Your Basket</h2>
-                <p className="text-xs text-slate-500">Supporting indigenous artisans & collectives</p>
+                <h2 className="font-display font-bold text-lg text-ocean-900">
+                  Your Basket
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Supporting indigenous artisans & collectives
+                </p>
               </div>
             </div>
             <button
@@ -51,9 +70,12 @@ export const CartDrawer: React.FC = () => {
             {items.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-8 text-slate-500">
                 <ShoppingBag className="w-12 h-12 text-slate-300 mb-3" />
-                <h3 className="font-display font-semibold text-slate-700">Your basket is empty</h3>
+                <h3 className="font-display font-semibold text-slate-700">
+                  Your basket is empty
+                </h3>
                 <p className="text-xs text-slate-500 mt-1 max-w-xs">
-                  Discover handcrafted coastal foods, sun-dried seafood, and experiential trails from Koli villages.
+                  Discover handcrafted coastal foods, sun-dried seafood, and
+                  experiential trails from Koli villages.
                 </p>
                 <button
                   onClick={() => setIsCartOpen(false)}
@@ -64,7 +86,10 @@ export const CartDrawer: React.FC = () => {
               </div>
             ) : (
               items.map(({ listing, quantity }) => (
-                <div key={listing.id} className="py-4 flex gap-3.5 first:pt-0 last:pb-0">
+                <div
+                  key={listing.id}
+                  className="py-4 flex gap-3.5 first:pt-0 last:pb-0"
+                >
                   <img
                     src={listing.images[0]}
                     alt={listing.title}
@@ -85,7 +110,9 @@ export const CartDrawer: React.FC = () => {
                         </button>
                       </div>
                       <p className="text-xs text-slate-500 mt-0.5">
-                        {listing.weight_grams ? `${listing.weight_grams}g` : listing.artisan_collective}
+                        {listing.weight_grams
+                          ? `${listing.weight_grams}g`
+                          : listing.artisan_collective}
                       </p>
                     </div>
 
@@ -93,14 +120,20 @@ export const CartDrawer: React.FC = () => {
                       {/* Quantity Controls */}
                       <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
                         <button
-                          onClick={() => updateQuantity(listing.id, quantity - 1)}
+                          onClick={() =>
+                            updateQuantity(listing.id, quantity - 1)
+                          }
                           className="p-1 hover:bg-slate-200 text-slate-600 transition-colors"
                         >
                           <Minus className="w-3.5 h-3.5" />
                         </button>
-                        <span className="px-3 text-xs font-semibold text-slate-700">{quantity}</span>
+                        <span className="px-3 text-xs font-semibold text-slate-700">
+                          {quantity}
+                        </span>
                         <button
-                          onClick={() => updateQuantity(listing.id, quantity + 1)}
+                          onClick={() =>
+                            updateQuantity(listing.id, quantity + 1)
+                          }
                           className="p-1 hover:bg-slate-200 text-slate-600 transition-colors"
                         >
                           <Plus className="w-3.5 h-3.5" />
@@ -129,7 +162,9 @@ export const CartDrawer: React.FC = () => {
 
               <div className="flex items-center justify-between text-base font-bold text-slate-900 border-t border-slate-200 pt-2">
                 <span>Subtotal</span>
-                <span className="text-ocean-900 text-lg font-display">{formatINR(totalAmount)}</span>
+                <span className="text-ocean-900 text-lg font-display">
+                  {formatINR(totalAmount)}
+                </span>
               </div>
 
               <button
@@ -148,14 +183,16 @@ export const CartDrawer: React.FC = () => {
               </button>
             </div>
           )}
-
         </div>
       </div>
 
       {/* Checkout Modal for Basket */}
       {isCheckoutOpen && (
         <CheckoutModal
-          items={items.map((i) => ({ listing: i.listing, quantity: i.quantity }))}
+          items={items.map((i) => ({
+            listing: i.listing,
+            quantity: i.quantity,
+          }))}
           onClose={() => setIsCheckoutOpen(false)}
         />
       )}
