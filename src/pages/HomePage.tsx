@@ -10,8 +10,9 @@ import {
   UtensilsCrossed,
   ShoppingBag,
   ArrowRight,
-  Plus,
-  Sparkles,
+  Search,
+  MapPin,
+  X,
 } from "lucide-react";
 import { Link } from "../components/ui/Link";
 
@@ -112,23 +113,220 @@ export const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#001D28] text-white min-h-screen space-y-16 pb-24 selection:bg-sun-300 selection:text-ocean-950">
-      {/* 1. Lu.ma Animated Hero Banner with Bhoomiputra Oceanic Gradient */}
-      <HeroBanner
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        selectedLocation={selectedLocation}
-        setSelectedLocation={setSelectedLocation}
-        uniqueLocations={uniqueLocations}
-        onScrollToCatalog={scrollToCatalog}
-      />
+    <div className="bg-[#001D28] text-white min-h-screen space-y-12 sm:space-y-16 pb-24 selection:bg-sun-300 selection:text-ocean-950">
+      {/* 1. Minimal Lu.ma Hero (Zero text bloat, 3-line punchy typography) */}
+      <HeroBanner onScrollToCatalog={scrollToCatalog} />
 
-      {/* 2. Main Feed Section */}
+      {/* 2. Main Discovery Section */}
       <main
         id="catalog-feed"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-16"
       >
-        {/* Category Pills & Quick Filter */}
+        {/* Prominent Command Search & Discovery Bar (Above Catalog) */}
+        <section className="space-y-4 pt-2">
+          <div className="bg-white/10 hover:bg-white/15 focus-within:bg-white/20 backdrop-blur-xl border border-white/20 focus-within:border-sun-300 rounded-3xl sm:rounded-full p-2 sm:p-2.5 shadow-xl transition-all max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-2 group">
+            {/* Search Input Field */}
+            <div className="flex items-center gap-2 pl-3 sm:pl-4 flex-1 min-w-0 w-full sm:w-auto">
+              <Search className="w-5 h-5 text-sun-300 shrink-0 group-focus-within:scale-110 transition-transform" />
+              <input
+                type="text"
+                placeholder="Search walks, workshops, feasts, crafts..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent border-none outline-none text-sm sm:text-base text-white placeholder:text-white/60 font-normal py-1.5"
+              />
+            </div>
+
+            {/* Location Selector Divider */}
+            <div className="hidden sm:block h-7 w-[1px] bg-white/20 mx-1" />
+
+            {/* Location Dropdown */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 sm:bg-transparent rounded-full sm:rounded-none w-full sm:w-auto shrink-0">
+              <MapPin className="w-4 h-4 text-ocean-300 shrink-0" />
+              <select
+                value={selectedLocation}
+                onChange={(e) => setSelectedLocation(e.target.value)}
+                className="bg-transparent border-none outline-none text-xs sm:text-sm text-white font-medium cursor-pointer pr-1 w-full sm:w-auto"
+              >
+                <option value="all" className="bg-[#003B4F] text-white">
+                  All Locations
+                </option>
+                {uniqueLocations.map((loc) => (
+                  <option
+                    key={loc}
+                    value={loc}
+                    className="bg-[#003B4F] text-white"
+                  >
+                    {loc}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Clear Button if active */}
+            {searchQuery || selectedLocation !== "all" ? (
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedLocation("all");
+                }}
+                className="w-full sm:w-auto px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-xs font-semibold text-white cursor-pointer flex items-center justify-center gap-1"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Clear</span>
+              </button>
+            ) : null}
+          </div>
+
+          {/* Quick Suggestion Chips */}
+          <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-white/70">
+            <span className="font-semibold text-white/50 text-[11px]">
+              Popular:
+            </span>
+            {[
+              { label: "Dawn Harbor Walk", query: "Harbor Walk" },
+              { label: "Net-Weaving Class", query: "Net-Weaving" },
+              { label: "Crab Feast", query: "Crab" },
+              { label: "Mangrove Safari", query: "Mangrove" },
+              { label: "Sun-Dried Jawla", query: "Jawla" },
+            ].map((chip) => (
+              <button
+                key={chip.label}
+                type="button"
+                onClick={() => setSearchQuery(chip.query)}
+                className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white/90 hover:text-white transition-all cursor-pointer text-[11px]"
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* 3. Lu.ma Signature "Browse by Category" Squircle Tile Grid */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-display font-bold text-xl sm:text-2xl text-white tracking-tight">
+                Browse by Category
+              </h2>
+              <p className="text-xs text-ocean-200 mt-0.5">
+                4 pillars of living coastal culture and heritage
+              </p>
+            </div>
+            {selectedPillar !== "all" && (
+              <button
+                onClick={() => setSelectedPillar("all")}
+                className="text-xs text-sun-300 hover:underline cursor-pointer"
+              >
+                Show All Categories
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            {/* Pillar 1: Walks */}
+            <button
+              onClick={() => {
+                setSelectedPillar("walks");
+                scrollToCatalog();
+              }}
+              className={`p-4 sm:p-5 rounded-2xl sm:rounded-3xl border transition-all text-left space-y-3 cursor-pointer group backdrop-blur-md shadow-md hover:-translate-y-0.5 ${
+                selectedPillar === "walks"
+                  ? "bg-[#00384C] border-sun-300 ring-2 ring-sun-300/40"
+                  : "bg-[#002836]/90 hover:bg-[#00384C] border-white/15 hover:border-white/30"
+              }`}
+            >
+              <div className="w-10 h-10 rounded-2xl bg-[#00AFEF]/15 border border-[#00AFEF]/30 flex items-center justify-center text-[#4DC6F4] group-hover:scale-110 transition-transform">
+                <Compass className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-display font-bold text-sm sm:text-base text-white group-hover:text-sun-300 transition-colors">
+                  Walks
+                </div>
+                <div className="text-[11px] text-ocean-200 font-medium">
+                  {pillarCounts.walks || 0} Experiences
+                </div>
+              </div>
+            </button>
+
+            {/* Pillar 2: Workshops */}
+            <button
+              onClick={() => {
+                setSelectedPillar("workshops");
+                scrollToCatalog();
+              }}
+              className={`p-4 sm:p-5 rounded-2xl sm:rounded-3xl border transition-all text-left space-y-3 cursor-pointer group backdrop-blur-md shadow-md hover:-translate-y-0.5 ${
+                selectedPillar === "workshops"
+                  ? "bg-[#00384C] border-sun-300 ring-2 ring-sun-300/40"
+                  : "bg-[#002836]/90 hover:bg-[#00384C] border-white/15 hover:border-white/30"
+              }`}
+            >
+              <div className="w-10 h-10 rounded-2xl bg-[#FFDE59]/15 border border-[#FFDE59]/30 flex items-center justify-center text-sun-300 group-hover:scale-110 transition-transform">
+                <Hammer className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-display font-bold text-sm sm:text-base text-white group-hover:text-sun-300 transition-colors">
+                  Workshops
+                </div>
+                <div className="text-[11px] text-ocean-200 font-medium">
+                  {pillarCounts.workshops || 0} Masterclasses
+                </div>
+              </div>
+            </button>
+
+            {/* Pillar 3: Food */}
+            <button
+              onClick={() => {
+                setSelectedPillar("food");
+                scrollToCatalog();
+              }}
+              className={`p-4 sm:p-5 rounded-2xl sm:rounded-3xl border transition-all text-left space-y-3 cursor-pointer group backdrop-blur-md shadow-md hover:-translate-y-0.5 ${
+                selectedPillar === "food"
+                  ? "bg-[#00384C] border-sun-300 ring-2 ring-sun-300/40"
+                  : "bg-[#002836]/90 hover:bg-[#00384C] border-white/15 hover:border-white/30"
+              }`}
+            >
+              <div className="w-10 h-10 rounded-2xl bg-[#F59E0B]/15 border border-[#F59E0B]/30 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                <UtensilsCrossed className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-display font-bold text-sm sm:text-base text-white group-hover:text-sun-300 transition-colors">
+                  Food & Feasts
+                </div>
+                <div className="text-[11px] text-ocean-200 font-medium">
+                  {pillarCounts.food || 0} Feasts
+                </div>
+              </div>
+            </button>
+
+            {/* Pillar 4: Goods */}
+            <button
+              onClick={() => {
+                setSelectedPillar("goods");
+                scrollToCatalog();
+              }}
+              className={`p-4 sm:p-5 rounded-2xl sm:rounded-3xl border transition-all text-left space-y-3 cursor-pointer group backdrop-blur-md shadow-md hover:-translate-y-0.5 ${
+                selectedPillar === "goods"
+                  ? "bg-[#00384C] border-sun-300 ring-2 ring-sun-300/40"
+                  : "bg-[#002836]/90 hover:bg-[#00384C] border-white/15 hover:border-white/30"
+              }`}
+            >
+              <div className="w-10 h-10 rounded-2xl bg-[#10B981]/15 border border-[#10B981]/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                <ShoppingBag className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-display font-bold text-sm sm:text-base text-white group-hover:text-sun-300 transition-colors">
+                  Artisan Goods
+                </div>
+                <div className="text-[11px] text-ocean-200 font-medium">
+                  {pillarCounts.goods || 0} Pantry Crafts
+                </div>
+              </div>
+            </button>
+          </div>
+        </section>
+
+        {/* 4. Category Pills Filter Bar */}
         <CategoryFilter
           categories={categories}
           selectedPillar={selectedPillar}
@@ -137,7 +335,7 @@ export const HomePage: React.FC = () => {
           pillarCounts={pillarCounts}
         />
 
-        {/* If user filtered or searched, show direct results */}
+        {/* 5. Filtered Results OR One-by-One Discovery Rails */}
         {selectedPillar !== "all" ||
         searchQuery ||
         selectedLocation !== "all" ? (
@@ -180,28 +378,29 @@ export const HomePage: React.FC = () => {
             )}
           </div>
         ) : (
-          /* Default Feed: One-By-One Pillars as requested by Vikas */
-          <div className="space-y-20">
+          /* Default Feed: One-By-One Pillars with Lu.ma Mobile Touch-Swipe Rails */
+          <div className="space-y-16">
             {/* Pillar 1: Walks */}
-            <section id="walks" className="space-y-6 scroll-mt-24">
-              <div className="flex items-end justify-between border-b border-white/10 pb-4">
-                <div className="space-y-1">
+            <section id="walks" className="space-y-4 scroll-mt-24">
+              <div className="flex items-end justify-between border-b border-white/10 pb-3">
+                <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-ocean-800 flex items-center justify-center text-sun-300">
-                      <Compass className="w-4 h-4" />
+                    <div className="w-6 h-6 rounded-lg bg-[#00AFEF]/15 border border-[#00AFEF]/30 flex items-center justify-center text-[#4DC6F4]">
+                      <Compass className="w-3.5 h-3.5" />
                     </div>
-                    <h2 className="font-display font-bold text-xl sm:text-2xl text-white">
+                    <h2 className="font-display font-bold text-lg sm:text-xl text-white">
                       Coastal Walks & Safaris
                     </h2>
                   </div>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-ocean-200">
                     Guided dawn village harbor trails and tidal mangrove boat
                     safaris.
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {/* Mobile horizontal swipe / Desktop grid */}
+              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
                 {walksListings.map((listing) => (
                   <ListingCard key={listing.id} listing={listing} />
                 ))}
@@ -209,25 +408,26 @@ export const HomePage: React.FC = () => {
             </section>
 
             {/* Pillar 2: Workshops */}
-            <section id="workshops" className="space-y-6 scroll-mt-24">
-              <div className="flex items-end justify-between border-b border-white/10 pb-4">
-                <div className="space-y-1">
+            <section id="workshops" className="space-y-4 scroll-mt-24">
+              <div className="flex items-end justify-between border-b border-white/10 pb-3">
+                <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-ocean-800 flex items-center justify-center text-sun-300">
-                      <Hammer className="w-4 h-4" />
+                    <div className="w-6 h-6 rounded-lg bg-[#FFDE59]/15 border border-[#FFDE59]/30 flex items-center justify-center text-sun-300">
+                      <Hammer className="w-3.5 h-3.5" />
                     </div>
-                    <h2 className="font-display font-bold text-xl sm:text-2xl text-white">
+                    <h2 className="font-display font-bold text-lg sm:text-xl text-white">
                       Traditional Workshops & Crafts
                     </h2>
                   </div>
-                  <p className="text-xs text-slate-400">
-                    Hands-on masterclasses in net-weaving, wooden boat
-                    carpentry, and maritime knotting.
+                  <p className="text-xs text-ocean-200">
+                    Hands-on masterclasses in net-weaving and wooden boat
+                    carpentry.
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {/* Mobile horizontal swipe / Desktop grid */}
+              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
                 {workshopsListings.map((listing) => (
                   <ListingCard key={listing.id} listing={listing} />
                 ))}
@@ -235,25 +435,26 @@ export const HomePage: React.FC = () => {
             </section>
 
             {/* Pillar 3: Food */}
-            <section id="food" className="space-y-6 scroll-mt-24">
-              <div className="flex items-end justify-between border-b border-white/10 pb-4">
-                <div className="space-y-1">
+            <section id="food" className="space-y-4 scroll-mt-24">
+              <div className="flex items-end justify-between border-b border-white/10 pb-3">
+                <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-ocean-800 flex items-center justify-center text-sun-300">
-                      <UtensilsCrossed className="w-4 h-4" />
+                    <div className="w-6 h-6 rounded-lg bg-[#F59E0B]/15 border border-[#F59E0B]/30 flex items-center justify-center text-amber-400">
+                      <UtensilsCrossed className="w-3.5 h-3.5" />
                     </div>
-                    <h2 className="font-display font-bold text-xl sm:text-2xl text-white">
+                    <h2 className="font-display font-bold text-lg sm:text-xl text-white">
                       Coastal Food & Feasts
                     </h2>
                   </div>
-                  <p className="text-xs text-slate-400">
-                    Authentic harbor breakfasts, traditional crab curries, and
-                    home-cooked seafood dining.
+                  <p className="text-xs text-ocean-200">
+                    Authentic harbor breakfasts, crab curries, and home-cooked
+                    seafood dining.
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {/* Mobile horizontal swipe / Desktop grid */}
+              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
                 {foodListings.map((listing) => (
                   <ListingCard key={listing.id} listing={listing} />
                 ))}
@@ -261,25 +462,26 @@ export const HomePage: React.FC = () => {
             </section>
 
             {/* Pillar 4: Goods */}
-            <section id="goods" className="space-y-6 scroll-mt-24">
-              <div className="flex items-end justify-between border-b border-white/10 pb-4">
-                <div className="space-y-1">
+            <section id="goods" className="space-y-4 scroll-mt-24">
+              <div className="flex items-end justify-between border-b border-white/10 pb-3">
+                <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-ocean-800 flex items-center justify-center text-sun-300">
-                      <ShoppingBag className="w-4 h-4" />
+                    <div className="w-6 h-6 rounded-lg bg-[#10B981]/15 border border-[#10B981]/30 flex items-center justify-center text-emerald-400">
+                      <ShoppingBag className="w-3.5 h-3.5" />
                     </div>
-                    <h2 className="font-display font-bold text-xl sm:text-2xl text-white">
+                    <h2 className="font-display font-bold text-lg sm:text-xl text-white">
                       Artisan Goods & Pantry
                     </h2>
                   </div>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-ocean-200">
                     Naturally sun-cured seasonal catch, stoneground spices, and
                     wild mangrove honey.
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {/* Mobile horizontal swipe / Desktop grid */}
+              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
                 {goodsListings.map((listing) => (
                   <ListingCard key={listing.id} listing={listing} />
                 ))}
@@ -288,106 +490,7 @@ export const HomePage: React.FC = () => {
           </div>
         )}
 
-        {/* 3. Browse by Category Grid (Lu.ma Screenshot 1 Style) */}
-        <section className="pt-8 space-y-6 border-t border-white/10">
-          <div className="space-y-1">
-            <h2 className="font-display font-bold text-xl sm:text-2xl text-white">
-              Browse by Pillar
-            </h2>
-            <p className="text-xs text-slate-400">
-              Discover authentic offerings tailored to how you want to
-              experience the coast.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {/* Tile 1: Walks */}
-            <button
-              onClick={() => {
-                setSelectedPillar("walks");
-                scrollToCatalog();
-              }}
-              className="p-5 rounded-2xl bg-[#002836]/90 hover:bg-[#00384C] border border-white/15 hover:border-sun-300/40 transition-all text-left space-y-3 cursor-pointer group backdrop-blur-md shadow-md"
-            >
-              <div className="w-9 h-9 rounded-xl bg-ocean-800/80 flex items-center justify-center text-sun-300 group-hover:scale-110 transition-transform">
-                <Compass className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="font-display font-bold text-sm text-white group-hover:text-sun-300 transition-colors">
-                  Walks
-                </div>
-                <div className="text-[11px] text-ocean-200">
-                  {pillarCounts.walks || 0} Experiences
-                </div>
-              </div>
-            </button>
-
-            {/* Tile 2: Workshops */}
-            <button
-              onClick={() => {
-                setSelectedPillar("workshops");
-                scrollToCatalog();
-              }}
-              className="p-5 rounded-2xl bg-[#002836]/90 hover:bg-[#00384C] border border-white/15 hover:border-sun-300/40 transition-all text-left space-y-3 cursor-pointer group backdrop-blur-md shadow-md"
-            >
-              <div className="w-9 h-9 rounded-xl bg-ocean-800/80 flex items-center justify-center text-sun-300 group-hover:scale-110 transition-transform">
-                <Hammer className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="font-display font-bold text-sm text-white group-hover:text-sun-300 transition-colors">
-                  Workshops
-                </div>
-                <div className="text-[11px] text-ocean-200">
-                  {pillarCounts.workshops || 0} Masterclasses
-                </div>
-              </div>
-            </button>
-
-            {/* Tile 3: Food */}
-            <button
-              onClick={() => {
-                setSelectedPillar("food");
-                scrollToCatalog();
-              }}
-              className="p-5 rounded-2xl bg-[#002836]/90 hover:bg-[#00384C] border border-white/15 hover:border-sun-300/40 transition-all text-left space-y-3 cursor-pointer group backdrop-blur-md shadow-md"
-            >
-              <div className="w-9 h-9 rounded-xl bg-ocean-800/80 flex items-center justify-center text-sun-300 group-hover:scale-110 transition-transform">
-                <UtensilsCrossed className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="font-display font-bold text-sm text-white group-hover:text-sun-300 transition-colors">
-                  Food & Dining
-                </div>
-                <div className="text-[11px] text-ocean-200">
-                  {pillarCounts.food || 0} Feasts
-                </div>
-              </div>
-            </button>
-
-            {/* Tile 4: Goods */}
-            <button
-              onClick={() => {
-                setSelectedPillar("goods");
-                scrollToCatalog();
-              }}
-              className="p-5 rounded-2xl bg-[#002836]/90 hover:bg-[#00384C] border border-white/15 hover:border-sun-300/40 transition-all text-left space-y-3 cursor-pointer group backdrop-blur-md shadow-md"
-            >
-              <div className="w-9 h-9 rounded-xl bg-ocean-800/80 flex items-center justify-center text-sun-300 group-hover:scale-110 transition-transform">
-                <ShoppingBag className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="font-display font-bold text-sm text-white group-hover:text-sun-300 transition-colors">
-                  Artisan Goods
-                </div>
-                <div className="text-[11px] text-ocean-200">
-                  {pillarCounts.goods || 0} Pantry Items
-                </div>
-              </div>
-            </button>
-          </div>
-        </section>
-
-        {/* 4. Lu.ma-Style Bottom CTA Banner with Bhoomiputra Ocean Gradient */}
+        {/* 6. Lu.ma-Style Bottom CTA Banner with Bhoomiputra Ocean Gradient */}
         <section className="pt-8 pb-4">
           <div className="max-w-3xl mx-auto p-8 sm:p-12 rounded-3xl bg-gradient-to-br from-[#003B4F] via-[#004A63] to-[#002E3D] border border-white/20 shadow-2xl relative overflow-hidden text-center space-y-6">
             <div className="max-w-xl mx-auto space-y-3">

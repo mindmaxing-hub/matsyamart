@@ -34,7 +34,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
   return (
     <Link
       to={detailPath}
-      className="group block bg-[#002836]/90 hover:bg-[#00384C] border border-white/15 hover:border-sun-300/40 rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 flex flex-col cursor-pointer backdrop-blur-md"
+      className="group block bg-[#002836]/90 hover:bg-[#00384C] border border-white/15 hover:border-sun-300/40 rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 flex flex-col cursor-pointer backdrop-blur-md shrink-0 w-[270px] sm:w-auto snap-start"
     >
       {/* Thumbnail Aspect Container */}
       <div className="relative aspect-[16/10] overflow-hidden bg-ocean-950">

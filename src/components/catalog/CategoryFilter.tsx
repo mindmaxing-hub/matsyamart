@@ -23,9 +23,9 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
   pillarCounts,
 }) => {
   return (
-    <div className="flex items-center justify-between border-b border-white/10 pb-4 flex-wrap gap-4">
+    <div className="w-full flex items-center justify-between border-b border-white/10 pb-4 gap-4">
       {/* 4 Pillars Pill Tabs (Lu.ma Style with Bhoomiputra Ocean Glass) */}
-      <div className="inline-flex items-center gap-1.5 p-1.5 bg-[#002E3D]/85 backdrop-blur-md rounded-full border border-white/15 overflow-x-auto max-w-full shadow-lg">
+      <div className="flex items-center gap-1.5 p-1 sm:p-1.5 bg-[#002836]/90 backdrop-blur-md rounded-full border border-white/15 overflow-x-auto scrollbar-none max-w-full shadow-md shrink-0">
         <button
           onClick={() => setSelectedPillar("all")}
           className={`px-4 py-2 text-xs font-semibold rounded-full transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
@@ -100,7 +100,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
         </button>
       </div>
 
-      <div className="text-xs text-slate-400 font-medium">
+      <div className="hidden md:block text-xs text-ocean-200 font-medium">
         Curated coastal experiences & authentic goods
       </div>
     </div>

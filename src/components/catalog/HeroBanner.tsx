@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Search, MapPin, Compass, Plus, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Link } from "../ui/Link";
 
 interface HeroBannerProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  selectedLocation: string;
-  setSelectedLocation: (loc: string) => void;
-  uniqueLocations: string[];
   onScrollToCatalog?: () => void;
 }
 
@@ -83,7 +78,7 @@ const FLOATING_STICKERS: FloatingCard[] = [
       "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=400&q=80",
     rotation: "-3deg",
     delayMs: 750,
-    positionClasses: "bottom-12 left-10 lg:left-24 hidden md:block",
+    positionClasses: "bottom-8 left-8 lg:left-24 hidden md:block",
   },
   // 6. Bottom Right
   {
@@ -95,16 +90,11 @@ const FLOATING_STICKERS: FloatingCard[] = [
       "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=400&q=80",
     rotation: "5deg",
     delayMs: 900,
-    positionClasses: "bottom-10 right-10 lg:right-28 hidden md:block",
+    positionClasses: "bottom-8 right-8 lg:right-28 hidden md:block",
   },
 ];
 
 export const HeroBanner: React.FC<HeroBannerProps> = ({
-  searchQuery,
-  setSearchQuery,
-  selectedLocation,
-  setSelectedLocation,
-  uniqueLocations,
   onScrollToCatalog,
 }) => {
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -117,7 +107,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 
   return (
     <div
-      className="relative min-h-[620px] lg:min-h-[720px] text-white flex flex-col items-center justify-center overflow-hidden px-4 py-20 sm:py-28 border-b border-white/10 selection:bg-sun-300 selection:text-ocean-950"
+      className="relative text-white flex flex-col items-center justify-center overflow-hidden px-4 py-16 sm:py-24 md:py-28 border-b border-white/10 selection:bg-sun-300 selection:text-ocean-950"
       style={{
         background: `
           radial-gradient(1200px 700px at 20% 10%, rgba(0, 161, 219, 0.45), transparent 60%),
@@ -171,172 +161,74 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         </div>
       ))}
 
-      {/* Centered Headline & Command Center Content */}
-      <div className="relative z-20 max-w-3xl text-center space-y-6 mx-auto">
-        {/* Bhoomiputra Official Eyebrow Tag */}
+      {/* Centered Headline & Action Content (Lu.ma Purity) */}
+      <div className="relative z-20 max-w-2xl text-center space-y-4 sm:space-y-6 mx-auto">
+        {/* Minimal Wordmark / Eyebrow (Lu.ma style) */}
         <div
-          className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] uppercase tracking-[0.22em] text-white/90 bg-white/10 border border-white/20 backdrop-blur-md shadow-sm transition-opacity duration-500 ${
+          className={`inline-flex items-center gap-1.5 text-xs text-ocean-200 font-semibold tracking-wider transition-opacity duration-500 ${
             hasLoaded ? "opacity-100" : "opacity-0"
           }`}
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-ocean-300 animate-pulse" />
-          <span>SONS OF THE SOIL · MMR COASTAL EXPERIENCES</span>
+          <span className="font-display font-bold text-sm tracking-tight text-white">
+            matsyamart
+          </span>
+          <span className="text-sun-300 font-bold text-base leading-none">
+            ✦
+          </span>
+          <span className="text-white/40">•</span>
+          <span className="text-ocean-200 text-[11px] uppercase tracking-widest font-medium">
+            Coastal Experiences
+          </span>
         </div>
 
-        {/* Editorial Display Headline */}
+        {/* Lu.ma-Style Big Headline (3-line punchy typography) */}
         <h1
           className={`font-display text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.05] transition-all duration-700 ${
             hasLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          Authentic coastal <br />
-          <span>communities. </span>
-          <br className="hidden sm:inline" />
-          <span className="text-sun-300">Experiences start here</span>
+          Coastal experiences <br />
+          <span className="text-sun-300">start here</span>
         </h1>
 
-        {/* Luminous Subtitle */}
+        {/* Crisp 1-Line Subtitle */}
         <p
-          className={`text-sm sm:text-lg text-white/80 max-w-2xl mx-auto leading-relaxed font-normal transition-all duration-700 delay-150 ${
+          className={`text-sm sm:text-base text-white/85 max-w-md sm:max-w-lg mx-auto leading-relaxed font-normal transition-all duration-700 delay-150 ${
             hasLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          Discover guided village walks, traditional masterclasses, home-cooked
-          feasts, and artisanal crafts across Mumbai and the Konkan coast.
+          Authentic village walks, masterclasses, feasts, and artisanal crafts
+          curated with coastal communities.
         </p>
 
-        {/* Spacious, High-Contrast Command Search & Location Bar */}
+        {/* Clean Lu.ma Action Row (Zero clutter) */}
         <div
-          className={`w-full max-w-2xl mx-auto pt-2 transition-all duration-700 delay-300 ${
+          className={`flex items-center justify-center gap-4 pt-2 sm:pt-4 transition-all duration-700 delay-300 ${
             hasLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          <div className="bg-white/15 hover:bg-white/20 focus-within:bg-white/25 backdrop-blur-xl border border-white/30 focus-within:border-sun-300 rounded-3xl sm:rounded-full p-2 sm:p-2.5 shadow-2xl transition-all flex flex-col sm:flex-row items-center gap-2 group">
-            {/* Search Input Field */}
-            <div className="flex items-center gap-2 pl-3 sm:pl-4 flex-1 min-w-0 w-full sm:w-auto">
-              <Search className="w-5 h-5 text-sun-300 shrink-0 group-focus-within:scale-110 transition-transform" />
-              <input
-                type="text"
-                placeholder="Search walks, workshops, feasts, crafts..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    if (onScrollToCatalog) {
-                      onScrollToCatalog();
-                    } else {
-                      document
-                        .getElementById("catalog-feed")
-                        ?.scrollIntoView({ behavior: "smooth" });
-                    }
-                  }
-                }}
-                className="w-full bg-transparent border-none outline-none text-sm sm:text-base text-white placeholder:text-white/60 font-normal py-1.5"
-              />
-            </div>
+          <button
+            onClick={() => {
+              if (onScrollToCatalog) {
+                onScrollToCatalog();
+              } else {
+                document
+                  .getElementById("catalog-feed")
+                  ?.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+            className="px-7 py-3 rounded-full bg-sun-300 hover:bg-sun-200 text-ocean-950 font-bold text-xs sm:text-sm transition-all shadow-lg hover:scale-105 active:scale-95 cursor-pointer"
+          >
+            Explore Experiences
+          </button>
 
-            {/* Location Selector Divider */}
-            <div className="hidden sm:block h-7 w-[1px] bg-white/25 mx-1" />
-
-            {/* Location Dropdown */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 sm:bg-transparent rounded-full sm:rounded-none w-full sm:w-auto shrink-0">
-              <MapPin className="w-4 h-4 text-ocean-300 shrink-0" />
-              <select
-                value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
-                className="bg-transparent border-none outline-none text-xs sm:text-sm text-white font-medium cursor-pointer pr-1 w-full sm:w-auto"
-              >
-                <option value="all" className="bg-[#003B4F] text-white">
-                  All Locations
-                </option>
-                {uniqueLocations.map((loc) => (
-                  <option
-                    key={loc}
-                    value={loc}
-                    className="bg-[#003B4F] text-white"
-                  >
-                    {loc}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Primary Action Button */}
-            <button
-              onClick={() => {
-                if (onScrollToCatalog) {
-                  onScrollToCatalog();
-                } else {
-                  document
-                    .getElementById("catalog-feed")
-                    ?.scrollIntoView({ behavior: "smooth" });
-                }
-              }}
-              className="w-full sm:w-auto px-6 py-3 rounded-full bg-sun-300 hover:bg-sun-200 text-ocean-950 font-bold text-xs sm:text-sm transition-all shadow-md hover:scale-105 active:scale-95 flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
-            >
-              <span>Explore</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Quick Popular Suggestions */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-3 text-xs text-white/75">
-            <span className="font-semibold text-white/50 text-[11px]">
-              Popular:
-            </span>
-            {[
-              { label: "Dawn Harbor Walk", query: "Harbor Walk" },
-              { label: "Net-Weaving Class", query: "Net-Weaving" },
-              { label: "Crab Feast", query: "Crab" },
-              { label: "Mangrove Safari", query: "Mangrove" },
-              { label: "Sun-Dried Jawla", query: "Jawla" },
-            ].map((chip) => (
-              <button
-                key={chip.label}
-                type="button"
-                onClick={() => {
-                  setSearchQuery(chip.query);
-                  if (onScrollToCatalog) {
-                    onScrollToCatalog();
-                  } else {
-                    document
-                      .getElementById("catalog-feed")
-                      ?.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
-                className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white/90 hover:text-white transition-all cursor-pointer text-[11px]"
-              >
-                {chip.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Secondary Quick Jump & Partner Link */}
-          <div className="flex items-center justify-center gap-4 pt-4 text-xs text-white/70">
-            <button
-              onClick={() => {
-                if (onScrollToCatalog) {
-                  onScrollToCatalog();
-                } else {
-                  document
-                    .getElementById("catalog-feed")
-                    ?.scrollIntoView({ behavior: "smooth" });
-                }
-              }}
-              className="hover:text-sun-300 transition-colors flex items-center gap-1 cursor-pointer"
-            >
-              <span>Browse All 4 Pillars</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-            <span className="text-white/30">•</span>
-            <Link
-              to="/host-with-us"
-              className="hover:text-sun-300 transition-colors flex items-center gap-1"
-            >
-              <span>Partner With Us</span>
-              <Plus className="w-3.5 h-3.5 text-sun-300" />
-            </Link>
-          </div>
+          <Link
+            to="/host-with-us"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-white/80 hover:text-white transition-colors"
+          >
+            <span>Submit an Experience</span>
+            <ArrowRight className="w-3.5 h-3.5 text-sun-300" />
+          </Link>
         </div>
       </div>
     </div>
