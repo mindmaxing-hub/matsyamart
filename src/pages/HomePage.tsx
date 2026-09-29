@@ -122,88 +122,8 @@ export const HomePage: React.FC = () => {
         id="catalog-feed"
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-16"
       >
-        {/* Prominent Command Search & Discovery Bar (Above Catalog) */}
+        {/* 2. Lu.ma Signature "Browse by Category" Squircle Tile Grid */}
         <section className="space-y-4 pt-2">
-          <div className="bg-white/10 hover:bg-white/15 focus-within:bg-white/20 backdrop-blur-xl border border-white/20 focus-within:border-sun-300 rounded-3xl sm:rounded-full p-2 sm:p-2.5 shadow-xl transition-all max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-2 group">
-            {/* Search Input Field */}
-            <div className="flex items-center gap-2 pl-3 sm:pl-4 flex-1 min-w-0 w-full sm:w-auto">
-              <Search className="w-5 h-5 text-sun-300 shrink-0 group-focus-within:scale-110 transition-transform" />
-              <input
-                type="text"
-                placeholder="Search walks, workshops, feasts, crafts..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-transparent border-none outline-none text-sm sm:text-base text-white placeholder:text-white/60 font-normal py-1.5"
-              />
-            </div>
-
-            {/* Location Selector Divider */}
-            <div className="hidden sm:block h-7 w-[1px] bg-white/20 mx-1" />
-
-            {/* Location Dropdown */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 sm:bg-transparent rounded-full sm:rounded-none w-full sm:w-auto shrink-0">
-              <MapPin className="w-4 h-4 text-ocean-300 shrink-0" />
-              <select
-                value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
-                className="bg-transparent border-none outline-none text-xs sm:text-sm text-white font-medium cursor-pointer pr-1 w-full sm:w-auto"
-              >
-                <option value="all" className="bg-[#003B4F] text-white">
-                  All Locations
-                </option>
-                {uniqueLocations.map((loc) => (
-                  <option
-                    key={loc}
-                    value={loc}
-                    className="bg-[#003B4F] text-white"
-                  >
-                    {loc}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Clear Button if active */}
-            {searchQuery || selectedLocation !== "all" ? (
-              <button
-                onClick={() => {
-                  setSearchQuery("");
-                  setSelectedLocation("all");
-                }}
-                className="w-full sm:w-auto px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-xs font-semibold text-white cursor-pointer flex items-center justify-center gap-1"
-              >
-                <X className="w-3.5 h-3.5" />
-                <span>Clear</span>
-              </button>
-            ) : null}
-          </div>
-
-          {/* Quick Suggestion Chips */}
-          <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-white/70">
-            <span className="font-semibold text-white/50 text-[11px]">
-              Popular:
-            </span>
-            {[
-              { label: "Dawn Harbor Walk", query: "Harbor Walk" },
-              { label: "Net-Weaving Class", query: "Net-Weaving" },
-              { label: "Crab Feast", query: "Crab" },
-              { label: "Mangrove Safari", query: "Mangrove" },
-              { label: "Sun-Dried Jawla", query: "Jawla" },
-            ].map((chip) => (
-              <button
-                key={chip.label}
-                type="button"
-                onClick={() => setSearchQuery(chip.query)}
-                className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white/90 hover:text-white transition-all cursor-pointer text-[11px]"
-              >
-                {chip.label}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* 3. Lu.ma Signature "Browse by Category" Squircle Tile Grid */}
-        <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-display font-bold text-xl sm:text-2xl text-white tracking-tight">
@@ -323,6 +243,86 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
             </button>
+          </div>
+        </section>
+
+        {/* 3. Prominent Command Search & Discovery Bar */}
+        <section className="space-y-4">
+          <div className="bg-white/10 hover:bg-white/15 focus-within:bg-white/20 backdrop-blur-xl border border-white/20 focus-within:border-sun-300 rounded-3xl sm:rounded-full p-2 sm:p-2.5 shadow-xl transition-all max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-2 group">
+            {/* Search Input Field */}
+            <div className="flex items-center gap-2 pl-3 sm:pl-4 flex-1 min-w-0 w-full sm:w-auto">
+              <Search className="w-5 h-5 text-sun-300 shrink-0 group-focus-within:scale-110 transition-transform" />
+              <input
+                type="text"
+                placeholder="Search walks, workshops, feasts, crafts..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent border-none outline-none text-sm sm:text-base text-white placeholder:text-white/60 font-normal py-1.5"
+              />
+            </div>
+
+            {/* Location Selector Divider */}
+            <div className="hidden sm:block h-7 w-[1px] bg-white/20 mx-1" />
+
+            {/* Location Dropdown */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 sm:bg-transparent rounded-full sm:rounded-none w-full sm:w-auto shrink-0">
+              <MapPin className="w-4 h-4 text-ocean-300 shrink-0" />
+              <select
+                value={selectedLocation}
+                onChange={(e) => setSelectedLocation(e.target.value)}
+                className="bg-transparent border-none outline-none text-xs sm:text-sm text-white font-medium cursor-pointer pr-1 w-full sm:w-auto"
+              >
+                <option value="all" className="bg-[#003B4F] text-white">
+                  All Locations
+                </option>
+                {uniqueLocations.map((loc) => (
+                  <option
+                    key={loc}
+                    value={loc}
+                    className="bg-[#003B4F] text-white"
+                  >
+                    {loc}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Clear Button if active */}
+            {searchQuery || selectedLocation !== "all" ? (
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedLocation("all");
+                }}
+                className="w-full sm:w-auto px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-xs font-semibold text-white cursor-pointer flex items-center justify-center gap-1"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Clear</span>
+              </button>
+            ) : null}
+          </div>
+
+          {/* Quick Suggestion Chips */}
+          <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-white/70">
+            <span className="font-semibold text-white/50 text-[11px]">
+              Popular:
+            </span>
+            {[
+              { label: "Dawn Harbor Walk", query: "Harbor Walk" },
+              { label: "Net-Weaving Class", query: "Net-Weaving" },
+              { label: "Crab Feast", query: "Crab" },
+              { label: "Mangrove Safari", query: "Mangrove" },
+              { label: "Sun-Dried Jawla", query: "Jawla" },
+            ].map((chip) => (
+              <button
+                key={chip.label}
+                type="button"
+                onClick={() => setSearchQuery(chip.query)}
+                className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white/90 hover:text-white transition-all cursor-pointer text-[11px]"
+              >
+                {chip.label}
+              </button>
+            ))}
           </div>
         </section>
 
