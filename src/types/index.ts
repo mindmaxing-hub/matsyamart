@@ -1,5 +1,7 @@
 export type ListingType = "experience" | "product";
 
+export type PillarType = "walks" | "workshops" | "food" | "goods";
+
 export type BookingStatus =
   "pending_payment" | "confirmed" | "cancelled" | "refunded";
 
@@ -7,6 +9,7 @@ export interface Category {
   id: string;
   name: string;
   slug: string;
+  pillar?: PillarType | undefined;
   description?: string | undefined;
   icon?: string | undefined;
   sort_order: number;
@@ -23,6 +26,7 @@ export interface Listing {
   title: string;
   slug: string;
   category_id?: string | undefined;
+  pillar?: PillarType | undefined;
   type: ListingType;
   short_summary: string;
   full_description: string;

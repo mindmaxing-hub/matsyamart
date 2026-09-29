@@ -2,73 +2,60 @@ import { Category, Listing, ExperienceSlot } from "../types";
 
 export const SEED_CATEGORIES: Category[] = [
   {
-    id: "cat-heritage",
-    name: "Heritage Walks",
-    slug: "heritage-walks",
+    id: "cat-walks",
+    name: "Walks",
+    slug: "walks",
+    pillar: "walks",
     description:
-      "Immersive walking trails guided by Koli elders through historic coastal villages and docks.",
+      "Guided coastal village trails, harbor dawn walks, and mangrove boat safaris.",
     icon: "Compass",
     sort_order: 1,
   },
   {
-    id: "cat-safari",
-    name: "Boat Trails & Safaris",
-    slug: "boat-safaris",
+    id: "cat-workshops",
+    name: "Workshops",
+    slug: "workshops",
+    pillar: "workshops",
     description:
-      "Traditional wooden boat journeys through tidal mangrove channels and coastal bays.",
-    icon: "Sailboat",
+      "Hands-on masterclasses in net-weaving, wooden boat carpentry, and maritime crafts.",
+    icon: "Hammer",
     sort_order: 2,
   },
   {
-    id: "cat-workshops",
-    name: "Workshops & Crafts",
-    slug: "workshops",
+    id: "cat-food",
+    name: "Food",
+    slug: "food",
+    pillar: "food",
     description:
-      "Hands-on masterclasses in net-weaving, boat carpentry, and maritime folklore.",
-    icon: "Hammer",
+      "Authentic coastal home meals, harbor dawn breakfasts, and traditional seafood dining.",
+    icon: "UtensilsCrossed",
     sort_order: 3,
   },
   {
-    id: "cat-culinary",
-    name: "Culinary Trails",
-    slug: "culinary-trails",
+    id: "cat-goods",
+    name: "Goods",
+    slug: "goods",
+    pillar: "goods",
     description:
-      "Home-cooked traditional coastal breakfasts, seafood curation, and spice blending.",
-    icon: "UtensilsCrossed",
+      "Artisanal sun-dried catch, small-batch stoneground masalas, and estuary treasures.",
+    icon: "ShoppingBag",
     sort_order: 4,
-  },
-  {
-    id: "cat-artisan",
-    name: "Artisan Goods",
-    slug: "artisan-goods",
-    description:
-      "Handcrafted items, boat models, and natural treasures harvested by coastal collectives.",
-    icon: "Sparkles",
-    sort_order: 5,
-  },
-  {
-    id: "cat-pantry",
-    name: "Sun-Dried Seafood & Masalas",
-    slug: "sun-dried-pantry",
-    description:
-      "Naturally dried seasonal catch, small-batch stoneground masalas, and estuary honey.",
-    icon: "Fish",
-    sort_order: 6,
   },
 ];
 
 export const SEED_LISTINGS: Listing[] = [
-  // 1. Versova Koliwada Heritage & Dawn Fish Auction Trail
+  // 1. Versova Coastal Heritage & Dawn Fish Auction Trail
   {
     id: "exp-versova-trail",
-    title: "Versova Koliwada Heritage & Dawn Fish Auction Trail",
+    title: "Versova Coastal Heritage & Dawn Fish Auction Trail",
     slug: "versova-koliwada-dawn-trail",
-    category_id: "cat-heritage",
+    category_id: "cat-walks",
+    pillar: "walks",
     type: "experience",
     short_summary:
-      "Experience the adrenaline of Mumbai's oldest fishing hamlet at dawn, witness the wholesale fish auction, and enjoy a traditional Koli breakfast.",
+      "Experience Mumbai's historic coastal village at dawn, witness wholesale boat auctions, and enjoy an authentic home-cooked breakfast.",
     full_description:
-      "Step into Versova Koliwada before sunrise as the fishing fleet docks with the night's harvest. Led by Devendra Koli and youth storytellers from the Versova Heritage Collective, this immersive morning walk takes you through 16th-century Portuguese alleys, the sacred Hingladevi temple square, and right into the epicenter of the morning fish auction where local women merchants set the city's seafood rates.\n\nAfter navigating the energetic docks and learning about traditional tidal navigation, unwind inside a multigenerational Koli home for hot lemongrass chai, freshly fried Bombay Duck (Bombil) or Pomfret, and hand-rolled rice bhakris cooked over wood embers.",
+      "Step into Versova coastal village before sunrise as the fishing fleet docks with the night's harvest. Led by Devendra Patil and local storytellers, this morning walk takes you through 16th-century historic alleys, ancestral squares, and into the epicenter of the morning fish auction where local women merchants set the city's seafood rates.\n\nAfter navigating the energetic docks and learning about traditional tidal navigation, unwind inside a family home for hot lemongrass chai, freshly prepared fish, and hand-rolled rice bhakris cooked over wood embers.",
     price_inr: 950,
     currency: "INR",
     images: [
@@ -76,15 +63,15 @@ export const SEED_LISTINGS: Listing[] = [
       "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
     ],
-    location_name: "Versova Koliwada, Andheri West, Mumbai",
+    location_name: "Versova Coastal Village, Andheri West, Mumbai",
     secret_meeting_point:
-      "Beside the Sacred Banyan Tree at Versova Jetty No. 1 (GPS: 19.1352° N, 72.8124° E). Guide Devendra will be holding a Bhoomiputra flag.",
+      "Beside the Sacred Banyan Tree at Versova Jetty No. 1 (GPS: 19.1352° N, 72.8124° E). Guide Devendra will welcome you.",
     duration_minutes: 150,
     included_items: [
       "Guided walk led by community elder & youth historian",
-      "Authentic home-cooked Koli breakfast & fresh chai",
+      "Authentic home-cooked coastal breakfast & fresh chai",
       "Fresh coconut water at harbor",
-      "Bhoomiputra cotton tote bag & fish identification card",
+      "Illustrated coastal fish identification guide",
     ],
     things_to_carry: [
       "Comfortable walking shoes with good grip (wet harbor surface)",
@@ -96,19 +83,19 @@ export const SEED_LISTINGS: Listing[] = [
         time: "06:15 AM",
         title: "Gathering at Versova Jetty",
         description:
-          "Welcome briefing, distribution of safety tags, and historical orientation on Mumbai's 7 original islands.",
+          "Welcome briefing and historical orientation on Mumbai's original coastal settlements.",
       },
       {
         time: "06:45 AM",
         title: "The Dawn Fish Auction",
         description:
-          "Navigate the harbor floor as mechanised and non-mechanised trawlers land their fresh catches of Pomfret, Surmai, and Prawns.",
+          "Navigate the harbor floor as traditional trawlers land fresh catches of Pomfret, Surmai, and Prawns.",
       },
       {
         time: "07:45 AM",
-        title: "Heritage Alleys & Shrine Walk",
+        title: "Heritage Alleys & Coastal Architecture",
         description:
-          "Explore ancient Gaothan architecture, ancestral drying machans, and sacred community shrines.",
+          "Explore traditional Gaothan architecture, ancestral drying machans, and coastal community shrines.",
       },
       {
         time: "08:30 AM",
@@ -119,10 +106,10 @@ export const SEED_LISTINGS: Listing[] = [
     ],
     is_active: true,
     is_featured: true,
-    host_name: "Devendra Koli & Versova Youth Heritage Collective",
+    host_name: "Devendra Patil & Versova Heritage Collective",
     host_phone: "+91 98201 44512",
     host_bio:
-      "Devendra is a 4th-generation Versova fisherman and community archivist who has documented over 200 oral histories of Koli navigation techniques.",
+      "Devendra is a 4th-generation coastal fisherman and community archivist preserving traditional maritime navigation.",
   },
 
   // 2. Thane Creek Mangrove & Flamingo Boat Safari
@@ -130,7 +117,8 @@ export const SEED_LISTINGS: Listing[] = [
     id: "exp-thane-flamingo",
     title: "Thane Creek Mangrove & Flamingo Boat Safari",
     slug: "thane-creek-flamingo-boat-safari",
-    category_id: "cat-safari",
+    category_id: "cat-walks",
+    pillar: "walks",
     type: "experience",
     short_summary:
       "Board a traditional shallow-draft boat through protected mangrove estuaries to witness thousands of migratory flamingos feeding at low tide.",
@@ -198,11 +186,12 @@ export const SEED_LISTINGS: Listing[] = [
     title: "Traditional Coastal Net-Weaving & Boat Carpentry Workshop",
     slug: "traditional-net-weaving-workshop",
     category_id: "cat-workshops",
+    pillar: "workshops",
     type: "experience",
     short_summary:
-      "Master the ancient knotting mathematics of Koli cast-nets and understand traditional teakwood boatbuilding beside Worli Fort.",
+      "Master the ancient knotting mathematics of coastal cast-nets and understand traditional teakwood boatbuilding beside Worli Fort.",
     full_description:
-      "Deep inside the boatyards beneath Worli Fort, generational shipwrights and net-weavers preserve crafts that predate modern industrial vessels. In this immersive hands-on 2-hour masterclass led by Master Carpenter Nana Patil, you will work directly with bamboo needles and marine-grade cords to weave your own mini decorative souvenir net.\n\nDiscover how indigenous boatbuilders steam and bend Malabar teak, seal planks using natural resin (*Dammar*) and cotton caulking without a single iron bolt, and hear age-old folklore regarding the protective sea-god carvings adorning Koli prows.",
+      "Deep inside the boatyards beneath Worli Fort, generational shipwrights and net-weavers preserve crafts that predate modern industrial vessels. In this immersive hands-on 2-hour masterclass led by Master Carpenter Nana Patil, you will work directly with bamboo needles and marine-grade cords to weave your own mini decorative souvenir net.\n\nDiscover how indigenous boatbuilders steam and bend Malabar teak, seal planks using natural resin (*Dammar*) and cotton caulking without a single iron bolt, and hear age-old folklore regarding the protective sea-god carvings adorning coastal prows.",
     price_inr: 800,
     currency: "INR",
     images: [
@@ -210,9 +199,9 @@ export const SEED_LISTINGS: Listing[] = [
       "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?auto=format&fit=crop&w=1200&q=80",
     ],
-    location_name: "Worli Koliwada Boatyard, Mumbai",
+    location_name: "Worli Coastal Boatyard, Mumbai",
     secret_meeting_point:
-      "Worli Koliwada Boat Ramp, foot of Worli Fort steps (GPS: 19.0234° N, 72.8167° E). Guide Nana Patil will welcome you.",
+      "Worli Coastal Boat Ramp, foot of Worli Fort steps (GPS: 19.0234° N, 72.8167° E). Guide Nana Patil will welcome you.",
     duration_minutes: 120,
     included_items: [
       "All workshop materials: traditional bamboo needle, hemp cord & frame",
@@ -249,20 +238,21 @@ export const SEED_LISTINGS: Listing[] = [
     host_name: "Master Carpenter Nana Patil & Worli Artisans",
     host_phone: "+91 98195 21040",
     host_bio:
-      "Nana Patil has crafted and restored over 85 traditional Koli fishing vessels over 40 years, keeping wooden boatbuilding techniques alive.",
+      "Nana Patil has crafted and restored traditional coastal fishing vessels over 40 years, keeping wooden boatbuilding techniques alive.",
   },
 
-  // 4. Sassoon Docks Dawn Heritage Walk & Seafood Culinary Trail
+  // 4. Sassoon Docks Dawn Heritage Walk & Coastal Seafood Feast
   {
     id: "exp-sassoon-trail",
-    title: "Sassoon Docks Dawn Heritage Walk & Seafood Culinary Trail",
+    title: "Sassoon Docks Dawn Heritage Walk & Coastal Seafood Feast",
     slug: "sassoon-docks-culinary-trail",
-    category_id: "cat-culinary",
+    category_id: "cat-food",
+    pillar: "food",
     type: "experience",
     short_summary:
-      "Explore Mumbai's first commercial wet dock established in 1875, learn to grade fresh wild catch, and enjoy a curated Koli feast.",
+      "Explore Mumbai's first commercial wet dock established in 1875, learn to grade fresh wild catch, and enjoy a curated coastal seafood feast.",
     full_description:
-      "Sassoon Docks is the vibrating heart of South Mumbai's maritime economy. Built in 1875 by David Sassoon, it continues to welcome deep-sea fishing trawlers returning from the Arabian Sea.\n\nLed by Ashwini Tandel, an acclaimed community educator and food custodian from the Colaba Koli Mahila Collective, this dawn trail unpacks the taxonomy of western coastal fish, how to spot wild vs farmed seafood, and the cultural politics of Mumbai's coastlines. We conclude at a restored colonial-era verandah for a grand home-cooked tasting feast featuring traditional crab curry, sol kadhi, and roasted jawla chutney.",
+      "Sassoon Docks is the vibrating heart of South Mumbai's maritime economy. Built in 1875 by David Sassoon, it continues to welcome deep-sea fishing trawlers returning from the Arabian Sea.\n\nLed by Ashwini Tandel, an acclaimed community educator and food custodian from the Colaba Coastal Collective, this dawn trail unpacks the taxonomy of western coastal fish, how to spot wild vs farmed seafood, and the cultural heritage of Mumbai's coastlines. We conclude at a restored verandah for a grand home-cooked tasting feast featuring traditional crab curry, sol kadhi, and roasted jawla chutney.",
     price_inr: 1200,
     currency: "INR",
     images: [
@@ -276,7 +266,7 @@ export const SEED_LISTINGS: Listing[] = [
     duration_minutes: 180,
     included_items: [
       "Expert seafood curation masterclass by community fish merchant",
-      "Full 4-course traditional Koli breakfast feast",
+      "Full 4-course traditional coastal breakfast feast",
       "Chilled digestive Sol Kadhi",
       "Illustrated coastal fish seasonality calendar",
     ],
@@ -305,30 +295,31 @@ export const SEED_LISTINGS: Listing[] = [
       },
       {
         time: "08:15 AM",
-        title: "Koli Culinary Feast & Q&A",
+        title: "Coastal Culinary Feast & Q&A",
         description:
           "Feast on authentic recipes passed down across five generations.",
       },
     ],
     is_active: true,
     is_featured: true,
-    host_name: "Ashwini Tandel & Colaba Koli Mahila Collective",
+    host_name: "Ashwini Tandel & Colaba Coastal Collective",
     host_phone: "+91 99204 77158",
     host_bio:
-      "Ashwini is a community activist and culinary researcher advocating for fair seafood procurement and indigenous women's market rights.",
+      "Ashwini is a community activist and culinary researcher advocating for fair seafood procurement and coastal food rights.",
   },
 
-  // 5. Artisanal Sun-Dried Jawla & Koli Masala Basket
+  // 5. Artisanal Sun-Dried Jawla & Coastal Spice Basket
   {
     id: "prd-jawla-basket",
-    title: "Artisanal Sun-Dried Jawla & Koli Masala Basket",
+    title: "Artisanal Sun-Dried Jawla & Coastal Spice Basket",
     slug: "artisanal-jawla-koli-masala-basket",
-    category_id: "cat-pantry",
+    category_id: "cat-goods",
+    pillar: "goods",
     type: "product",
     short_summary:
-      "Naturally stilt-dried baby prawns (Jawla) paired with hand-pounded woodfire Koli red spice masala.",
+      "Naturally sea-breeze dried baby prawns (Jawla) paired with hand-pounded woodfire coastal red spice blend.",
     full_description:
-      "A prized staple of coastal household pantries. Small baby shrimp (*Jawla*) caught by artisanal gillnets off Madh Island are sun-cured over high bamboo *machans* using clean sea-breeze drying methods that lock in intense umami without chemicals or artificial preservatives.\n\nPaired with a 250g tin of authentic Koli Lal Masala — stone-pounded with 24 indigenous whole spices roasted over teakwood embers by the Mahila Bachat Gat. Makes sensational dry stir-fries, crispy fritters, and classic Sunday curries.",
+      "A prized staple of coastal household pantries. Small baby shrimp (*Jawla*) caught by artisanal gillnets off Madh Island are sun-cured over high bamboo *machans* using clean sea-breeze drying methods that lock in intense umami without chemicals or artificial preservatives.\n\nPaired with a 250g tin of authentic Coastal Lal Masala — stone-pounded with 24 indigenous whole spices roasted over teakwood embers by the Mahila Bachat Gat. Makes sensational dry stir-fries, crispy fritters, and classic Sunday curries.",
     price_inr: 650,
     currency: "INR",
     images: [
@@ -340,7 +331,7 @@ export const SEED_LISTINGS: Listing[] = [
     artisan_collective: "Madh Island Coastal Mahila Bachat Gat",
     is_active: true,
     is_featured: true,
-    host_name: "Shakuntala Koli & Madh Women's Collective",
+    host_name: "Shakuntala Patil & Madh Women's Collective",
     host_phone: "+91 98691 12345",
     host_bio:
       "A 22-woman self-help group dedicated to chemical-free coastal sun-drying and fair-wage artisanal food processing.",
@@ -351,10 +342,11 @@ export const SEED_LISTINGS: Listing[] = [
     id: "prd-mangrove-honey",
     title: "Raw Mangrove Wild Blossom Honey (500g)",
     slug: "raw-mangrove-wild-honey",
-    category_id: "cat-pantry",
+    category_id: "cat-goods",
+    pillar: "goods",
     type: "product",
     short_summary:
-      "100% pure, unpasteurized natural honey sustainably collected from wild mangrove blossoms along the estuarine creeks.",
+      "Pure, unpasteurized natural honey sustainably collected from wild mangrove blossoms along the estuarine creeks.",
     full_description:
       "Harvested by certified indigenous gatherers from wild *Avicennia marina* mangrove floral blossoms along the Thane Creek and Vikhroli estuaries. This honey is cold-strained through pure unbleached cotton, preserving natural bee pollen, enzymes, and rich coastal floral notes.\n\nFeatures a distinct amber viscosity, low glycemic floral index, and subtle hint of salty-sweet minerality unique to mangrove shoreline flora. Zero added sugar or syrup.",
     price_inr: 550,
@@ -374,17 +366,18 @@ export const SEED_LISTINGS: Listing[] = [
       "Community cooperative integrating sustainable non-timber forest produce harvesting with tidal wetland restoration.",
   },
 
-  // 7. Handcrafted Miniature Koli Wooden Fishing Boat
+  // 7. Handcrafted Miniature Coastal Wooden Fishing Boat
   {
     id: "prd-mini-boat",
-    title: "Handcrafted Miniature Koli Wooden Fishing Boat",
+    title: "Handcrafted Miniature Coastal Wooden Fishing Boat",
     slug: "handcrafted-miniature-koli-boat",
-    category_id: "cat-artisan",
+    category_id: "cat-goods",
+    pillar: "goods",
     type: "product",
     short_summary:
-      "Authentic hand-carved scale model of a traditional Machwa fishing boat with cotton sails and carved eye insignia.",
+      "Authentic hand-carved scale model of a traditional coastal Machwa fishing boat with cotton sails and carved eye insignia.",
     full_description:
-      "An heirloom-quality maritime showpiece. Hand-carved from upcycled Malabar boat teak by senior craftsmen in Mahim Koliwada. This model replicates every historical proportion of the legendary *Machwa* coastal trawlers that have navigated the Konkan sea for centuries.\n\nIncludes functional miniature carved rudder, authentic cotton canvas rigging, miniature brass mooring cleats, and the sacred protective eye (*Bhavai*) hand-painted on the bow to safeguard seafarers.",
+      "An heirloom-quality maritime showpiece. Hand-carved from upcycled Malabar boat teak by senior craftsmen in Mahim coastal village. This model replicates every historical proportion of the legendary *Machwa* coastal trawlers that have navigated the Konkan sea for centuries.\n\nIncludes functional miniature carved rudder, authentic cotton canvas rigging, miniature brass mooring cleats, and the sacred protective eye (*Bhavai*) hand-painted on the bow to safeguard seafarers.",
     price_inr: 1100,
     currency: "INR",
     images: [
@@ -393,26 +386,27 @@ export const SEED_LISTINGS: Listing[] = [
     ],
     stock_count: 14,
     weight_grams: 750,
-    artisan_collective: "Mahim Koliwada Woodcarvers Guild",
+    artisan_collective: "Mahim Coastal Woodcarvers Guild",
     is_active: true,
     is_featured: false,
-    host_name: "Master Craftsman Ganpat Koli",
+    host_name: "Master Craftsman Ganpat Patil",
     host_phone: "+91 98334 55120",
     host_bio:
-      "Master Ganpat has built over 50 real fishing vessels and now teaches young apprentices scale boat carving and restoration.",
+      "Master Ganpat has built real fishing vessels and now teaches young apprentices scale boat carving and restoration.",
   },
 
-  // 8. Traditional Malvani & Koli Fish Curry Masala Trio (300g)
+  // 8. Traditional Malvani & Coastal Fish Curry Masala Trio (300g)
   {
     id: "prd-masala-trio",
-    title: "Traditional Malvani & Koli Fish Curry Masala Trio (300g)",
+    title: "Traditional Malvani & Coastal Fish Curry Masala Trio (300g)",
     slug: "koli-curry-masala-trio",
-    category_id: "cat-pantry",
+    category_id: "cat-goods",
+    pillar: "goods",
     type: "product",
     short_summary:
-      "Three generational coastal spice blends: Koli Fish Fry Rub, Malvani Sunday Curry Masala, and Roasted Coconut Chutney Podi.",
+      "Three generational coastal spice blends: Coastal Fish Fry Rub, Malvani Sunday Curry Masala, and Roasted Coconut Chutney Podi.",
     full_description:
-      "The ultimate coastal spice pantry trio in sealed reusable tins:\n\n1. **Koli Fish Fry Masala (100g):** Roasted Byadgi chillies, coriander seed, trifala, and black pepper. Perfect crisp crust for Surmai and Pomfret.\n2. **Malvani Sunday Curry Masala (100g):** Slow-roasted 18-spice blend for deep, aromatic gravies and crab curries.\n3. **Roasted Coconut-Jawla Chutney Podi (100g):** Fiery dry condiment made with stoneground roasted copra, garlic, and sea salt.",
+      "The ultimate coastal spice pantry trio in sealed reusable tins:\n\n1. **Coastal Fish Fry Masala (100g):** Roasted Byadgi chillies, coriander seed, trifala, and black pepper. Perfect crisp crust for fresh catch.\n2. **Malvani Sunday Curry Masala (100g):** Slow-roasted 18-spice blend for deep, aromatic gravies and crab curries.\n3. **Roasted Coconut-Jawla Chutney Podi (100g):** Fiery dry condiment made with stoneground roasted copra, garlic, and sea salt.",
     price_inr: 380,
     currency: "INR",
     images: [

@@ -1,14 +1,7 @@
 import React, { useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { Link } from "../ui/Link";
-import {
-  ShoppingBag,
-  Menu,
-  X,
-  Compass,
-  Anchor,
-  ShieldCheck,
-} from "lucide-react";
+import { ShoppingBag, Menu, X, Anchor, Plus } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 
 export const Navbar: React.FC = () => {
@@ -28,172 +21,136 @@ export const Navbar: React.FC = () => {
   const isActive = (path: string) => currentPath === path;
 
   return (
-    <>
-      {/* Top Indigenous Stewardship Announcement Bar */}
-      <div className="bg-ocean-950 text-white text-[11px] py-1.5 px-4 tracking-wide font-medium border-b border-ocean-800">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-2 h-2 rounded-full bg-sun-300 animate-pulse shrink-0" />
-            <span className="truncate">
-              Direct Community Revenue — 100% of tour fees & goods payouts go
-              directly to Koli hosts & women's collectives
+    <header className="sticky top-0 z-50 bg-[#030D12]/90 backdrop-blur-md border-b border-white/10 text-white transition-all">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        {/* Brand Logo */}
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <div className="w-8 h-8 rounded-lg bg-ocean-800 flex items-center justify-center border border-ocean-700/80 text-sun-300 group-hover:scale-105 transition-transform">
+            <Anchor className="w-4 h-4 text-sun-300" />
+          </div>
+          <div className="flex items-baseline gap-1">
+            <span className="font-display font-bold text-xl text-white tracking-tight">
+              matsyamart
+            </span>
+            <span className="text-sun-300 font-bold text-lg leading-none">
+              ✦
             </span>
           </div>
-          <div className="hidden sm:flex items-center gap-4 text-ocean-200 shrink-0">
-            <span className="flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-sun-300" />
-              Verified Koliwada Guides
-            </span>
-            <span className="text-ocean-500">|</span>
-            <a
-              href="https://bhoomiputra.org"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-sun-300 transition-colors"
-            >
-              Bhoomiputra Foundation ↗
-            </a>
-          </div>
+        </Link>
+
+        {/* Desktop 4-Pillar Links (Luma Style) */}
+        <nav className="hidden md:flex items-center gap-1 bg-white/5 border border-white/10 rounded-full px-3 py-1">
+          <a
+            href="/#walks"
+            className="text-xs font-medium px-3 py-1 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            Walks
+          </a>
+          <a
+            href="/#workshops"
+            className="text-xs font-medium px-3 py-1 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            Workshops
+          </a>
+          <a
+            href="/#food"
+            className="text-xs font-medium px-3 py-1 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            Food
+          </a>
+          <a
+            href="/#goods"
+            className="text-xs font-medium px-3 py-1 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            Goods
+          </a>
+        </nav>
+
+        {/* Right Actions: Cart + + Submit Experience Button */}
+        <div className="flex items-center gap-3">
+          {/* Cart Icon */}
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-colors relative"
+            title="Open Cart"
+            aria-label="Cart"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            {totalItemsCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-sun-300 text-ocean-950 font-bold text-[10px] rounded-full flex items-center justify-center animate-pulse">
+                {totalItemsCount}
+              </span>
+            )}
+          </button>
+
+          {/* + Submit Experience Pill (Luma Style) */}
+          <Link
+            to="/host-with-us"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-ocean-950 hover:bg-slate-100 transition-colors shadow-xs"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Submit Experience</span>
+          </Link>
+
+          {/* Mobile Menu Trigger */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/10"
+            aria-label="Toggle Navigation"
+          >
+            {mobileMenuOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
+          </button>
         </div>
       </div>
 
-      {/* Main Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          {/* Brand Identity */}
-          <Link to="/" className="flex items-center gap-3.5 group">
-            {/* Origami Chevron Logo Mark */}
-            <div className="w-11 h-11 rounded-xl bg-ocean-900 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform overflow-hidden relative border border-ocean-700 shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-tr from-ocean-900 via-ocean-800 to-ocean-600 opacity-90" />
-              <Anchor className="w-6 h-6 text-sun-300 relative z-10 stroke-[2.2]" />
-            </div>
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-[#030D12] border-b border-white/10 px-4 py-4 space-y-3">
+          <div className="grid grid-cols-2 gap-2 pb-3 border-b border-white/10">
+            <a
+              href="/#walks"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-white/5 rounded-xl text-center"
+            >
+              🚶 Walks
+            </a>
+            <a
+              href="/#workshops"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-white/5 rounded-xl text-center"
+            >
+              🛠️ Workshops
+            </a>
+            <a
+              href="/#food"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-white/5 rounded-xl text-center"
+            >
+              🍲 Food
+            </a>
+            <a
+              href="/#goods"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-white/5 rounded-xl text-center"
+            >
+              🧺 Goods
+            </a>
+          </div>
 
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span className="font-display font-bold text-2xl text-ocean-900 tracking-tight">
-                  Matsya<span className="text-ocean-600">Mart</span>
-                </span>
-                <span className="hidden md:inline-flex text-[10px] font-semibold uppercase tracking-wider bg-ocean-100 text-ocean-800 px-2 py-0.5 rounded-full border border-ocean-200">
-                  Coastal Goods & Trails
-                </span>
-              </div>
-              <span className="text-[11px] text-slate-500 font-medium tracking-tight">
-                A Bhoomiputra Community Initiative
-              </span>
-            </div>
+          <Link
+            to="/host-with-us"
+            onClick={() => setMobileMenuOpen(false)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-sun-300 text-ocean-950 font-bold text-xs shadow-xs"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Submit an Experience or Craft</span>
           </Link>
-
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8">
-            <Link
-              to="/"
-              className={`text-sm font-medium transition-colors ${
-                isActive("/")
-                  ? "text-ocean-900 font-semibold"
-                  : "text-slate-600 hover:text-ocean-800"
-              }`}
-            >
-              Explore Experiences
-            </Link>
-
-            <a
-              href="/#artisan-goods"
-              className="text-sm font-medium text-slate-600 hover:text-ocean-800 transition-colors"
-            >
-              Artisan Goods
-            </a>
-
-            <Link
-              to="/host-with-us"
-              className={`text-sm font-medium flex items-center gap-1.5 transition-colors ${
-                isActive("/host-with-us")
-                  ? "text-ocean-900 font-semibold"
-                  : "text-slate-600 hover:text-ocean-800"
-              }`}
-            >
-              <Compass className="w-4 h-4 text-ocean-600" />
-              Host With Us
-            </Link>
-
-            <Link
-              to="/admin"
-              className={`text-xs uppercase tracking-wider font-semibold px-2.5 py-1 rounded-md transition-colors ${
-                isActive("/admin")
-                  ? "bg-ocean-900 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
-            >
-              Admin Portal
-            </Link>
-          </nav>
-
-          {/* Action Area: Cart & Mobile Toggle */}
-          <div className="flex items-center gap-3">
-            {/* Bag Button */}
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 rounded-xl border border-slate-200/80 bg-slate-50 hover:bg-slate-100 text-ocean-900 transition-colors flex items-center justify-center shadow-xs cursor-pointer"
-              aria-label="View Cart"
-            >
-              <ShoppingBag className="w-5 h-5 text-ocean-800" />
-              {totalItemsCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-sun-300 text-ocean-950 font-bold text-xs rounded-full flex items-center justify-center border-2 border-white shadow-xs">
-                  {totalItemsCount}
-                </span>
-              )}
-            </button>
-
-            {/* Mobile Hamburger Toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-              aria-label="Toggle Navigation"
-            >
-              {mobileMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
-            </button>
-          </div>
         </div>
-
-        {/* Mobile Flyout Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-4 pb-6 space-y-3 shadow-lg">
-            <Link
-              to="/"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2.5 rounded-lg text-base font-medium text-slate-800 hover:bg-ocean-50"
-            >
-              Explore Experiences & Tours
-            </Link>
-            <a
-              href="/#artisan-goods"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2.5 rounded-lg text-base font-medium text-slate-800 hover:bg-ocean-50"
-            >
-              Artisanal Goods & Masalas
-            </a>
-            <Link
-              to="/host-with-us"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2.5 rounded-lg text-base font-medium text-ocean-800 hover:bg-ocean-50"
-            >
-              Host With Us (Community Proposal)
-            </Link>
-            <div className="pt-2 border-t border-slate-100">
-              <Link
-                to="/admin"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block px-3 py-2 rounded-lg text-xs uppercase font-semibold text-slate-600 bg-slate-100"
-              >
-                Coordinator & Admin Dashboard
-              </Link>
-            </div>
-          </div>
-        )}
-      </header>
-    </>
+      )}
+    </header>
   );
 };

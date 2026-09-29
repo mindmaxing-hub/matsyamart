@@ -255,7 +255,7 @@ export const SlotBookingSheet: React.FC<SlotBookingSheetProps> = ({
             <div className="flex justify-between text-slate-600">
               <span>Community Host Payout</span>
               <span className="font-semibold text-emerald-700">
-                100% Direct
+                Community Partnered
               </span>
             </div>
             <div className="flex justify-between text-base font-bold text-ocean-950 pt-2 border-t border-ocean-200/60">

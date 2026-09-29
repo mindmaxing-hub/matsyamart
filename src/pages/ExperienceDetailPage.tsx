@@ -200,12 +200,13 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-500 space-y-1">
             <div className="flex items-center gap-1.5 font-semibold text-slate-700">
               <ShieldCheck className="w-4 h-4 text-sun-300" />
-              <span>Bhoomiputra Direct Payouts Guarantee</span>
+              <span>Bhoomiputra Community Experience Guarantee</span>
             </div>
             <p className="text-[11px] leading-relaxed">
-              Ticket payments go directly into community accounts. If a tidal
-              boat tour is cancelled due to adverse weather or marine warnings,
-              100% refund or free date rescheduling is provided instantly.
+              Ticket payments directly support coastal guides and hosts. If a
+              tidal boat tour is cancelled due to adverse weather or marine
+              warnings, a full refund or free date rescheduling is provided
+              instantly.
             </p>
           </div>
         </div>

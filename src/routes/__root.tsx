@@ -75,7 +75,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         {
           name: "description",
           content:
-            "Authentic coastal tours, mangrove safaris, net-weaving workshops, and chemical-free seafood direct from Koliwada communities.",
+            "Authentic coastal walks, boat safaris, hands-on workshops, and artisanal goods curated with indigenous coastal communities.",
         },
       ],
       links: [

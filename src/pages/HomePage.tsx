@@ -3,29 +3,32 @@ import { HeroBanner } from "../components/catalog/HeroBanner";
 import { CategoryFilter } from "../components/catalog/CategoryFilter";
 import { ListingCard } from "../components/catalog/ListingCard";
 import { useData } from "../context/DataContext";
-import { ListingType } from "../types";
+import { PillarType, Listing } from "../types";
 import {
-  ShieldCheck,
-  HeartHandshake,
   Compass,
-  Waves,
+  Hammer,
+  UtensilsCrossed,
+  ShoppingBag,
+  ArrowRight,
+  Plus,
   Sparkles,
 } from "lucide-react";
+import { Link } from "../components/ui/Link";
 
 export const HomePage: React.FC = () => {
   const { listings, categories } = useData();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("all");
-  const [selectedType, setSelectedType] = useState<"all" | ListingType>("all");
-  const [selectedCategorySlug, setSelectedCategorySlug] = useState("all");
+  const [selectedPillar, setSelectedPillar] = useState<"all" | PillarType>(
+    "all",
+  );
 
   // Extract unique locations from active listings
   const uniqueLocations = useMemo(() => {
     const set = new Set<string>();
     listings.forEach((l) => {
       if (l.location_name) {
-        // e.g. "Versova Koliwada, Andheri West, Mumbai" -> "Versova Koliwada"
         const primary = l.location_name.split(",")[0]?.trim();
         if (primary) {
           set.add(primary);
@@ -35,20 +38,28 @@ export const HomePage: React.FC = () => {
     return Array.from(set);
   }, [listings]);
 
+  // Pillar counts
+  const pillarCounts: Record<PillarType, number> = useMemo(() => {
+    const counts: Record<PillarType, number> = {
+      walks: 0,
+      workshops: 0,
+      food: 0,
+      goods: 0,
+    };
+    listings.forEach((item) => {
+      if (item.pillar && item.pillar in counts) {
+        counts[item.pillar] += 1;
+      }
+    });
+    return counts;
+  }, [listings]);
+
   // Filter listings
   const filteredListings = useMemo(() => {
     return listings.filter((item) => {
-      // Type filter
-      if (selectedType !== "all" && item.type !== selectedType) {
+      // Pillar filter
+      if (selectedPillar !== "all" && item.pillar !== selectedPillar) {
         return false;
-      }
-
-      // Category filter
-      if (selectedCategorySlug !== "all") {
-        const cat = categories.find((c) => c.slug === selectedCategorySlug);
-        if (cat && item.category_id !== cat.id) {
-          return false;
-        }
       }
 
       // Location filter
@@ -75,133 +86,333 @@ export const HomePage: React.FC = () => {
 
       return true;
     });
-  }, [
-    listings,
-    categories,
-    selectedType,
-    selectedCategorySlug,
-    selectedLocation,
-    searchQuery,
-  ]);
+  }, [listings, selectedPillar, selectedLocation, searchQuery]);
+
+  // Specific groups for the 4 pillars (one-by-one presentation)
+  const walksListings = useMemo(
+    () => listings.filter((l) => l.pillar === "walks"),
+    [listings],
+  );
+  const workshopsListings = useMemo(
+    () => listings.filter((l) => l.pillar === "workshops"),
+    [listings],
+  );
+  const foodListings = useMemo(
+    () => listings.filter((l) => l.pillar === "food"),
+    [listings],
+  );
+  const goodsListings = useMemo(
+    () => listings.filter((l) => l.pillar === "goods"),
+    [listings],
+  );
+
+  const scrollToCatalog = () => {
+    const el = document.getElementById("catalog-feed");
+    el?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
-    <div className="space-y-12 pb-20">
-      {/* Hero Documentary Banner */}
+    <div className="bg-[#030D12] text-white min-h-screen space-y-16 pb-24 selection:bg-sun-300 selection:text-ocean-950">
+      {/* 1. Lu.ma Animated Hero Banner */}
       <HeroBanner
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         selectedLocation={selectedLocation}
         setSelectedLocation={setSelectedLocation}
         uniqueLocations={uniqueLocations}
+        onScrollToCatalog={scrollToCatalog}
       />
 
-      {/* Main Catalog Section */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Filters */}
+      {/* 2. Main Feed Section */}
+      <main
+        id="catalog-feed"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16"
+      >
+        {/* Category Pills & Quick Filter */}
         <CategoryFilter
           categories={categories}
-          selectedType={selectedType}
-          setSelectedType={setSelectedType}
-          selectedCategorySlug={selectedCategorySlug}
-          setSelectedCategorySlug={setSelectedCategorySlug}
+          selectedPillar={selectedPillar}
+          setSelectedPillar={setSelectedPillar}
           totalListingsCount={listings.length}
+          pillarCounts={pillarCounts}
         />
 
-        {/* Listings Grid */}
-        {filteredListings.length === 0 ? (
-          <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 shadow-xs space-y-3">
-            <Compass className="w-10 h-10 text-slate-300 mx-auto" />
-            <h3 className="font-display font-bold text-lg text-slate-700">
-              No coastal offerings found
-            </h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              We couldn't find any tours or artisan items matching your search
-              criteria. Try resetting filters or searching for general terms
-              like "Versova" or "Fish".
-            </p>
-            <button
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedLocation("all");
-                setSelectedType("all");
-                setSelectedCategorySlug("all");
-              }}
-              className="mt-2 px-4 py-2 text-xs font-semibold text-ocean-800 bg-ocean-100 hover:bg-ocean-200 rounded-xl transition-colors"
-            >
-              Reset All Filters
-            </button>
+        {/* If user filtered or searched, show direct results */}
+        {selectedPillar !== "all" ||
+        searchQuery ||
+        selectedLocation !== "all" ? (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="font-display font-bold text-xl sm:text-2xl text-white">
+                {selectedPillar !== "all"
+                  ? `${selectedPillar.charAt(0).toUpperCase() + selectedPillar.slice(1)} Offerings`
+                  : "Search Results"}
+              </h2>
+              <button
+                onClick={() => {
+                  setSelectedPillar("all");
+                  setSearchQuery("");
+                  setSelectedLocation("all");
+                }}
+                className="text-xs text-sun-300 hover:underline cursor-pointer"
+              >
+                Reset Filters
+              </button>
+            </div>
+
+            {filteredListings.length === 0 ? (
+              <div className="p-12 text-center bg-[#061822] rounded-3xl border border-white/10 space-y-3">
+                <Compass className="w-8 h-8 text-slate-500 mx-auto" />
+                <h3 className="font-display font-bold text-base text-slate-300">
+                  No offerings found
+                </h3>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  Try adjusting your search terms or view all coastal
+                  categories.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredListings.map((listing) => (
+                  <ListingCard key={listing.id} listing={listing} />
+                ))}
+              </div>
+            )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredListings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
-            ))}
+          /* Default Feed: One-By-One Pillars as requested by Vikas */
+          <div className="space-y-20">
+            {/* Pillar 1: Walks */}
+            <section id="walks" className="space-y-6 scroll-mt-24">
+              <div className="flex items-end justify-between border-b border-white/10 pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-ocean-800 flex items-center justify-center text-sun-300">
+                      <Compass className="w-4 h-4" />
+                    </div>
+                    <h2 className="font-display font-bold text-xl sm:text-2xl text-white">
+                      Coastal Walks & Safaris
+                    </h2>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Guided dawn village harbor trails and tidal mangrove boat
+                    safaris.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {walksListings.map((listing) => (
+                  <ListingCard key={listing.id} listing={listing} />
+                ))}
+              </div>
+            </section>
+
+            {/* Pillar 2: Workshops */}
+            <section id="workshops" className="space-y-6 scroll-mt-24">
+              <div className="flex items-end justify-between border-b border-white/10 pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-ocean-800 flex items-center justify-center text-sun-300">
+                      <Hammer className="w-4 h-4" />
+                    </div>
+                    <h2 className="font-display font-bold text-xl sm:text-2xl text-white">
+                      Traditional Workshops & Crafts
+                    </h2>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Hands-on masterclasses in net-weaving, wooden boat
+                    carpentry, and maritime knotting.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {workshopsListings.map((listing) => (
+                  <ListingCard key={listing.id} listing={listing} />
+                ))}
+              </div>
+            </section>
+
+            {/* Pillar 3: Food */}
+            <section id="food" className="space-y-6 scroll-mt-24">
+              <div className="flex items-end justify-between border-b border-white/10 pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-ocean-800 flex items-center justify-center text-sun-300">
+                      <UtensilsCrossed className="w-4 h-4" />
+                    </div>
+                    <h2 className="font-display font-bold text-xl sm:text-2xl text-white">
+                      Coastal Food & Feasts
+                    </h2>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Authentic harbor breakfasts, traditional crab curries, and
+                    home-cooked seafood dining.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {foodListings.map((listing) => (
+                  <ListingCard key={listing.id} listing={listing} />
+                ))}
+              </div>
+            </section>
+
+            {/* Pillar 4: Goods */}
+            <section id="goods" className="space-y-6 scroll-mt-24">
+              <div className="flex items-end justify-between border-b border-white/10 pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-ocean-800 flex items-center justify-center text-sun-300">
+                      <ShoppingBag className="w-4 h-4" />
+                    </div>
+                    <h2 className="font-display font-bold text-xl sm:text-2xl text-white">
+                      Artisan Goods & Pantry
+                    </h2>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Naturally sun-cured seasonal catch, stoneground spices, and
+                    wild mangrove honey.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {goodsListings.map((listing) => (
+                  <ListingCard key={listing.id} listing={listing} />
+                ))}
+              </div>
+            </section>
           </div>
         )}
 
-        {/* Community Manifesto Section */}
-        <section className="mt-16 bg-ocean-900 text-white rounded-3xl p-8 sm:p-12 border border-ocean-700 relative overflow-hidden shadow-tactile">
-          <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none translate-x-12 translate-y-12">
-            <Waves className="w-96 h-96" />
+        {/* 3. Browse by Category Grid (Lu.ma Screenshot 1 Style) */}
+        <section className="pt-8 space-y-6 border-t border-white/10">
+          <div className="space-y-1">
+            <h2 className="font-display font-bold text-xl sm:text-2xl text-white">
+              Browse by Pillar
+            </h2>
+            <p className="text-xs text-slate-400">
+              Discover authentic offerings tailored to how you want to
+              experience the coast.
+            </p>
           </div>
 
-          <div className="relative z-10 max-w-3xl space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-ocean-800 border border-ocean-600 text-sun-300 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>The MatsyaMart Community Charter</span>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {/* Tile 1: Walks */}
+            <button
+              onClick={() => {
+                setSelectedPillar("walks");
+                scrollToCatalog();
+              }}
+              className="p-5 rounded-2xl bg-[#061822] hover:bg-[#0B2430] border border-white/10 hover:border-white/20 transition-all text-left space-y-3 cursor-pointer group"
+            >
+              <div className="w-9 h-9 rounded-xl bg-ocean-800/80 flex items-center justify-center text-sun-300 group-hover:scale-110 transition-transform">
+                <Compass className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-display font-bold text-sm text-white group-hover:text-sun-300 transition-colors">
+                  Walks
+                </div>
+                <div className="text-[11px] text-slate-400">
+                  {pillarCounts.walks || 0} Experiences
+                </div>
+              </div>
+            </button>
 
-            <h2 className="font-display font-bold text-2xl sm:text-4xl text-white">
-              Centering Indigenous Livelihoods, Ending Tourism Middlemen
+            {/* Tile 2: Workshops */}
+            <button
+              onClick={() => {
+                setSelectedPillar("workshops");
+                scrollToCatalog();
+              }}
+              className="p-5 rounded-2xl bg-[#061822] hover:bg-[#0B2430] border border-white/10 hover:border-white/20 transition-all text-left space-y-3 cursor-pointer group"
+            >
+              <div className="w-9 h-9 rounded-xl bg-ocean-800/80 flex items-center justify-center text-sun-300 group-hover:scale-110 transition-transform">
+                <Hammer className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-display font-bold text-sm text-white group-hover:text-sun-300 transition-colors">
+                  Workshops
+                </div>
+                <div className="text-[11px] text-slate-400">
+                  {pillarCounts.workshops || 0} Masterclasses
+                </div>
+              </div>
+            </button>
+
+            {/* Tile 3: Food */}
+            <button
+              onClick={() => {
+                setSelectedPillar("food");
+                scrollToCatalog();
+              }}
+              className="p-5 rounded-2xl bg-[#061822] hover:bg-[#0B2430] border border-white/10 hover:border-white/20 transition-all text-left space-y-3 cursor-pointer group"
+            >
+              <div className="w-9 h-9 rounded-xl bg-ocean-800/80 flex items-center justify-center text-sun-300 group-hover:scale-110 transition-transform">
+                <UtensilsCrossed className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-display font-bold text-sm text-white group-hover:text-sun-300 transition-colors">
+                  Food & Dining
+                </div>
+                <div className="text-[11px] text-slate-400">
+                  {pillarCounts.food || 0} Feasts
+                </div>
+              </div>
+            </button>
+
+            {/* Tile 4: Goods */}
+            <button
+              onClick={() => {
+                setSelectedPillar("goods");
+                scrollToCatalog();
+              }}
+              className="p-5 rounded-2xl bg-[#061822] hover:bg-[#0B2430] border border-white/10 hover:border-white/20 transition-all text-left space-y-3 cursor-pointer group"
+            >
+              <div className="w-9 h-9 rounded-xl bg-ocean-800/80 flex items-center justify-center text-sun-300 group-hover:scale-110 transition-transform">
+                <ShoppingBag className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-display font-bold text-sm text-white group-hover:text-sun-300 transition-colors">
+                  Artisan Goods
+                </div>
+                <div className="text-[11px] text-slate-400">
+                  {pillarCounts.goods || 0} Pantry Items
+                </div>
+              </div>
+            </button>
+          </div>
+        </section>
+
+        {/* 4. Lu.ma-Style Bottom CTA Banner */}
+        <section className="pt-12 pb-4 text-center space-y-6">
+          <div className="max-w-xl mx-auto space-y-3">
+            <h2 className="font-display font-bold text-3xl sm:text-5xl text-white tracking-tight leading-tight">
+              Your next unforgettable <br />
+              <span className="text-sun-300">memory awaits.</span>
             </h2>
-
-            <p className="text-xs sm:text-sm text-ocean-100 leading-relaxed">
-              Koliwadas are Mumbai's living ecological cradle. For decades,
-              commercial tour operators and commercial seafood aggregators have
-              extracted stories and profits while leaving community guides
-              undercompensated.
+            <p className="text-xs sm:text-sm text-slate-400">
+              Immerse yourself in living coastal culture with verified local
+              guides and artisans.
             </p>
+          </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 border-t border-ocean-700/80">
-              <div className="space-y-1">
-                <div className="text-sun-300 font-display font-bold text-2xl">
-                  100%
-                </div>
-                <div className="text-xs font-semibold text-white">
-                  Direct Payouts
-                </div>
-                <p className="text-[11px] text-ocean-200">
-                  Tour revenues transfer directly to guide bank accounts without
-                  platform cut.
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <div className="text-sun-300 font-display font-bold text-2xl">
-                  Bachat Gats
-                </div>
-                <div className="text-xs font-semibold text-white">
-                  Women Collectives
-                </div>
-                <p className="text-[11px] text-ocean-200">
-                  Sun-dried seafood and masalas are packaged by certified
-                  coastal women's collectives.
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <div className="text-sun-300 font-display font-bold text-2xl">
-                  Zero Waste
-                </div>
-                <div className="text-xs font-semibold text-white">
-                  Ecological Care
-                </div>
-                <p className="text-[11px] text-ocean-200">
-                  Small batch tours strictly limited to safe capacities
-                  respecting tidal estuaries.
-                </p>
-              </div>
-            </div>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={scrollToCatalog}
+              className="px-6 py-3 rounded-full bg-white text-ocean-950 font-bold text-xs sm:text-sm hover:bg-slate-100 transition-all shadow-md cursor-pointer"
+            >
+              Discover Experiences
+            </button>
+            <Link
+              to="/host-with-us"
+              className="px-6 py-3 rounded-full bg-white/10 text-white font-semibold text-xs sm:text-sm hover:bg-white/20 border border-white/20 transition-all"
+            >
+              Partner With Us
+            </Link>
           </div>
         </section>
       </main>

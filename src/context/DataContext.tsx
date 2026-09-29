@@ -64,8 +64,8 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-const STORAGE_LISTINGS = "matsyamart_listings_v1";
-const STORAGE_SLOTS = "matsyamart_slots_v1";
+const STORAGE_LISTINGS = "matsyamart_listings_v2";
+const STORAGE_SLOTS = "matsyamart_slots_v2";
 const STORAGE_ORDERS = "matsyamart_orders_v1";
 const STORAGE_PROPOSALS = "matsyamart_proposals_v1";
 

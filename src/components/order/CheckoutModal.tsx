@@ -195,11 +195,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 Instant Checkout
               </span>
               <span className="text-[10px] font-semibold bg-sun-300 text-ocean-950 px-2 py-0.5 rounded-full uppercase">
-                Zero Middlemen
+                Curated Experience
               </span>
             </div>
             <p className="text-xs text-ocean-200 mt-0.5">
-              100% of proceeds go directly to Koli elders & artisan collectives
+              Curated and operated in direct partnership with local coastal
+              communities
             </p>
           </div>
           <button

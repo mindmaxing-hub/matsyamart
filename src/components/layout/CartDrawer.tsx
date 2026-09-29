@@ -74,8 +74,8 @@ export const CartDrawer: React.FC = () => {
                   Your basket is empty
                 </h3>
                 <p className="text-xs text-slate-500 mt-1 max-w-xs">
-                  Discover handcrafted coastal foods, sun-dried seafood, and
-                  experiential trails from Koli villages.
+                  Discover handcrafted coastal foods, artisanal items, and
+                  experiential trails from coastal villages.
                 </p>
                 <button
                   onClick={() => setIsCartOpen(false)}
@@ -154,9 +154,9 @@ export const CartDrawer: React.FC = () => {
           {items.length > 0 && (
             <div className="p-5 border-t border-slate-200 bg-slate-50 space-y-3">
               <div className="flex items-center justify-between text-xs text-slate-500">
-                <span>Direct Artisan Revenue</span>
+                <span>Direct Artisan Support</span>
                 <span className="font-semibold text-emerald-700 flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5" /> 100% to Community
+                  <ShieldCheck className="w-3.5 h-3.5" /> Community-Partnered
                 </span>
               </div>
 

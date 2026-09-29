@@ -162,3 +162,52 @@ h4,
     border: 1px solid #e2e8f0 !important;
   }
 }
+
+/* Lu.ma-style Smooth Pop-in & Stagger Animations */
+@keyframes lumaPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.65) translateY(24px) rotate(var(--rot, 0deg));
+  }
+  60% {
+    opacity: 0.95;
+    transform: scale(1.04) translateY(-3px) rotate(var(--rot, 0deg));
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0) rotate(var(--rot, 0deg));
+  }
+}
+
+@keyframes lumaFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lumaFloat {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(var(--rot, 0deg));
+  }
+  50% {
+    transform: translateY(-6px) rotate(var(--rot, 0deg));
+  }
+}
+
+.animate-luma-pop {
+  animation: lumaPopIn 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-luma-fade {
+  animation: lumaFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-luma-float {
+  animation: lumaFloat 5s ease-in-out infinite;
+}
