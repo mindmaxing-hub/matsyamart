@@ -112,8 +112,8 @@ export const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#030D12] text-white min-h-screen space-y-16 pb-24 selection:bg-sun-300 selection:text-ocean-950">
-      {/* 1. Lu.ma Animated Hero Banner */}
+    <div className="bg-[#001D28] text-white min-h-screen space-y-16 pb-24 selection:bg-sun-300 selection:text-ocean-950">
+      {/* 1. Lu.ma Animated Hero Banner with Bhoomiputra Oceanic Gradient */}
       <HeroBanner
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -161,12 +161,12 @@ export const HomePage: React.FC = () => {
             </div>
 
             {filteredListings.length === 0 ? (
-              <div className="p-12 text-center bg-[#061822] rounded-3xl border border-white/10 space-y-3">
-                <Compass className="w-8 h-8 text-slate-500 mx-auto" />
-                <h3 className="font-display font-bold text-base text-slate-300">
+              <div className="p-12 text-center bg-[#002E3D]/80 backdrop-blur-md rounded-3xl border border-white/15 space-y-3">
+                <Compass className="w-8 h-8 text-ocean-300 mx-auto" />
+                <h3 className="font-display font-bold text-base text-white">
                   No offerings found
                 </h3>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                <p className="text-xs text-ocean-200 max-w-sm mx-auto">
                   Try adjusting your search terms or view all coastal
                   categories.
                 </p>
@@ -307,7 +307,7 @@ export const HomePage: React.FC = () => {
                 setSelectedPillar("walks");
                 scrollToCatalog();
               }}
-              className="p-5 rounded-2xl bg-[#061822] hover:bg-[#0B2430] border border-white/10 hover:border-white/20 transition-all text-left space-y-3 cursor-pointer group"
+              className="p-5 rounded-2xl bg-[#002836]/90 hover:bg-[#00384C] border border-white/15 hover:border-sun-300/40 transition-all text-left space-y-3 cursor-pointer group backdrop-blur-md shadow-md"
             >
               <div className="w-9 h-9 rounded-xl bg-ocean-800/80 flex items-center justify-center text-sun-300 group-hover:scale-110 transition-transform">
                 <Compass className="w-5 h-5" />
@@ -316,7 +316,7 @@ export const HomePage: React.FC = () => {
                 <div className="font-display font-bold text-sm text-white group-hover:text-sun-300 transition-colors">
                   Walks
                 </div>
-                <div className="text-[11px] text-slate-400">
+                <div className="text-[11px] text-ocean-200">
                   {pillarCounts.walks || 0} Experiences
                 </div>
               </div>
@@ -328,7 +328,7 @@ export const HomePage: React.FC = () => {
                 setSelectedPillar("workshops");
                 scrollToCatalog();
               }}
-              className="p-5 rounded-2xl bg-[#061822] hover:bg-[#0B2430] border border-white/10 hover:border-white/20 transition-all text-left space-y-3 cursor-pointer group"
+              className="p-5 rounded-2xl bg-[#002836]/90 hover:bg-[#00384C] border border-white/15 hover:border-sun-300/40 transition-all text-left space-y-3 cursor-pointer group backdrop-blur-md shadow-md"
             >
               <div className="w-9 h-9 rounded-xl bg-ocean-800/80 flex items-center justify-center text-sun-300 group-hover:scale-110 transition-transform">
                 <Hammer className="w-5 h-5" />
@@ -337,7 +337,7 @@ export const HomePage: React.FC = () => {
                 <div className="font-display font-bold text-sm text-white group-hover:text-sun-300 transition-colors">
                   Workshops
                 </div>
-                <div className="text-[11px] text-slate-400">
+                <div className="text-[11px] text-ocean-200">
                   {pillarCounts.workshops || 0} Masterclasses
                 </div>
               </div>
@@ -349,7 +349,7 @@ export const HomePage: React.FC = () => {
                 setSelectedPillar("food");
                 scrollToCatalog();
               }}
-              className="p-5 rounded-2xl bg-[#061822] hover:bg-[#0B2430] border border-white/10 hover:border-white/20 transition-all text-left space-y-3 cursor-pointer group"
+              className="p-5 rounded-2xl bg-[#002836]/90 hover:bg-[#00384C] border border-white/15 hover:border-sun-300/40 transition-all text-left space-y-3 cursor-pointer group backdrop-blur-md shadow-md"
             >
               <div className="w-9 h-9 rounded-xl bg-ocean-800/80 flex items-center justify-center text-sun-300 group-hover:scale-110 transition-transform">
                 <UtensilsCrossed className="w-5 h-5" />
@@ -358,7 +358,7 @@ export const HomePage: React.FC = () => {
                 <div className="font-display font-bold text-sm text-white group-hover:text-sun-300 transition-colors">
                   Food & Dining
                 </div>
-                <div className="text-[11px] text-slate-400">
+                <div className="text-[11px] text-ocean-200">
                   {pillarCounts.food || 0} Feasts
                 </div>
               </div>
@@ -370,7 +370,7 @@ export const HomePage: React.FC = () => {
                 setSelectedPillar("goods");
                 scrollToCatalog();
               }}
-              className="p-5 rounded-2xl bg-[#061822] hover:bg-[#0B2430] border border-white/10 hover:border-white/20 transition-all text-left space-y-3 cursor-pointer group"
+              className="p-5 rounded-2xl bg-[#002836]/90 hover:bg-[#00384C] border border-white/15 hover:border-sun-300/40 transition-all text-left space-y-3 cursor-pointer group backdrop-blur-md shadow-md"
             >
               <div className="w-9 h-9 rounded-xl bg-ocean-800/80 flex items-center justify-center text-sun-300 group-hover:scale-110 transition-transform">
                 <ShoppingBag className="w-5 h-5" />
@@ -379,7 +379,7 @@ export const HomePage: React.FC = () => {
                 <div className="font-display font-bold text-sm text-white group-hover:text-sun-300 transition-colors">
                   Artisan Goods
                 </div>
-                <div className="text-[11px] text-slate-400">
+                <div className="text-[11px] text-ocean-200">
                   {pillarCounts.goods || 0} Pantry Items
                 </div>
               </div>
@@ -387,32 +387,34 @@ export const HomePage: React.FC = () => {
           </div>
         </section>
 
-        {/* 4. Lu.ma-Style Bottom CTA Banner */}
-        <section className="pt-12 pb-4 text-center space-y-6">
-          <div className="max-w-xl mx-auto space-y-3">
-            <h2 className="font-display font-bold text-3xl sm:text-5xl text-white tracking-tight leading-tight">
-              Your next unforgettable <br />
-              <span className="text-sun-300">memory awaits.</span>
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-400">
-              Immerse yourself in living coastal culture with verified local
-              guides and artisans.
-            </p>
-          </div>
+        {/* 4. Lu.ma-Style Bottom CTA Banner with Bhoomiputra Ocean Gradient */}
+        <section className="pt-8 pb-4">
+          <div className="max-w-3xl mx-auto p-8 sm:p-12 rounded-3xl bg-gradient-to-br from-[#003B4F] via-[#004A63] to-[#002E3D] border border-white/20 shadow-2xl relative overflow-hidden text-center space-y-6">
+            <div className="max-w-xl mx-auto space-y-3">
+              <h2 className="font-display font-bold text-3xl sm:text-5xl text-white tracking-tight leading-tight">
+                Your next unforgettable <br />
+                <span className="text-sun-300">coastal memory awaits.</span>
+              </h2>
+              <p className="text-xs sm:text-sm text-ocean-100">
+                Immerse yourself in living coastal culture with verified local
+                guides, hosts, and artisanal collectives.
+              </p>
+            </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <button
-              onClick={scrollToCatalog}
-              className="px-6 py-3 rounded-full bg-white text-ocean-950 font-bold text-xs sm:text-sm hover:bg-slate-100 transition-all shadow-md cursor-pointer"
-            >
-              Discover Experiences
-            </button>
-            <Link
-              to="/host-with-us"
-              className="px-6 py-3 rounded-full bg-white/10 text-white font-semibold text-xs sm:text-sm hover:bg-white/20 border border-white/20 transition-all"
-            >
-              Partner With Us
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <button
+                onClick={scrollToCatalog}
+                className="px-6 py-3 rounded-full bg-sun-300 hover:bg-sun-200 text-ocean-950 font-bold text-xs sm:text-sm transition-all shadow-md hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                Discover Experiences
+              </button>
+              <Link
+                to="/host-with-us"
+                className="px-6 py-3 rounded-full bg-white/10 text-white font-semibold text-xs sm:text-sm hover:bg-white/20 border border-white/20 transition-all hover:scale-105 active:scale-95"
+              >
+                Partner With Us
+              </Link>
+            </div>
           </div>
         </section>
       </main>

@@ -34,7 +34,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
   return (
     <Link
       to={detailPath}
-      className="group block bg-[#061822] hover:bg-[#0B2430] border border-white/10 hover:border-white/20 rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 flex flex-col cursor-pointer"
+      className="group block bg-[#002836]/90 hover:bg-[#00384C] border border-white/15 hover:border-sun-300/40 rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 flex flex-col cursor-pointer backdrop-blur-md"
     >
       {/* Thumbnail Aspect Container */}
       <div className="relative aspect-[16/10] overflow-hidden bg-ocean-950">
@@ -47,14 +47,14 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
 
         {/* Pillar Tag */}
         <div className="absolute top-3 left-3 pointer-events-none">
-          <span className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-[10px] font-bold tracking-wider uppercase text-sun-300 shadow-xs">
+          <span className="px-2.5 py-1 rounded-full bg-ocean-950/80 backdrop-blur-md border border-sun-300/25 text-[10px] font-bold tracking-wider uppercase text-sun-300 shadow-xs">
             {getPillarLabel()}
           </span>
         </div>
 
         {/* Price Pill */}
         <div className="absolute bottom-3 right-3 pointer-events-none">
-          <span className="px-3 py-1 rounded-full bg-[#030D12]/90 backdrop-blur-md border border-white/15 text-xs font-bold text-white shadow-xs">
+          <span className="px-3 py-1 rounded-full bg-[#001D28]/95 backdrop-blur-md border border-sun-300/30 text-xs font-bold text-sun-300 shadow-xs">
             {formatINR(listing.price_inr)}
           </span>
         </div>
@@ -79,8 +79,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
           </h3>
 
           {/* Host & Location Line */}
-          <div className="flex items-center gap-1 text-[11px] text-slate-400 line-clamp-1 pt-0.5">
-            <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+          <div className="flex items-center gap-1 text-[11px] text-ocean-200 line-clamp-1 pt-0.5">
+            <MapPin className="w-3 h-3 text-ocean-300 shrink-0" />
             <span className="truncate">
               {listing.location_name || listing.artisan_collective}
             </span>
@@ -88,8 +88,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
         </div>
 
         {/* Action Button Row */}
-        <div className="pt-2 border-t border-white/5 flex items-center justify-between">
-          <span className="text-[11px] text-slate-400 font-medium truncate max-w-[60%]">
+        <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+          <span className="text-[11px] text-ocean-200 font-medium truncate max-w-[60%]">
             By {listing.host_name.split("&")[0]?.trim()}
           </span>
 

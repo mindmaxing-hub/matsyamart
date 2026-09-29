@@ -21,19 +21,26 @@ export const Navbar: React.FC = () => {
   const isActive = (path: string) => currentPath === path;
 
   return (
-    <header className="sticky top-0 z-50 bg-[#030D12]/90 backdrop-blur-md border-b border-white/10 text-white transition-all">
+    <header className="sticky top-0 z-50 bg-[#004A63]/90 backdrop-blur-md border-b border-white/10 text-white transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Brand Logo */}
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-ocean-800 flex items-center justify-center border border-ocean-700/80 text-sun-300 group-hover:scale-105 transition-transform">
-            <Anchor className="w-4 h-4 text-sun-300" />
-          </div>
-          <div className="flex items-baseline gap-1">
-            <span className="font-display font-bold text-xl text-white tracking-tight">
-              matsyamart
-            </span>
-            <span className="text-sun-300 font-bold text-lg leading-none">
-              ✦
+        {/* Brand Logo with Bhoomiputra Official Mark */}
+        <Link to="/" className="flex items-center gap-3 group">
+          <img
+            src="/bhoomiputra-mark.png"
+            alt="Bhoomiputra Foundation"
+            className="w-8 h-8 object-contain group-hover:scale-105 transition-transform"
+          />
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5">
+              <span className="font-display font-bold text-lg text-white tracking-tight leading-none">
+                matsyamart
+              </span>
+              <span className="text-sun-300 font-bold text-sm leading-none">
+                ✦
+              </span>
+            </div>
+            <span className="text-[9px] uppercase tracking-wider text-ocean-200 font-semibold leading-tight">
+              Bhoomiputra Foundation
             </span>
           </div>
         </Link>
@@ -109,7 +116,7 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#030D12] border-b border-white/10 px-4 py-4 space-y-3">
+        <div className="md:hidden bg-[#003B4F] border-b border-white/10 px-4 py-4 space-y-3">
           <div className="grid grid-cols-2 gap-2 pb-3 border-b border-white/10">
             <a
               href="/#walks"

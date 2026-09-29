@@ -24,14 +24,14 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
 }) => {
   return (
     <div className="flex items-center justify-between border-b border-white/10 pb-4 flex-wrap gap-4">
-      {/* 4 Pillars Pill Tabs (Lu.ma Style) */}
-      <div className="inline-flex items-center gap-1.5 p-1 bg-[#061822] rounded-full border border-white/10 overflow-x-auto max-w-full">
+      {/* 4 Pillars Pill Tabs (Lu.ma Style with Bhoomiputra Ocean Glass) */}
+      <div className="inline-flex items-center gap-1.5 p-1.5 bg-[#002E3D]/85 backdrop-blur-md rounded-full border border-white/15 overflow-x-auto max-w-full shadow-lg">
         <button
           onClick={() => setSelectedPillar("all")}
           className={`px-4 py-2 text-xs font-semibold rounded-full transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
             selectedPillar === "all"
               ? "bg-white text-ocean-950 shadow-sm"
-              : "text-slate-400 hover:text-white"
+              : "text-ocean-200 hover:text-white hover:bg-white/10"
           }`}
         >
           <Layers className="w-3.5 h-3.5" />
@@ -44,7 +44,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
           className={`px-4 py-2 text-xs font-semibold rounded-full transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
             selectedPillar === "walks"
               ? "bg-white text-ocean-950 shadow-sm"
-              : "text-slate-400 hover:text-white"
+              : "text-ocean-200 hover:text-white hover:bg-white/10"
           }`}
         >
           <Compass className="w-3.5 h-3.5" />
@@ -59,7 +59,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
           className={`px-4 py-2 text-xs font-semibold rounded-full transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
             selectedPillar === "workshops"
               ? "bg-white text-ocean-950 shadow-sm"
-              : "text-slate-400 hover:text-white"
+              : "text-ocean-200 hover:text-white hover:bg-white/10"
           }`}
         >
           <Hammer className="w-3.5 h-3.5" />
@@ -74,7 +74,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
           className={`px-4 py-2 text-xs font-semibold rounded-full transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
             selectedPillar === "food"
               ? "bg-white text-ocean-950 shadow-sm"
-              : "text-slate-400 hover:text-white"
+              : "text-ocean-200 hover:text-white hover:bg-white/10"
           }`}
         >
           <UtensilsCrossed className="w-3.5 h-3.5" />
@@ -89,7 +89,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
           className={`px-4 py-2 text-xs font-semibold rounded-full transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
             selectedPillar === "goods"
               ? "bg-white text-ocean-950 shadow-sm"
-              : "text-slate-400 hover:text-white"
+              : "text-ocean-200 hover:text-white hover:bg-white/10"
           }`}
         >
           <ShoppingBag className="w-3.5 h-3.5" />
