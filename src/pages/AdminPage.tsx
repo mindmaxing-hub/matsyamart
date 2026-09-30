@@ -305,7 +305,7 @@ export const AdminPage: React.FC = () => {
             <div className="text-[11px] font-bold tracking-[0.14em] text-[rgba(41,16,11,0.48)] uppercase">
               WORKSPACE AUTHENTICATION
             </div>
-            <h2 className="font-editorial text-3xl text-[#29100B]">
+            <h2 className="font-display text-3xl text-[#29100B]">
               Matsya<em className="italic text-[#E3A157]">Mart</em>
             </h2>
             <p className="text-[13px] text-[rgba(41,16,11,0.64)]">
@@ -355,7 +355,7 @@ export const AdminPage: React.FC = () => {
                     placeholder="Enter passcode..."
                     value={passcode}
                     onChange={(e) => setPasscode(e.target.value)}
-                    className="w-full text-xs pl-10 pr-3 py-3 rounded-full bg-[#FFFDFB] text-[#29100B] border border-[rgba(41,16,11,0.15)] focus:border-[#C67F2A] outline-none shadow-xs font-editorial-mono"
+                    className="w-full text-xs pl-10 pr-3 py-3 rounded-full bg-[#FFFDFB] text-[#29100B] border border-[rgba(41,16,11,0.15)] focus:border-[#C67F2A] outline-none shadow-xs font-mono"
                   />
                 </div>
               </div>
@@ -461,7 +461,7 @@ export const AdminPage: React.FC = () => {
 
   // 2. Main Authenticated Dashboard Shell (Matching matsya-mart-admin-redesign.html)
   return (
-    <div className="min-h-screen flex bg-[#F5EDEB] text-[#29100B] font-body-sans selection:bg-[#29100B] selection:text-[#F5EDEB]">
+    <div className="min-h-screen flex bg-[#F5EDEB] text-[#29100B] font-sans selection:bg-[#29100B] selection:text-[#F5EDEB]">
       {/* LEFT SIDEBAR: Roast Anchor #29100B */}
       <aside className="w-[272px] shrink-0 bg-[#29100B] text-[#F5EDEB] border-r border-[#29100B] flex flex-col justify-between sticky top-0 h-screen z-30 p-[22px_16px_16px]">
         <div>
@@ -470,7 +470,7 @@ export const AdminPage: React.FC = () => {
             <div className="text-[11px] tracking-[0.14em] uppercase text-[rgba(245,237,235,0.48)] font-semibold px-3">
               WORKSPACE
             </div>
-            <div className="font-editorial text-[30px] tracking-[-0.02em] leading-[1.05] px-3 pt-0.5 text-[#F5EDEB]">
+            <div className="font-display text-[30px] tracking-[-0.02em] leading-[1.05] px-3 pt-0.5 text-[#F5EDEB]">
               <span>Matsya</span>
               <em className="italic text-[#E3A157]">Mart</em>
             </div>
@@ -548,7 +548,7 @@ export const AdminPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2.5">
-            <span className="font-editorial-mono text-[12.5px] text-[rgba(41,16,11,0.64)] hidden sm:inline">
+            <span className="font-mono text-[12.5px] text-[rgba(41,16,11,0.64)] hidden sm:inline">
               social@bhoomiputra.org
             </span>
             <span className="text-[10.5px] font-bold tracking-[0.06em] border border-[#29100B] rounded-full px-2.5 py-0.5 uppercase text-[#29100B]">
@@ -581,7 +581,7 @@ export const AdminPage: React.FC = () => {
           <div>
             <div className="admin-page-kicker">{currentNav.kicker}</div>
             <h1
-              className="font-editorial font-normal text-[36px] sm:text-[40px] tracking-[-0.02em] leading-[1.05] text-[#29100B] max-w-[24ch]"
+              className="font-display font-normal text-[36px] sm:text-[40px] tracking-[-0.02em] leading-[1.05] text-[#29100B] max-w-[24ch]"
               dangerouslySetInnerHTML={{ __html: currentNav.editorialTitle }}
             />
             <p className="text-[rgba(41,16,11,0.64)] text-[15px] mt-2 max-w-[65ch]">
@@ -599,7 +599,7 @@ export const AdminPage: React.FC = () => {
                   <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
                     Total revenue
                   </div>
-                  <div className="font-editorial text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
+                  <div className="font-display text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
                     {formatINR(overviewMetrics.totalRevenue)}
                   </div>
                   <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
@@ -614,7 +614,7 @@ export const AdminPage: React.FC = () => {
                   <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
                     Tidal walk bookings
                   </div>
-                  <div className="font-editorial text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
+                  <div className="font-display text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
                     {overviewMetrics.experienceOrdersCount}
                   </div>
                   <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
@@ -626,7 +626,7 @@ export const AdminPage: React.FC = () => {
                   <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
                     D2C orders to ship
                   </div>
-                  <div className="font-editorial text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
+                  <div className="font-display text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
                     {overviewMetrics.pendingFulfillments}
                   </div>
                   <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
@@ -638,7 +638,7 @@ export const AdminPage: React.FC = () => {
                   <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
                     Pending moderation
                   </div>
-                  <div className="font-editorial text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
+                  <div className="font-display text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
                     {pendingProposalsCount}
                   </div>
                   <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
@@ -650,7 +650,7 @@ export const AdminPage: React.FC = () => {
               {/* Quick Navigation Cards: Needs your eye */}
               <div className="space-y-3 pt-2">
                 <div className="flex items-baseline gap-3">
-                  <h2 className="font-editorial text-[22px] tracking-[-0.01em] font-normal text-[#29100B]">
+                  <h2 className="font-display text-[22px] tracking-[-0.01em] font-normal text-[#29100B]">
                     Needs your eye
                   </h2>
                   <p className="text-[13px] text-[rgba(41,16,11,0.44)] ml-auto">
@@ -784,7 +784,7 @@ export const AdminPage: React.FC = () => {
               {/* Recent Orders Snapshot */}
               <div className="space-y-3 pt-2">
                 <div className="flex items-baseline gap-3">
-                  <h2 className="font-editorial text-[22px] tracking-[-0.01em] font-normal text-[#29100B]">
+                  <h2 className="font-display text-[22px] tracking-[-0.01em] font-normal text-[#29100B]">
                     Latest transactions
                   </h2>
                   <p className="text-[13px] text-[rgba(41,16,11,0.44)] ml-auto">
@@ -812,7 +812,7 @@ export const AdminPage: React.FC = () => {
                       >
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-editorial-mono font-medium text-[12.5px] text-[#29100B]">
+                            <span className="font-mono font-medium text-[12.5px] text-[#29100B]">
                               {order.order_ref}
                             </span>
                             <span

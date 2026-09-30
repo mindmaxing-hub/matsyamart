@@ -121,7 +121,7 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
       {/* Add Slot Modal / Inline Form */}
       {showAddForm && (
         <form onSubmit={handleCreateSlot} className="admin-card p-6 space-y-4">
-          <div className="font-editorial text-xl text-[var(--admin-fg)]">
+          <div className="font-display font-semibold text-xl text-[var(--admin-fg)]">
             Create New Coastal Time Slot
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3.5">
@@ -198,7 +198,7 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
       <div className="admin-slots-grid">
         {filteredSlots.length === 0 ? (
           <div className="col-span-full p-12 text-center admin-card text-[var(--admin-muted)] text-sm">
-            <p className="font-editorial text-2xl text-[var(--admin-fg)] mb-1">
+            <p className="font-display font-semibold text-2xl text-[var(--admin-fg)] mb-1">
               No tidal slots scheduled
             </p>
             <p>Select another experience or generate weekend batches above.</p>

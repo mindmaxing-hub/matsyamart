@@ -77,7 +77,7 @@ export const SpecialListingsManager: React.FC<SpecialListingsManagerProps> = ({
         {/* Ordered Deck Rows */}
         {spotlightListings.length === 0 ? (
           <div className="p-12 text-center text-[var(--admin-muted)] text-sm">
-            <p className="font-editorial text-2xl text-[var(--admin-fg)] mb-1">
+            <p className="font-display font-semibold text-2xl text-[var(--admin-fg)] mb-1">
               No spotlight cards assigned
             </p>
             <p>Select a listing above to feature in the homepage hero deck.</p>

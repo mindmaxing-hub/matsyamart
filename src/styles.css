@@ -251,12 +251,12 @@ h4,
 }
 
 .font-editorial {
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: "Fraunces", Georgia, serif;
 }
 
 .font-body-sans {
   font-family:
-    "Instrument Sans",
+    "Inter",
     system-ui,
     -apple-system,
     sans-serif;
@@ -264,6 +264,151 @@ h4,
 
 .font-editorial-mono {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+/* ==========================================================================
+   METRICS GRID & METRIC CARDS
+   ========================================================================== */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+  margin-bottom: 22px;
+}
+@media (max-width: 1024px) {
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metric {
+  padding: 18px 20px 16px;
+  border-radius: 18px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border-soft);
+  box-shadow: var(--admin-shadow);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.metric .lbl {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--admin-muted);
+}
+
+.metric .val {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 32px;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 6px 0 2px;
+  color: var(--admin-fg);
+  font-weight: 600;
+}
+
+.metric .sub {
+  font-size: 12.5px;
+  color: var(--admin-faint);
+  margin-top: auto;
+}
+
+.metric.hl {
+  box-shadow:
+    inset 3px 0 0 var(--admin-accent),
+    var(--admin-shadow);
+}
+
+.metric .tick {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--admin-accent-softer);
+  color: var(--admin-accent-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ==========================================================================
+   DATA TABLE GRID
+   ========================================================================== */
+table.grid,
+table.admin-table {
+  display: table !important;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  text-align: left;
+}
+
+table.grid thead,
+table.admin-table thead {
+  display: table-header-group !important;
+  background: rgba(245, 237, 235, 0.45);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+table.grid tbody,
+table.admin-table tbody {
+  display: table-row-group !important;
+}
+
+table.grid tr,
+table.admin-table tr {
+  display: table-row !important;
+}
+
+table.grid th,
+table.admin-table th {
+  display: table-cell !important;
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--admin-muted);
+  text-align: left;
+  padding: 13px 18px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+table.grid td,
+table.admin-table td {
+  display: table-cell !important;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--admin-border-soft);
+  vertical-align: middle;
+  color: var(--admin-fg);
+}
+
+table.grid tr:last-child td,
+table.admin-table tr:last-child td {
+  border-bottom: 0;
+}
+
+table.grid tbody tr,
+table.admin-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+table.grid tbody tr:hover,
+table.admin-table tbody tr:hover {
+  background: rgba(227, 161, 87, 0.04);
 }
 
 /* Page Kicker */
@@ -492,7 +637,7 @@ h4,
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: "Fraunces", Georgia, serif;
   font-size: 20px;
   flex-shrink: 0;
 }
@@ -578,7 +723,7 @@ h4,
   display: block;
 }
 .admin-kv-val {
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: "Fraunces", Georgia, serif;
   font-size: 21px;
   font-weight: 400;
   color: var(--admin-fg);

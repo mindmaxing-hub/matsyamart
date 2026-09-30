@@ -151,34 +151,56 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
   return (
     <div className="space-y-6">
       {/* 4 Safety Status KPI Cards */}
-      <div className="metrics">
-        <div className="metric hl">
-          <div className="lbl">Coastal Zones Monitored</div>
-          <div className="val">{zones.length}</div>
-          <div className="sub">Shoreline sectors mapped</div>
-          <div className="tick">↗</div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between shadow-[inset_3px_0_0_var(--admin-accent)]">
+          <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)] flex items-center justify-between">
+            <span>Coastal Zones Monitored</span>
+            <span className="text-[var(--admin-accent)] font-mono text-sm">
+              ↗
+            </span>
+          </div>
+          <div className="font-display font-semibold text-[32px] sm:text-[34px] tracking-tight leading-[1.15] text-[var(--admin-fg)] my-1.5">
+            {zones.length}
+          </div>
+          <div className="text-[12.5px] text-[var(--admin-faint)]">
+            Shoreline sectors mapped
+          </div>
         </div>
 
-        <div className="metric">
-          <div className="lbl">Normal Water Conditions</div>
-          <div className="val">
+        <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between">
+          <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)]">
+            Normal Water Conditions
+          </div>
+          <div className="font-display font-semibold text-[32px] sm:text-[34px] tracking-tight leading-[1.15] text-[var(--admin-fg)] my-1.5">
             {zones.filter((z) => z.status === "normal").length}
           </div>
-          <div className="sub">Optimal tidal windows active</div>
+          <div className="text-[12.5px] text-[var(--admin-faint)]">
+            Optimal tidal windows active
+          </div>
         </div>
 
-        <div className="metric">
-          <div className="lbl">Cautionary Swell</div>
-          <div className="val text-[var(--admin-accent-strong)]">
+        <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between">
+          <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)]">
+            Cautionary Swell
+          </div>
+          <div className="font-display font-semibold text-[32px] sm:text-[34px] tracking-tight leading-[1.15] text-[var(--admin-accent-strong)] my-1.5">
             {cautionZonesCount}
           </div>
-          <div className="sub">Increased guide vigilance</div>
+          <div className="text-[12.5px] text-[var(--admin-faint)]">
+            Increased guide vigilance
+          </div>
         </div>
 
-        <div className="metric">
-          <div className="lbl">Emergency Lockdowns</div>
-          <div className="val">{lockdownZonesCount}</div>
-          <div className="sub">Tours suspended for safety</div>
+        <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between">
+          <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)]">
+            Emergency Lockdowns
+          </div>
+          <div className="font-display font-semibold text-[32px] sm:text-[34px] tracking-tight leading-[1.15] text-[var(--admin-fg)] my-1.5">
+            {lockdownZonesCount}
+          </div>
+          <div className="text-[12.5px] text-[var(--admin-faint)]">
+            Tours suspended for safety
+          </div>
         </div>
       </div>
 
@@ -194,7 +216,7 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
         {/* LEFT 2 COLS: Zone Safety Matrix */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-editorial text-2xl text-[var(--admin-fg)]">
+            <h3 className="font-display font-semibold text-2xl text-[var(--admin-fg)]">
               Live Coastal Zone Conditions &amp; Swell Monitor
             </h3>
             <span className="text-xs text-[var(--admin-muted)]">
@@ -213,7 +235,7 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--admin-border-soft)] pb-3">
                     <div>
                       <div className="flex items-center gap-2.5 flex-wrap">
-                        <span className="font-editorial text-xl text-[var(--admin-fg)]">
+                        <span className="font-display font-semibold text-xl text-[var(--admin-fg)]">
                           {zone.zone_name}
                         </span>
                         <span
@@ -315,7 +337,7 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
           <div className="admin-card p-5 space-y-4">
             <div className="flex items-center gap-2 border-b border-[var(--admin-border-soft)] pb-3">
               <PhoneCall className="w-4 h-4 text-[var(--admin-accent-strong)]" />
-              <h4 className="font-editorial text-xl text-[var(--admin-fg)]">
+              <h4 className="font-display font-semibold text-xl text-[var(--admin-fg)]">
                 Coastal Emergency Hotlines
               </h4>
             </div>
@@ -325,7 +347,7 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
                 <div className="font-semibold text-[var(--admin-fg)]">
                   Mumbai Coastal Police (Mahim Post)
                 </div>
-                <div className="font-editorial-mono text-[var(--admin-fg)] font-bold">
+                <div className="font-mono text-[var(--admin-fg)] font-bold">
                   022-2444 8911
                 </div>
                 <div className="text-[11px] text-[var(--admin-faint)]">
@@ -337,7 +359,7 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
                 <div className="font-semibold text-[var(--admin-fg)]">
                   Versova Lifeguard Watchtower
                 </div>
-                <div className="font-editorial-mono text-[var(--admin-fg)] font-bold">
+                <div className="font-mono text-[var(--admin-fg)] font-bold">
                   +91 98200 44199
                 </div>
                 <div className="text-[11px] text-[var(--admin-faint)]">
@@ -349,7 +371,7 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
                 <div className="font-semibold text-[var(--admin-fg)]">
                   Maharashtra Maritime Board (MMB)
                 </div>
-                <div className="font-editorial-mono text-[var(--admin-fg)] font-bold">
+                <div className="font-mono text-[var(--admin-fg)] font-bold">
                   022-2266 2110
                 </div>
                 <div className="text-[11px] text-[var(--admin-faint)]">
@@ -361,7 +383,7 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
                 <div className="font-semibold text-[var(--admin-fg)]">
                   Indian Navy Coastal SAR Hotline
                 </div>
-                <div className="font-editorial-mono text-rose-700 font-bold">
+                <div className="font-mono text-rose-700 font-bold">
                   1093 (Toll Free)
                 </div>
                 <div className="text-[11px] text-[var(--admin-faint)]">
@@ -375,7 +397,7 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
           <div className="admin-card p-5 space-y-3 bg-[var(--admin-surface)]">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-700" />
-              <h4 className="font-editorial text-xl text-[var(--admin-fg)]">
+              <h4 className="font-display font-semibold text-xl text-[var(--admin-fg)]">
                 Safety Checklist Invariants
               </h4>
             </div>
@@ -397,7 +419,7 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
           <div className="admin-card w-full max-w-md p-6 space-y-5 border-rose-300">
             <div className="flex items-center gap-2.5 text-rose-700 border-b border-[var(--admin-border-soft)] pb-3">
               <ShieldAlert className="w-5 h-5 shrink-0" />
-              <h3 className="font-editorial text-2xl text-[var(--admin-fg)]">
+              <h3 className="font-display font-semibold text-2xl text-[var(--admin-fg)]">
                 Initiate Zone Emergency Lockdown
               </h3>
             </div>

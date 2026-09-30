@@ -42,6 +42,7 @@ export default {
       fontFamily: {
         display: ["Fraunces", "Georgia", "serif"],
         sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+        mono: ["IBM Plex Mono", "ui-monospace", "monospace"],
       },
       boxShadow: {
         tactile:

@@ -234,7 +234,7 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     <div className="space-y-1">
-                      <h3 className="font-editorial text-2xl font-normal text-[#29100B] tracking-[-0.01em]">
+                      <h3 className="font-display font-semibold text-2xl font-normal text-[#29100B] tracking-[-0.01em]">
                         {prop.proposal_title}
                       </h3>
                       <div className="text-[13px] text-[rgba(41,16,11,0.64)] flex flex-wrap items-center gap-2">
@@ -242,9 +242,7 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                         <span>·</span>
                         <span>{prop.koliwada_or_village}</span>
                         <span>·</span>
-                        <span className="font-editorial-mono">
-                          {prop.phone}
-                        </span>
+                        <span className="font-mono">{prop.phone}</span>
                       </div>
                     </div>
 
@@ -341,7 +339,7 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     <div className="space-y-1">
-                      <h3 className="font-editorial text-2xl font-normal text-[#29100B] tracking-[-0.01em]">
+                      <h3 className="font-display font-semibold text-2xl font-normal text-[#29100B] tracking-[-0.01em]">
                         {inq.subject}
                       </h3>
                       <div className="text-[13px] text-[rgba(41,16,11,0.64)] flex flex-wrap items-center gap-2">
@@ -389,7 +387,7 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                   </div>
 
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-[rgba(41,16,11,0.08)]">
-                    <div className="text-xs text-[rgba(41,16,11,0.64)] font-editorial-mono">
+                    <div className="text-xs text-[rgba(41,16,11,0.64)] font-mono">
                       Contact: {inq.phone} · {inq.email}
                     </div>
 

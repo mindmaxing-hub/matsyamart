@@ -116,7 +116,7 @@ export const CommunicationsHub: React.FC<CommunicationsHubProps> = ({
                   >
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-editorial-mono text-[12.5px] text-[var(--admin-fg)] font-semibold">
+                        <span className="font-mono text-[12.5px] text-[var(--admin-fg)] font-semibold">
                           {order.order_ref}
                         </span>
                         <span className="admin-pill admin-pill-line text-[9.5px]">
@@ -184,7 +184,7 @@ export const CommunicationsHub: React.FC<CommunicationsHubProps> = ({
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-editorial-mono text-[12.5px] text-[var(--admin-fg)] font-semibold">
+                      <span className="font-mono text-[12.5px] text-[var(--admin-fg)] font-semibold">
                         {order.order_ref}
                       </span>
                       <span className="admin-pill admin-pill-amber text-[9.5px]">

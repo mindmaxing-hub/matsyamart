@@ -225,32 +225,56 @@ export const InventoryStockManager: React.FC<InventoryStockManagerProps> = ({
   return (
     <div className="space-y-6">
       {/* 4 KPI Stock Summary Cards */}
-      <div className="metrics">
-        <div className="metric hl">
-          <div className="lbl">Total Physical SKUs</div>
-          <div className="val">{productListings.length}</div>
-          <div className="sub">Cataloged pantry goods</div>
-          <div className="tick">↗</div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between shadow-[inset_3px_0_0_var(--admin-accent)]">
+          <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)] flex items-center justify-between">
+            <span>Total Physical SKUs</span>
+            <span className="text-[var(--admin-accent)] font-mono text-sm">
+              ↗
+            </span>
+          </div>
+          <div className="font-display font-semibold text-[32px] sm:text-[34px] tracking-tight leading-[1.15] text-[var(--admin-fg)] my-1.5">
+            {productListings.length}
+          </div>
+          <div className="text-[12.5px] text-[var(--admin-faint)]">
+            Cataloged pantry goods
+          </div>
         </div>
 
-        <div className="metric">
-          <div className="lbl">In-Stock Inventory</div>
-          <div className="val">{totalStockUnits}</div>
-          <div className="sub">Units ready across village hubs</div>
+        <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between">
+          <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)]">
+            In-Stock Inventory
+          </div>
+          <div className="font-display font-semibold text-[32px] sm:text-[34px] tracking-tight leading-[1.15] text-[var(--admin-fg)] my-1.5">
+            {totalStockUnits}
+          </div>
+          <div className="text-[12.5px] text-[var(--admin-faint)]">
+            Units ready across village hubs
+          </div>
         </div>
 
-        <div className="metric">
-          <div className="lbl">Low Stock Warnings</div>
-          <div className="val text-[var(--admin-accent-strong)]">
+        <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between">
+          <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)]">
+            Low Stock Warnings
+          </div>
+          <div className="font-display font-semibold text-[32px] sm:text-[34px] tracking-tight leading-[1.15] text-[var(--admin-accent-strong)] my-1.5">
             {lowStockCount}
           </div>
-          <div className="sub">Below replenishment threshold</div>
+          <div className="text-[12.5px] text-[var(--admin-faint)]">
+            Below replenishment threshold
+          </div>
         </div>
 
-        <div className="metric">
-          <div className="lbl">Out of Stock</div>
-          <div className="val">{outOfStockCount}</div>
-          <div className="sub">Ordering disabled automatically</div>
+        <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between">
+          <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)]">
+            Out of Stock
+          </div>
+          <div className="font-display font-semibold text-[32px] sm:text-[34px] tracking-tight leading-[1.15] text-[var(--admin-fg)] my-1.5">
+            {outOfStockCount}
+          </div>
+          <div className="text-[12.5px] text-[var(--admin-faint)]">
+            Ordering disabled automatically
+          </div>
         </div>
       </div>
 
@@ -300,19 +324,33 @@ export const InventoryStockManager: React.FC<InventoryStockManagerProps> = ({
       {/* Inventory & Freshness Batch Table */}
       <div className="admin-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="grid w-full">
+          <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr>
-                <th>Artisan Pantry Product</th>
-                <th>Lot # &amp; FSSAI</th>
-                <th>Packaged Date</th>
-                <th>Best Before</th>
-                <th style={{ textAlign: "center" }}>Current Stock</th>
-                <th style={{ textAlign: "center" }}>Status</th>
-                <th style={{ textAlign: "right" }}>Quick Restock Allocation</th>
+              <tr className="border-b border-[var(--admin-border)] bg-[rgba(245,237,235,0.45)]">
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap">
+                  Artisan Pantry Product
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap">
+                  Lot # &amp; FSSAI
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap">
+                  Packaged Date
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap">
+                  Best Before
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap text-center">
+                  Current Stock
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap text-center">
+                  Status
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap text-right">
+                  Quick Restock Allocation
+                </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-[var(--admin-border-soft)]">
               {filteredItems.map(({ listing, batch }) => {
                 const isOutOfStock = batch.stock_units === 0;
                 const isLowStock =
@@ -320,9 +358,12 @@ export const InventoryStockManager: React.FC<InventoryStockManagerProps> = ({
                   batch.stock_units <= batch.min_threshold;
 
                 return (
-                  <tr key={listing.id}>
+                  <tr
+                    key={listing.id}
+                    className="hover:bg-[rgba(227,161,87,0.03)] transition-colors"
+                  >
                     {/* Product & Collective */}
-                    <td>
+                    <td className="py-3.5 px-4 align-middle">
                       <div className="flex items-center gap-3">
                         <img
                           src={listing.images[0]}
@@ -330,7 +371,7 @@ export const InventoryStockManager: React.FC<InventoryStockManagerProps> = ({
                           className="w-10 h-10 rounded-xl object-cover border border-[var(--admin-border-soft)] shrink-0"
                         />
                         <div>
-                          <b className="text-[var(--admin-fg)] block">
+                          <b className="text-[var(--admin-fg)] block text-[13px]">
                             {listing.title}
                           </b>
                           <div className="text-[12px] text-[var(--admin-faint)]">
@@ -342,8 +383,8 @@ export const InventoryStockManager: React.FC<InventoryStockManagerProps> = ({
                     </td>
 
                     {/* Lot # & FSSAI */}
-                    <td>
-                      <div className="font-editorial-mono text-[var(--admin-fg)] text-[11.5px] font-semibold">
+                    <td className="py-3.5 px-4 align-middle">
+                      <div className="font-mono text-[var(--admin-fg)] text-[11.5px] font-semibold">
                         {batch.lot_number}
                       </div>
                       <div className="text-[11px] text-[var(--admin-faint)]">
@@ -352,17 +393,17 @@ export const InventoryStockManager: React.FC<InventoryStockManagerProps> = ({
                     </td>
 
                     {/* Packaged Date */}
-                    <td className="text-[var(--admin-muted)]">
+                    <td className="py-3.5 px-4 align-middle text-[var(--admin-muted)]">
                       {batch.packaging_date}
                     </td>
 
                     {/* Best Before */}
-                    <td className="font-medium text-[var(--admin-fg)]">
+                    <td className="py-3.5 px-4 align-middle font-medium text-[var(--admin-fg)]">
                       {batch.best_before_date}
                     </td>
 
                     {/* Stock Units Editable */}
-                    <td style={{ textAlign: "center" }}>
+                    <td className="py-3.5 px-4 align-middle text-center">
                       <input
                         type="number"
                         min="0"
@@ -370,12 +411,12 @@ export const InventoryStockManager: React.FC<InventoryStockManagerProps> = ({
                         onChange={(e) =>
                           handleSetStockDirect(batch.id, Number(e.target.value))
                         }
-                        className="w-16 text-center font-bold text-[var(--admin-fg)] bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-full py-1 px-1.5 outline-none focus:border-[var(--admin-accent-strong)] text-xs font-editorial-mono"
+                        className="w-16 text-center font-bold text-[var(--admin-fg)] bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-full py-1 px-1.5 outline-none focus:border-[var(--admin-accent-strong)] text-xs font-mono"
                       />
                     </td>
 
                     {/* Status Pill */}
-                    <td style={{ textAlign: "center" }}>
+                    <td className="py-3.5 px-4 align-middle text-center">
                       <span
                         className={`admin-pill text-[9.5px] ${
                           isOutOfStock
@@ -394,7 +435,7 @@ export const InventoryStockManager: React.FC<InventoryStockManagerProps> = ({
                     </td>
 
                     {/* Quick Restock Actions */}
-                    <td style={{ textAlign: "right" }}>
+                    <td className="py-3.5 px-4 align-middle text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => handleAdjustStock(batch.id, 10)}

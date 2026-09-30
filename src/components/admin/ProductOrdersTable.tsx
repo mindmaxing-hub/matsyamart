@@ -165,7 +165,7 @@ export const ProductOrdersTable: React.FC<ProductOrdersTableProps> = ({
           <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
             Total D2C orders
           </div>
-          <div className="font-editorial text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
+          <div className="font-display font-semibold text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
             {productOrders.length}
           </div>
           <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
@@ -177,7 +177,7 @@ export const ProductOrdersTable: React.FC<ProductOrdersTableProps> = ({
           <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
             Pending packing
           </div>
-          <div className="font-editorial text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
+          <div className="font-display font-semibold text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
             {pendingCount}
           </div>
           <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
@@ -189,7 +189,7 @@ export const ProductOrdersTable: React.FC<ProductOrdersTableProps> = ({
           <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
             In transit
           </div>
-          <div className="font-editorial text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
+          <div className="font-display font-semibold text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
             {shippedCount}
           </div>
           <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
@@ -201,7 +201,7 @@ export const ProductOrdersTable: React.FC<ProductOrdersTableProps> = ({
           <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
             Goods revenue
           </div>
-          <div className="font-editorial text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
+          <div className="font-display font-semibold text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
             {formatINR(totalGoodsRevenue)}
           </div>
           <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
@@ -256,7 +256,7 @@ export const ProductOrdersTable: React.FC<ProductOrdersTableProps> = ({
       <div className="admin-card overflow-hidden">
         {filteredOrders.length === 0 ? (
           <div className="p-14 text-center text-[rgba(41,16,11,0.44)] space-y-2">
-            <div className="font-editorial text-[26px] text-[rgba(41,16,11,0.64)]">
+            <div className="font-display font-semibold text-[26px] text-[rgba(41,16,11,0.64)]">
               All caught up — nothing to pack.
             </div>
             <div className="text-[14px]">

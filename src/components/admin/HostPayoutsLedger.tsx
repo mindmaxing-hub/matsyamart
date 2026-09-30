@@ -245,32 +245,56 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
   return (
     <div className="space-y-6">
       {/* 4 Financial Split Cards */}
-      <div className="metrics">
-        <div className="metric hl">
-          <div className="lbl">Community Earnings (85%)</div>
-          <div className="val">{formatINR(totalCommunityEarnings)}</div>
-          <div className="sub">Direct host &amp; artisan allocation</div>
-          <div className="tick">↗</div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between shadow-[inset_3px_0_0_var(--admin-accent)]">
+          <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)] flex items-center justify-between">
+            <span>Community Earnings (85%)</span>
+            <span className="text-[var(--admin-accent)] font-mono text-sm">
+              ↗
+            </span>
+          </div>
+          <div className="font-display font-semibold text-[32px] sm:text-[34px] tracking-tight leading-[1.15] text-[var(--admin-fg)] my-1.5">
+            {formatINR(totalCommunityEarnings)}
+          </div>
+          <div className="text-[12.5px] text-[var(--admin-faint)]">
+            Direct host &amp; artisan allocation
+          </div>
         </div>
 
-        <div className="metric">
-          <div className="lbl">Outstanding Balance Due</div>
-          <div className="val text-[var(--admin-accent-strong)]">
+        <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between">
+          <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)]">
+            Outstanding Balance Due
+          </div>
+          <div className="font-display font-semibold text-[32px] sm:text-[34px] tracking-tight leading-[1.15] text-[var(--admin-accent-strong)] my-1.5">
             {formatINR(totalOutstanding)}
           </div>
-          <div className="sub">Awaiting bank / UPI remittance</div>
+          <div className="text-[12.5px] text-[var(--admin-faint)]">
+            Awaiting bank / UPI remittance
+          </div>
         </div>
 
-        <div className="metric">
-          <div className="lbl">Total Disbursed to Date</div>
-          <div className="val">{formatINR(totalDisbursed)}</div>
-          <div className="sub">Settled via UPI / IMPS UTR</div>
+        <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between">
+          <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)]">
+            Total Disbursed to Date
+          </div>
+          <div className="font-display font-semibold text-[32px] sm:text-[34px] tracking-tight leading-[1.15] text-[var(--admin-fg)] my-1.5">
+            {formatINR(totalDisbursed)}
+          </div>
+          <div className="text-[12.5px] text-[var(--admin-faint)]">
+            Settled via UPI / IMPS UTR
+          </div>
         </div>
 
-        <div className="metric">
-          <div className="lbl">MatsyaMart Retainer (15%)</div>
-          <div className="val">{formatINR(platformRetainer)}</div>
-          <div className="sub">Operations, safety &amp; platform</div>
+        <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between">
+          <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)]">
+            MatsyaMart Retainer (15%)
+          </div>
+          <div className="font-display font-semibold text-[32px] sm:text-[34px] tracking-tight leading-[1.15] text-[var(--admin-fg)] my-1.5">
+            {formatINR(platformRetainer)}
+          </div>
+          <div className="text-[12.5px] text-[var(--admin-faint)]">
+            Operations, safety &amp; platform
+          </div>
         </div>
       </div>
 
@@ -319,34 +343,53 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
       {/* Partners Payout Ledger Table */}
       <div className="admin-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="grid w-full">
+          <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr>
-                <th>Community Partner</th>
-                <th>Role &amp; Location</th>
-                <th>UPI &amp; Account Details</th>
-                <th style={{ textAlign: "right" }}>Total Earned (85%)</th>
-                <th style={{ textAlign: "right" }}>Paid to Date</th>
-                <th style={{ textAlign: "right" }}>Balance Due</th>
-                <th style={{ textAlign: "center" }}>Status</th>
-                <th style={{ textAlign: "right" }}>Actions</th>
+              <tr className="border-b border-[var(--admin-border)] bg-[rgba(245,237,235,0.45)]">
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap">
+                  Community Partner
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap">
+                  Role &amp; Location
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap">
+                  UPI &amp; Account Details
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap text-right">
+                  Total Earned (85%)
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap text-right">
+                  Paid to Date
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap text-right">
+                  Balance Due
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap text-center">
+                  Status
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap text-right">
+                  Actions
+                </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-[var(--admin-border-soft)]">
               {filteredPayouts.map((partner) => {
                 const isPaidInFull = partner.pending_balance_inr === 0;
 
                 return (
-                  <tr key={partner.id}>
+                  <tr
+                    key={partner.id}
+                    className="hover:bg-[rgba(227,161,87,0.03)] transition-colors"
+                  >
                     {/* Partner Name */}
-                    <td>
-                      <b className="text-[var(--admin-fg)]">
+                    <td className="py-3.5 px-4 align-middle">
+                      <b className="text-[var(--admin-fg)] text-[13px]">
                         {partner.partner_name}
                       </b>
                     </td>
 
                     {/* Role & Village */}
-                    <td>
+                    <td className="py-3.5 px-4 align-middle">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span
                           className={`admin-pill text-[9.5px] ${
@@ -366,9 +409,9 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
                     </td>
 
                     {/* UPI & Bank Account */}
-                    <td>
+                    <td className="py-3.5 px-4 align-middle">
                       <div className="space-y-0.5">
-                        <div className="font-editorial-mono text-[var(--admin-fg)] text-[11.5px] font-medium">
+                        <div className="font-mono text-[var(--admin-fg)] text-[11.5px] font-medium">
                           {partner.upi_id}
                         </div>
                         <div className="text-[11px] text-[var(--admin-faint)]">
@@ -378,21 +421,21 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
                     </td>
 
                     {/* Total Earned */}
-                    <td style={{ textAlign: "right" }}>
+                    <td className="py-3.5 px-4 align-middle text-right">
                       <b className="text-[var(--admin-fg)]">
                         {formatINR(partner.total_earned_inr)}
                       </b>
                     </td>
 
                     {/* Paid */}
-                    <td style={{ textAlign: "right" }}>
+                    <td className="py-3.5 px-4 align-middle text-right">
                       <span className="text-[var(--admin-muted)] font-medium">
                         {formatINR(partner.total_paid_inr)}
                       </span>
                     </td>
 
                     {/* Balance Due */}
-                    <td style={{ textAlign: "right" }}>
+                    <td className="py-3.5 px-4 align-middle text-right">
                       <b
                         className={
                           partner.pending_balance_inr > 0
@@ -405,7 +448,7 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
                     </td>
 
                     {/* Status Pill */}
-                    <td style={{ textAlign: "center" }}>
+                    <td className="py-3.5 px-4 align-middle text-center">
                       <span
                         className={`admin-pill text-[9.5px] ${
                           isPaidInFull ? "admin-pill-line" : "admin-pill-amber"
@@ -416,7 +459,7 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
                     </td>
 
                     {/* Actions */}
-                    <td style={{ textAlign: "right" }}>
+                    <td className="py-3.5 px-4 align-middle text-right">
                       {partner.pending_balance_inr > 0 ? (
                         <button
                           onClick={() => handleOpenDisbursement(partner)}
@@ -425,7 +468,7 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
                           Record payout
                         </button>
                       ) : (
-                        <span className="text-[11.5px] text-[var(--admin-faint)] italic font-editorial-mono">
+                        <span className="text-[11.5px] text-[var(--admin-faint)] italic font-mono">
                           Settled · {partner.utr_reference?.slice(-6)}
                         </span>
                       )}
@@ -444,7 +487,7 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
           <div className="admin-card w-full max-w-md p-6 space-y-5">
             <div className="flex items-center justify-between border-b border-[var(--admin-border-soft)] pb-3">
               <div>
-                <h3 className="font-editorial text-2xl text-[var(--admin-fg)]">
+                <h3 className="font-display font-semibold text-2xl text-[var(--admin-fg)]">
                   Record Community Remittance
                 </h3>
                 <p className="text-xs text-[var(--admin-muted)]">
@@ -484,14 +527,14 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
                   placeholder="e.g. CMS202610010042"
                   value={utrInput}
                   onChange={(e) => setUtrInput(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-[var(--admin-surface)] text-[var(--admin-fg)] rounded-xl border border-[var(--admin-border)] outline-none focus:border-[var(--admin-accent-strong)] font-editorial-mono"
+                  className="w-full text-xs p-2.5 bg-[var(--admin-surface)] text-[var(--admin-fg)] rounded-xl border border-[var(--admin-border)] outline-none focus:border-[var(--admin-accent-strong)] font-mono"
                 />
               </div>
 
               <div className="p-3 bg-[var(--admin-bg)] rounded-xl border border-[var(--admin-border-soft)] text-xs text-[var(--admin-muted)] space-y-1">
                 <div className="flex justify-between">
                   <span>Destination UPI:</span>
-                  <span className="font-editorial-mono font-bold text-[var(--admin-fg)]">
+                  <span className="font-mono font-bold text-[var(--admin-fg)]">
                     {payouts.find((p) => p.id === selectedPartnerId)?.upi_id}
                   </span>
                 </div>

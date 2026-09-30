@@ -113,7 +113,7 @@ export const ManifestTable: React.FC<ManifestTableProps> = ({
           <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
             Filtered bookings
           </div>
-          <div className="font-editorial text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
+          <div className="font-display font-semibold text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
             {filteredOrders.length}
           </div>
           <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
@@ -125,7 +125,7 @@ export const ManifestTable: React.FC<ManifestTableProps> = ({
           <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
             Attendees confirmed
           </div>
-          <div className="font-editorial text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
+          <div className="font-display font-semibold text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
             {totalAttendees}
           </div>
           <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
@@ -137,7 +137,7 @@ export const ManifestTable: React.FC<ManifestTableProps> = ({
           <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
             Community payout
           </div>
-          <div className="font-editorial text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
+          <div className="font-display font-semibold text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
             {formatINR(totalRevenue)}
           </div>
           <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
@@ -229,7 +229,7 @@ export const ManifestTable: React.FC<ManifestTableProps> = ({
                       key={order.id}
                       className="hover:bg-[#F9EFE7]/40 transition-colors"
                     >
-                      <td className="py-3.5 px-4 font-editorial-mono text-[12.5px] text-[#29100B]">
+                      <td className="py-3.5 px-4 font-mono text-[12.5px] text-[#29100B]">
                         {order.order_ref}
                       </td>
                       <td className="py-3.5 px-4 max-w-[220px] truncate text-[#29100B]">
@@ -243,7 +243,7 @@ export const ManifestTable: React.FC<ManifestTableProps> = ({
                           </div>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 font-editorial-mono text-[12.5px] text-[rgba(41,16,11,0.7)]">
+                      <td className="py-3.5 px-4 font-mono text-[12.5px] text-[rgba(41,16,11,0.7)]">
                         {order.customer_phone}
                       </td>
                       <td className="py-3.5 px-4 text-center font-bold text-[#29100B]">

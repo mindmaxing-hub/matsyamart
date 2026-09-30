@@ -255,32 +255,56 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
   return (
     <div className="space-y-6">
       {/* 4 Financial Split Cards */}
-      <div className="metrics">
-        <div className="metric hl">
-          <div className="lbl">Pending Refund Requests</div>
-          <div className="val text-[var(--admin-accent-strong)]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between shadow-[inset_3px_0_0_var(--admin-accent)]">
+          <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)]">
+            Pending Refund Requests
+          </div>
+          <div className="font-display font-semibold text-[32px] sm:text-[34px] tracking-tight leading-[1.15] text-[var(--admin-accent-strong)] my-1.5">
             {pendingRequests}
           </div>
-          <div className="sub">Awaiting coordinator audit</div>
-          <div className="tick">↗</div>
+          <div className="text-[12.5px] text-[var(--admin-faint)]">
+            Awaiting coordinator audit
+          </div>
+          <div className="absolute top-4 right-4 w-7 h-7 rounded-full bg-[var(--admin-accent-softer)] text-[var(--admin-accent-strong)] flex items-center justify-center font-bold text-sm">
+            ↗
+          </div>
         </div>
 
-        <div className="metric">
-          <div className="lbl">Cash Refunds Processed</div>
-          <div className="val">{formatINR(totalRefundedInr)}</div>
-          <div className="sub">Via original payment gateway</div>
+        <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between">
+          <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)]">
+            Cash Refunds Processed
+          </div>
+          <div className="font-display font-semibold text-[32px] sm:text-[34px] tracking-tight leading-[1.15] text-[var(--admin-fg)] my-1.5">
+            {formatINR(totalRefundedInr)}
+          </div>
+          <div className="text-[12.5px] text-[var(--admin-faint)]">
+            Via original payment gateway
+          </div>
         </div>
 
-        <div className="metric">
-          <div className="lbl">Store Credit Vouchers</div>
-          <div className="val">{vouchersIssuedCount}</div>
-          <div className="sub">Retained 100% platform revenue</div>
+        <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between">
+          <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)]">
+            Store Credit Vouchers
+          </div>
+          <div className="font-display font-semibold text-[32px] sm:text-[34px] tracking-tight leading-[1.15] text-[var(--admin-fg)] my-1.5">
+            {vouchersIssuedCount}
+          </div>
+          <div className="text-[12.5px] text-[var(--admin-faint)]">
+            Retained 100% platform revenue
+          </div>
         </div>
 
-        <div className="metric">
-          <div className="lbl">Policy Compliance Rate</div>
-          <div className="val">98.8%</div>
-          <div className="sub">Zero chargeback disputes</div>
+        <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between">
+          <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)]">
+            Policy Compliance Rate
+          </div>
+          <div className="font-display font-semibold text-[32px] sm:text-[34px] tracking-tight leading-[1.15] text-[var(--admin-fg)] my-1.5">
+            98.8%
+          </div>
+          <div className="text-[12.5px] text-[var(--admin-faint)]">
+            Zero chargeback disputes
+          </div>
         </div>
       </div>
 
@@ -331,27 +355,44 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
       {/* Refunds Table */}
       <div className="admin-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="grid w-full">
+          <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr>
-                <th>Ticket Ref &amp; Guest</th>
-                <th>Tour / Item</th>
-                <th>Notice Window</th>
-                <th>Cancellation Reason</th>
-                <th style={{ textAlign: "right" }}>Amount</th>
-                <th style={{ textAlign: "center" }}>Policy Status</th>
-                <th style={{ textAlign: "right" }}>Actions</th>
+              <tr className="border-b border-[var(--admin-border)] bg-[rgba(245,237,235,0.45)]">
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap">
+                  Ticket Ref &amp; Guest
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap">
+                  Tour / Item
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap">
+                  Notice Window
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap">
+                  Cancellation Reason
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap text-right">
+                  Amount
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap text-center">
+                  Policy Status
+                </th>
+                <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap text-right">
+                  Actions
+                </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-[var(--admin-border-soft)]">
               {filteredTickets.map((t) => {
                 const isPending = t.status === "requested";
 
                 return (
-                  <tr key={t.id}>
+                  <tr
+                    key={t.id}
+                    className="hover:bg-[rgba(227,161,87,0.03)] transition-colors"
+                  >
                     {/* Ref & Guest */}
-                    <td>
-                      <div className="font-editorial-mono font-bold text-[var(--admin-fg)] text-[12px]">
+                    <td className="py-3.5 px-4 align-top">
+                      <div className="font-mono font-bold text-[var(--admin-fg)] text-[12px]">
                         {t.order_ref}
                       </div>
                       <div className="font-semibold text-[var(--admin-fg)] mt-0.5">
@@ -363,7 +404,7 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
                     </td>
 
                     {/* Tour Name */}
-                    <td className="max-w-[200px]">
+                    <td className="py-3.5 px-4 align-top max-w-[200px]">
                       <b className="text-[var(--admin-fg)] block truncate">
                         {t.tour_or_item_name}
                       </b>
@@ -373,7 +414,7 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
                     </td>
 
                     {/* Notice Window */}
-                    <td>
+                    <td className="py-3.5 px-4 align-top">
                       <span
                         className={`admin-pill text-[9.5px] ${
                           t.hours_before_tour >= 48
@@ -395,7 +436,7 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
                     </td>
 
                     {/* Cancellation Reason */}
-                    <td className="max-w-xs">
+                    <td className="py-3.5 px-4 align-top max-w-xs">
                       <div className="text-[var(--admin-muted)] text-[12px] leading-relaxed">
                         {t.cancellation_reason}
                       </div>
@@ -407,14 +448,14 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
                     </td>
 
                     {/* Amount */}
-                    <td style={{ textAlign: "right" }}>
+                    <td className="py-3.5 px-4 align-top text-right">
                       <b className="text-[var(--admin-fg)]">
                         {formatINR(t.amount_paid_inr)}
                       </b>
                     </td>
 
                     {/* Status Pill */}
-                    <td style={{ textAlign: "center" }}>
+                    <td className="py-3.5 px-4 align-top text-center">
                       <span
                         className={`admin-pill text-[9.5px] ${
                           t.status === "refunded"
@@ -429,7 +470,7 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
                         {t.status.replace(/_/g, " ")}
                       </span>
                       {t.credit_voucher_code && (
-                        <div className="font-editorial-mono text-[var(--admin-accent-strong)] font-bold text-[11px] mt-1">
+                        <div className="font-mono text-[var(--admin-accent-strong)] font-bold text-[11px] mt-1">
                           {t.credit_voucher_code}
                         </div>
                       )}
@@ -491,7 +532,7 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
           <div className="admin-card w-full max-w-md p-6 space-y-5">
             <div className="flex items-center justify-between border-b border-[var(--admin-border-soft)] pb-3">
               <div>
-                <h3 className="font-editorial text-2xl text-[var(--admin-fg)]">
+                <h3 className="font-display font-semibold text-2xl text-[var(--admin-fg)]">
                   {actionType === "refund"
                     ? "Confirm Cash Refund"
                     : "Issue Store Credit Voucher"}
@@ -522,7 +563,7 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
                     required
                     value={razorpayRefundId}
                     onChange={(e) => setRazorpayRefundId(e.target.value)}
-                    className="w-full text-xs p-2.5 bg-[var(--admin-surface)] text-[var(--admin-fg)] border border-[var(--admin-border)] rounded-xl outline-none focus:border-[var(--admin-accent-strong)] font-editorial-mono"
+                    className="w-full text-xs p-2.5 bg-[var(--admin-surface)] text-[var(--admin-fg)] border border-[var(--admin-border)] rounded-xl outline-none focus:border-[var(--admin-accent-strong)] font-mono"
                   />
                   <span className="text-[11px] text-[var(--admin-faint)] mt-1 block">
                     Refund Amount: {formatINR(selectedTicket.amount_paid_inr)}
@@ -538,7 +579,7 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
                     required
                     value={voucherCode}
                     onChange={(e) => setVoucherCode(e.target.value)}
-                    className="w-full text-xs p-2.5 bg-[var(--admin-surface)] text-[var(--admin-fg)] border border-[var(--admin-border)] rounded-xl outline-none font-editorial-mono font-bold focus:border-[var(--admin-accent-strong)]"
+                    className="w-full text-xs p-2.5 bg-[var(--admin-surface)] text-[var(--admin-fg)] border border-[var(--admin-border)] rounded-xl outline-none font-mono font-bold focus:border-[var(--admin-accent-strong)]"
                   />
                   <span className="text-[11.5px] text-[var(--admin-accent-strong)] mt-1 block">
                     Valid for 180 days across any coastal safari or pantry item.
