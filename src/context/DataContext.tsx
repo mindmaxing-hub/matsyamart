@@ -8,6 +8,7 @@ import {
   OrderItem,
   ShippingAddress,
   AttendeeDetail,
+  FulfillmentStatus,
 } from "../types";
 import {
   SEED_CATEGORIES,
@@ -39,6 +40,7 @@ interface DataContextType {
   slots: ExperienceSlot[];
   orders: Order[];
   proposals: CommunityVendorProposal[];
+  spotlightListingIds: string[];
   getListingBySlug: (slug: string) => Listing | undefined;
   getSlotsByListingId: (listingId: string) => ExperienceSlot[];
   getOrderByRef: (ref: string) => Order | undefined;
@@ -60,6 +62,15 @@ interface DataContextType {
     status: "approved" | "rejected",
     notes?: string,
   ) => void;
+  reorderSpotlight: (fromIndex: number, toIndex: number) => void;
+  toggleSpotlight: (listingId: string) => void;
+  setSpotlightListingIds: (ids: string[]) => void;
+  updateOrderFulfillment: (
+    orderId: string,
+    status: FulfillmentStatus,
+    courier?: string,
+    awb?: string,
+  ) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -68,6 +79,7 @@ const STORAGE_LISTINGS = "matsyamart_listings_v2";
 const STORAGE_SLOTS = "matsyamart_slots_v2";
 const STORAGE_ORDERS = "matsyamart_orders_v1";
 const STORAGE_PROPOSALS = "matsyamart_proposals_v1";
+const STORAGE_SPOTLIGHT = "matsyamart_spotlight_v1";
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -129,11 +141,76 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
           },
         ],
       };
-      return [initialMockOrder];
+
+      const initialMockProductOrder: Order = {
+        id: "ord-seed-02",
+        order_ref: "MM-PRD-2026-0089",
+        customer_name: "Aditya Nair",
+        customer_email: "aditya.nair@example.com",
+        customer_phone: "+91 98199 44321",
+        total_amount_inr: 1200,
+        status: "confirmed",
+        fulfillment_status: "processing",
+        courier_partner: "Blue Dart Express",
+        tracking_awb: "BD992817441IN",
+        shipping_address: {
+          addressLine: "Flat 402, Sea Breeze Apts, 14th Road, Khar West",
+          landmark: "Near Khar Gymkhana",
+          city: "Mumbai",
+          state: "Maharashtra",
+          pincode: "400052",
+        },
+        razorpay_payment_id: "pay_sim_seed99282",
+        created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
+        items: [
+          {
+            id: "item-seed-02",
+            order_id: "ord-seed-02",
+            listing_id: "prd-jawla-basket",
+            quantity: 1,
+            unit_price_inr: 650,
+            listing: SEED_LISTINGS.find((l) => l.id === "prd-jawla-basket"),
+          },
+          {
+            id: "item-seed-03",
+            order_id: "ord-seed-02",
+            listing_id: "prd-mangrove-honey",
+            quantity: 1,
+            unit_price_inr: 550,
+            listing: SEED_LISTINGS.find((l) => l.id === "prd-mangrove-honey"),
+          },
+        ],
+      };
+
+      return [initialMockOrder, initialMockProductOrder];
     } catch {
       return [];
     }
   });
+
+  const DEFAULT_SPOTLIGHT_IDS = [
+    "exp-net-weaving",
+    "exp-sassoon-trail",
+    "exp-thane-flamingo",
+    "prd-mangrove-honey",
+    "prd-jawla-basket",
+    "exp-versova-trail",
+  ];
+
+  const [spotlightListingIds, setSpotlightListingIds] = useState<string[]>(
+    () => {
+      try {
+        const saved = localStorage.getItem(STORAGE_SPOTLIGHT);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+        return DEFAULT_SPOTLIGHT_IDS;
+      } catch {
+        return DEFAULT_SPOTLIGHT_IDS;
+      }
+    },
+  );
 
   const [proposals, setProposals] = useState<CommunityVendorProposal[]>(() => {
     try {
@@ -180,6 +257,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     localStorage.setItem(STORAGE_PROPOSALS, JSON.stringify(proposals));
   }, [proposals]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      STORAGE_SPOTLIGHT,
+      JSON.stringify(spotlightListingIds),
+    );
+  }, [spotlightListingIds]);
 
   // Optionally fetch from Supabase if configured
   useEffect(() => {
@@ -255,6 +339,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
       razorpay_order_id: input.razorpayOrderId,
       razorpay_payment_id: input.razorpayPaymentId,
       status: "confirmed",
+      fulfillment_status: isExperience ? undefined : "unfulfilled",
       shipping_address: input.shippingAddress,
       emergency_contact: input.emergencyContact,
       created_at: new Date().toISOString(),
@@ -406,6 +491,55 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
+  const reorderSpotlight = (fromIndex: number, toIndex: number) => {
+    setSpotlightListingIds((prev) => {
+      if (
+        fromIndex < 0 ||
+        fromIndex >= prev.length ||
+        toIndex < 0 ||
+        toIndex >= prev.length
+      ) {
+        return prev;
+      }
+      const updated = [...prev];
+      const [moved] = updated.splice(fromIndex, 1);
+      if (moved) {
+        updated.splice(toIndex, 0, moved);
+      }
+      return updated;
+    });
+  };
+
+  const toggleSpotlight = (listingId: string) => {
+    setSpotlightListingIds((prev) => {
+      if (prev.includes(listingId)) {
+        return prev.filter((id) => id !== listingId);
+      } else {
+        return [...prev, listingId];
+      }
+    });
+  };
+
+  const updateOrderFulfillment = (
+    orderId: string,
+    status: FulfillmentStatus,
+    courier?: string,
+    awb?: string,
+  ) => {
+    setOrders((prev) =>
+      prev.map((order) => {
+        if (order.id !== orderId) return order;
+        return {
+          ...order,
+          fulfillment_status: status,
+          courier_partner:
+            courier !== undefined ? courier : order.courier_partner,
+          tracking_awb: awb !== undefined ? awb : order.tracking_awb,
+        };
+      }),
+    );
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -414,6 +548,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         slots,
         orders,
         proposals,
+        spotlightListingIds,
         getListingBySlug,
         getSlotsByListingId,
         getOrderByRef,
@@ -423,6 +558,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         toggleCancelSlot,
         addProposal,
         updateProposalStatus,
+        reorderSpotlight,
+        toggleSpotlight,
+        setSpotlightListingIds,
+        updateOrderFulfillment,
       }}
     >
       {children}

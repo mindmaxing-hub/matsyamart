@@ -65,24 +65,19 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
   const handleGenerateWeekendBatches = () => {
     if (!selectedListingId) return;
     addRecurringWeekendSlots(selectedListingId, 4, 14);
-    setSuccessMsg(
-      "Generated next 4 weeks of Saturday & Sunday dawn slots (8 new batches)!",
-    );
-    setTimeout(() => setSuccessMsg(""), 4000);
+    setSuccessMsg("Generated 4 upcoming weekend batches successfully!");
+    setTimeout(() => setSuccessMsg(""), 3000);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Filter and Actions */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200">
-        <div>
-          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-            Select Coastal Experience
-          </label>
+    <div className="space-y-5">
+      {/* Top Filter & Batch Action Bar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[#29100b] p-3.5 rounded-2xl border border-[#dab38c]/20">
+        <div className="flex-1 max-w-md">
           <select
             value={selectedListingId}
             onChange={(e) => setSelectedListingId(e.target.value)}
-            className="text-xs sm:text-sm font-semibold p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-ocean-950"
+            className="w-full text-xs p-2.5 bg-[#35160e] text-[#f5edeb] rounded-xl border border-[#dab38c]/30 outline-none font-medium focus:border-[#e3a157]"
           >
             {experienceListings.map((l) => (
               <option key={l.id} value={l.id}>
@@ -95,15 +90,15 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
             onClick={handleGenerateWeekendBatches}
-            className="flex-1 sm:flex-none px-3.5 py-2.5 bg-ocean-50 hover:bg-ocean-100 text-ocean-800 border border-ocean-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs"
+            className="flex-1 sm:flex-none px-3.5 py-2.5 bg-[#35160e] hover:bg-[#5d3a24] text-[#e3a157] border border-[#dab38c]/25 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
           >
-            <Sparkles className="w-3.5 h-3.5 text-sun-300" />
+            <Sparkles className="w-3.5 h-3.5 text-[#e3a157]" />
             <span>Generate Weekend Batches (4 Weeks)</span>
           </button>
 
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="flex-1 sm:flex-none px-4 py-2.5 bg-ocean-800 hover:bg-ocean-900 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs"
+            className="flex-1 sm:flex-none px-4 py-2.5 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Add Single Slot</span>
@@ -112,8 +107,8 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
       </div>
 
       {successMsg && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2">
-          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+        <div className="p-3 bg-emerald-950/60 border border-emerald-800/50 text-emerald-300 text-xs rounded-xl flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
@@ -122,14 +117,14 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
       {showAddForm && (
         <form
           onSubmit={handleCreateSlot}
-          className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-4"
+          className="bg-[#35160e] border border-[#dab38c]/25 p-5 rounded-2xl space-y-4"
         >
-          <div className="font-display font-bold text-sm text-slate-800">
+          <div className="font-display font-bold text-sm text-[#f5edeb]">
             Create New Time Slot
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div>
-              <label className="text-xs font-medium text-slate-600 block mb-1">
+              <label className="text-xs font-medium text-[#dab38c]/80 block mb-1">
                 Date
               </label>
               <input
@@ -137,11 +132,11 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
                 required
                 value={slotDate}
                 onChange={(e) => setSlotDate(e.target.value)}
-                className="w-full text-xs p-2 bg-white rounded-xl border border-slate-200 outline-none"
+                className="w-full text-xs p-2 bg-[#29100b] text-[#f5edeb] rounded-xl border border-[#dab38c]/30 outline-none focus:border-[#e3a157]"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-600 block mb-1">
+              <label className="text-xs font-medium text-[#dab38c]/80 block mb-1">
                 Start Time
               </label>
               <input
@@ -149,11 +144,11 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
                 required
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="w-full text-xs p-2 bg-white rounded-xl border border-slate-200 outline-none"
+                className="w-full text-xs p-2 bg-[#29100b] text-[#f5edeb] rounded-xl border border-[#dab38c]/30 outline-none focus:border-[#e3a157]"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-600 block mb-1">
+              <label className="text-xs font-medium text-[#dab38c]/80 block mb-1">
                 End Time
               </label>
               <input
@@ -161,11 +156,11 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
                 required
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                className="w-full text-xs p-2 bg-white rounded-xl border border-slate-200 outline-none"
+                className="w-full text-xs p-2 bg-[#29100b] text-[#f5edeb] rounded-xl border border-[#dab38c]/30 outline-none focus:border-[#e3a157]"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-600 block mb-1">
+              <label className="text-xs font-medium text-[#dab38c]/80 block mb-1">
                 Guest Capacity
               </label>
               <input
@@ -174,7 +169,7 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
                 max="50"
                 value={capacity}
                 onChange={(e) => setCapacity(Number(e.target.value))}
-                className="w-full text-xs p-2 bg-white rounded-xl border border-slate-200 outline-none"
+                className="w-full text-xs p-2 bg-[#29100b] text-[#f5edeb] rounded-xl border border-[#dab38c]/30 outline-none focus:border-[#e3a157]"
               />
             </div>
           </div>
@@ -183,13 +178,13 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
             <button
               type="button"
               onClick={() => setShowAddForm(false)}
-              className="px-3 py-1.5 text-xs text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-100"
+              className="px-3 py-1.5 text-xs text-[#dab38c] bg-[#29100b] border border-[#dab38c]/25 rounded-lg hover:text-[#f5edeb] cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-1.5 text-xs font-semibold text-white bg-ocean-800 hover:bg-ocean-900 rounded-lg shadow-xs"
+              className="px-4 py-1.5 text-xs font-bold text-[#29100b] bg-[#e3a157] hover:bg-[#dab38c] rounded-lg shadow-xs cursor-pointer"
             >
               Save Slot
             </button>
@@ -200,7 +195,7 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
       {/* Slots List */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
         {filteredSlots.length === 0 ? (
-          <div className="col-span-full p-8 text-center bg-white rounded-2xl border border-slate-200 text-slate-400 text-xs">
+          <div className="col-span-full p-8 text-center bg-[#29100b] rounded-2xl border border-[#dab38c]/20 text-[#dab38c]/60 text-xs">
             No scheduled slots found for this experience.
           </div>
         ) : (
@@ -214,18 +209,18 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
                 key={slot.id}
                 className={`p-4 rounded-2xl border transition-all ${
                   slot.is_cancelled
-                    ? "bg-rose-50/60 border-rose-200 opacity-75"
-                    : "bg-white border-slate-200 hover:shadow-xs"
+                    ? "bg-rose-950/40 border-rose-800/40 opacity-75"
+                    : "bg-[#35160e]/85 border-[#dab38c]/20 hover:border-[#e3a157]/40 shadow-md"
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-ocean-950">
-                      <Calendar className="w-3.5 h-3.5 text-ocean-700" />
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-[#f5edeb]">
+                      <Calendar className="w-3.5 h-3.5 text-[#e3a157]" />
                       <span>{formatDate(slot.slot_start)}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
+                    <div className="flex items-center gap-1.5 text-xs text-[#dab38c]/80">
+                      <Clock className="w-3.5 h-3.5 text-[#dab38c]/50" />
                       <span>
                         {formatSlotRange(slot.slot_start, slot.slot_end)}
                       </span>
@@ -233,12 +228,12 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
                   </div>
 
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border ${
                       slot.is_cancelled
-                        ? "bg-rose-100 text-rose-800"
+                        ? "bg-rose-950/60 text-rose-300 border-rose-800/50"
                         : isFull
-                          ? "bg-amber-100 text-amber-800"
-                          : "bg-emerald-100 text-emerald-800"
+                          ? "bg-amber-950/60 text-amber-300 border-amber-800/50"
+                          : "bg-emerald-950/60 text-emerald-300 border-emerald-800/50"
                     }`}
                   >
                     {slot.is_cancelled
@@ -249,21 +244,21 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
                   </span>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1 text-slate-600">
-                    <Users className="w-3.5 h-3.5 text-slate-400" />
+                <div className="mt-4 pt-3 border-t border-[#dab38c]/15 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1 text-[#dab38c]/80">
+                    <Users className="w-3.5 h-3.5 text-[#dab38c]/50" />
                     <span>
-                      <strong className="text-slate-900">{booked}</strong> /{" "}
+                      <strong className="text-[#e3a157]">{booked}</strong> /{" "}
                       {cap} booked
                     </span>
                   </div>
 
                   <button
                     onClick={() => toggleCancelSlot(slot.id)}
-                    className={`text-[11px] font-semibold px-2 py-1 rounded-md transition-colors ${
+                    className={`text-[11px] font-semibold px-2 py-1 rounded-md transition-colors cursor-pointer ${
                       slot.is_cancelled
-                        ? "text-emerald-700 hover:bg-emerald-50"
-                        : "text-rose-600 hover:bg-rose-50"
+                        ? "text-emerald-400 hover:bg-emerald-950/40"
+                        : "text-rose-400 hover:bg-rose-950/40"
                     }`}
                   >
                     {slot.is_cancelled ? "Restore Slot" : "Emergency Cancel"}

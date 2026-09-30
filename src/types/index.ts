@@ -47,6 +47,7 @@ export interface Listing {
   // Meta
   is_active: boolean;
   is_featured: boolean;
+  spotlight_order?: number | undefined;
   host_name: string;
   host_phone?: string | undefined;
   host_bio?: string | undefined;
@@ -90,6 +91,9 @@ export interface ShippingAddress {
   pincode: string;
 }
 
+export type FulfillmentStatus =
+  "unfulfilled" | "processing" | "shipped" | "delivered";
+
 export interface Order {
   id: string;
   order_ref: string;
@@ -100,6 +104,9 @@ export interface Order {
   razorpay_order_id?: string | undefined;
   razorpay_payment_id?: string | undefined;
   status: BookingStatus;
+  fulfillment_status?: FulfillmentStatus | undefined;
+  courier_partner?: string | undefined;
+  tracking_awb?: string | undefined;
   shipping_address?: ShippingAddress | undefined;
   emergency_contact?: string | undefined;
   payment_meta?: Record<string, unknown> | undefined;

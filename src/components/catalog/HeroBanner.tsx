@@ -1,109 +1,36 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { Link } from "../ui/Link";
+import { useData } from "../../context/DataContext";
 
 interface HeroBannerProps {
   onScrollToCatalog?: () => void;
 }
 
-interface HeroCard {
-  id: string;
-  title: string;
-  category: "Walks" | "Workshops" | "Food" | "Goods";
-  subtitle: string;
-  image: string;
-  rotation: string;
-  delayMs: number;
-}
-
-// 8 Verified Authentic Coastal Event Cards (Zero mockups, Zero 404s)
-const CARDS: HeroCard[] = [
-  {
-    id: "card-1",
-    title: "DAWN HARBOR WALK",
-    category: "Walks",
-    subtitle: "Versova Village • 6:30 AM",
-    image:
-      "https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=400&q=80",
-    rotation: "-3deg",
-    delayMs: 100,
-  },
-  {
-    id: "card-2",
-    title: "BOAT CARPENTRY",
-    category: "Workshops",
-    subtitle: "Worli Boatyard • 4:00 PM",
-    image:
-      "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=400&q=80",
-    rotation: "2deg",
-    delayMs: 200,
-  },
-  {
-    id: "card-3",
-    title: "CRAB CURRY FEAST",
-    category: "Food",
-    subtitle: "Colaba Coastal Kitchen",
-    image:
-      "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=400&q=80",
-    rotation: "-2deg",
-    delayMs: 300,
-  },
-  {
-    id: "card-4",
-    title: "MANGROVE SAFARI",
-    category: "Walks",
-    subtitle: "Thane Flamingo Estuary",
-    image:
-      "https://images.unsplash.com/photo-1510525009512-ad7fc13eefab?auto=format&fit=crop&w=400&q=80",
-    rotation: "3deg",
-    delayMs: 400,
-  },
-  {
-    id: "card-5",
-    title: "WILD BLOSSOM HONEY",
-    category: "Goods",
-    subtitle: "Vikhroli Mangrove Guild",
-    image:
-      "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=400&q=80",
-    rotation: "-3deg",
-    delayMs: 500,
-  },
-  {
-    id: "card-6",
-    title: "SUN-DRIED JAWLA",
-    category: "Goods",
-    subtitle: "Madh Island Artisans",
-    image:
-      "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=400&q=80",
-    rotation: "2deg",
-    delayMs: 600,
-  },
-  {
-    id: "card-7",
-    title: "SUNSET SHORE TRAIL",
-    category: "Walks",
-    subtitle: "Alibaug Coastline",
-    image:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80",
-    rotation: "-1deg",
-    delayMs: 700,
-  },
-  {
-    id: "card-8",
-    title: "NIGHT NAVIGATION",
-    category: "Workshops",
-    subtitle: "Mahim Bay • 8:00 PM",
-    image:
-      "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=400&q=80",
-    rotation: "3deg",
-    delayMs: 800,
-  },
+const ROTATIONS = [
+  "-3deg",
+  "2deg",
+  "-2deg",
+  "3deg",
+  "-3deg",
+  "2deg",
+  "-1deg",
+  "3deg",
 ];
 
 export const HeroBanner: React.FC<HeroBannerProps> = ({
   onScrollToCatalog,
 }) => {
+  const { listings, spotlightListingIds } = useData();
   const [hasLoaded, setHasLoaded] = useState(false);
+
+  // Resolve spotlight listings in exact ordered sequence
+  const displayListings = useMemo(() => {
+    const list = spotlightListingIds
+      .map((id) => listings.find((l) => l.id === id))
+      .filter((l): l is NonNullable<typeof l> => Boolean(l && l.is_active));
+    return list.length > 0 ? list : listings.slice(0, 6);
+  }, [spotlightListingIds, listings]);
 
   useEffect(() => {
     const timer = setTimeout(() => setHasLoaded(true), 50);
@@ -193,35 +120,56 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       >
         {/* Responsive Scrolling/Fanning Card Deck */}
         <div className="flex items-center justify-start sm:justify-center gap-3 sm:gap-4 md:gap-5 overflow-x-auto pb-4 pt-2 scrollbar-none px-2 sm:px-4">
-          {CARDS.map((card) => (
-            <div
-              key={card.id}
-              className="shrink-0 w-28 sm:w-36 md:w-44 p-1.5 sm:p-2 bg-[#35160e]/85 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-[#dab38c]/25 shadow-[0_15px_35px_rgba(41,16,11,0.7)] hover:scale-105 transition-all hover:border-[#e3a157]/50"
-              style={{
-                transform: `rotate(${card.rotation})`,
-              }}
-            >
-              <div className="w-full aspect-[4/3] rounded-lg sm:rounded-xl overflow-hidden mb-1.5 sm:mb-2 bg-[#29100b] relative">
-                <img
-                  src={card.image}
-                  alt={card.title}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-                <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded-full bg-[#29100b]/90 backdrop-blur-xs text-[7px] sm:text-[8px] font-bold tracking-wider uppercase text-[#e3a157] border border-[#e3a157]/30">
-                  {card.category}
-                </span>
-              </div>
-              <div className="px-0.5 sm:px-1">
-                <div className="font-display font-bold text-[9px] sm:text-xs text-[#f5edeb] truncate tracking-tight">
-                  {card.title}
+          {displayListings.map((listing, index) => {
+            const rotation = ROTATIONS[index % ROTATIONS.length];
+            const detailPath =
+              listing.type === "experience"
+                ? `/experience/${listing.slug}`
+                : `/product/${listing.slug}`;
+            const categoryLabel =
+              listing.pillar === "walks"
+                ? "Walks"
+                : listing.pillar === "workshops"
+                  ? "Workshops"
+                  : listing.pillar === "food"
+                    ? "Food"
+                    : "Goods";
+            const subtitle =
+              listing.type === "experience"
+                ? listing.location_name?.split(",")[0] || "Mumbai Coastal"
+                : listing.artisan_collective || "Artisanal Goods";
+
+            return (
+              <Link
+                key={listing.id}
+                to={detailPath}
+                className="group shrink-0 w-28 sm:w-36 md:w-44 p-1.5 sm:p-2 bg-[#35160e]/85 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-[#dab38c]/25 shadow-[0_15px_35px_rgba(41,16,11,0.7)] hover:scale-105 hover:-translate-y-1 transition-all hover:border-[#e3a157]/60 block cursor-pointer"
+                style={{
+                  transform: `rotate(${rotation})`,
+                }}
+              >
+                <div className="w-full aspect-[4/3] rounded-lg sm:rounded-xl overflow-hidden mb-1.5 sm:mb-2 bg-[#29100b] relative">
+                  <img
+                    src={listing.images[0]}
+                    alt={listing.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                  <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded-full bg-[#29100b]/90 backdrop-blur-xs text-[7px] sm:text-[8px] font-bold tracking-wider uppercase text-[#e3a157] border border-[#e3a157]/30">
+                    {categoryLabel}
+                  </span>
                 </div>
-                <div className="text-[8px] sm:text-[10px] text-[#dab38c] truncate">
-                  {card.subtitle}
+                <div className="px-0.5 sm:px-1">
+                  <div className="font-display font-bold text-[9px] sm:text-xs text-[#f5edeb] group-hover:text-[#dab38c] transition-colors truncate tracking-tight">
+                    {listing.title}
+                  </div>
+                  <div className="text-[8px] sm:text-[10px] text-[#dab38c]/80 truncate">
+                    {subtitle}
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </div>
 
