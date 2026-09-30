@@ -136,3 +136,58 @@ export interface CartItem {
   slot?: ExperienceSlot | undefined;
   attendeeDetails?: AttendeeDetail[] | undefined;
 }
+
+export interface HostPayoutRecord {
+  id: string;
+  partner_name: string;
+  role_type: "guide" | "artisan_collective";
+  koliwada: string;
+  upi_id: string;
+  bank_account_mask: string;
+  total_earned_inr: number;
+  total_paid_inr: number;
+  pending_balance_inr: number;
+  last_payout_date?: string | undefined;
+  utr_reference?: string | undefined;
+  status: "pending" | "processing" | "disbursed";
+}
+
+export interface InventoryBatchItem {
+  id: string;
+  listing_id: string;
+  lot_number: string;
+  packaging_date: string;
+  best_before_date: string;
+  stock_units: number;
+  min_threshold: number;
+  unit_weight_grams: number;
+  fssai_license_ref?: string | undefined;
+}
+
+export interface ZoneSafetyIncident {
+  id: string;
+  zone_name: string;
+  status: "normal" | "caution" | "lockdown";
+  swell_height_m: number;
+  tide_phase: string;
+  advisory_message: string;
+  last_updated: string;
+}
+
+export interface RefundTicket {
+  id: string;
+  order_ref: string;
+  customer_name: string;
+  customer_phone: string;
+  tour_or_item_name: string;
+  booking_date: string;
+  request_date: string;
+  hours_before_tour: number;
+  amount_paid_inr: number;
+  cancellation_reason: string;
+  eligibility: "full_refund" | "partial_or_credit" | "non_refundable";
+  status: "requested" | "refunded" | "credit_voucher_issued" | "declined";
+  razorpay_refund_id?: string | undefined;
+  credit_voucher_code?: string | undefined;
+  admin_notes?: string | undefined;
+}

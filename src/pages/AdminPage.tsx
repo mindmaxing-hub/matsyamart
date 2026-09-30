@@ -7,6 +7,10 @@ import { ProductOrdersTable } from "../components/admin/ProductOrdersTable";
 import { CommunicationsHub } from "../components/admin/CommunicationsHub";
 import { SpecialListingsManager } from "../components/admin/SpecialListingsManager";
 import { MultiQueueManager } from "../components/admin/MultiQueueManager";
+import { HostPayoutsLedger } from "../components/admin/HostPayoutsLedger";
+import { InventoryStockManager } from "../components/admin/InventoryStockManager";
+import { CoastalSafetyCommand } from "../components/admin/CoastalSafetyCommand";
+import { RefundsManager } from "../components/admin/RefundsManager";
 import { Link } from "../components/ui/Link";
 import { formatINR, formatDate } from "../lib/utils";
 import {
@@ -29,6 +33,9 @@ import {
   Compass,
   CheckCircle2,
   ExternalLink,
+  Wallet,
+  Boxes,
+  Radio,
 } from "lucide-react";
 
 type AdminSectionId =
@@ -36,7 +43,11 @@ type AdminSectionId =
   | "queues"
   | "manifest"
   | "goods"
+  | "inventory"
   | "slots"
+  | "safety"
+  | "payouts"
+  | "refunds"
   | "spotlight"
   | "communications";
 
@@ -198,12 +209,44 @@ export const AdminPage: React.FC = () => {
         "Manage packaging, courier tracking AWB updates, delivery statuses, and artisan collective remittances.",
     },
     {
+      id: "inventory",
+      label: "Artisan Stock & Batches",
+      icon: Boxes,
+      heading: "Artisan Pantry Inventory & Freshness Batches",
+      subtitle:
+        "Monitor physical pantry stock, lot harvest numbers, shelf-life expiry dates, and allocate batch replenishment.",
+    },
+    {
       id: "slots",
       label: "Tidal Slots & Capacity",
       icon: Clock,
       heading: "Tidal Windows & Booking Capacities",
       subtitle:
         "Control weekend low-tide safari capacity, sunrise slot availability, and village guide assignments.",
+    },
+    {
+      id: "safety",
+      label: "Coastal Weather & Safety",
+      icon: Radio,
+      heading: "Arabian Sea Swell & Coastal Zone Safety Command",
+      subtitle:
+        "Monitor real-time tidal windows, swell heights, weather warnings, and trigger emergency zone lockdowns.",
+    },
+    {
+      id: "payouts",
+      label: "Host & Artisan Payouts",
+      icon: Wallet,
+      heading: "Host & Artisan Remittances Ledger",
+      subtitle:
+        "Reconcile 85% community revenue share vs 15% platform retainer, guide UPI details, and log UTR settlements.",
+    },
+    {
+      id: "refunds",
+      label: "Refunds & Vouchers",
+      icon: RotateCcw,
+      heading: "Cancellations, Refunds & Reschedule Vouchers",
+      subtitle:
+        "Audit cancellation policy eligibility (>48h vs <24h), track Razorpay refund IDs, and issue digital credit vouchers.",
     },
     {
       id: "spotlight",
@@ -593,7 +636,7 @@ export const AdminPage: React.FC = () => {
                   <h3 className="font-display font-bold text-base text-slate-900">
                     Quick Operational Jumps
                   </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     <button
                       onClick={() => setActiveSection("queues")}
                       className="p-4 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 text-left transition-colors flex items-center justify-between group cursor-pointer shadow-xs"
@@ -648,6 +691,66 @@ export const AdminPage: React.FC = () => {
                           </div>
                           <div className="text-[11px] text-slate-500">
                             Update courier tracking AWBs
+                          </div>
+                        </div>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+                    </button>
+
+                    <button
+                      onClick={() => setActiveSection("payouts")}
+                      className="p-4 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 text-left transition-colors flex items-center justify-between group cursor-pointer shadow-xs"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-slate-900 text-[#e3a157] flex items-center justify-center">
+                          <Wallet className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-xs text-slate-900">
+                            Host Payouts Ledger
+                          </div>
+                          <div className="text-[11px] text-slate-500">
+                            85/15 split & UTR settlements
+                          </div>
+                        </div>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+                    </button>
+
+                    <button
+                      onClick={() => setActiveSection("inventory")}
+                      className="p-4 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 text-left transition-colors flex items-center justify-between group cursor-pointer shadow-xs"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-slate-900 text-[#e3a157] flex items-center justify-center">
+                          <Boxes className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-xs text-slate-900">
+                            Pantry Stock & Batches
+                          </div>
+                          <div className="text-[11px] text-slate-500">
+                            Expiry dates & quick restock
+                          </div>
+                        </div>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+                    </button>
+
+                    <button
+                      onClick={() => setActiveSection("safety")}
+                      className="p-4 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 text-left transition-colors flex items-center justify-between group cursor-pointer shadow-xs"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-slate-900 text-[#e3a157] flex items-center justify-center">
+                          <Radio className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-xs text-slate-900">
+                            Coastal Swell & Safety
+                          </div>
+                          <div className="text-[11px] text-slate-500">
+                            Live zone alerts & lockdowns
                           </div>
                         </div>
                       </div>
@@ -746,12 +849,30 @@ export const AdminPage: React.FC = () => {
               />
             )}
 
-            {/* 5. TIDAL SLOTS & CAPACITY */}
+            {/* 5. ARTISAN INVENTORY & FRESHNESS BATCHES */}
+            {activeSection === "inventory" && (
+              <InventoryStockManager listings={listings} />
+            )}
+
+            {/* 6. TIDAL SLOTS & CAPACITY */}
             {activeSection === "slots" && (
               <SlotManager slots={slots} listings={listings} />
             )}
 
-            {/* 6. SPECIAL LISTINGS (HERO SPOTLIGHT) */}
+            {/* 7. COASTAL WEATHER & SAFETY COMMAND */}
+            {activeSection === "safety" && (
+              <CoastalSafetyCommand slots={slots} listings={listings} />
+            )}
+
+            {/* 8. HOST & ARTISAN PAYOUTS LEDGER */}
+            {activeSection === "payouts" && (
+              <HostPayoutsLedger orders={orders} listings={listings} />
+            )}
+
+            {/* 9. REFUNDS & DISPUTES CONSOLE */}
+            {activeSection === "refunds" && <RefundsManager orders={orders} />}
+
+            {/* 10. SPECIAL LISTINGS (HERO SPOTLIGHT) */}
             {activeSection === "spotlight" && (
               <SpecialListingsManager
                 listings={listings}
@@ -761,7 +882,7 @@ export const AdminPage: React.FC = () => {
               />
             )}
 
-            {/* 7. COMMUNICATIONS HUB */}
+            {/* 11. COMMUNICATIONS HUB */}
             {activeSection === "communications" && (
               <CommunicationsHub orders={orders} listings={listings} />
             )}
