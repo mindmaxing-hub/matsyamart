@@ -109,7 +109,7 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-[#F8FAFC] text-slate-800 antialiased min-h-screen">
+      <body className="bg-[#29100b] text-[#f5edeb] antialiased min-h-screen">
         {children}
         <Scripts />
       </body>
@@ -124,7 +124,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <DataProvider>
         <CartProvider>
-          <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
+          <div className="min-h-screen flex flex-col bg-[#29100b] text-[#f5edeb]">
             <Navbar />
             <div className="flex-1">
               <Outlet />
