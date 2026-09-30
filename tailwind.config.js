@@ -4,6 +4,13 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Coffee & Cream Palette from user swatch (media_1790777562845.png)
+        cream: "#f5edeb",
+        caramel: "#dab38c",
+        amber: "#e3a157",
+        mocha: "#b2652f",
+        espresso: "#5d3a24",
+        roast: "#29100b",
         ocean: {
           50: "#F0F9FE",
           100: "#CDEEFC",

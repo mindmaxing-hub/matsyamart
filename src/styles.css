@@ -35,6 +35,14 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  /* Coffee & Cream Palette (media_1790777562845.png) */
+  --color-roast: #29100b;
+  --color-espresso: #5d3a24;
+  --color-mocha: #b2652f;
+  --color-amber: #e3a157;
+  --color-caramel: #dab38c;
+  --color-cream: #f5edeb;
+
   /* Bhoomiputra Deep Ocean Ramp */
   --color-ocean-950: #002e3d;
   --color-ocean-900: #004a63;
