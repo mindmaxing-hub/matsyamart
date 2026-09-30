@@ -160,36 +160,36 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
   return (
     <div className="space-y-5">
       {/* Header & Queue Type Chips */}
-      <div className="bg-[#29100b] border border-[#dab38c]/25 rounded-2xl p-5 shadow-xl space-y-4">
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#e3a157] bg-[#35160e] px-2.5 py-0.5 rounded-full border border-[#dab38c]/20">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">
                 Community Moderation
               </span>
-              <span className="text-xs text-amber-300 font-semibold flex items-center gap-1">
+              <span className="text-xs text-amber-600 font-semibold flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5" /> {totalPending} Pending
                 Decisions
               </span>
             </div>
-            <h2 className="font-display font-bold text-lg sm:text-xl text-[#f5edeb] mt-1">
+            <h2 className="font-display font-bold text-lg sm:text-xl text-slate-900 mt-1">
               Multi-Type Review & Submissions Hub
             </h2>
-            <p className="text-xs text-[#dab38c]/70">
+            <p className="text-xs text-slate-500">
               Review and moderate host proposals, artisan submissions, corporate
               bulk requests, and reschedule notices.
             </p>
           </div>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pt-2 border-t border-[#dab38c]/15">
+        {/* Filter Tabs (Image 5 Style Pill Filters) */}
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pt-2 border-t border-slate-100">
           <button
             onClick={() => setActiveQueueTab("all")}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
               activeQueueTab === "all"
-                ? "bg-[#e3a157] text-[#29100b] font-bold"
-                : "bg-[#35160e] text-[#dab38c] hover:text-[#f5edeb] border border-[#dab38c]/20"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200"
             }`}
           >
             All Submissions ({proposals.length + customInquiries.length})
@@ -199,8 +199,8 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
             onClick={() => setActiveQueueTab("experiences")}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeQueueTab === "experiences"
-                ? "bg-[#e3a157] text-[#29100b] font-bold"
-                : "bg-[#35160e] text-[#dab38c] hover:text-[#f5edeb] border border-[#dab38c]/20"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200"
             }`}
           >
             <Compass className="w-3.5 h-3.5" />
@@ -211,8 +211,8 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
             onClick={() => setActiveQueueTab("products")}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeQueueTab === "products"
-                ? "bg-[#e3a157] text-[#29100b] font-bold"
-                : "bg-[#35160e] text-[#dab38c] hover:text-[#f5edeb] border border-[#dab38c]/20"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200"
             }`}
           >
             <ShoppingBag className="w-3.5 h-3.5" />
@@ -223,8 +223,8 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
             onClick={() => setActiveQueueTab("corporate")}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeQueueTab === "corporate"
-                ? "bg-[#e3a157] text-[#29100b] font-bold"
-                : "bg-[#35160e] text-[#dab38c] hover:text-[#f5edeb] border border-[#dab38c]/20"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200"
             }`}
           >
             <Building2 className="w-3.5 h-3.5" />
@@ -237,8 +237,8 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
             onClick={() => setActiveQueueTab("reschedules")}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeQueueTab === "reschedules"
-                ? "bg-[#e3a157] text-[#29100b] font-bold"
-                : "bg-[#35160e] text-[#dab38c] hover:text-[#f5edeb] border border-[#dab38c]/20"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200"
             }`}
           >
             <Waves className="w-3.5 h-3.5" />
@@ -268,19 +268,19 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
               return (
                 <div
                   key={prop.id}
-                  className="bg-[#29100b] rounded-2xl border border-[#dab38c]/25 p-5 space-y-4 shadow-lg text-[#f5edeb]"
+                  className="bg-white rounded-2xl border border-slate-200/80 p-5 space-y-4 shadow-xs text-slate-900"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#dab38c]/15 pb-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-display font-bold text-base text-[#f5edeb]">
+                        <span className="font-display font-bold text-base text-slate-900">
                           {prop.proposal_title}
                         </span>
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border ${
                             prop.proposal_type === "experience"
-                              ? "bg-[#35160e] text-[#e3a157] border-[#dab38c]/30"
-                              : "bg-[#35160e] text-emerald-300 border-[#dab38c]/30"
+                              ? "bg-amber-50 text-amber-800 border-amber-200"
+                              : "bg-emerald-50 text-emerald-800 border-emerald-200"
                           }`}
                         >
                           {prop.proposal_type === "experience"
@@ -289,8 +289,8 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                         </span>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-[#dab38c]/80 mt-1">
-                        <span className="font-semibold text-[#f5edeb]">
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1">
+                        <span className="font-semibold text-slate-800">
                           {prop.applicant_name}
                         </span>
                         <span>•</span>
@@ -299,8 +299,8 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                           {prop.koliwada_or_village}
                         </span>
                         <span>•</span>
-                        <span className="flex items-center gap-1 text-[#dab38c]">
-                          <Phone className="w-3 h-3 text-emerald-400" />
+                        <span className="flex items-center gap-1 text-slate-600">
+                          <Phone className="w-3 h-3 text-emerald-600" />
                           {prop.phone}
                         </span>
                       </div>
@@ -309,25 +309,25 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                     <span
                       className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider self-start sm:self-auto border ${
                         isApproved
-                          ? "bg-emerald-950/60 text-emerald-300 border-emerald-800/50"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                           : prop.status === "rejected"
-                            ? "bg-rose-950/60 text-rose-300 border-rose-800/50"
-                            : "bg-amber-950/60 text-amber-300 border-amber-800/50"
+                            ? "bg-rose-50 text-rose-700 border-rose-200"
+                            : "bg-amber-50 text-amber-700 border-amber-200"
                       }`}
                     >
                       {prop.status.replace("_", " ")}
                     </span>
                   </div>
 
-                  <p className="text-xs text-[#dab38c]/90 leading-relaxed bg-[#35160e]/50 p-3 rounded-xl border border-[#dab38c]/10">
+                  <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-100">
                     {prop.summary}
                   </p>
 
                   {/* Actions & Coordinator Notes */}
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-                    <div className="text-xs text-[#dab38c]/70 flex items-center gap-2">
+                    <div className="text-xs text-slate-500 flex items-center gap-2">
                       <span>Target Price:</span>
-                      <strong className="text-[#e3a157]">
+                      <strong className="text-slate-900 font-bold">
                         {prop.estimated_price_inr
                           ? formatINR(prop.estimated_price_inr)
                           : "Needs Estimate"}
@@ -346,24 +346,24 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                               [prop.id]: e.target.value,
                             })
                           }
-                          className="text-xs px-2.5 py-1.5 bg-[#35160e] text-[#f5edeb] border border-[#dab38c]/30 rounded-lg outline-none w-48"
+                          className="text-xs px-3 py-1.5 bg-white text-slate-900 border border-slate-200 rounded-lg outline-none w-52 placeholder:text-slate-400 focus:border-slate-900 shadow-xs"
                         />
                         <button
                           onClick={() => handleRejectProposal(prop.id)}
-                          className="px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 text-xs font-semibold rounded-lg border border-rose-800/40 transition-colors cursor-pointer"
+                          className="px-3 py-1.5 text-rose-600 hover:bg-rose-50 text-xs font-semibold rounded-lg border border-rose-200 transition-colors cursor-pointer"
                         >
                           Decline
                         </button>
                         <button
                           onClick={() => handleApproveProposal(prop.id)}
-                          className="px-3.5 py-1.5 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1"
+                          className="px-3.5 py-1.5 bg-[#e3a157] hover:bg-[#d97706] text-slate-950 text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1 shadow-xs"
                         >
                           <Check className="w-3.5 h-3.5" />
                           <span>Approve & List</span>
                         </button>
                       </div>
                     ) : (
-                      <div className="text-[11px] text-[#dab38c]/60 italic">
+                      <div className="text-[11px] text-slate-400 italic">
                         {prop.admin_notes || "Moderated by coordinator"}
                       </div>
                     )}
@@ -389,19 +389,19 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
               return (
                 <div
                   key={inq.id}
-                  className="bg-[#29100b] rounded-2xl border border-[#dab38c]/25 p-5 space-y-4 shadow-lg text-[#f5edeb]"
+                  className="bg-white rounded-2xl border border-slate-200/80 p-5 space-y-4 shadow-xs text-slate-900"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#dab38c]/15 pb-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-display font-bold text-base text-[#f5edeb]">
+                        <span className="font-display font-bold text-base text-slate-900">
                           {inq.subject}
                         </span>
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border ${
                             isCorporate
-                              ? "bg-sky-950/60 text-sky-300 border-sky-800/50"
-                              : "bg-amber-950/60 text-amber-300 border-amber-800/50"
+                              ? "bg-sky-50 text-sky-800 border-sky-200"
+                              : "bg-amber-50 text-amber-800 border-amber-200"
                           }`}
                         >
                           {isCorporate
@@ -410,51 +410,51 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                         </span>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-[#dab38c]/80 mt-1">
-                        <span className="font-semibold text-[#f5edeb]">
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1">
+                        <span className="font-semibold text-slate-800">
                           {inq.name}
                         </span>
                         {inq.organization && (
                           <>
                             <span>•</span>
-                            <span className="text-[#e3a157]">
+                            <span className="text-slate-700 font-medium">
                               {inq.organization}
                             </span>
                           </>
                         )}
                         <span>•</span>
-                        <span className="flex items-center gap-1 text-[#dab38c]">
-                          <Phone className="w-3 h-3 text-emerald-400" />
+                        <span className="flex items-center gap-1 text-slate-600">
+                          <Phone className="w-3 h-3 text-emerald-600" />
                           {inq.phone}
                         </span>
                         <span>•</span>
-                        <span className="text-[#dab38c]/60">{inq.email}</span>
+                        <span className="text-slate-400">{inq.email}</span>
                       </div>
                     </div>
 
                     <span
                       className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider self-start sm:self-auto border ${
                         inq.status === "resolved"
-                          ? "bg-emerald-950/60 text-emerald-300 border-emerald-800/50"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                           : inq.status === "contacted"
-                            ? "bg-sky-950/60 text-sky-300 border-sky-800/50"
-                            : "bg-amber-950/60 text-amber-300 border-amber-800/50"
+                            ? "bg-sky-50 text-sky-700 border-sky-200"
+                            : "bg-amber-50 text-amber-700 border-amber-200"
                       }`}
                     >
                       {inq.status.replace("_", " ")}
                     </span>
                   </div>
 
-                  <p className="text-xs text-[#dab38c]/90 leading-relaxed bg-[#35160e]/50 p-3 rounded-xl border border-[#dab38c]/10">
+                  <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-100">
                     {inq.details}
                   </p>
 
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-                    <div className="text-xs text-[#dab38c]/70 flex items-center gap-3">
+                    <div className="text-xs text-slate-500 flex items-center gap-3">
                       {inq.headcount && (
                         <span>
                           Group Size:{" "}
-                          <strong className="text-[#e3a157]">
+                          <strong className="text-slate-900 font-bold">
                             {inq.headcount} Guests
                           </strong>
                         </span>
@@ -462,7 +462,7 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                       {inq.requestedDate && (
                         <span>
                           Target:{" "}
-                          <strong className="text-[#f5edeb]">
+                          <strong className="text-slate-900 font-bold">
                             {inq.requestedDate}
                           </strong>
                         </span>
@@ -476,7 +476,7 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                         )}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 transition-colors"
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 transition-colors shadow-xs"
                       >
                         <MessageSquare className="w-3 h-3" />
                         <span>Reply on WhatsApp</span>
@@ -487,7 +487,7 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                           onClick={() =>
                             handleUpdateInquiryStatus(inq.id, "contacted")
                           }
-                          className="px-3 py-1.5 bg-[#35160e] hover:bg-[#5d3a24] text-[#dab38c] hover:text-[#f5edeb] border border-[#dab38c]/25 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                          className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-xs"
                         >
                           Mark Contacted
                         </button>
@@ -498,7 +498,7 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                           onClick={() =>
                             handleUpdateInquiryStatus(inq.id, "resolved")
                           }
-                          className="px-3 py-1.5 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                          className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs"
                         >
                           Resolve & Close
                         </button>

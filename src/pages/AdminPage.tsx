@@ -226,22 +226,22 @@ export const AdminPage: React.FC = () => {
   const currentNav =
     NAV_ITEMS.find((item) => item.id === activeSection) ?? NAV_ITEMS[0]!;
 
-  // 1. Passcode / Login Gate (Amber Canvas + Elevated Cream Card)
+  // 1. Passcode / Login Gate (Clean Light Neutral Canvas + Elevated Crisp White Card)
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#e3a157] flex flex-col items-center justify-center p-4 selection:bg-[#29100b] selection:text-[#f5edeb]">
-        <div className="bg-[#fdfbf7] rounded-3xl border border-[#dab38c]/40 shadow-2xl w-full max-w-md p-8 space-y-6 text-[#29100b]">
+      <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center justify-center p-4 selection:bg-slate-900 selection:text-white">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-xl w-full max-w-md p-8 space-y-6 text-slate-900">
           <div className="text-center space-y-2">
-            <div className="w-12 h-12 rounded-2xl bg-[#29100b] text-[#e3a157] border border-[#dab38c]/30 flex items-center justify-center mx-auto shadow-md">
+            <div className="w-12 h-12 rounded-2xl bg-slate-900 text-[#e3a157] border border-slate-800 flex items-center justify-center mx-auto shadow-md">
               <Lock className="w-6 h-6" />
             </div>
-            <div className="text-[10px] font-bold tracking-[0.25em] text-[#5d3a24]/80 uppercase">
+            <div className="text-[10px] font-bold tracking-[0.25em] text-slate-400 uppercase">
               WORKSPACE AUTHENTICATION
             </div>
-            <h2 className="font-display font-bold text-2xl text-[#29100b]">
+            <h2 className="font-display font-bold text-2xl text-slate-900">
               MatsyaMart Operations
             </h2>
-            <p className="text-xs text-[#5d3a24]/80">
+            <p className="text-xs text-slate-500">
               Restricted to verified coastal community leaders and tour
               coordinators.
             </p>
@@ -249,14 +249,14 @@ export const AdminPage: React.FC = () => {
 
           {/* Toggle between Passcode and Supabase Auth */}
           {isSupabaseConfigured && (
-            <div className="flex rounded-xl bg-[#f5ede4] p-1 border border-[#dab38c]/30 text-xs">
+            <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs">
               <button
                 type="button"
                 onClick={() => setAuthMode("passcode")}
                 className={`flex-1 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                   authMode === "passcode"
-                    ? "bg-[#29100b] text-[#f5edeb] shadow-xs"
-                    : "text-[#5d3a24] hover:text-[#29100b]"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 Passcode Gate
@@ -266,8 +266,8 @@ export const AdminPage: React.FC = () => {
                 onClick={() => setAuthMode("supabase")}
                 className={`flex-1 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                   authMode === "supabase"
-                    ? "bg-[#29100b] text-[#f5edeb] shadow-xs"
-                    : "text-[#5d3a24] hover:text-[#29100b]"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 Supabase Auth
@@ -278,32 +278,32 @@ export const AdminPage: React.FC = () => {
           {authMode === "passcode" ? (
             <form onSubmit={handlePasscodeLogin} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-[#5d3a24] block mb-1">
+                <label className="text-xs font-semibold text-slate-700 block mb-1">
                   Enter Coordinator Passcode
                 </label>
                 <div className="relative">
-                  <KeyRound className="w-4 h-4 text-[#5d3a24]/50 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="password"
                     required
                     placeholder="Enter passcode..."
                     value={passcode}
                     onChange={(e) => setPasscode(e.target.value)}
-                    className="w-full text-xs pl-9 pr-3 py-3 rounded-xl bg-white text-[#29100b] border border-[#dab38c]/40 focus:border-[#29100b] outline-none shadow-xs"
+                    className="w-full text-xs pl-9 pr-3 py-3 rounded-xl bg-white text-slate-900 border border-slate-200 focus:border-slate-900 outline-none shadow-xs"
                   />
                 </div>
               </div>
 
               {errorMsg && (
-                <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-300 text-xs text-rose-800 flex items-center gap-1.5">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-1.5">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
                   <span>{errorMsg}</span>
                 </div>
               )}
 
               <button
                 type="submit"
-                className="w-full py-3 bg-[#29100b] hover:bg-[#481f14] text-[#f5edeb] rounded-xl text-xs font-bold shadow-md transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-md transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <span>Unlock Operations Command Center</span>
                 <ArrowRight className="w-3.5 h-3.5 text-[#e3a157]" />
@@ -318,7 +318,7 @@ export const AdminPage: React.FC = () => {
                     sessionStorage.setItem("matsya_admin_auth", "true");
                   }
                 }}
-                className="w-full text-center text-[11px] text-[#29100b] font-semibold hover:underline pt-1 cursor-pointer"
+                className="w-full text-center text-[11px] text-slate-600 font-semibold hover:underline pt-1 cursor-pointer"
               >
                 ⚡ Quick Demo Login (matsya2026)
               </button>
@@ -326,42 +326,42 @@ export const AdminPage: React.FC = () => {
           ) : (
             <form onSubmit={handleSupabaseLogin} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-[#5d3a24] block mb-1">
+                <label className="text-xs font-semibold text-slate-700 block mb-1">
                   Coordinator Email
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-[#5d3a24]/50 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="email"
                     required
                     placeholder="coordinator@bhoomiputra.org"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full text-xs pl-9 pr-3 py-3 rounded-xl bg-white text-[#29100b] border border-[#dab38c]/40 focus:border-[#29100b] outline-none shadow-xs"
+                    className="w-full text-xs pl-9 pr-3 py-3 rounded-xl bg-white text-slate-900 border border-slate-200 focus:border-slate-900 outline-none shadow-xs"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-[#5d3a24] block mb-1">
+                <label className="text-xs font-semibold text-slate-700 block mb-1">
                   Password
                 </label>
                 <div className="relative">
-                  <KeyRound className="w-4 h-4 text-[#5d3a24]/50 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="password"
                     required
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full text-xs pl-9 pr-3 py-3 rounded-xl bg-white text-[#29100b] border border-[#dab38c]/40 focus:border-[#29100b] outline-none shadow-xs"
+                    className="w-full text-xs pl-9 pr-3 py-3 rounded-xl bg-white text-slate-900 border border-slate-200 focus:border-slate-900 outline-none shadow-xs"
                   />
                 </div>
               </div>
 
               {errorMsg && (
-                <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-300 text-xs text-rose-800 flex items-center gap-1.5">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-1.5">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
                   <span>{errorMsg}</span>
                 </div>
               )}
@@ -369,7 +369,7 @@ export const AdminPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 bg-[#29100b] hover:bg-[#481f14] text-[#f5edeb] rounded-xl text-xs font-bold shadow-md transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-md transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <span>
                   {isLoading ? "Verifying..." : "Sign In with Supabase"}
@@ -379,12 +379,12 @@ export const AdminPage: React.FC = () => {
             </form>
           )}
 
-          <div className="pt-2 border-t border-[#dab38c]/25 text-center">
+          <div className="pt-2 border-t border-slate-100 text-center">
             <Link
               to="/"
-              className="text-xs text-[#5d3a24] hover:text-[#29100b] inline-flex items-center gap-1 transition-colors"
+              className="text-xs text-slate-500 hover:text-slate-900 inline-flex items-center gap-1 transition-colors"
             >
-              <ArrowLeft className="w-3.5 h-3.5 text-[#e3a157]" />
+              <ArrowLeft className="w-3.5 h-3.5 text-slate-400" />
               <span>Return to Customer Storefront</span>
             </Link>
           </div>
@@ -393,24 +393,24 @@ export const AdminPage: React.FC = () => {
     );
   }
 
-  // 2. Main Authenticated Dashboard Shell (Matching Image 2 Lovable Workspace Layout)
+  // 2. Main Authenticated Dashboard Shell (Matching Clean Bhoomiputra Workspace Layout)
   return (
-    <div className="min-h-screen flex bg-[#e3a157] text-[#29100b] selection:bg-[#29100b] selection:text-[#f5edeb]">
-      {/* LEFT SIDEBAR: Clean rows matching Image 2 */}
-      <aside className="w-64 sm:w-72 bg-[#fdfbf7] border-r border-[#dab38c]/35 flex flex-col justify-between shrink-0 min-h-screen sticky top-0 h-screen z-30 shadow-md">
+    <div className="min-h-screen flex bg-[#f8f9fa] text-slate-900 selection:bg-slate-900 selection:text-white">
+      {/* LEFT SIDEBAR: Crisp White matching Bhoomiputra reference */}
+      <aside className="w-64 sm:w-72 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 min-h-screen sticky top-0 h-screen z-30 shadow-xs">
         <div>
           {/* Header Branding */}
-          <div className="p-5 border-b border-[#dab38c]/25">
-            <div className="text-[10px] font-bold tracking-[0.25em] text-[#5d3a24]/70 uppercase">
+          <div className="p-5 border-b border-slate-100">
+            <div className="text-[10px] font-bold tracking-[0.25em] text-slate-400 uppercase">
               WORKSPACE
             </div>
-            <div className="font-display font-bold text-xl text-[#29100b] mt-1 flex items-center gap-1.5">
+            <div className="font-display font-bold text-xl text-slate-900 mt-1 flex items-center gap-1.5">
               <span>MatsyaMart</span>
               <span className="text-[#e3a157] font-bold text-lg leading-none">
                 ✦
               </span>
             </div>
-            <div className="text-[11px] text-[#5d3a24]/75 mt-0.5">
+            <div className="text-[11px] text-slate-500 mt-0.5">
               Coastal Operations Hub
             </div>
           </div>
@@ -427,14 +427,14 @@ export const AdminPage: React.FC = () => {
                   onClick={() => setActiveSection(item.id)}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                     isActive
-                      ? "bg-[#29100b] text-[#f5edeb] shadow-sm"
-                      : "text-[#5d3a24] hover:bg-[#dab38c]/15 hover:text-[#29100b]"
+                      ? "bg-slate-900 text-white shadow-xs"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                   }`}
                 >
                   <div className="flex items-center gap-2.5 truncate">
                     <Icon
                       className={`w-4 h-4 shrink-0 ${
-                        isActive ? "text-[#e3a157]" : "text-[#5d3a24]"
+                        isActive ? "text-[#e3a157]" : "text-slate-400"
                       }`}
                     />
                     <span className="truncate">{item.label}</span>
@@ -444,8 +444,8 @@ export const AdminPage: React.FC = () => {
                     <span
                       className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                         isActive
-                          ? "bg-[#e3a157] text-[#29100b]"
-                          : "bg-[#dab38c]/30 text-[#29100b]"
+                          ? "bg-[#e3a157] text-slate-950"
+                          : "bg-slate-200 text-slate-800"
                       }`}
                     >
                       {item.badge}
@@ -458,55 +458,59 @@ export const AdminPage: React.FC = () => {
         </div>
 
         {/* Sidebar Footer: Return to Storefront & Status */}
-        <div className="p-4 border-t border-[#dab38c]/25 space-y-2.5 bg-[#fcf8f2]">
+        <div className="p-4 border-t border-slate-100 space-y-2.5 bg-slate-50/60">
           <Link
             to="/"
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-[#dab38c]/35 bg-white hover:bg-[#f5edeb] text-xs font-semibold text-[#29100b] transition-colors shadow-xs"
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition-colors shadow-xs"
           >
-            <ArrowLeft className="w-3.5 h-3.5 text-[#e3a157]" />
+            <ArrowLeft className="w-3.5 h-3.5 text-slate-500" />
             <span>Back to Storefront</span>
           </Link>
 
-          <div className="flex items-center justify-center gap-2 text-[10px] text-[#5d3a24]/75">
-            <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+          <div className="flex items-center justify-center gap-2 text-[10px] text-slate-500">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span>Live Sync Active</span>
           </div>
         </div>
       </aside>
 
-      {/* RIGHT MAIN WORKSPACE: Amber Background Canvas */}
-      <main className="flex-1 flex flex-col min-w-0 bg-[#e3a157] overflow-y-auto min-h-screen">
-        {/* Top Header Chrome matching Image 2 */}
-        <header className="px-6 sm:px-10 py-3.5 flex items-center justify-between border-b border-[#29100b]/10 bg-[#e3a157] sticky top-0 z-20 backdrop-blur-xs">
-          <div className="text-xs font-medium text-[#29100b]/80 flex items-center gap-1.5">
-            <span className="opacity-60">Workspace</span>
-            <span className="opacity-40">/</span>
-            <span className="font-bold text-[#29100b]">{currentNav.label}</span>
+      {/* RIGHT MAIN WORKSPACE: Clean Light Background Canvas */}
+      <main className="flex-1 flex flex-col min-w-0 bg-[#f8f9fa] overflow-y-auto min-h-screen">
+        {/* Top Header Chrome */}
+        <header className="px-6 sm:px-10 py-3.5 flex items-center justify-between border-b border-slate-200/80 bg-white/80 sticky top-0 z-20 backdrop-blur-md">
+          <div className="text-xs font-medium text-slate-600 flex items-center gap-1.5">
+            <span className="text-slate-400">Workspace</span>
+            <span className="text-slate-300">/</span>
+            <span className="font-semibold text-slate-900">
+              {currentNav.label}
+            </span>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-[#29100b] font-medium">
-              <span className="font-mono text-xs">social@bhoomiputra.org</span>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-[#29100b] text-[#f5edeb] px-2 py-0.5 rounded-md">
+            <div className="hidden sm:flex items-center gap-2 text-xs text-slate-600 font-medium">
+              <span className="font-mono text-xs text-slate-700">
+                social@bhoomiputra.org
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-900 text-white px-2 py-0.5 rounded-md">
                 ADMIN
               </span>
             </div>
 
             <button
               onClick={() => window.location.reload()}
-              className="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-[#29100b] text-xs font-semibold border border-[#dab38c]/35 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
               title="Refresh Data"
             >
-              <RotateCcw className="w-3.5 h-3.5 text-[#29100b]" />
+              <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
               <span>Refresh</span>
             </button>
 
             <button
               onClick={handleLogout}
-              className="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-[#29100b] text-xs font-semibold border border-[#dab38c]/35 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
               title="Sign Out"
             >
-              <LogOut className="w-3.5 h-3.5 text-[#29100b]" />
+              <LogOut className="w-3.5 h-3.5 text-slate-500" />
               <span>Sign out</span>
             </button>
           </div>
@@ -516,69 +520,69 @@ export const AdminPage: React.FC = () => {
         <div className="p-6 sm:p-10 space-y-6 max-w-7xl w-full mx-auto">
           {/* View Heading & Subtitle */}
           <div className="space-y-1">
-            <h1 className="font-display font-bold text-2xl sm:text-3xl lg:text-4xl text-[#29100b] tracking-tight">
+            <h1 className="font-display font-bold text-2xl sm:text-3xl text-slate-900 tracking-tight">
               {currentNav.heading}
             </h1>
-            <p className="text-xs sm:text-sm text-[#5d3a24]/90 font-medium">
+            <p className="text-xs sm:text-sm text-slate-500 font-normal">
               {currentNav.subtitle}
             </p>
           </div>
 
-          {/* Elevated Cream Workspace Card */}
-          <div className="bg-[#fdfbf7] rounded-3xl border border-[#dab38c]/35 shadow-xl p-6 sm:p-8 min-h-[520px]">
+          {/* Elevated Crisp White Workspace Card */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 sm:p-8 min-h-[520px]">
             {/* 1. EXECUTIVE OVERVIEW */}
             {activeSection === "overview" && (
               <div className="space-y-8">
                 {/* 4 KPI Metric Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="p-5 rounded-2xl bg-white border border-[#dab38c]/30 shadow-xs space-y-2">
-                    <div className="flex items-center justify-between text-xs font-semibold text-[#5d3a24]/80">
+                  <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
+                    <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
                       <span>Total Revenue</span>
                       <TrendingUp className="w-4 h-4 text-[#e3a157]" />
                     </div>
-                    <div className="font-display font-bold text-2xl text-[#29100b]">
+                    <div className="font-display font-bold text-2xl text-slate-900">
                       {formatINR(overviewMetrics.totalRevenue)}
                     </div>
-                    <div className="text-[11px] text-[#5d3a24]/70">
+                    <div className="text-[11px] text-slate-400">
                       Experiences + D2C Goods
                     </div>
                   </div>
 
-                  <div className="p-5 rounded-2xl bg-white border border-[#dab38c]/30 shadow-xs space-y-2">
-                    <div className="flex items-center justify-between text-xs font-semibold text-[#5d3a24]/80">
+                  <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
+                    <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
                       <span>Tidal Walk Bookings</span>
                       <Calendar className="w-4 h-4 text-[#e3a157]" />
                     </div>
-                    <div className="font-display font-bold text-2xl text-[#29100b]">
+                    <div className="font-display font-bold text-2xl text-slate-900">
                       {overviewMetrics.experienceOrdersCount}
                     </div>
-                    <div className="text-[11px] text-[#5d3a24]/70">
+                    <div className="text-[11px] text-slate-400">
                       Confirmed guest passes
                     </div>
                   </div>
 
-                  <div className="p-5 rounded-2xl bg-white border border-[#dab38c]/30 shadow-xs space-y-2">
-                    <div className="flex items-center justify-between text-xs font-semibold text-[#5d3a24]/80">
+                  <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
+                    <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
                       <span>D2C Orders to Ship</span>
                       <Package className="w-4 h-4 text-[#e3a157]" />
                     </div>
-                    <div className="font-display font-bold text-2xl text-[#29100b]">
+                    <div className="font-display font-bold text-2xl text-slate-900">
                       {overviewMetrics.pendingFulfillments}
                     </div>
-                    <div className="text-[11px] text-[#5d3a24]/70">
+                    <div className="text-[11px] text-slate-400">
                       Awaiting courier tracking AWB
                     </div>
                   </div>
 
-                  <div className="p-5 rounded-2xl bg-white border border-[#dab38c]/30 shadow-xs space-y-2">
-                    <div className="flex items-center justify-between text-xs font-semibold text-[#5d3a24]/80">
+                  <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
+                    <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
                       <span>Pending Moderation</span>
                       <ShieldCheck className="w-4 h-4 text-[#e3a157]" />
                     </div>
-                    <div className="font-display font-bold text-2xl text-[#29100b]">
+                    <div className="font-display font-bold text-2xl text-slate-900">
                       {pendingProposalsCount}
                     </div>
-                    <div className="text-[11px] text-[#5d3a24]/70">
+                    <div className="text-[11px] text-slate-400">
                       Community proposals awaiting review
                     </div>
                   </div>
@@ -586,68 +590,68 @@ export const AdminPage: React.FC = () => {
 
                 {/* Quick Navigation Cards */}
                 <div className="space-y-3">
-                  <h3 className="font-display font-bold text-base text-[#29100b]">
+                  <h3 className="font-display font-bold text-base text-slate-900">
                     Quick Operational Jumps
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <button
                       onClick={() => setActiveSection("queues")}
-                      className="p-4 rounded-2xl bg-white hover:bg-[#f5ede4] border border-[#dab38c]/30 text-left transition-colors flex items-center justify-between group cursor-pointer shadow-xs"
+                      className="p-4 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 text-left transition-colors flex items-center justify-between group cursor-pointer shadow-xs"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#29100b] text-[#e3a157] flex items-center justify-center">
+                        <div className="w-9 h-9 rounded-xl bg-slate-900 text-[#e3a157] flex items-center justify-center">
                           <ShieldCheck className="w-4 h-4" />
                         </div>
                         <div>
-                          <div className="font-semibold text-xs text-[#29100b]">
+                          <div className="font-semibold text-xs text-slate-900">
                             Moderate Submissions
                           </div>
-                          <div className="text-[11px] text-[#5d3a24]/70">
+                          <div className="text-[11px] text-slate-500">
                             {pendingProposalsCount} pending decisions
                           </div>
                         </div>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-[#5d3a24] group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
                     </button>
 
                     <button
                       onClick={() => setActiveSection("manifest")}
-                      className="p-4 rounded-2xl bg-white hover:bg-[#f5ede4] border border-[#dab38c]/30 text-left transition-colors flex items-center justify-between group cursor-pointer shadow-xs"
+                      className="p-4 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 text-left transition-colors flex items-center justify-between group cursor-pointer shadow-xs"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#29100b] text-[#e3a157] flex items-center justify-center">
+                        <div className="w-9 h-9 rounded-xl bg-slate-900 text-[#e3a157] flex items-center justify-center">
                           <Calendar className="w-4 h-4" />
                         </div>
                         <div>
-                          <div className="font-semibold text-xs text-[#29100b]">
+                          <div className="font-semibold text-xs text-slate-900">
                             Check-In Manifest
                           </div>
-                          <div className="text-[11px] text-[#5d3a24]/70">
+                          <div className="text-[11px] text-slate-500">
                             Validate guest passes & export CSV
                           </div>
                         </div>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-[#5d3a24] group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
                     </button>
 
                     <button
                       onClick={() => setActiveSection("goods")}
-                      className="p-4 rounded-2xl bg-white hover:bg-[#f5ede4] border border-[#dab38c]/30 text-left transition-colors flex items-center justify-between group cursor-pointer shadow-xs"
+                      className="p-4 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 text-left transition-colors flex items-center justify-between group cursor-pointer shadow-xs"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#29100b] text-[#e3a157] flex items-center justify-center">
+                        <div className="w-9 h-9 rounded-xl bg-slate-900 text-[#e3a157] flex items-center justify-center">
                           <Package className="w-4 h-4" />
                         </div>
                         <div>
-                          <div className="font-semibold text-xs text-[#29100b]">
+                          <div className="font-semibold text-xs text-slate-900">
                             Fulfill D2C Goods
                           </div>
-                          <div className="text-[11px] text-[#5d3a24]/70">
+                          <div className="text-[11px] text-slate-500">
                             Update courier tracking AWBs
                           </div>
                         </div>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-[#5d3a24] group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>
                 </div>
@@ -655,20 +659,20 @@ export const AdminPage: React.FC = () => {
                 {/* Recent Orders Snapshot */}
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-display font-bold text-base text-[#29100b]">
+                    <h3 className="font-display font-bold text-base text-slate-900">
                       Recent Customer Transactions
                     </h3>
                     <button
                       onClick={() => setActiveSection("manifest")}
-                      className="text-xs text-[#29100b] font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+                      className="text-xs text-slate-700 hover:text-slate-900 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
                     >
                       <span>View All Orders</span>
-                      <ArrowRight className="w-3 h-3 text-[#e3a157]" />
+                      <ArrowRight className="w-3 h-3 text-slate-400" />
                     </button>
                   </div>
 
-                  <div className="border border-[#dab38c]/30 rounded-2xl overflow-hidden bg-white shadow-xs">
-                    <div className="divide-y divide-[#dab38c]/20">
+                  <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+                    <div className="divide-y divide-slate-100">
                       {orders.slice(0, 5).map((order) => {
                         const isExp = order.items.some(
                           (i) =>
@@ -679,18 +683,18 @@ export const AdminPage: React.FC = () => {
                         return (
                           <div
                             key={order.id}
-                            className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                            className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-slate-50/60 transition-colors"
                           >
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
-                                <span className="font-mono font-bold text-[#29100b]">
+                                <span className="font-mono font-bold text-slate-900">
                                   {order.order_ref}
                                 </span>
                                 <span
                                   className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                                     isExp
-                                      ? "bg-[#e3a157]/20 text-[#29100b]"
-                                      : "bg-emerald-100 text-emerald-900"
+                                      ? "bg-amber-50 text-amber-800 border border-amber-200"
+                                      : "bg-emerald-50 text-emerald-800 border border-emerald-200"
                                   }`}
                                 >
                                   {isExp
@@ -698,7 +702,7 @@ export const AdminPage: React.FC = () => {
                                     : "Artisan Goods"}
                                 </span>
                               </div>
-                              <div className="text-[#5d3a24]">
+                              <div className="text-slate-600">
                                 {order.customer_name} •{" "}
                                 {order.items[0]?.listing?.title || "Tour Item"}
                               </div>
@@ -706,10 +710,10 @@ export const AdminPage: React.FC = () => {
 
                             <div className="flex items-center gap-4 justify-between sm:justify-end">
                               <div className="text-right">
-                                <div className="font-bold text-[#29100b]">
+                                <div className="font-bold text-slate-900">
                                   {formatINR(order.total_amount_inr)}
                                 </div>
-                                <div className="text-[10px] text-[#5d3a24]/70">
+                                <div className="text-[10px] text-slate-400">
                                   {formatDate(order.created_at)}
                                 </div>
                               </div>

@@ -74,16 +74,16 @@ export const SpecialListingsManager: React.FC<SpecialListingsManagerProps> = ({
   return (
     <div className="space-y-6">
       {/* Top Description & Metrics Card */}
-      <div className="bg-[#35160e]/80 border border-[#dab38c]/20 rounded-2xl p-5 text-[#f5edeb] backdrop-blur-md space-y-4">
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 text-slate-900 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#e3a157]" />
-              <h2 className="font-display font-bold text-lg text-[#f5edeb]">
+              <h2 className="font-display font-bold text-lg text-slate-900">
                 Hero Showcase & Special Listings Manager
               </h2>
             </div>
-            <p className="text-xs text-[#dab38c]/80 leading-relaxed max-w-2xl">
+            <p className="text-xs text-slate-500 leading-relaxed max-w-2xl">
               Manage the curated card deck showcased on the homepage hero
               banner. Reorder cards using the arrows to adjust display priority,
               click to preview live listings, or add new experiences and
@@ -93,19 +93,19 @@ export const SpecialListingsManager: React.FC<SpecialListingsManagerProps> = ({
 
           {/* Quick Balance Counter */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[11px] font-semibold text-[#dab38c] bg-[#29100b] px-3 py-1 rounded-full border border-[#dab38c]/20">
+            <span className="text-[11px] font-semibold text-slate-800 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
               Total Featured: {spotlightListings.length}
             </span>
-            <span className="text-[11px] text-[#dab38c]/80 bg-[#29100b] px-2.5 py-1 rounded-full border border-[#dab38c]/20">
+            <span className="text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200">
               Walks: {categoryCounts["walks"] || 0}
             </span>
-            <span className="text-[11px] text-[#dab38c]/80 bg-[#29100b] px-2.5 py-1 rounded-full border border-[#dab38c]/20">
+            <span className="text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200">
               Workshops: {categoryCounts["workshops"] || 0}
             </span>
-            <span className="text-[11px] text-[#dab38c]/80 bg-[#29100b] px-2.5 py-1 rounded-full border border-[#dab38c]/20">
+            <span className="text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200">
               Food: {categoryCounts["food"] || 0}
             </span>
-            <span className="text-[11px] text-[#dab38c]/80 bg-[#29100b] px-2.5 py-1 rounded-full border border-[#dab38c]/20">
+            <span className="text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200">
               Goods: {categoryCounts["goods"] || 0}
             </span>
           </div>
@@ -113,12 +113,12 @@ export const SpecialListingsManager: React.FC<SpecialListingsManagerProps> = ({
 
         {/* Add Listing Bar */}
         {availableToAdd.length > 0 && (
-          <div className="pt-3 border-t border-[#dab38c]/15 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="flex-1">
               <select
                 value={selectedToAdd}
                 onChange={(e) => setSelectedToAdd(e.target.value)}
-                className="w-full text-xs bg-[#29100b] text-[#f5edeb] border border-[#dab38c]/30 rounded-xl px-3 py-2.5 outline-none focus:border-[#e3a157]"
+                className="w-full text-xs bg-white text-slate-900 border border-slate-200 rounded-xl px-3 py-2.5 outline-none focus:border-slate-900 shadow-xs"
               >
                 <option value="">
                   -- Select an active listing to add to hero spotlight --
@@ -134,7 +134,7 @@ export const SpecialListingsManager: React.FC<SpecialListingsManagerProps> = ({
             <button
               onClick={handleAdd}
               disabled={!selectedToAdd}
-              className="px-4 py-2.5 rounded-xl bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs transition-colors flex items-center justify-center gap-1.5 disabled:opacity-40 cursor-pointer"
+              className="px-4 py-2.5 rounded-xl bg-[#e3a157] hover:bg-[#d97706] text-slate-950 font-bold text-xs transition-colors flex items-center justify-center gap-1.5 disabled:opacity-40 cursor-pointer shadow-xs"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add to Spotlight</span>
@@ -144,23 +144,23 @@ export const SpecialListingsManager: React.FC<SpecialListingsManagerProps> = ({
       </div>
 
       {/* Ordered Spotlight List */}
-      <div className="bg-[#29100b] border border-[#dab38c]/20 rounded-2xl overflow-hidden shadow-lg">
-        <div className="p-4 border-b border-[#dab38c]/15 flex items-center justify-between">
-          <span className="text-xs font-bold text-[#dab38c] uppercase tracking-wider">
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+        <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+          <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
             Active Hero Deck Sequence ({spotlightListings.length} Cards)
           </span>
-          <span className="text-[11px] text-[#dab38c]/60">
+          <span className="text-[11px] text-slate-400">
             Card 1 appears on the far-left of the hero banner
           </span>
         </div>
 
         {spotlightListings.length === 0 ? (
-          <div className="p-12 text-center text-[#dab38c]/60 text-xs">
+          <div className="p-12 text-center text-slate-400 text-xs">
             No listings currently added to the spotlight. Add listings above to
             populate the hero banner.
           </div>
         ) : (
-          <div className="divide-y divide-[#dab38c]/10">
+          <div className="divide-y divide-slate-100">
             {spotlightListings.map((listing, index) => {
               const detailPath =
                 listing.type === "experience"
@@ -173,12 +173,12 @@ export const SpecialListingsManager: React.FC<SpecialListingsManagerProps> = ({
               return (
                 <div
                   key={listing.id}
-                  className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-[#35160e]/50 transition-colors"
+                  className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-slate-50/80 transition-colors"
                 >
                   {/* Left: Sequence Badge + Thumbnail + Details */}
                   <div className="flex items-center gap-3.5 min-w-0 flex-1">
                     {/* Position Badge */}
-                    <div className="w-8 h-8 rounded-xl bg-[#35160e] border border-[#dab38c]/30 text-[#e3a157] font-bold text-xs flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 text-slate-900 font-bold text-xs flex items-center justify-center shrink-0">
                       #{index + 1}
                     </div>
 
@@ -186,26 +186,26 @@ export const SpecialListingsManager: React.FC<SpecialListingsManagerProps> = ({
                     <img
                       src={listing.images[0]}
                       alt={listing.title}
-                      className="w-14 h-11 object-cover rounded-lg border border-[#dab38c]/20 shrink-0"
+                      className="w-14 h-11 object-cover rounded-lg border border-slate-200 shrink-0"
                     />
 
                     {/* Title & Metadata */}
                     <div className="min-w-0 space-y-0.5">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-display font-semibold text-xs sm:text-sm text-[#f5edeb] truncate">
+                        <span className="font-display font-semibold text-xs sm:text-sm text-slate-900 truncate">
                           {listing.title}
                         </span>
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#35160e] border border-[#dab38c]/20 text-[10px] font-bold uppercase text-[#e3a157]">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-[10px] font-bold uppercase text-slate-700">
                           {getPillarIcon(listing.pillar)}
                           <span>{listing.pillar || listing.type}</span>
                         </span>
                       </div>
-                      <div className="text-[11px] text-[#dab38c]/70 flex items-center gap-3 flex-wrap">
+                      <div className="text-[11px] text-slate-500 flex items-center gap-3 flex-wrap">
                         <span>Price: {formatINR(listing.price_inr)}</span>
                         <span>•</span>
                         <span>Host/Artisan: {listing.host_name}</span>
                         <span>•</span>
-                        <span className="text-[#dab38c]/50">
+                        <span className="text-slate-400">
                           Slug: {listing.slug}
                         </span>
                       </div>
@@ -219,7 +219,7 @@ export const SpecialListingsManager: React.FC<SpecialListingsManagerProps> = ({
                       onClick={() => onReorder(index, index - 1)}
                       disabled={isFirst}
                       title="Move card left/earlier in sequence"
-                      className="p-2 rounded-lg bg-[#35160e] hover:bg-[#5d3a24] text-[#dab38c] hover:text-[#f5edeb] border border-[#dab38c]/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                      className="p-2 rounded-lg bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-xs"
                     >
                       <ArrowUp className="w-4 h-4" />
                     </button>
@@ -229,7 +229,7 @@ export const SpecialListingsManager: React.FC<SpecialListingsManagerProps> = ({
                       onClick={() => onReorder(index, index + 1)}
                       disabled={isLast}
                       title="Move card right/later in sequence"
-                      className="p-2 rounded-lg bg-[#35160e] hover:bg-[#5d3a24] text-[#dab38c] hover:text-[#f5edeb] border border-[#dab38c]/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                      className="p-2 rounded-lg bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-xs"
                     >
                       <ArrowDown className="w-4 h-4" />
                     </button>
@@ -240,9 +240,9 @@ export const SpecialListingsManager: React.FC<SpecialListingsManagerProps> = ({
                       target="_blank"
                       rel="noreferrer"
                       title="View listing live on site"
-                      className="px-3 py-2 rounded-lg bg-[#35160e] hover:bg-[#5d3a24] text-[#e3a157] hover:text-[#f5edeb] border border-[#dab38c]/20 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="px-3 py-2 rounded-lg bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                     >
-                      <Eye className="w-3.5 h-3.5" />
+                      <Eye className="w-3.5 h-3.5 text-slate-500" />
                       <span>View Live ↗</span>
                     </a>
 
@@ -250,7 +250,7 @@ export const SpecialListingsManager: React.FC<SpecialListingsManagerProps> = ({
                     <button
                       onClick={() => onToggle(listing.id)}
                       title="Remove from hero spotlight deck"
-                      className="p-2 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-rose-100 border border-rose-800/40 transition-colors cursor-pointer"
+                      className="p-2 rounded-lg text-rose-600 hover:bg-rose-50 border border-rose-200 transition-colors cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
