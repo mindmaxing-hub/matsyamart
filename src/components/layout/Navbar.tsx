@@ -26,7 +26,7 @@ export const Navbar: React.FC = () => {
         {/* Minimal Luma-Style Wordmark (Zero Bhoomiputra branding in header) */}
         <Link to="/" className="flex items-center gap-1.5 group">
           <span className="font-display font-bold text-xl text-[#f5edeb] tracking-tight leading-none group-hover:text-[#dab38c] transition-colors">
-            matsyamart
+            MatsyaMart
           </span>
           <span className="text-[#e3a157] font-bold text-lg leading-none">
             ✦

@@ -129,7 +129,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           }`}
         >
           <span className="font-display font-bold tracking-tight text-[#f5edeb]">
-            matsyamart
+            MatsyaMart
           </span>
           <span className="text-[#e3a157] font-bold leading-none">✦</span>
         </div>

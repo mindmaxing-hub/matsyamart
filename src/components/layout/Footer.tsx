@@ -17,7 +17,7 @@ export const Footer: React.FC = () => {
                 className="w-6 h-6 object-contain"
               />
               <span className="font-display font-bold text-lg text-[#f5edeb]">
-                matsyamart<span className="text-[#e3a157]">✦</span>
+                MatsyaMart<span className="text-[#e3a157]">✦</span>
               </span>
             </Link>
             <p className="text-[11px] text-[#dab38c]/80 leading-relaxed">

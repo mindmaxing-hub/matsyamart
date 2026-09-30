@@ -64,14 +64,14 @@ export async function initiatePayment(
         currency: "INR",
         name: "MatsyaMart",
         description: options.description,
-        image: "https://experience.bhoomiputra.org/favicon.svg",
+        image: "/favicon.svg",
         prefill: {
           name: options.customerName,
           email: options.customerEmail,
           contact: options.customerPhone,
         },
         theme: {
-          color: "#004A63",
+          color: "#29100b",
         },
         handler: function (response: RazorpaySuccessResponse) {
           options.onSuccess({
