@@ -255,167 +255,137 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
   return (
     <div className="space-y-6">
       {/* 4 Financial Split Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Pending Refund Requests</span>
-            <Clock className="w-4 h-4 text-amber-600" />
+      <div className="metrics">
+        <div className="metric hl">
+          <div className="lbl">Pending Refund Requests</div>
+          <div className="val text-[var(--admin-accent-strong)]">
+            {pendingRequests}
           </div>
-          <div className="font-display font-bold text-2xl text-amber-600">
-            {pendingRequests} Requests
-          </div>
-          <div className="text-[11px] text-slate-400">
-            Awaiting coordinator audit
-          </div>
+          <div className="sub">Awaiting coordinator audit</div>
+          <div className="tick">↗</div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Cash Refunds Processed</span>
-            <RotateCcw className="w-4 h-4 text-rose-500" />
-          </div>
-          <div className="font-display font-bold text-2xl text-slate-900">
-            {formatINR(totalRefundedInr)}
-          </div>
-          <div className="text-[11px] text-slate-400">
-            Via original payment gateway
-          </div>
+        <div className="metric">
+          <div className="lbl">Cash Refunds Processed</div>
+          <div className="val">{formatINR(totalRefundedInr)}</div>
+          <div className="sub">Via original payment gateway</div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Store Credit Vouchers</span>
-            <Ticket className="w-4 h-4 text-emerald-600" />
-          </div>
-          <div className="font-display font-bold text-2xl text-emerald-600">
-            {vouchersIssuedCount} Vouchers
-          </div>
-          <div className="text-[11px] text-slate-400">
-            Retained 100% platform revenue
-          </div>
+        <div className="metric">
+          <div className="lbl">Store Credit Vouchers</div>
+          <div className="val">{vouchersIssuedCount}</div>
+          <div className="sub">Retained 100% platform revenue</div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Policy Compliance Rate</span>
-            <ShieldCheck className="w-4 h-4 text-[#e3a157]" />
-          </div>
-          <div className="font-display font-bold text-2xl text-slate-900">
-            98.8%
-          </div>
-          <div className="text-[11px] text-slate-400">
-            Zero chargeback disputes
-          </div>
+        <div className="metric">
+          <div className="lbl">Policy Compliance Rate</div>
+          <div className="val">98.8%</div>
+          <div className="sub">Zero chargeback disputes</div>
         </div>
       </div>
 
       {actionSuccessMsg && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2 shadow-xs">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>{actionSuccessMsg}</span>
+        <div className="p-3.5 bg-[var(--admin-surface)] border border-[var(--admin-accent)] text-[var(--admin-fg)] text-xs rounded-2xl flex items-center gap-2 shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-[var(--admin-accent-strong)] shrink-0" />
+          <span className="font-medium">{actionSuccessMsg}</span>
         </div>
       )}
 
       {/* Filter and Export Bar */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-xs">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search customer name, order ref, or phone..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full text-xs pl-9 pr-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl outline-none focus:border-slate-900 shadow-xs"
-            />
+      <div className="admin-card p-4">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+            <div className="admin-search flex-1">
+              <span className="text-[var(--admin-faint)]">⌕</span>
+              <input
+                type="text"
+                placeholder="Search customer name, order ref, or phone..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="admin-select text-xs"
+            >
+              <option value="all">All Request Statuses</option>
+              <option value="requested">Pending Decision</option>
+              <option value="refunded">Cash Refunded</option>
+              <option value="credit_voucher_issued">Store Credit Issued</option>
+              <option value="declined">Declined</option>
+            </select>
           </div>
 
-          {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-xs bg-white text-slate-900 border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-slate-900 shadow-xs"
+          <button
+            onClick={exportRefundsCSV}
+            className="admin-btn text-xs font-semibold"
           >
-            <option value="all">All Request Statuses</option>
-            <option value="requested">Pending Decision</option>
-            <option value="refunded">Cash Refunded</option>
-            <option value="credit_voucher_issued">Store Credit Issued</option>
-            <option value="declined">Declined</option>
-          </select>
+            <FileSpreadsheet className="w-3.5 h-3.5 text-[var(--admin-accent)]" />
+            <span>Export Refunds CSV</span>
+          </button>
         </div>
-
-        {/* CSV Export */}
-        <button
-          onClick={exportRefundsCSV}
-          className="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-        >
-          <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Export Refunds CSV</span>
-        </button>
       </div>
 
       {/* Refunds Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+      <div className="admin-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-700">
-            <thead className="bg-slate-50 text-slate-500 font-bold text-[10px] uppercase tracking-wider border-b border-slate-200">
+          <table className="grid w-full">
+            <thead>
               <tr>
-                <th className="py-3 px-4">Ticket Ref & Guest</th>
-                <th className="py-3 px-4">Tour / Item</th>
-                <th className="py-3 px-4">Notice Window</th>
-                <th className="py-3 px-4">Cancellation Reason</th>
-                <th className="py-3 px-4 text-right">Amount</th>
-                <th className="py-3 px-4 text-center">Policy Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th>Ticket Ref &amp; Guest</th>
+                <th>Tour / Item</th>
+                <th>Notice Window</th>
+                <th>Cancellation Reason</th>
+                <th style={{ textAlign: "right" }}>Amount</th>
+                <th style={{ textAlign: "center" }}>Policy Status</th>
+                <th style={{ textAlign: "right" }}>Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs">
+            <tbody>
               {filteredTickets.map((t) => {
                 const isPending = t.status === "requested";
 
                 return (
-                  <tr
-                    key={t.id}
-                    className="hover:bg-slate-50/80 transition-colors"
-                  >
+                  <tr key={t.id}>
                     {/* Ref & Guest */}
-                    <td className="py-3.5 px-4 align-top">
-                      <div className="font-mono font-bold text-slate-900">
+                    <td>
+                      <div className="font-editorial-mono font-bold text-[var(--admin-fg)] text-[12px]">
                         {t.order_ref}
                       </div>
-                      <div className="font-semibold text-slate-800 mt-0.5">
+                      <div className="font-semibold text-[var(--admin-fg)] mt-0.5">
                         {t.customer_name}
                       </div>
-                      <div className="text-[10px] text-slate-400">
+                      <div className="text-[11px] text-[var(--admin-faint)]">
                         {t.customer_phone}
                       </div>
                     </td>
 
                     {/* Tour Name */}
-                    <td className="py-3.5 px-4 align-top max-w-[200px]">
-                      <div className="font-semibold text-slate-900 truncate">
+                    <td className="max-w-[200px]">
+                      <b className="text-[var(--admin-fg)] block truncate">
                         {t.tour_or_item_name}
-                      </div>
-                      <div className="text-[10px] text-slate-400 mt-0.5">
+                      </b>
+                      <div className="text-[11px] text-[var(--admin-faint)] mt-0.5">
                         Booked for: {t.booking_date}
                       </div>
                     </td>
 
                     {/* Notice Window */}
-                    <td className="py-3.5 px-4 align-top">
+                    <td>
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
+                        className={`admin-pill text-[9.5px] ${
                           t.hours_before_tour >= 48
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            ? "admin-pill-line"
                             : t.hours_before_tour >= 24
-                              ? "bg-amber-50 text-amber-700 border-amber-200"
-                              : "bg-rose-50 text-rose-700 border-rose-200"
+                              ? "admin-pill-amber"
+                              : "admin-pill-roast"
                         }`}
                       >
                         {t.hours_before_tour}h Notice
                       </span>
-                      <div className="text-[10px] text-slate-400 mt-1">
+                      <div className="text-[11px] text-[var(--admin-faint)] mt-1">
                         {t.hours_before_tour >= 48
                           ? "100% Refund Eligible"
                           : t.hours_before_tour >= 24
@@ -425,68 +395,69 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
                     </td>
 
                     {/* Cancellation Reason */}
-                    <td className="py-3.5 px-4 align-top max-w-xs">
-                      <div className="text-slate-600 text-[11px] leading-relaxed">
+                    <td className="max-w-xs">
+                      <div className="text-[var(--admin-muted)] text-[12px] leading-relaxed">
                         {t.cancellation_reason}
                       </div>
                       {t.admin_notes && (
-                        <div className="text-[10px] text-slate-400 italic mt-0.5">
+                        <div className="text-[11px] text-[var(--admin-faint)] italic mt-0.5">
                           Note: {t.admin_notes}
                         </div>
                       )}
                     </td>
 
                     {/* Amount */}
-                    <td className="py-3.5 px-4 align-top text-right font-bold text-slate-900">
-                      {formatINR(t.amount_paid_inr)}
+                    <td style={{ textAlign: "right" }}>
+                      <b className="text-[var(--admin-fg)]">
+                        {formatINR(t.amount_paid_inr)}
+                      </b>
                     </td>
 
                     {/* Status Pill */}
-                    <td className="py-3.5 px-4 align-top text-center">
+                    <td style={{ textAlign: "center" }}>
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
+                        className={`admin-pill text-[9.5px] ${
                           t.status === "refunded"
-                            ? "bg-rose-50 text-rose-700 border-rose-200"
+                            ? "admin-pill-roast"
                             : t.status === "credit_voucher_issued"
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              ? "admin-pill-line"
                               : t.status === "declined"
-                                ? "bg-slate-100 text-slate-700 border-slate-200"
-                                : "bg-amber-50 text-amber-700 border-amber-200"
+                                ? "admin-pill-line opacity-60"
+                                : "admin-pill-amber"
                         }`}
                       >
                         {t.status.replace(/_/g, " ")}
                       </span>
                       {t.credit_voucher_code && (
-                        <div className="font-mono text-emerald-700 font-bold text-[10px] mt-1">
+                        <div className="font-editorial-mono text-[var(--admin-accent-strong)] font-bold text-[11px] mt-1">
                           {t.credit_voucher_code}
                         </div>
                       )}
                     </td>
 
                     {/* Actions */}
-                    <td className="py-3.5 px-4 align-top text-right">
+                    <td style={{ textAlign: "right" }}>
                       {isPending ? (
                         <div className="flex items-center justify-end gap-1.5 flex-wrap">
                           <button
                             onClick={() => handleOpenAction(t, "credit")}
-                            className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs inline-flex items-center gap-1"
+                            className="admin-btn admin-btn-primary text-xs font-bold py-1 px-2.5"
                             title="Issue 100% store credit voucher code"
                           >
-                            <Ticket className="w-3 h-3" />
-                            <span>Credit Voucher</span>
+                            Credit voucher
                           </button>
 
                           <button
                             onClick={() => handleOpenAction(t, "refund")}
-                            className="px-2.5 py-1 bg-white hover:bg-slate-50 text-rose-600 border border-rose-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+                            className="admin-btn text-xs py-1 px-2.5"
                             title="Log Razorpay refund reference"
                           >
-                            Cash Refund
+                            Cash refund
                           </button>
 
                           <button
                             onClick={() => handleDecline(t.id)}
-                            className="px-2 py-1 text-slate-400 hover:text-slate-700 text-xs font-medium cursor-pointer"
+                            className="admin-btn admin-btn-quiet text-xs py-1 px-2 text-[var(--admin-faint)]"
                             title="Decline cancellation"
                           >
                             Decline
@@ -499,10 +470,10 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
                           )}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[11px] text-emerald-700 hover:underline inline-flex items-center gap-1"
+                          className="text-[12px] text-[var(--admin-accent-strong)] hover:underline inline-flex items-center gap-1 font-semibold"
                         >
                           <Send className="w-3 h-3" />
-                          <span>WhatsApp Update</span>
+                          <span>WhatsApp Update ↗</span>
                         </a>
                       )}
                     </td>
@@ -516,17 +487,17 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
 
       {/* Action Modal (Cash Refund or Credit Voucher) */}
       {selectedTicket && actionType && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-md p-6 space-y-5 text-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#29100B]/50 backdrop-blur-xs">
+          <div className="admin-card w-full max-w-md p-6 space-y-5">
+            <div className="flex items-center justify-between border-b border-[var(--admin-border-soft)] pb-3">
               <div>
-                <h3 className="font-display font-bold text-base text-slate-900">
+                <h3 className="font-editorial text-2xl text-[var(--admin-fg)]">
                   {actionType === "refund"
                     ? "Confirm Cash Refund"
                     : "Issue Store Credit Voucher"}
                 </h3>
-                <p className="text-xs text-slate-500">
-                  {selectedTicket.customer_name} • {selectedTicket.order_ref}
+                <p className="text-xs text-[var(--admin-muted)]">
+                  {selectedTicket.customer_name} · {selectedTicket.order_ref}
                 </p>
               </div>
               <button
@@ -534,7 +505,7 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
                   setSelectedTicket(null);
                   setActionType(null);
                 }}
-                className="text-slate-400 hover:text-slate-700 text-lg leading-none cursor-pointer"
+                className="text-[var(--admin-muted)] hover:text-[var(--admin-fg)] text-lg leading-none cursor-pointer"
               >
                 ✕
               </button>
@@ -543,7 +514,7 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
             <form onSubmit={handleConfirmAction} className="space-y-4">
               {actionType === "refund" ? (
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 block mb-1">
+                  <label className="text-[11px] font-bold tracking-wider uppercase text-[var(--admin-muted)] block mb-1.5">
                     Razorpay Gateway Refund ID
                   </label>
                   <input
@@ -551,15 +522,15 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
                     required
                     value={razorpayRefundId}
                     onChange={(e) => setRazorpayRefundId(e.target.value)}
-                    className="w-full text-xs px-3 py-2.5 bg-white text-slate-900 border border-slate-200 rounded-xl outline-none focus:border-slate-900 shadow-xs"
+                    className="w-full text-xs p-2.5 bg-[var(--admin-surface)] text-[var(--admin-fg)] border border-[var(--admin-border)] rounded-xl outline-none focus:border-[var(--admin-accent-strong)] font-editorial-mono"
                   />
-                  <span className="text-[10px] text-slate-400 mt-1 block">
+                  <span className="text-[11px] text-[var(--admin-faint)] mt-1 block">
                     Refund Amount: {formatINR(selectedTicket.amount_paid_inr)}
                   </span>
                 </div>
               ) : (
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 block mb-1">
+                  <label className="text-[11px] font-bold tracking-wider uppercase text-[var(--admin-muted)] block mb-1.5">
                     Generated Store Credit Voucher Code
                   </label>
                   <input
@@ -567,9 +538,9 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
                     required
                     value={voucherCode}
                     onChange={(e) => setVoucherCode(e.target.value)}
-                    className="w-full text-xs px-3 py-2.5 bg-white text-slate-900 border border-slate-200 rounded-xl outline-none font-mono font-bold focus:border-slate-900 shadow-xs"
+                    className="w-full text-xs p-2.5 bg-[var(--admin-surface)] text-[var(--admin-fg)] border border-[var(--admin-border)] rounded-xl outline-none font-editorial-mono font-bold focus:border-[var(--admin-accent-strong)]"
                   />
-                  <span className="text-[10px] text-emerald-600 mt-1 block">
+                  <span className="text-[11.5px] text-[var(--admin-accent-strong)] mt-1 block">
                     Valid for 180 days across any coastal safari or pantry item.
                   </span>
                 </div>
@@ -582,17 +553,13 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
                     setSelectedTicket(null);
                     setActionType(null);
                   }}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer shadow-xs"
+                  className="admin-btn admin-btn-quiet text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className={`px-4 py-2 text-xs font-bold rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5 ${
-                    actionType === "refund"
-                      ? "bg-rose-600 hover:bg-rose-700 text-white"
-                      : "bg-[#e3a157] hover:bg-[#d97706] text-slate-950"
-                  }`}
+                  className="admin-btn admin-btn-primary text-xs font-bold"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>

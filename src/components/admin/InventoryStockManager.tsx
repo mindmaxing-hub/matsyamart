@@ -225,123 +225,94 @@ export const InventoryStockManager: React.FC<InventoryStockManagerProps> = ({
   return (
     <div className="space-y-6">
       {/* 4 KPI Stock Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Total Physical SKUs</span>
-            <Package className="w-4 h-4 text-[#e3a157]" />
-          </div>
-          <div className="font-display font-bold text-2xl text-slate-900">
-            {productListings.length}
-          </div>
-          <div className="text-[11px] text-slate-400">
-            Cataloged artisan goods
-          </div>
+      <div className="metrics">
+        <div className="metric hl">
+          <div className="lbl">Total Physical SKUs</div>
+          <div className="val">{productListings.length}</div>
+          <div className="sub">Cataloged pantry goods</div>
+          <div className="tick">↗</div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>In-Stock Inventory</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          </div>
-          <div className="font-display font-bold text-2xl text-emerald-600">
-            {totalStockUnits} Units
-          </div>
-          <div className="text-[11px] text-slate-400">
-            Ready in village hubs
-          </div>
+        <div className="metric">
+          <div className="lbl">In-Stock Inventory</div>
+          <div className="val">{totalStockUnits}</div>
+          <div className="sub">Units ready across village hubs</div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Low Stock Warnings</span>
-            <AlertTriangle className="w-4 h-4 text-amber-600" />
+        <div className="metric">
+          <div className="lbl">Low Stock Warnings</div>
+          <div className="val text-[var(--admin-accent-strong)]">
+            {lowStockCount}
           </div>
-          <div className="font-display font-bold text-2xl text-amber-600">
-            {lowStockCount} SKUs
-          </div>
-          <div className="text-[11px] text-slate-400">
-            Below replenishment threshold
-          </div>
+          <div className="sub">Below replenishment threshold</div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Out of Stock</span>
-            <AlertTriangle className="w-4 h-4 text-rose-500" />
-          </div>
-          <div className="font-display font-bold text-2xl text-rose-600">
-            {outOfStockCount} SKUs
-          </div>
-          <div className="text-[11px] text-slate-400">
-            Ordering disabled automatically
-          </div>
+        <div className="metric">
+          <div className="lbl">Out of Stock</div>
+          <div className="val">{outOfStockCount}</div>
+          <div className="sub">Ordering disabled automatically</div>
         </div>
       </div>
 
       {notification && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2 shadow-xs">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>{notification}</span>
+        <div className="p-3.5 bg-[var(--admin-surface)] border border-[var(--admin-accent)] text-[var(--admin-fg)] text-xs rounded-2xl flex items-center gap-2 shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-[var(--admin-accent-strong)] shrink-0" />
+          <span className="font-medium">{notification}</span>
         </div>
       )}
 
       {/* Filter and Export Bar */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-xs">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search product title, batch lot number, or collective..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full text-xs pl-9 pr-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl outline-none focus:border-slate-900 shadow-xs"
-            />
+      <div className="admin-card p-4">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+            <div className="admin-search flex-1">
+              <span className="text-[var(--admin-faint)]">⌕</span>
+              <input
+                type="text"
+                placeholder="Search product title, batch lot number, or collective..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <select
+              value={stockFilter}
+              onChange={(e) => setStockFilter(e.target.value)}
+              className="admin-select text-xs"
+            >
+              <option value="all">All Inventory Statuses</option>
+              <option value="in">Normal In-Stock</option>
+              <option value="low">Low Stock Alerts Only</option>
+              <option value="out">Out of Stock Only</option>
+            </select>
           </div>
 
-          {/* Stock Filter */}
-          <select
-            value={stockFilter}
-            onChange={(e) => setStockFilter(e.target.value)}
-            className="text-xs bg-white text-slate-900 border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-slate-900 shadow-xs"
+          <button
+            onClick={exportInventoryCSV}
+            className="admin-btn text-xs font-semibold"
           >
-            <option value="all">All Inventory Statuses</option>
-            <option value="in">Normal In-Stock</option>
-            <option value="low">Low Stock Alerts Only</option>
-            <option value="out">Out of Stock Only</option>
-          </select>
+            <FileSpreadsheet className="w-3.5 h-3.5 text-[var(--admin-accent)]" />
+            <span>Export Stock CSV</span>
+          </button>
         </div>
-
-        {/* CSV Export */}
-        <button
-          onClick={exportInventoryCSV}
-          className="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-        >
-          <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Export Stock CSV</span>
-        </button>
       </div>
 
       {/* Inventory & Freshness Batch Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+      <div className="admin-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-700">
-            <thead className="bg-slate-50 text-slate-500 font-bold text-[10px] uppercase tracking-wider border-b border-slate-200">
+          <table className="grid w-full">
+            <thead>
               <tr>
-                <th className="py-3 px-4">Artisan Pantry Product</th>
-                <th className="py-3 px-4">Lot # & FSSAI</th>
-                <th className="py-3 px-4">Packaged Date</th>
-                <th className="py-3 px-4">Best Before</th>
-                <th className="py-3 px-4 text-center">Current Stock</th>
-                <th className="py-3 px-4 text-center">Status</th>
-                <th className="py-3 px-4 text-right">
-                  Quick Restock Allocation
-                </th>
+                <th>Artisan Pantry Product</th>
+                <th>Lot # &amp; FSSAI</th>
+                <th>Packaged Date</th>
+                <th>Best Before</th>
+                <th style={{ textAlign: "center" }}>Current Stock</th>
+                <th style={{ textAlign: "center" }}>Status</th>
+                <th style={{ textAlign: "right" }}>Quick Restock Allocation</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs">
+            <tbody>
               {filteredItems.map(({ listing, batch }) => {
                 const isOutOfStock = batch.stock_units === 0;
                 const isLowStock =
@@ -349,52 +320,49 @@ export const InventoryStockManager: React.FC<InventoryStockManagerProps> = ({
                   batch.stock_units <= batch.min_threshold;
 
                 return (
-                  <tr
-                    key={listing.id}
-                    className="hover:bg-slate-50/80 transition-colors"
-                  >
+                  <tr key={listing.id}>
                     {/* Product & Collective */}
-                    <td className="py-3.5 px-4 align-middle">
+                    <td>
                       <div className="flex items-center gap-3">
                         <img
                           src={listing.images[0]}
                           alt={listing.title}
-                          className="w-10 h-10 rounded-lg object-cover border border-slate-200 shrink-0"
+                          className="w-10 h-10 rounded-xl object-cover border border-[var(--admin-border-soft)] shrink-0"
                         />
                         <div>
-                          <div className="font-semibold text-slate-900">
+                          <b className="text-[var(--admin-fg)] block">
                             {listing.title}
-                          </div>
-                          <div className="text-[11px] text-slate-500">
+                          </b>
+                          <div className="text-[12px] text-[var(--admin-faint)]">
                             {listing.artisan_collective || "Village Collective"}{" "}
-                            • {batch.unit_weight_grams}g
+                            · {batch.unit_weight_grams}g
                           </div>
                         </div>
                       </div>
                     </td>
 
                     {/* Lot # & FSSAI */}
-                    <td className="py-3.5 px-4 align-middle">
-                      <div className="font-mono text-slate-800 text-[11px] font-semibold">
+                    <td>
+                      <div className="font-editorial-mono text-[var(--admin-fg)] text-[11.5px] font-semibold">
                         {batch.lot_number}
                       </div>
-                      <div className="text-[10px] text-slate-400">
+                      <div className="text-[11px] text-[var(--admin-faint)]">
                         {batch.fssai_license_ref || "FSSAI Certified"}
                       </div>
                     </td>
 
                     {/* Packaged Date */}
-                    <td className="py-3.5 px-4 align-middle text-slate-600">
+                    <td className="text-[var(--admin-muted)]">
                       {batch.packaging_date}
                     </td>
 
                     {/* Best Before */}
-                    <td className="py-3.5 px-4 align-middle font-medium text-slate-700">
+                    <td className="font-medium text-[var(--admin-fg)]">
                       {batch.best_before_date}
                     </td>
 
                     {/* Stock Units Editable */}
-                    <td className="py-3.5 px-4 align-middle text-center">
+                    <td style={{ textAlign: "center" }}>
                       <input
                         type="number"
                         min="0"
@@ -402,19 +370,19 @@ export const InventoryStockManager: React.FC<InventoryStockManagerProps> = ({
                         onChange={(e) =>
                           handleSetStockDirect(batch.id, Number(e.target.value))
                         }
-                        className="w-16 text-center font-bold text-slate-900 bg-white border border-slate-200 rounded-lg py-1 px-1.5 outline-none focus:border-slate-900 text-xs shadow-xs"
+                        className="w-16 text-center font-bold text-[var(--admin-fg)] bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-full py-1 px-1.5 outline-none focus:border-[var(--admin-accent-strong)] text-xs font-editorial-mono"
                       />
                     </td>
 
                     {/* Status Pill */}
-                    <td className="py-3.5 px-4 align-middle text-center">
+                    <td style={{ textAlign: "center" }}>
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
+                        className={`admin-pill text-[9.5px] ${
                           isOutOfStock
-                            ? "bg-rose-50 text-rose-700 border-rose-200"
+                            ? "admin-pill-roast"
                             : isLowStock
-                              ? "bg-amber-50 text-amber-700 border-amber-200"
-                              : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              ? "admin-pill-amber"
+                              : "admin-pill-line"
                         }`}
                       >
                         {isOutOfStock
@@ -426,25 +394,25 @@ export const InventoryStockManager: React.FC<InventoryStockManagerProps> = ({
                     </td>
 
                     {/* Quick Restock Actions */}
-                    <td className="py-3.5 px-4 align-middle text-right">
+                    <td style={{ textAlign: "right" }}>
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => handleAdjustStock(batch.id, 10)}
-                          className="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold text-[11px] rounded-lg transition-colors cursor-pointer shadow-xs"
+                          className="admin-btn text-[11px] py-1 px-2.5"
                           title="Add 10 units"
                         >
                           +10
                         </button>
                         <button
                           onClick={() => handleAdjustStock(batch.id, 25)}
-                          className="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold text-[11px] rounded-lg transition-colors cursor-pointer shadow-xs"
+                          className="admin-btn text-[11px] py-1 px-2.5"
                           title="Add 25 units"
                         >
                           +25
                         </button>
                         <button
                           onClick={() => handleAdjustStock(batch.id, 50)}
-                          className="px-2.5 py-1 bg-[#e3a157] hover:bg-[#d97706] text-slate-950 font-bold text-[11px] rounded-lg transition-colors cursor-pointer shadow-xs"
+                          className="admin-btn admin-btn-primary text-[11px] py-1 px-2.5 font-bold"
                           title="Add 50 units"
                         >
                           +50

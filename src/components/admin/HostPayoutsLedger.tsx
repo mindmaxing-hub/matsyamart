@@ -245,196 +245,170 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
   return (
     <div className="space-y-6">
       {/* 4 Financial Split Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Community Earnings (85%)</span>
-            <Wallet className="w-4 h-4 text-[#e3a157]" />
-          </div>
-          <div className="font-display font-bold text-2xl text-slate-900">
-            {formatINR(totalCommunityEarnings)}
-          </div>
-          <div className="text-[11px] text-slate-400">
-            Direct host & artisan allocation
-          </div>
+      <div className="metrics">
+        <div className="metric hl">
+          <div className="lbl">Community Earnings (85%)</div>
+          <div className="val">{formatINR(totalCommunityEarnings)}</div>
+          <div className="sub">Direct host &amp; artisan allocation</div>
+          <div className="tick">↗</div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Outstanding Balance Due</span>
-            <Clock className="w-4 h-4 text-amber-600" />
-          </div>
-          <div className="font-display font-bold text-2xl text-amber-600">
+        <div className="metric">
+          <div className="lbl">Outstanding Balance Due</div>
+          <div className="val text-[var(--admin-accent-strong)]">
             {formatINR(totalOutstanding)}
           </div>
-          <div className="text-[11px] text-slate-400">
-            Awaiting bank / UPI remittance
-          </div>
+          <div className="sub">Awaiting bank / UPI remittance</div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Total Disbursed to Date</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          </div>
-          <div className="font-display font-bold text-2xl text-emerald-600">
-            {formatINR(totalDisbursed)}
-          </div>
-          <div className="text-[11px] text-slate-400">
-            Settled via UPI / IMPS UTR
-          </div>
+        <div className="metric">
+          <div className="lbl">Total Disbursed to Date</div>
+          <div className="val">{formatINR(totalDisbursed)}</div>
+          <div className="sub">Settled via UPI / IMPS UTR</div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>MatsyaMart Retainer (15%)</span>
-            <ShieldCheck className="w-4 h-4 text-slate-700" />
-          </div>
-          <div className="font-display font-bold text-2xl text-slate-900">
-            {formatINR(platformRetainer)}
-          </div>
-          <div className="text-[11px] text-slate-400">
-            Operations, insurance & gateway
-          </div>
+        <div className="metric">
+          <div className="lbl">MatsyaMart Retainer (15%)</div>
+          <div className="val">{formatINR(platformRetainer)}</div>
+          <div className="sub">Operations, safety &amp; platform</div>
         </div>
       </div>
 
       {payoutSuccessMsg && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2 shadow-xs">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>{payoutSuccessMsg}</span>
+        <div className="p-3.5 bg-[var(--admin-surface)] border border-[var(--admin-accent)] text-[var(--admin-fg)] text-xs rounded-2xl flex items-center gap-2 shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-[var(--admin-accent-strong)] shrink-0" />
+          <span className="font-medium">{payoutSuccessMsg}</span>
         </div>
       )}
 
       {/* Filter and Action Bar */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-xs">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search partner name, Koliwada village, or UPI..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full text-xs pl-9 pr-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl outline-none focus:border-slate-900 shadow-xs"
-            />
+      <div className="admin-card p-4">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+            <div className="admin-search flex-1">
+              <span className="text-[var(--admin-faint)]">⌕</span>
+              <input
+                type="text"
+                placeholder="Search partner name, Koliwada village, or UPI..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="admin-select text-xs"
+            >
+              <option value="all">All Community Partners</option>
+              <option value="guide">Tour Hosts &amp; Guides</option>
+              <option value="artisan_collective">Artisan Cooperatives</option>
+            </select>
           </div>
 
-          {/* Role Filter */}
-          <select
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-            className="text-xs bg-white text-slate-900 border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-slate-900 shadow-xs"
+          <button
+            onClick={exportPayoutsCSV}
+            className="admin-btn text-xs font-semibold"
           >
-            <option value="all">All Community Partners</option>
-            <option value="guide">Tour Guides & Storytellers</option>
-            <option value="artisan_collective">Artisan Cooperatives</option>
-          </select>
+            <Download className="w-3.5 h-3.5 text-[var(--admin-accent)]" />
+            <span>Export CSV</span>
+          </button>
         </div>
-
-        {/* CSV Export */}
-        <button
-          onClick={exportPayoutsCSV}
-          className="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-        >
-          <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Export Payouts CSV</span>
-        </button>
       </div>
 
       {/* Partners Payout Ledger Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+      <div className="admin-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-700">
-            <thead className="bg-slate-50 text-slate-500 font-bold text-[10px] uppercase tracking-wider border-b border-slate-200">
+          <table className="grid w-full">
+            <thead>
               <tr>
-                <th className="py-3 px-4">Community Partner</th>
-                <th className="py-3 px-4">Role & Location</th>
-                <th className="py-3 px-4">UPI & Account Details</th>
-                <th className="py-3 px-4 text-right">Total Earned (85%)</th>
-                <th className="py-3 px-4 text-right">Paid to Date</th>
-                <th className="py-3 px-4 text-right">Balance Due</th>
-                <th className="py-3 px-4 text-center">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th>Community Partner</th>
+                <th>Role &amp; Location</th>
+                <th>UPI &amp; Account Details</th>
+                <th style={{ textAlign: "right" }}>Total Earned (85%)</th>
+                <th style={{ textAlign: "right" }}>Paid to Date</th>
+                <th style={{ textAlign: "right" }}>Balance Due</th>
+                <th style={{ textAlign: "center" }}>Status</th>
+                <th style={{ textAlign: "right" }}>Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs">
+            <tbody>
               {filteredPayouts.map((partner) => {
                 const isPaidInFull = partner.pending_balance_inr === 0;
 
                 return (
-                  <tr
-                    key={partner.id}
-                    className="hover:bg-slate-50/80 transition-colors"
-                  >
+                  <tr key={partner.id}>
                     {/* Partner Name */}
-                    <td className="py-3.5 px-4 font-semibold text-slate-900">
-                      {partner.partner_name}
+                    <td>
+                      <b className="text-[var(--admin-fg)]">
+                        {partner.partner_name}
+                      </b>
                     </td>
 
                     {/* Role & Village */}
-                    <td className="py-3.5 px-4">
+                    <td>
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border ${
+                          className={`admin-pill text-[9.5px] ${
                             partner.role_type === "guide"
-                              ? "bg-amber-50 text-amber-800 border-amber-200"
-                              : "bg-emerald-50 text-emerald-800 border-emerald-200"
+                              ? "admin-pill-amber"
+                              : "admin-pill-line"
                           }`}
                         >
                           {partner.role_type === "guide"
                             ? "Tour Host"
                             : "Artisan Co-Op"}
                         </span>
-                        <span className="text-slate-500 text-[11px]">
+                        <span className="text-[var(--admin-muted)] text-[12px]">
                           {partner.koliwada}
                         </span>
                       </div>
                     </td>
 
                     {/* UPI & Bank Account */}
-                    <td className="py-3.5 px-4">
+                    <td>
                       <div className="space-y-0.5">
-                        <div className="font-mono text-slate-800 text-[11px] font-medium">
+                        <div className="font-editorial-mono text-[var(--admin-fg)] text-[11.5px] font-medium">
                           {partner.upi_id}
                         </div>
-                        <div className="text-[10px] text-slate-400">
+                        <div className="text-[11px] text-[var(--admin-faint)]">
                           {partner.bank_account_mask}
                         </div>
                       </div>
                     </td>
 
                     {/* Total Earned */}
-                    <td className="py-3.5 px-4 text-right font-bold text-slate-900">
-                      {formatINR(partner.total_earned_inr)}
+                    <td style={{ textAlign: "right" }}>
+                      <b className="text-[var(--admin-fg)]">
+                        {formatINR(partner.total_earned_inr)}
+                      </b>
                     </td>
 
                     {/* Paid */}
-                    <td className="py-3.5 px-4 text-right font-medium text-emerald-600">
-                      {formatINR(partner.total_paid_inr)}
-                    </td>
-
-                    {/* Balance Due */}
-                    <td className="py-3.5 px-4 text-right font-bold">
-                      <span
-                        className={
-                          partner.pending_balance_inr > 0
-                            ? "text-amber-600"
-                            : "text-slate-400"
-                        }
-                      >
-                        {formatINR(partner.pending_balance_inr)}
+                    <td style={{ textAlign: "right" }}>
+                      <span className="text-[var(--admin-muted)] font-medium">
+                        {formatINR(partner.total_paid_inr)}
                       </span>
                     </td>
 
+                    {/* Balance Due */}
+                    <td style={{ textAlign: "right" }}>
+                      <b
+                        className={
+                          partner.pending_balance_inr > 0
+                            ? "text-[var(--admin-accent-strong)]"
+                            : "text-[var(--admin-faint)]"
+                        }
+                      >
+                        {formatINR(partner.pending_balance_inr)}
+                      </b>
+                    </td>
+
                     {/* Status Pill */}
-                    <td className="py-3.5 px-4 text-center">
+                    <td style={{ textAlign: "center" }}>
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
-                          isPaidInFull
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                            : "bg-amber-50 text-amber-700 border-amber-200"
+                        className={`admin-pill text-[9.5px] ${
+                          isPaidInFull ? "admin-pill-line" : "admin-pill-amber"
                         }`}
                       >
                         {isPaidInFull ? "Disbursed" : "Pending Due"}
@@ -442,18 +416,17 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
                     </td>
 
                     {/* Actions */}
-                    <td className="py-3.5 px-4 text-right">
+                    <td style={{ textAlign: "right" }}>
                       {partner.pending_balance_inr > 0 ? (
                         <button
                           onClick={() => handleOpenDisbursement(partner)}
-                          className="px-3 py-1.5 bg-[#e3a157] hover:bg-[#d97706] text-slate-950 font-bold text-xs rounded-lg transition-colors shadow-xs cursor-pointer inline-flex items-center gap-1"
+                          className="admin-btn admin-btn-primary text-xs font-bold py-1.5 px-3.5"
                         >
-                          <CreditCard className="w-3.5 h-3.5" />
-                          <span>Record Payout</span>
+                          Record payout
                         </button>
                       ) : (
-                        <span className="text-[11px] text-slate-400 italic">
-                          Settled (Ref: {partner.utr_reference?.slice(-6)})
+                        <span className="text-[11.5px] text-[var(--admin-faint)] italic font-editorial-mono">
+                          Settled · {partner.utr_reference?.slice(-6)}
                         </span>
                       )}
                     </td>
@@ -467,20 +440,20 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
 
       {/* Record Disbursement Modal */}
       {selectedPartnerId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-md p-6 space-y-5 text-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#29100B]/50 backdrop-blur-xs">
+          <div className="admin-card w-full max-w-md p-6 space-y-5">
+            <div className="flex items-center justify-between border-b border-[var(--admin-border-soft)] pb-3">
               <div>
-                <h3 className="font-display font-bold text-base text-slate-900">
+                <h3 className="font-editorial text-2xl text-[var(--admin-fg)]">
                   Record Community Remittance
                 </h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--admin-muted)]">
                   Log UPI / NEFT bank settlement reference for accounts audit.
                 </p>
               </div>
               <button
                 onClick={() => setSelectedPartnerId(null)}
-                className="text-slate-400 hover:text-slate-700 text-lg leading-none cursor-pointer"
+                className="text-[var(--admin-muted)] hover:text-[var(--admin-fg)] text-lg leading-none cursor-pointer"
               >
                 ✕
               </button>
@@ -488,7 +461,7 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
 
             <form onSubmit={handleConfirmDisbursement} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1">
+                <label className="text-[11px] font-bold tracking-wider uppercase text-[var(--admin-muted)] block mb-1.5">
                   Disbursement Amount (INR)
                 </label>
                 <input
@@ -497,34 +470,34 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
                   min="1"
                   value={disbursementAmount}
                   onChange={(e) => setDisbursementAmount(e.target.value)}
-                  className="w-full text-xs px-3 py-2.5 bg-white text-slate-900 border border-slate-200 rounded-xl outline-none focus:border-slate-900 shadow-xs"
+                  className="w-full text-xs p-2.5 bg-[var(--admin-surface)] text-[var(--admin-fg)] rounded-xl border border-[var(--admin-border)] outline-none focus:border-[var(--admin-accent-strong)]"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1">
+                <label className="text-[11px] font-bold tracking-wider uppercase text-[var(--admin-muted)] block mb-1.5">
                   Bank / UPI UTR Transaction Reference
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. UTR30948210984"
+                  placeholder="e.g. CMS202610010042"
                   value={utrInput}
                   onChange={(e) => setUtrInput(e.target.value)}
-                  className="w-full text-xs px-3 py-2.5 bg-white text-slate-900 border border-slate-200 rounded-xl outline-none focus:border-slate-900 shadow-xs"
+                  className="w-full text-xs p-2.5 bg-[var(--admin-surface)] text-[var(--admin-fg)] rounded-xl border border-[var(--admin-border)] outline-none focus:border-[var(--admin-accent-strong)] font-editorial-mono"
                 />
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-[11px] text-slate-600 space-y-1">
+              <div className="p-3 bg-[var(--admin-bg)] rounded-xl border border-[var(--admin-border-soft)] text-xs text-[var(--admin-muted)] space-y-1">
                 <div className="flex justify-between">
                   <span>Destination UPI:</span>
-                  <span className="font-mono font-bold text-slate-800">
+                  <span className="font-editorial-mono font-bold text-[var(--admin-fg)]">
                     {payouts.find((p) => p.id === selectedPartnerId)?.upi_id}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Account:</span>
-                  <span className="text-slate-700">
+                  <span className="text-[var(--admin-fg)]">
                     {
                       payouts.find((p) => p.id === selectedPartnerId)
                         ?.bank_account_mask
@@ -537,16 +510,15 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
                 <button
                   type="button"
                   onClick={() => setSelectedPartnerId(null)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer shadow-xs"
+                  className="admin-btn admin-btn-quiet text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-xs font-bold text-slate-950 bg-[#e3a157] hover:bg-[#d97706] rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5"
+                  className="admin-btn admin-btn-primary text-xs font-bold"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Confirm Settlement</span>
+                  Confirm settlement
                 </button>
               </div>
             </form>

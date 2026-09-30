@@ -151,64 +151,41 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
   return (
     <div className="space-y-6">
       {/* 4 Safety Status KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Coastal Zones Monitored</span>
-            <Compass className="w-4 h-4 text-[#e3a157]" />
-          </div>
-          <div className="font-display font-bold text-2xl text-slate-900">
-            {zones.length} Zones
-          </div>
-          <div className="text-[11px] text-slate-400">
-            Mumbai & Thane shoreline
-          </div>
+      <div className="metrics">
+        <div className="metric hl">
+          <div className="lbl">Coastal Zones Monitored</div>
+          <div className="val">{zones.length}</div>
+          <div className="sub">Shoreline sectors mapped</div>
+          <div className="tick">↗</div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Normal Water Conditions</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+        <div className="metric">
+          <div className="lbl">Normal Water Conditions</div>
+          <div className="val">
+            {zones.filter((z) => z.status === "normal").length}
           </div>
-          <div className="font-display font-bold text-2xl text-emerald-600">
-            {zones.filter((z) => z.status === "normal").length} Zones
-          </div>
-          <div className="text-[11px] text-slate-400">
-            Optimal tidal window active
-          </div>
+          <div className="sub">Optimal tidal windows active</div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Cautionary Swell</span>
-            <AlertTriangle className="w-4 h-4 text-amber-600" />
+        <div className="metric">
+          <div className="lbl">Cautionary Swell</div>
+          <div className="val text-[var(--admin-accent-strong)]">
+            {cautionZonesCount}
           </div>
-          <div className="font-display font-bold text-2xl text-amber-600">
-            {cautionZonesCount} Zones
-          </div>
-          <div className="text-[11px] text-slate-400">
-            Increased guide vigilance
-          </div>
+          <div className="sub">Increased guide vigilance</div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Emergency Lockdowns</span>
-            <ShieldAlert className="w-4 h-4 text-rose-600" />
-          </div>
-          <div className="font-display font-bold text-2xl text-rose-600">
-            {lockdownZonesCount} Zones
-          </div>
-          <div className="text-[11px] text-slate-400">
-            Tours suspended for safety
-          </div>
+        <div className="metric">
+          <div className="lbl">Emergency Lockdowns</div>
+          <div className="val">{lockdownZonesCount}</div>
+          <div className="sub">Tours suspended for safety</div>
         </div>
       </div>
 
       {alertSuccessMsg && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2 shadow-xs">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>{alertSuccessMsg}</span>
+        <div className="p-3.5 bg-[var(--admin-surface)] border border-[var(--admin-accent)] text-[var(--admin-fg)] text-xs rounded-2xl flex items-center gap-2 shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-[var(--admin-accent-strong)] shrink-0" />
+          <span className="font-medium">{alertSuccessMsg}</span>
         </div>
       )}
 
@@ -217,11 +194,11 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
         {/* LEFT 2 COLS: Zone Safety Matrix */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-display font-bold text-base text-slate-900">
-              Live Coastal Zone Conditions & Swell Monitor
+            <h3 className="font-editorial text-2xl text-[var(--admin-fg)]">
+              Live Coastal Zone Conditions &amp; Swell Monitor
             </h3>
-            <span className="text-xs text-slate-500">
-              Updated automatically via coordinator network
+            <span className="text-xs text-[var(--admin-muted)]">
+              Coordinators synced
             </span>
           </div>
 
@@ -232,37 +209,28 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
               const isLockdown = zone.status === "lockdown";
 
               return (
-                <div
-                  key={zone.id}
-                  className={`bg-white rounded-2xl border p-5 space-y-4 shadow-xs transition-all ${
-                    isLockdown
-                      ? "border-rose-300 ring-2 ring-rose-100"
-                      : isCaution
-                        ? "border-amber-300 ring-2 ring-amber-50"
-                        : "border-slate-200/80"
-                  }`}
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                <div key={zone.id} className="admin-card p-5 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--admin-border-soft)] pb-3">
                     <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-display font-bold text-base text-slate-900">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <span className="font-editorial text-xl text-[var(--admin-fg)]">
                           {zone.zone_name}
                         </span>
                         <span
-                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase border ${
-                            isNormal
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          className={`admin-pill text-[9.5px] ${
+                            isLockdown
+                              ? "admin-pill-roast"
                               : isCaution
-                                ? "bg-amber-50 text-amber-700 border-amber-200"
-                                : "bg-rose-50 text-rose-700 border-rose-200 animate-pulse"
+                                ? "admin-pill-amber"
+                                : "admin-pill-line"
                           }`}
                         >
                           {zone.status.toUpperCase()}
                         </span>
                       </div>
-                      <div className="text-xs text-slate-500 mt-1 flex items-center gap-3 flex-wrap">
+                      <div className="text-[13px] text-[var(--admin-muted)] mt-1 flex items-center gap-3 flex-wrap">
                         <span>Tide: {zone.tide_phase}</span>
-                        <span>•</span>
+                        <span>·</span>
                         <span>Swell: {zone.swell_height_m}m</span>
                       </div>
                     </div>
@@ -273,10 +241,10 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
                         onClick={() =>
                           handleUpdateZoneStatus(zone.id, "normal")
                         }
-                        className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
+                        className={`admin-btn text-xs py-1.5 px-3 ${
                           isNormal
-                            ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                            : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                            ? "bg-[var(--admin-fg)] text-[var(--admin-surface)]"
+                            : ""
                         }`}
                       >
                         Normal
@@ -285,20 +253,18 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
                         onClick={() =>
                           handleUpdateZoneStatus(zone.id, "caution")
                         }
-                        className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
-                          isCaution
-                            ? "bg-amber-600 text-white border-amber-600 shadow-xs"
-                            : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                        className={`admin-btn text-xs py-1.5 px-3 ${
+                          isCaution ? "admin-btn-primary font-bold" : ""
                         }`}
                       >
                         Caution
                       </button>
                       <button
                         onClick={() => setSelectedLockdownZone(zone.id)}
-                        className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
+                        className={`admin-btn text-xs py-1.5 px-3 ${
                           isLockdown
-                            ? "bg-rose-600 text-white border-rose-600 shadow-xs"
-                            : "bg-white text-rose-600 border-rose-200 hover:bg-rose-50"
+                            ? "bg-rose-700 text-white border-transparent"
+                            : "text-rose-700 hover:border-rose-400"
                         }`}
                       >
                         Lockdown
@@ -308,8 +274,8 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
 
                   {/* Advisory Text Editor */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-600 block">
-                      Coastal Advisory & Safety Briefing
+                    <label className="text-[11px] font-bold tracking-wider uppercase text-[var(--admin-muted)] block">
+                      Coastal Advisory &amp; Safety Briefing
                     </label>
                     <input
                       type="text"
@@ -317,13 +283,13 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
                       onChange={(e) =>
                         handleUpdateAdvisory(zone.id, e.target.value)
                       }
-                      className="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 outline-none focus:bg-white focus:border-slate-900 shadow-xs"
+                      className="w-full text-xs p-2.5 bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-xl text-[var(--admin-fg)] outline-none focus:border-[var(--admin-accent-strong)]"
                     />
                   </div>
 
                   {/* Quick Action: Open WhatsApp Broadcast */}
                   <div className="flex items-center justify-between text-xs pt-1">
-                    <span className="text-[11px] text-slate-400">
+                    <span className="text-[11.5px] text-[var(--admin-faint)]">
                       Last logged: {formatDate(zone.last_updated)}
                     </span>
                     <a
@@ -332,10 +298,10 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
                       )}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-emerald-700 hover:text-emerald-800 font-semibold inline-flex items-center gap-1 cursor-pointer"
+                      className="text-[var(--admin-accent-strong)] hover:underline font-semibold inline-flex items-center gap-1 cursor-pointer"
                     >
                       <Send className="w-3 h-3" />
-                      <span>Broadcast Advisory to Guides & Guests</span>
+                      <span>Broadcast advisory to guides &amp; guests ↗</span>
                     </a>
                   </div>
                 </div>
@@ -346,59 +312,59 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
 
         {/* RIGHT COL: Emergency Response Hotlines & Protocol */}
         <div className="space-y-5">
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
-            <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-              <PhoneCall className="w-4 h-4 text-rose-600" />
-              <h4 className="font-display font-bold text-sm text-slate-900">
+          <div className="admin-card p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-[var(--admin-border-soft)] pb-3">
+              <PhoneCall className="w-4 h-4 text-[var(--admin-accent-strong)]" />
+              <h4 className="font-editorial text-xl text-[var(--admin-fg)]">
                 Coastal Emergency Hotlines
               </h4>
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
-                <div className="font-semibold text-slate-900">
+              <div className="p-3 bg-[var(--admin-bg)] rounded-xl border border-[var(--admin-border-soft)] space-y-1">
+                <div className="font-semibold text-[var(--admin-fg)]">
                   Mumbai Coastal Police (Mahim Post)
                 </div>
-                <div className="font-mono text-slate-700 font-bold">
+                <div className="font-editorial-mono text-[var(--admin-fg)] font-bold">
                   022-2444 8911
                 </div>
-                <div className="text-[10px] text-slate-400">
+                <div className="text-[11px] text-[var(--admin-faint)]">
                   Direct radio link for reef shallows
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
-                <div className="font-semibold text-slate-900">
+              <div className="p-3 bg-[var(--admin-bg)] rounded-xl border border-[var(--admin-border-soft)] space-y-1">
+                <div className="font-semibold text-[var(--admin-fg)]">
                   Versova Lifeguard Watchtower
                 </div>
-                <div className="font-mono text-slate-700 font-bold">
+                <div className="font-editorial-mono text-[var(--admin-fg)] font-bold">
                   +91 98200 44199
                 </div>
-                <div className="text-[10px] text-slate-400">
-                  Beach patrol & rescue boat dispatch
+                <div className="text-[11px] text-[var(--admin-faint)]">
+                  Beach patrol &amp; rescue boat dispatch
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
-                <div className="font-semibold text-slate-900">
+              <div className="p-3 bg-[var(--admin-bg)] rounded-xl border border-[var(--admin-border-soft)] space-y-1">
+                <div className="font-semibold text-[var(--admin-fg)]">
                   Maharashtra Maritime Board (MMB)
                 </div>
-                <div className="font-mono text-slate-700 font-bold">
+                <div className="font-editorial-mono text-[var(--admin-fg)] font-bold">
                   022-2266 2110
                 </div>
-                <div className="text-[10px] text-slate-400">
-                  Trawler traffic & weather notices
+                <div className="text-[11px] text-[var(--admin-faint)]">
+                  Trawler traffic &amp; weather notices
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
-                <div className="font-semibold text-slate-900">
+              <div className="p-3 bg-[var(--admin-bg)] rounded-xl border border-[var(--admin-border-soft)] space-y-1">
+                <div className="font-semibold text-[var(--admin-fg)]">
                   Indian Navy Coastal SAR Hotline
                 </div>
-                <div className="font-mono text-rose-700 font-bold">
+                <div className="font-editorial-mono text-rose-700 font-bold">
                   1093 (Toll Free)
                 </div>
-                <div className="text-[10px] text-slate-400">
+                <div className="text-[11px] text-[var(--admin-faint)]">
                   Arabian Sea maritime rescue
                 </div>
               </div>
@@ -406,18 +372,18 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
           </div>
 
           {/* Safety Protocols Card */}
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
+          <div className="admin-card p-5 space-y-3 bg-[var(--admin-surface)]">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <h4 className="font-display font-bold text-sm text-slate-900">
+              <ShieldCheck className="w-4 h-4 text-emerald-700" />
+              <h4 className="font-editorial text-xl text-[var(--admin-fg)]">
                 Safety Checklist Invariants
               </h4>
             </div>
-            <ul className="text-xs text-slate-600 space-y-2 list-disc list-inside">
+            <ul className="text-xs text-[var(--admin-muted)] space-y-2 list-disc list-inside">
               <li>1 guide assigned for every 12 attendees max.</li>
               <li>Lifejackets mandatory on all boat crossings.</li>
               <li>
-                First aid kit with saline rinse & gauze on every reef walk.
+                First aid kit with saline rinse &amp; gauze on every reef walk.
               </li>
               <li>Tidal walks terminate 45 min before high tide turn.</li>
             </ul>
@@ -427,18 +393,18 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
 
       {/* Emergency Lockdown Confirmation Modal */}
       {selectedLockdownZone && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl border border-rose-300 shadow-2xl w-full max-w-md p-6 space-y-5 text-slate-900">
-            <div className="flex items-center gap-2.5 text-rose-600 border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#29100B]/50 backdrop-blur-xs">
+          <div className="admin-card w-full max-w-md p-6 space-y-5 border-rose-300">
+            <div className="flex items-center gap-2.5 text-rose-700 border-b border-[var(--admin-border-soft)] pb-3">
               <ShieldAlert className="w-5 h-5 shrink-0" />
-              <h3 className="font-display font-bold text-base text-slate-900">
+              <h3 className="font-editorial text-2xl text-[var(--admin-fg)]">
                 Initiate Zone Emergency Lockdown
               </h3>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-[var(--admin-muted)] leading-relaxed">
               You are declaring an emergency lockdown for{" "}
-              <strong className="text-slate-900 font-bold">
+              <strong className="text-[var(--admin-fg)] font-bold">
                 {zones.find((z) => z.id === selectedLockdownZone)?.zone_name}
               </strong>
               . This will suspend coastal operations, trigger WhatsApp storm
@@ -446,14 +412,14 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
             </p>
 
             <div>
-              <label className="text-xs font-semibold text-slate-700 block mb-1">
+              <label className="text-[11px] font-bold tracking-wider uppercase text-[var(--admin-muted)] block mb-1.5">
                 Emergency Declaration Reason
               </label>
               <input
                 type="text"
                 value={lockdownReason}
                 onChange={(e) => setLockdownReason(e.target.value)}
-                className="w-full text-xs px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl outline-none focus:border-rose-600 shadow-xs"
+                className="w-full text-xs p-2.5 bg-[var(--admin-surface)] text-[var(--admin-fg)] border border-[var(--admin-border)] rounded-xl outline-none focus:border-rose-600"
               />
             </div>
 
@@ -461,14 +427,14 @@ export const CoastalSafetyCommand: React.FC<CoastalSafetyCommandProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedLockdownZone(null)}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer shadow-xs"
+                className="admin-btn admin-btn-quiet text-xs"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleConfirmLockdown}
-                className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5"
+                className="admin-btn text-xs font-bold text-white bg-rose-700 hover:bg-rose-800 border-transparent"
               >
                 <ShieldAlert className="w-3.5 h-3.5" />
                 <span>Confirm Emergency Lockdown</span>

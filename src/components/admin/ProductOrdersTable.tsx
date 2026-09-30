@@ -158,106 +158,119 @@ export const ProductOrdersTable: React.FC<ProductOrdersTableProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Top Metrics Banner */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 text-slate-900 shadow-xs">
-          <div className="text-[10px] text-slate-500 uppercase font-semibold">
-            Total D2C Orders
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="p-5 rounded-[16px] bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)]">
+          <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
+            Total D2C orders
           </div>
-          <div className="text-2xl font-bold font-display mt-1 text-slate-900">
+          <div className="font-editorial text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
             {productOrders.length}
           </div>
-          <div className="text-[10px] text-slate-400 mt-0.5">
-            Physical merchandise & pantry items
+          <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
+            Merchandise &amp; pantry
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 text-slate-900 shadow-xs">
-          <div className="text-[10px] text-amber-600 uppercase font-semibold flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5" />
-            <span>Pending Packing</span>
+        <div className="p-5 rounded-[16px] bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)]">
+          <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
+            Pending packing
           </div>
-          <div className="text-2xl font-bold font-display mt-1 text-amber-600">
+          <div className="font-editorial text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
             {pendingCount}
           </div>
-          <div className="text-[10px] text-slate-400 mt-0.5">
-            Needs label printing & dispatch
+          <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
+            Needs label &amp; dispatch
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 text-slate-900 shadow-xs">
-          <div className="text-[10px] text-sky-600 uppercase font-semibold flex items-center gap-1.5">
-            <Truck className="w-3.5 h-3.5" />
-            <span>In Transit</span>
+        <div className="p-5 rounded-[16px] bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)]">
+          <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
+            In transit
           </div>
-          <div className="text-2xl font-bold font-display mt-1 text-sky-600">
+          <div className="font-editorial text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
             {shippedCount}
           </div>
-          <div className="text-[10px] text-slate-400 mt-0.5">
-            Dispatched with tracking AWB
+          <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
+            With tracking AWB
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 text-slate-900 shadow-xs">
-          <div className="text-[10px] text-emerald-600 uppercase font-semibold flex items-center gap-1.5">
-            <CheckCircle className="w-3.5 h-3.5" />
-            <span>Goods Revenue</span>
+        <div className="p-5 rounded-[16px] bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)] relative shadow-[inset_3px_0_0_#E3A157]">
+          <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
+            Goods revenue
           </div>
-          <div className="text-2xl font-bold font-display mt-1 text-slate-900">
+          <div className="font-editorial text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
             {formatINR(totalGoodsRevenue)}
           </div>
-          <div className="text-[10px] text-slate-400 mt-0.5">
-            Direct-to-artisan cooperatives
+          <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
+            Direct to cooperatives
+          </div>
+          <div className="absolute top-4 right-4 w-[26px] h-[26px] rounded-full bg-[rgba(227,161,87,0.14)] flex items-center justify-center text-[#C67F2A] font-bold text-xs">
+            ↗
           </div>
         </div>
       </div>
 
       {/* Filter and Export Bar */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-xs">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search by customer name, order ref, phone, city, or pincode..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full text-xs pl-9 pr-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl outline-none focus:border-slate-900 shadow-xs"
-            />
+      <div className="admin-card p-4">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+            {/* Search */}
+            <div className="admin-search flex-1">
+              <span>⌕</span>
+              <input
+                type="text"
+                placeholder="Search by customer name, order ref, phone, city, or pincode…"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            {/* Status Filter */}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="admin-select text-xs py-2 px-3.5"
+            >
+              <option value="all">All Fulfillment Statuses</option>
+              <option value="unfulfilled">Unfulfilled / Pending</option>
+              <option value="processing">Processing</option>
+              <option value="shipped">Shipped / In Transit</option>
+              <option value="delivered">Delivered</option>
+            </select>
           </div>
 
-          {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-xs bg-white text-slate-900 border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-slate-900 shadow-xs"
+          {/* CSV Export */}
+          <button
+            onClick={exportFulfillmentCSV}
+            className="admin-btn text-xs py-2 px-4 cursor-pointer"
           >
-            <option value="all">All Fulfillment Statuses</option>
-            <option value="unfulfilled">Unfulfilled / Pending</option>
-            <option value="processing">Processing</option>
-            <option value="shipped">Shipped / In Transit</option>
-            <option value="delivered">Delivered</option>
-          </select>
+            <span>↓ Shipping manifest format</span>
+          </button>
         </div>
-
-        {/* CSV Export */}
-        <button
-          onClick={exportFulfillmentCSV}
-          disabled={filteredOrders.length === 0}
-          className="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-40 cursor-pointer shadow-xs"
-        >
-          <Download className="w-3.5 h-3.5" />
-          <span>Export Shipping Manifest</span>
-        </button>
       </div>
 
-      {/* Orders Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+      {/* Orders Table or Empty State matching HTML */}
+      <div className="admin-card overflow-hidden">
         {filteredOrders.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 text-xs">
-            No physical goods orders match your search criteria.
+          <div className="p-14 text-center text-[rgba(41,16,11,0.44)] space-y-2">
+            <div className="font-editorial text-[26px] text-[rgba(41,16,11,0.64)]">
+              All caught up — nothing to pack.
+            </div>
+            <div className="text-[14px]">
+              New pantry orders will land here with labels, AWBs and payout
+              splits pre-filled.
+            </div>
+            <div className="pt-3">
+              <button
+                onClick={exportFulfillmentCSV}
+                className="admin-btn text-xs py-2 px-4 cursor-pointer"
+              >
+                ↓ Shipping manifest format
+              </button>
+            </div>
           </div>
         ) : (
           <div className="overflow-x-auto">

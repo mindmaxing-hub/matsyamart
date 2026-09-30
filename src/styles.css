@@ -228,3 +228,358 @@ h4,
 .animate-luma-float {
   animation: lumaFloat 5s ease-in-out infinite;
 }
+
+/* ==========================================================================
+   MATSYAMART ADMIN REDESIGN DESIGN SYSTEM (brand-spec.md & matsya-mart-admin-redesign.html)
+   ========================================================================== */
+:root {
+  --admin-bg: #f5edeb;
+  --admin-surface: #fffdfb;
+  --admin-surface-2: #f9efe7;
+  --admin-surface-warm: #efe0d2;
+  --admin-fg: #29100b;
+  --admin-muted: rgba(41, 16, 11, 0.64);
+  --admin-faint: rgba(41, 16, 11, 0.44);
+  --admin-border: rgba(41, 16, 11, 0.13);
+  --admin-border-soft: rgba(41, 16, 11, 0.08);
+  --admin-accent: #e3a157;
+  --admin-accent-soft: rgba(227, 161, 87, 0.22);
+  --admin-accent-softer: rgba(227, 161, 87, 0.14);
+  --admin-accent-strong: #c67f2a;
+  --admin-shadow:
+    0 1px 2px rgba(41, 16, 11, 0.05), 0 8px 28px -12px rgba(41, 16, 11, 0.14);
+}
+
+.font-editorial {
+  font-family: "Instrument Serif", Georgia, serif;
+}
+
+.font-body-sans {
+  font-family:
+    "Instrument Sans",
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+.font-editorial-mono {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+/* Page Kicker */
+.admin-page-kicker {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--admin-accent-strong);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.admin-page-kicker::before {
+  content: "";
+  width: 18px;
+  height: 2px;
+  background: var(--admin-accent-strong);
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* Editorial Card */
+.admin-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border-soft);
+  border-radius: 20px;
+  box-shadow: var(--admin-shadow);
+}
+
+/* Pills */
+.admin-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  border: 1px solid;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-pill-amber {
+  background: var(--admin-accent-softer);
+  border-color: rgba(198, 127, 42, 0.4);
+  color: var(--admin-fg);
+}
+
+.admin-pill-line {
+  background: transparent;
+  border-color: var(--admin-border);
+  color: var(--admin-muted);
+}
+
+.admin-pill-roast {
+  background: var(--admin-fg);
+  border-color: var(--admin-fg);
+  color: var(--admin-surface);
+}
+
+/* Action Buttons */
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 9999px;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 9px 16px;
+  cursor: pointer;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  color: var(--admin-fg);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.admin-btn:hover {
+  border-color: var(--admin-fg);
+}
+
+.admin-btn-primary {
+  background: var(--admin-accent);
+  border-color: transparent;
+  color: var(--admin-fg);
+}
+
+.admin-btn-primary:hover {
+  background: var(--admin-accent-strong);
+  color: #fffdfb;
+  border-color: transparent;
+}
+
+.admin-btn-quiet {
+  border-color: transparent;
+  background: transparent;
+  color: var(--admin-muted);
+}
+
+.admin-btn-quiet:hover {
+  color: var(--admin-fg);
+  background: rgba(41, 16, 11, 0.06);
+}
+
+/* Filter Chips */
+.admin-chip {
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  border-radius: 9999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.admin-chip:hover {
+  color: var(--admin-fg);
+  border-color: var(--admin-fg);
+}
+
+.admin-chip.active {
+  background: var(--admin-fg);
+  color: var(--admin-surface);
+  border-color: var(--admin-fg);
+}
+
+/* Inputs */
+.admin-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  border-radius: 9999px;
+  padding: 9px 16px;
+}
+
+.admin-search input {
+  border: 0;
+  background: transparent;
+  outline: 0;
+  width: 100%;
+  font-size: 14px;
+  color: var(--admin-fg);
+  font-family: inherit;
+}
+
+.admin-select {
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  border-radius: 9999px;
+  padding: 9px 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--admin-fg);
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+}
+
+/* Slots Grid & Card */
+.admin-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+@media (max-width: 1024px) {
+  .admin-slots-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-slot-card {
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border-soft);
+  box-shadow: var(--admin-shadow);
+}
+
+.admin-bar {
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--admin-bg);
+  margin: 12px 0 8px;
+  overflow: hidden;
+  border: 1px solid var(--admin-border-soft);
+}
+
+.admin-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--admin-accent);
+  border-radius: 9999px;
+}
+
+/* Hero Deck / Spotlight Row */
+.admin-hero-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--admin-border-soft);
+}
+.admin-hero-row:first-child {
+  border-top: 0;
+}
+
+.admin-thumb {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    var(--admin-accent-soft),
+    var(--admin-surface-2)
+  );
+  border: 1px solid var(--admin-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.admin-rank {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--admin-faint);
+  width: 28px;
+}
+
+.admin-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: var(--admin-muted);
+  transition: all 0.15s ease;
+}
+.admin-icon-btn:hover:not(:disabled) {
+  color: var(--admin-fg);
+  border-color: var(--admin-fg);
+}
+.admin-icon-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Comms Two-Column & KV */
+.admin-two-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .admin-two-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-ta {
+  width: 100%;
+  border: 1px solid var(--admin-border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 14px;
+  background: var(--admin-surface);
+  color: var(--admin-fg);
+  resize: vertical;
+  min-height: 86px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.admin-ta:focus {
+  border-color: var(--admin-accent-strong);
+}
+
+.admin-kv {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+.admin-kv-cell {
+  border: 1px solid var(--admin-border-soft);
+  border-radius: 12px;
+  padding: 11px;
+  text-align: center;
+}
+.admin-kv-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--admin-faint);
+  display: block;
+}
+.admin-kv-val {
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: 21px;
+  font-weight: 400;
+  color: var(--admin-fg);
+}

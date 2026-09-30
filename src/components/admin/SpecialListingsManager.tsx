@@ -1,18 +1,5 @@
 import React, { useState } from "react";
-import {
-  ArrowUp,
-  ArrowDown,
-  ExternalLink,
-  Sparkles,
-  Trash2,
-  Plus,
-  Eye,
-  CheckCircle2,
-  Compass,
-  Hammer,
-  UtensilsCrossed,
-  ShoppingBag,
-} from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Listing } from "../../types";
 import { formatINR } from "../../lib/utils";
 
@@ -22,6 +9,13 @@ interface SpecialListingsManagerProps {
   onReorder: (fromIndex: number, toIndex: number) => void;
   onToggle: (listingId: string) => void;
 }
+
+const PILLAR_ICONS: Record<string, string> = {
+  walks: "≈",
+  workshops: "◈",
+  food: "◐",
+  goods: "⬢",
+};
 
 export const SpecialListingsManager: React.FC<SpecialListingsManagerProps> = ({
   listings,
@@ -41,126 +35,55 @@ export const SpecialListingsManager: React.FC<SpecialListingsManagerProps> = ({
     (l) => l.is_active && !spotlightListingIds.includes(l.id),
   );
 
-  // Category counts in the current spotlight
-  const categoryCounts = spotlightListings.reduce(
-    (acc, l) => {
-      const p = l.pillar || (l.type === "experience" ? "walks" : "goods");
-      acc[p] = (acc[p] || 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>,
-  );
-
   const handleAdd = () => {
     if (!selectedToAdd) return;
     onToggle(selectedToAdd);
     setSelectedToAdd("");
   };
 
-  const getPillarIcon = (pillar?: string) => {
-    switch (pillar) {
-      case "walks":
-        return <Compass className="w-3.5 h-3.5 text-[#e3a157]" />;
-      case "workshops":
-        return <Hammer className="w-3.5 h-3.5 text-[#e3a157]" />;
-      case "food":
-        return <UtensilsCrossed className="w-3.5 h-3.5 text-[#e3a157]" />;
-      case "goods":
-      default:
-        return <ShoppingBag className="w-3.5 h-3.5 text-[#e3a157]" />;
-    }
-  };
-
   return (
     <div className="space-y-6">
-      {/* Top Description & Metrics Card */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 text-slate-900 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#e3a157]" />
-              <h2 className="font-display font-bold text-lg text-slate-900">
-                Hero Showcase & Special Listings Manager
-              </h2>
-            </div>
-            <p className="text-xs text-slate-500 leading-relaxed max-w-2xl">
-              Manage the curated card deck showcased on the homepage hero
-              banner. Reorder cards using the arrows to adjust display priority,
-              click to preview live listings, or add new experiences and
-              artisanal goods.
-            </p>
-          </div>
-
-          {/* Quick Balance Counter */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[11px] font-semibold text-slate-800 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
-              Total Featured: {spotlightListings.length}
-            </span>
-            <span className="text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200">
-              Walks: {categoryCounts["walks"] || 0}
-            </span>
-            <span className="text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200">
-              Workshops: {categoryCounts["workshops"] || 0}
-            </span>
-            <span className="text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200">
-              Food: {categoryCounts["food"] || 0}
-            </span>
-            <span className="text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200">
-              Goods: {categoryCounts["goods"] || 0}
-            </span>
-          </div>
-        </div>
-
-        {/* Add Listing Bar */}
-        {availableToAdd.length > 0 && (
-          <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="flex-1">
-              <select
-                value={selectedToAdd}
-                onChange={(e) => setSelectedToAdd(e.target.value)}
-                className="w-full text-xs bg-white text-slate-900 border border-slate-200 rounded-xl px-3 py-2.5 outline-none focus:border-slate-900 shadow-xs"
-              >
-                <option value="">
-                  -- Select an active listing to add to hero spotlight --
-                </option>
-                {availableToAdd.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    [{item.pillar?.toUpperCase() || item.type.toUpperCase()}]{" "}
-                    {item.title} ({formatINR(item.price_inr)})
-                  </option>
-                ))}
-              </select>
-            </div>
-            <button
-              onClick={handleAdd}
-              disabled={!selectedToAdd}
-              className="px-4 py-2.5 rounded-xl bg-[#e3a157] hover:bg-[#d97706] text-slate-950 font-bold text-xs transition-colors flex items-center justify-center gap-1.5 disabled:opacity-40 cursor-pointer shadow-xs"
+      {/* Spotlight Curate Card */}
+      <div className="admin-card overflow-hidden">
+        {/* Add listing toolbar */}
+        <div className="p-5 border-b border-[var(--admin-border-soft)] flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="flex-1">
+            <select
+              value={selectedToAdd}
+              onChange={(e) => setSelectedToAdd(e.target.value)}
+              className="admin-select w-full"
             >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add to Spotlight</span>
-            </button>
+              <option value="">
+                — Select an active listing to add to spotlight —
+              </option>
+              {availableToAdd.map((item) => (
+                <option key={item.id} value={item.id}>
+                  [{item.pillar?.toUpperCase() || item.type.toUpperCase()}]{" "}
+                  {item.title} ({formatINR(item.price_inr)})
+                </option>
+              ))}
+            </select>
           </div>
-        )}
-      </div>
-
-      {/* Ordered Spotlight List */}
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-        <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
-            Active Hero Deck Sequence ({spotlightListings.length} Cards)
-          </span>
-          <span className="text-[11px] text-slate-400">
-            Card 1 appears on the far-left of the hero banner
-          </span>
+          <button
+            onClick={handleAdd}
+            disabled={!selectedToAdd}
+            className="admin-btn admin-btn-primary text-xs font-bold disabled:opacity-40"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>+ Add to spotlight</span>
+          </button>
         </div>
 
+        {/* Ordered Deck Rows */}
         {spotlightListings.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 text-xs">
-            No listings currently added to the spotlight. Add listings above to
-            populate the hero banner.
+          <div className="p-12 text-center text-[var(--admin-muted)] text-sm">
+            <p className="font-editorial text-2xl text-[var(--admin-fg)] mb-1">
+              No spotlight cards assigned
+            </p>
+            <p>Select a listing above to feature in the homepage hero deck.</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div>
             {spotlightListings.map((listing, index) => {
               const detailPath =
                 listing.type === "experience"
@@ -169,90 +92,81 @@ export const SpecialListingsManager: React.FC<SpecialListingsManagerProps> = ({
 
               const isFirst = index === 0;
               const isLast = index === spotlightListings.length - 1;
+              const pillarKey = listing.pillar || "walks";
+              const iconSymbol = PILLAR_ICONS[pillarKey] || "◈";
 
               return (
                 <div
                   key={listing.id}
-                  className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-slate-50/80 transition-colors"
+                  className="admin-hero-row flex-wrap sm:flex-nowrap"
                 >
-                  {/* Left: Sequence Badge + Thumbnail + Details */}
-                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                    {/* Position Badge */}
-                    <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 text-slate-900 font-bold text-xs flex items-center justify-center shrink-0">
-                      #{index + 1}
-                    </div>
+                  <span className="admin-rank">#{index + 1}</span>
 
-                    {/* Image Thumbnail */}
-                    <img
-                      src={listing.images[0]}
-                      alt={listing.title}
-                      className="w-14 h-11 object-cover rounded-lg border border-slate-200 shrink-0"
-                    />
+                  <span className="admin-thumb">
+                    {listing.images && listing.images[0] ? (
+                      <img
+                        src={listing.images[0]}
+                        alt={listing.title}
+                        className="w-full h-full object-cover rounded-[11px]"
+                      />
+                    ) : (
+                      iconSymbol
+                    )}
+                  </span>
 
-                    {/* Title & Metadata */}
-                    <div className="min-w-0 space-y-0.5">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-display font-semibold text-xs sm:text-sm text-slate-900 truncate">
-                          {listing.title}
-                        </span>
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-[10px] font-bold uppercase text-slate-700">
-                          {getPillarIcon(listing.pillar)}
-                          <span>{listing.pillar || listing.type}</span>
-                        </span>
-                      </div>
-                      <div className="text-[11px] text-slate-500 flex items-center gap-3 flex-wrap">
-                        <span>Price: {formatINR(listing.price_inr)}</span>
-                        <span>•</span>
-                        <span>Host/Artisan: {listing.host_name}</span>
-                        <span>•</span>
-                        <span className="text-slate-400">
-                          Slug: {listing.slug}
-                        </span>
-                      </div>
+                  <div className="flex-1 min-w-0">
+                    <b className="text-[14.5px] text-[var(--admin-fg)] block truncate">
+                      {listing.title}
+                    </b>
+                    <div className="text-[12.5px] text-[var(--admin-faint)] truncate">
+                      {formatINR(listing.price_inr)} ·{" "}
+                      {listing.pillar || listing.type} · {listing.host_name}
                     </div>
                   </div>
 
-                  {/* Right: Actions (Move Up, Move Down, View Live, Remove) */}
-                  <div className="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
-                    {/* Move Up */}
+                  <span
+                    className={`admin-pill ${
+                      index === 0 ? "admin-pill-amber" : "admin-pill-line"
+                    }`}
+                  >
+                    {listing.pillar || listing.type}
+                  </span>
+
+                  <div className="flex items-center gap-2">
                     <button
-                      onClick={() => onReorder(index, index - 1)}
+                      className="admin-icon-btn"
                       disabled={isFirst}
-                      title="Move card left/earlier in sequence"
-                      className="p-2 rounded-lg bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-xs"
+                      onClick={() => onReorder(index, index - 1)}
+                      aria-label="Move card up"
+                      title="Move up"
                     >
-                      <ArrowUp className="w-4 h-4" />
+                      ↑
                     </button>
-
-                    {/* Move Down */}
                     <button
-                      onClick={() => onReorder(index, index + 1)}
+                      className="admin-icon-btn"
                       disabled={isLast}
-                      title="Move card right/later in sequence"
-                      className="p-2 rounded-lg bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-xs"
+                      onClick={() => onReorder(index, index + 1)}
+                      aria-label="Move card down"
+                      title="Move down"
                     >
-                      <ArrowDown className="w-4 h-4" />
+                      ↓
                     </button>
 
-                    {/* View Live Listing */}
                     <a
                       href={detailPath}
                       target="_blank"
                       rel="noreferrer"
-                      title="View listing live on site"
-                      className="px-3 py-2 rounded-lg bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                      className="admin-btn admin-btn-quiet text-xs"
                     >
-                      <Eye className="w-3.5 h-3.5 text-slate-500" />
-                      <span>View Live ↗</span>
+                      View live ↗
                     </a>
 
-                    {/* Remove from Spotlight */}
                     <button
                       onClick={() => onToggle(listing.id)}
-                      title="Remove from hero spotlight deck"
-                      className="p-2 rounded-lg text-rose-600 hover:bg-rose-50 border border-rose-200 transition-colors cursor-pointer"
+                      className="admin-icon-btn text-[var(--admin-muted)] hover:text-rose-600"
+                      title="Remove from spotlight"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>

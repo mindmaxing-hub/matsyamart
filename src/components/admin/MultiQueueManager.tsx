@@ -158,91 +158,53 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
     customInquiries.filter((i) => i.status === "pending_review").length;
 
   return (
-    <div className="space-y-5">
-      {/* Header & Queue Type Chips */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">
-                Community Moderation
-              </span>
-              <span className="text-xs text-amber-600 font-semibold flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5" /> {totalPending} Pending
-                Decisions
-              </span>
-            </div>
-            <h2 className="font-display font-bold text-lg sm:text-xl text-slate-900 mt-1">
-              Multi-Type Review & Submissions Hub
-            </h2>
-            <p className="text-xs text-slate-500">
-              Review and moderate host proposals, artisan submissions, corporate
-              bulk requests, and reschedule notices.
-            </p>
-          </div>
-        </div>
-
-        {/* Filter Tabs (Image 5 Style Pill Filters) */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pt-2 border-t border-slate-100">
+    <div className="space-y-4">
+      {/* Header & Filter Chips */}
+      <div className="admin-card p-4 sm:p-5 space-y-3">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none flex-wrap">
           <button
             onClick={() => setActiveQueueTab("all")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-              activeQueueTab === "all"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200"
+            className={`admin-chip cursor-pointer ${
+              activeQueueTab === "all" ? "active" : ""
             }`}
           >
-            All Submissions ({proposals.length + customInquiries.length})
+            All ({proposals.length + customInquiries.length})
           </button>
 
           <button
             onClick={() => setActiveQueueTab("experiences")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-              activeQueueTab === "experiences"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200"
+            className={`admin-chip cursor-pointer ${
+              activeQueueTab === "experiences" ? "active" : ""
             }`}
           >
-            <Compass className="w-3.5 h-3.5" />
-            <span>Host Experiences ({experienceProposals.length})</span>
+            Host Experiences ({experienceProposals.length})
           </button>
 
           <button
             onClick={() => setActiveQueueTab("products")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-              activeQueueTab === "products"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200"
+            className={`admin-chip cursor-pointer ${
+              activeQueueTab === "products" ? "active" : ""
             }`}
           >
-            <ShoppingBag className="w-3.5 h-3.5" />
-            <span>Artisan Goods ({productProposals.length})</span>
+            Artisan Goods ({productProposals.length})
           </button>
 
           <button
             onClick={() => setActiveQueueTab("corporate")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-              activeQueueTab === "corporate"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200"
+            className={`admin-chip cursor-pointer ${
+              activeQueueTab === "corporate" ? "active" : ""
             }`}
           >
-            <Building2 className="w-3.5 h-3.5" />
-            <span>
-              Corporate & Group Inquiries ({corporateInquiries.length})
-            </span>
+            Corporate ({corporateInquiries.length})
           </button>
 
           <button
             onClick={() => setActiveQueueTab("reschedules")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-              activeQueueTab === "reschedules"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200"
+            className={`admin-chip cursor-pointer ${
+              activeQueueTab === "reschedules" ? "active" : ""
             }`}
           >
-            <Waves className="w-3.5 h-3.5" />
-            <span>Tidal & Reschedules ({rescheduleNotices.length})</span>
+            Reschedules ({rescheduleNotices.length})
           </button>
         </div>
       </div>
@@ -268,77 +230,64 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
               return (
                 <div
                   key={prop.id}
-                  className="bg-white rounded-2xl border border-slate-200/80 p-5 space-y-4 shadow-xs text-slate-900"
+                  className="admin-card p-5 sm:p-6 space-y-3.5 text-[#29100B]"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-display font-bold text-base text-slate-900">
-                          {prop.proposal_title}
-                        </span>
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border ${
-                            prop.proposal_type === "experience"
-                              ? "bg-amber-50 text-amber-800 border-amber-200"
-                              : "bg-emerald-50 text-emerald-800 border-emerald-200"
-                          }`}
-                        >
-                          {prop.proposal_type === "experience"
-                            ? "Host Experience"
-                            : "Artisan Product"}
-                        </span>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1">
-                        <span className="font-semibold text-slate-800">
-                          {prop.applicant_name}
-                        </span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3 text-[#e3a157]" />
-                          {prop.koliwada_or_village}
-                        </span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1 text-slate-600">
-                          <Phone className="w-3 h-3 text-emerald-600" />
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <h3 className="font-editorial text-2xl font-normal text-[#29100B] tracking-[-0.01em]">
+                        {prop.proposal_title}
+                      </h3>
+                      <div className="text-[13px] text-[rgba(41,16,11,0.64)] flex flex-wrap items-center gap-2">
+                        <b className="text-[#29100B]">{prop.applicant_name}</b>
+                        <span>·</span>
+                        <span>{prop.koliwada_or_village}</span>
+                        <span>·</span>
+                        <span className="font-editorial-mono">
                           {prop.phone}
                         </span>
                       </div>
                     </div>
 
-                    <span
-                      className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider self-start sm:self-auto border ${
-                        isApproved
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : prop.status === "rejected"
-                            ? "bg-rose-50 text-rose-700 border-rose-200"
-                            : "bg-amber-50 text-amber-700 border-amber-200"
-                      }`}
-                    >
-                      {prop.status.replace("_", " ")}
-                    </span>
+                    <div className="flex items-center gap-2 self-start sm:self-auto">
+                      <span
+                        className={
+                          isPending
+                            ? "admin-pill admin-pill-amber"
+                            : isApproved
+                              ? "admin-pill admin-pill-roast"
+                              : "admin-pill admin-pill-line"
+                        }
+                      >
+                        {prop.status.replace("_", " ")}
+                      </span>
+                      <span className="admin-pill admin-pill-line">
+                        {prop.proposal_type === "experience"
+                          ? "Host experience"
+                          : "Artisan product"}
+                      </span>
+                    </div>
                   </div>
 
-                  <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-100">
-                    {prop.summary}
-                  </p>
+                  <div className="bg-[#F5EDEB] border border-dashed border-[rgba(41,16,11,0.15)] rounded-xl p-3.5 text-[14px] text-[rgba(41,16,11,0.64)] italic leading-relaxed">
+                    “{prop.summary}”
+                  </div>
 
                   {/* Actions & Coordinator Notes */}
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-                    <div className="text-xs text-slate-500 flex items-center gap-2">
-                      <span>Target Price:</span>
-                      <strong className="text-slate-900 font-bold">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-[rgba(41,16,11,0.08)]">
+                    <div className="text-[13.5px] text-[rgba(41,16,11,0.64)] flex items-center gap-1.5">
+                      <span>Target</span>
+                      <b className="text-[#29100B]">
                         {prop.estimated_price_inr
                           ? formatINR(prop.estimated_price_inr)
                           : "Needs Estimate"}
-                      </strong>
+                      </b>
                     </div>
 
                     {isPending ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2.5">
                         <input
                           type="text"
-                          placeholder="Add coordinator notes..."
+                          placeholder="Add coordinator note…"
                           value={adminNotes[prop.id] || ""}
                           onChange={(e) =>
                             setAdminNotes({
@@ -346,24 +295,23 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                               [prop.id]: e.target.value,
                             })
                           }
-                          className="text-xs px-3 py-1.5 bg-white text-slate-900 border border-slate-200 rounded-lg outline-none w-52 placeholder:text-slate-400 focus:border-slate-900 shadow-xs"
+                          className="admin-search rounded-full py-1.5 px-3.5 text-xs w-48 sm:w-60"
                         />
                         <button
                           onClick={() => handleRejectProposal(prop.id)}
-                          className="px-3 py-1.5 text-rose-600 hover:bg-rose-50 text-xs font-semibold rounded-lg border border-rose-200 transition-colors cursor-pointer"
+                          className="text-[rgba(41,16,11,0.7)] hover:text-[#29100B] text-[13.5px] font-semibold underline underline-offset-3 cursor-pointer"
                         >
                           Decline
                         </button>
                         <button
                           onClick={() => handleApproveProposal(prop.id)}
-                          className="px-3.5 py-1.5 bg-[#e3a157] hover:bg-[#d97706] text-slate-950 text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1 shadow-xs"
+                          className="admin-btn admin-btn-primary text-xs py-2 px-4 cursor-pointer"
                         >
-                          <Check className="w-3.5 h-3.5" />
-                          <span>Approve & List</span>
+                          ✓ Approve &amp; List
                         </button>
                       </div>
                     ) : (
-                      <div className="text-[11px] text-slate-400 italic">
+                      <div className="text-[12px] text-[rgba(41,16,11,0.44)] italic">
                         {prop.admin_notes || "Moderated by coordinator"}
                       </div>
                     )}
@@ -389,84 +337,60 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
               return (
                 <div
                   key={inq.id}
-                  className="bg-white rounded-2xl border border-slate-200/80 p-5 space-y-4 shadow-xs text-slate-900"
+                  className="admin-card p-5 sm:p-6 space-y-3.5 text-[#29100B]"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-display font-bold text-base text-slate-900">
-                          {inq.subject}
-                        </span>
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border ${
-                            isCorporate
-                              ? "bg-sky-50 text-sky-800 border-sky-200"
-                              : "bg-amber-50 text-amber-800 border-amber-200"
-                          }`}
-                        >
-                          {isCorporate
-                            ? "Corporate Inquiry"
-                            : "Reschedule Notice"}
-                        </span>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1">
-                        <span className="font-semibold text-slate-800">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <h3 className="font-editorial text-2xl font-normal text-[#29100B] tracking-[-0.01em]">
+                        {inq.subject}
+                      </h3>
+                      <div className="text-[13px] text-[rgba(41,16,11,0.64)] flex flex-wrap items-center gap-2">
+                        <b className="text-[#29100B]">
                           {inq.name}
-                        </span>
-                        {inq.organization && (
+                          {inq.organization ? ` · ${inq.organization}` : ""}
+                        </b>
+                        {inq.headcount && (
                           <>
-                            <span>•</span>
-                            <span className="text-slate-700 font-medium">
-                              {inq.organization}
-                            </span>
+                            <span>·</span>
+                            <span>{inq.headcount} guests</span>
                           </>
                         )}
-                        <span>•</span>
-                        <span className="flex items-center gap-1 text-slate-600">
-                          <Phone className="w-3 h-3 text-emerald-600" />
-                          {inq.phone}
-                        </span>
-                        <span>•</span>
-                        <span className="text-slate-400">{inq.email}</span>
+                        {inq.requestedDate && (
+                          <>
+                            <span>·</span>
+                            <span>{inq.requestedDate}</span>
+                          </>
+                        )}
                       </div>
                     </div>
 
-                    <span
-                      className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider self-start sm:self-auto border ${
-                        inq.status === "resolved"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : inq.status === "contacted"
-                            ? "bg-sky-50 text-sky-700 border-sky-200"
-                            : "bg-amber-50 text-amber-700 border-amber-200"
-                      }`}
-                    >
-                      {inq.status.replace("_", " ")}
-                    </span>
+                    <div className="flex items-center gap-2 self-start sm:self-auto">
+                      <span
+                        className={
+                          inq.status === "pending_review"
+                            ? "admin-pill admin-pill-amber"
+                            : inq.status === "resolved"
+                              ? "admin-pill admin-pill-roast"
+                              : "admin-pill admin-pill-line"
+                        }
+                      >
+                        {inq.status.replace("_", " ")}
+                      </span>
+                      <span className="admin-pill admin-pill-line">
+                        {isCorporate
+                          ? "Corporate inquiry"
+                          : "Reschedule notice"}
+                      </span>
+                    </div>
                   </div>
 
-                  <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-100">
-                    {inq.details}
-                  </p>
+                  <div className="bg-[#F5EDEB] border border-dashed border-[rgba(41,16,11,0.15)] rounded-xl p-3.5 text-[14px] text-[rgba(41,16,11,0.64)] italic leading-relaxed">
+                    “{inq.details}”
+                  </div>
 
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-                    <div className="text-xs text-slate-500 flex items-center gap-3">
-                      {inq.headcount && (
-                        <span>
-                          Group Size:{" "}
-                          <strong className="text-slate-900 font-bold">
-                            {inq.headcount} Guests
-                          </strong>
-                        </span>
-                      )}
-                      {inq.requestedDate && (
-                        <span>
-                          Target:{" "}
-                          <strong className="text-slate-900 font-bold">
-                            {inq.requestedDate}
-                          </strong>
-                        </span>
-                      )}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-[rgba(41,16,11,0.08)]">
+                    <div className="text-xs text-[rgba(41,16,11,0.64)] font-editorial-mono">
+                      Contact: {inq.phone} · {inq.email}
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -476,10 +400,9 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                         )}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 transition-colors shadow-xs"
+                        className="admin-btn text-xs py-2 px-3.5 cursor-pointer"
                       >
-                        <MessageSquare className="w-3 h-3" />
-                        <span>Reply on WhatsApp</span>
+                        Reply on WhatsApp
                       </a>
 
                       {inq.status === "pending_review" && (
@@ -487,9 +410,9 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                           onClick={() =>
                             handleUpdateInquiryStatus(inq.id, "contacted")
                           }
-                          className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+                          className="admin-btn admin-btn-quiet text-xs py-2 px-3.5 cursor-pointer"
                         >
-                          Mark Contacted
+                          Mark contacted
                         </button>
                       )}
 
@@ -498,9 +421,9 @@ export const MultiQueueManager: React.FC<MultiQueueManagerProps> = ({
                           onClick={() =>
                             handleUpdateInquiryStatus(inq.id, "resolved")
                           }
-                          className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                          className="admin-btn admin-btn-primary text-xs py-2 px-4 cursor-pointer"
                         >
-                          Resolve & Close
+                          Resolve &amp; close
                         </button>
                       )}
                     </div>
