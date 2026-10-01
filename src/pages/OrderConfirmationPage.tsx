@@ -39,7 +39,7 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
         </p>
         <Link
           to="/"
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-ocean-800 text-white rounded-xl text-xs font-semibold"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-semibold transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Return to Catalog
         </Link>
@@ -52,7 +52,7 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
       <div>
         <Link
           to="/"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-ocean-700 hover:text-ocean-900 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Return to Catalog Home
         </Link>

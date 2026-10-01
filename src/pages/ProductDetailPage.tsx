@@ -2,17 +2,16 @@ import React, { useState } from "react";
 import { Link } from "../components/ui/Link";
 import { useData } from "../context/DataContext";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 import {
   ArrowLeft,
   ShoppingBag,
   Package,
-  ShieldCheck,
-  CheckCircle2,
-  Sparkles,
   Truck,
   Heart,
   Plus,
   Minus,
+  Sparkles,
 } from "lucide-react";
 import { formatINR } from "../lib/utils";
 import { CheckoutModal } from "../components/order/CheckoutModal";
@@ -32,6 +31,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
   const { getListingBySlug } = useData();
   const { addItem } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
 
   const listing = slug ? getListingBySlug(slug) : undefined;
 
@@ -48,13 +48,15 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
         </h2>
         <Link
           to="/"
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-ocean-800 text-white rounded-xl text-xs font-semibold"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-black"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Return to Catalog
         </Link>
       </div>
     );
   }
+
+  const isWishlisted = isInWishlist(listing.id);
 
   const handleAddToCart = () => {
     addItem(listing, quantity);
@@ -66,20 +68,39 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Back to Catalog */}
-      <div>
+      {/* Back to Catalog & Wishlist */}
+      <div className="flex items-center justify-between">
         <Link
           to="/"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-ocean-700 hover:text-ocean-900 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Artisan Catalog
         </Link>
+
+        <button
+          onClick={() => toggleWishlist(listing)}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer shadow-2xs ${
+            isWishlisted
+              ? "bg-rose-50 text-rose-700 border-rose-200 shadow-rose-100"
+              : "bg-white text-slate-600 hover:text-rose-600 border-slate-200 hover:border-rose-200"
+          }`}
+          title={
+            isWishlisted ? "Saved in guest wishlist" : "Save to guest wishlist"
+          }
+        >
+          <Heart
+            className={`w-3.5 h-3.5 ${
+              isWishlisted ? "fill-rose-500 text-rose-500" : ""
+            }`}
+          />
+          <span>{isWishlisted ? "Saved" : "Save Item"}</span>
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         {/* Left Column: Product Imagery (6 Cols) */}
         <div className="lg:col-span-6 space-y-3">
-          <div className="aspect-square w-full rounded-3xl overflow-hidden bg-slate-100 border border-slate-200 shadow-tactile relative">
+          <div className="aspect-square w-full rounded-3xl overflow-hidden bg-slate-100 border border-slate-200 shadow-xs relative">
             <img
               src={listing.images[activeImgIdx] || listing.images[0]}
               alt={listing.title}
@@ -99,9 +120,9 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                 <button
                   key={idx}
                   onClick={() => setActiveImgIdx(idx)}
-                  className={`w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all ${
+                  className={`w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer ${
                     activeImgIdx === idx
-                      ? "border-amber-600 ring-2 ring-amber-600/30"
+                      ? "border-amber-600 ring-2 ring-amber-400/30"
                       : "border-transparent opacity-70 hover:opacity-100"
                   }`}
                 >
@@ -120,7 +141,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
         <div className="lg:col-span-6 space-y-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full">
+              <span className="text-xs font-semibold text-amber-900 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300/60">
                 {listing.artisan_collective || "Coastal Women's Collective"}
               </span>
               <span className="text-xs text-slate-400">•</span>
@@ -131,7 +152,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               </span>
             </div>
 
-            <h1 className="font-display font-bold text-2xl sm:text-3xl text-ocean-950">
+            <h1 className="font-display font-bold text-2xl sm:text-3xl text-slate-900">
               {listing.title}
             </h1>
 
@@ -141,15 +162,15 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           </div>
 
           {/* Price & Quantity Box */}
-          <div className="p-6 bg-slate-50 border border-slate-200/80 rounded-3xl space-y-5">
+          <div className="p-6 bg-slate-50 border border-slate-200/90 rounded-3xl space-y-5">
             <div className="flex items-baseline justify-between">
               <div>
                 <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
                   Direct Price
                 </span>
-                <div className="font-display font-bold text-3xl text-ocean-950">
+                <div className="font-display font-bold text-3xl text-slate-900">
                   {formatINR(listing.price_inr)}
-                  <span className="text-xs font-normal text-slate-500 font-sans">
+                  <span className="text-sm font-normal text-slate-500 font-sans">
                     {" "}
                     / pack
                   </span>
@@ -164,7 +185,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                 <div className="flex items-center border border-slate-300 rounded-xl bg-white overflow-hidden shadow-xs">
                   <button
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="p-2 hover:bg-slate-100 text-slate-700 transition-colors"
+                    className="p-2 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>
@@ -173,7 +194,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                   </span>
                   <button
                     onClick={() => setQuantity((q) => q + 1)}
-                    className="p-2 hover:bg-slate-100 text-slate-700 transition-colors"
+                    className="p-2 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
@@ -186,7 +207,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               <span>
                 Subtotal ({quantity} {quantity === 1 ? "pack" : "packs"})
               </span>
-              <span className="font-display font-bold text-base text-ocean-900">
+              <span className="font-display font-bold text-base text-slate-900">
                 {formatINR(totalAmount)}
               </span>
             </div>
@@ -195,24 +216,26 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <button
                 onClick={handleAddToCart}
-                className="py-3.5 px-4 bg-white hover:bg-slate-100 text-ocean-900 border border-slate-300 rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center justify-center gap-2"
+                className="py-3.5 px-4 bg-white hover:bg-slate-100 text-slate-900 border border-slate-300 rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
               >
-                <ShoppingBag className="w-4 h-4 text-ocean-700" />
-                <span>{addedAlert ? "Added to Bag! ✓" : "Add to Bag"}</span>
+                <ShoppingBag className="w-4 h-4 text-amber-700" />
+                <span>
+                  {addedAlert ? "Added to Basket! ✓" : "Add to Basket"}
+                </span>
               </button>
 
               <button
                 onClick={() => setIsInstantCheckoutOpen(true)}
-                className="py-3.5 px-4 bg-ocean-800 hover:bg-ocean-900 text-white rounded-xl text-xs font-semibold transition-all shadow-md flex items-center justify-center gap-2"
+                className="py-3.5 px-4 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-semibold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Sparkles className="w-4 h-4 text-sun-300" />
+                <Sparkles className="w-4 h-4 text-amber-300" />
                 <span>Buy Now with UPI</span>
               </button>
             </div>
 
             {/* Direct Dispatch Note */}
             <div className="flex items-center gap-2 text-[11px] text-slate-500 pt-1">
-              <Truck className="w-3.5 h-3.5 text-ocean-700 shrink-0" />
+              <Truck className="w-3.5 h-3.5 text-amber-700 shrink-0" />
               <span>
                 Ships across Mumbai & India via direct coastal collective
                 logistics.
@@ -222,19 +245,21 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
           {/* Full Narrative & Bachat Gat Story */}
           <div className="space-y-4 pt-2">
-            <h3 className="font-display font-bold text-lg text-ocean-950">
+            <h3 className="font-display font-bold text-lg text-slate-900">
               Harvest & Collective Production Story
             </h3>
-            <div className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+            <div className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line">
               {listing.full_description}
             </div>
           </div>
 
           {/* Collective Trust Box */}
-          <div className="p-5 rounded-2xl bg-ocean-50/60 border border-ocean-100 flex items-start gap-3 text-xs text-ocean-900">
+          <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex items-start gap-3 text-xs text-slate-800">
             <Heart className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <div className="font-bold">Community Fair-Wage Guarantee</div>
+              <div className="font-bold text-slate-900">
+                Community Fair-Wage Guarantee
+              </div>
               <p className="text-slate-600 leading-relaxed text-[11px]">
                 By buying this, you provide clean, dignified income directly to
                 indigenous coastal women processors and mangrove conservation

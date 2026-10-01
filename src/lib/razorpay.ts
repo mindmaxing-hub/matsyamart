@@ -71,7 +71,7 @@ export async function initiatePayment(
           contact: options.customerPhone,
         },
         theme: {
-          color: "#29100b",
+          color: "#0F172A",
         },
         handler: function (response: RazorpaySuccessResponse) {
           options.onSuccess({

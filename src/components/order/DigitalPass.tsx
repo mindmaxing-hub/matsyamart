@@ -8,7 +8,6 @@ import {
   Phone,
   Share2,
   Printer,
-  Compass,
   Anchor,
   CheckCircle,
   ExternalLink,
@@ -32,7 +31,7 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
         particleCount: 60,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ["#004A63", "#00AFEF", "#FFDE59"],
+        colors: ["#0F172A", "#E3A157", "#10B981"],
       });
     } catch {
       // Ignore if canvas-confetti is not loaded
@@ -49,7 +48,7 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
 
   const handleShareWhatsApp = () => {
     const text = encodeURIComponent(
-      `⚓ My MatsyaMart Coastal Pass for ${order.items[0]?.listing?.title || "Bhoomiputra Tour"} is confirmed! Ticket Code: ${order.order_ref}. View pass: ${window.location.href}`,
+      `⚓ My MatsyaMart Coastal Pass for ${order.items[0]?.listing?.title || "Community Tour"} is confirmed! Ticket Code: ${order.order_ref}. View pass: ${window.location.href}`,
     );
     window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
   };
@@ -69,16 +68,16 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Confirmation Banner */}
       <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-200">
           <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
           <span>Booking & Payment Confirmed</span>
         </div>
-        <h1 className="font-display font-bold text-2xl sm:text-3xl text-ocean-950">
+        <h1 className="font-display font-bold text-2xl sm:text-3xl text-slate-900">
           Your Verified Coastal Digital Pass
         </h1>
         <p className="text-xs text-slate-500 max-w-md mx-auto">
           Please present this pass on your phone or provide ticket code{" "}
-          <span className="font-mono font-bold text-ocean-900">
+          <span className="font-mono font-bold text-slate-900">
             {order.order_ref}
           </span>{" "}
           upon arrival.
@@ -86,32 +85,32 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
       </div>
 
       {/* Maritime Permit Card */}
-      <div className="bg-white rounded-3xl border-2 border-ocean-800 shadow-modal overflow-hidden relative">
+      <div className="bg-white rounded-3xl border-2 border-slate-900 shadow-xl overflow-hidden relative">
         {/* Pass Header Band */}
-        <div className="bg-ocean-900 text-white p-6 flex items-start justify-between relative overflow-hidden border-b border-ocean-700">
+        <div className="bg-slate-900 text-white p-6 flex items-start justify-between relative overflow-hidden border-b border-slate-800">
           <div className="relative z-10 space-y-1">
             <div className="flex items-center gap-2">
-              <span className="font-display font-bold text-lg text-sun-300">
+              <span className="font-display font-bold text-lg text-amber-400">
                 MatsyaMart
               </span>
-              <span className="text-[10px] uppercase font-bold tracking-wider bg-ocean-800 px-2 py-0.5 rounded border border-ocean-600">
+              <span className="text-[10px] uppercase font-bold tracking-wider bg-slate-800 text-slate-200 px-2 py-0.5 rounded border border-slate-700">
                 Official Boarding Permit
               </span>
             </div>
             <h2 className="font-display font-bold text-xl text-white pt-1">
               {listing?.title || "Community Experience"}
             </h2>
-            <div className="text-xs text-ocean-200 flex items-center gap-1.5 pt-0.5">
-              <Anchor className="w-3.5 h-3.5 text-sun-300" />
+            <div className="text-xs text-slate-300 flex items-center gap-1.5 pt-0.5">
+              <Anchor className="w-3.5 h-3.5 text-amber-400" />
               <span>Host: {listing?.host_name || "Indigenous Collective"}</span>
             </div>
           </div>
 
           <div className="relative z-10 text-right shrink-0">
-            <span className="text-[10px] uppercase tracking-wider text-ocean-300 block">
+            <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
               Ticket Ref
             </span>
-            <span className="font-mono font-bold text-sm text-sun-300 bg-ocean-950 px-2.5 py-1 rounded-lg border border-ocean-700 block mt-0.5">
+            <span className="font-mono font-bold text-sm text-amber-400 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 block mt-0.5">
               {order.order_ref}
             </span>
           </div>
@@ -121,23 +120,23 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
         <div className="p-6 sm:p-8 space-y-6">
           {/* Schedule & Timing Grid */}
           {slot && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-ocean-50/70 border border-ocean-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200/90">
               <div className="space-y-1">
                 <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-ocean-700" /> Date of
+                  <Calendar className="w-3.5 h-3.5 text-amber-700" /> Date of
                   Experience
                 </span>
-                <span className="font-display font-bold text-base text-ocean-950 block">
+                <span className="font-display font-bold text-base text-slate-900 block">
                   {formatDate(slot.slot_start)}
                 </span>
               </div>
 
               <div className="space-y-1">
                 <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-ocean-700" /> Reporting
+                  <Clock className="w-3.5 h-3.5 text-amber-700" /> Reporting
                   Time
                 </span>
-                <span className="font-display font-bold text-base text-ocean-950 block">
+                <span className="font-display font-bold text-base text-slate-900 block">
                   {formatTime(slot.slot_start)} sharp
                 </span>
               </div>
@@ -166,7 +165,7 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
                   )}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold transition-colors shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-semibold transition-colors shadow-xs"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   <span>Open Coordinates in Google Maps</span>
@@ -176,7 +175,7 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
           )}
 
           {/* Guest Breakdown & QR Code Row */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4 border-t border-dashed border-slate-300">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4 border-t border-dashed border-slate-200">
             <div className="space-y-3 w-full sm:w-auto">
               <div>
                 <span className="text-[10px] uppercase font-bold text-slate-400">
@@ -203,7 +202,7 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
                   <span className="text-[10px] uppercase font-bold text-slate-400">
                     Amount Paid
                   </span>
-                  <div className="font-semibold text-ocean-900 font-display">
+                  <div className="font-semibold text-slate-900 font-display">
                     {formatINR(order.total_amount_inr)}
                   </div>
                 </div>
@@ -211,10 +210,10 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
 
               {listing?.host_phone && (
                 <div className="pt-2 text-xs flex items-center gap-2 text-slate-700">
-                  <Phone className="w-3.5 h-3.5 text-ocean-700" />
+                  <Phone className="w-3.5 h-3.5 text-amber-700" />
                   <span>
                     Host Support WhatsApp:{" "}
-                    <strong className="text-ocean-900">
+                    <strong className="text-slate-900">
                       {listing.host_phone}
                     </strong>
                   </span>
@@ -260,7 +259,7 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
       <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
         <button
           onClick={handlePrint}
-          className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-2 shadow-xs transition-colors"
+          className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
         >
           <Printer className="w-4 h-4 text-slate-600" />
           <span>Print / Save PDF</span>
@@ -268,7 +267,7 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
 
         <button
           onClick={handleShareWhatsApp}
-          className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-2 shadow-xs transition-colors"
+          className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
         >
           <Share2 className="w-4 h-4" />
           <span>Share to WhatsApp</span>
@@ -276,7 +275,7 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
 
         <button
           onClick={handleCopyLink}
-          className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-2 shadow-xs transition-colors"
+          className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
         >
           <span>{copied ? "Link Copied! ✓" : "Copy Pass Link"}</span>
         </button>
