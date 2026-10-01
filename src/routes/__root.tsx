@@ -20,17 +20,17 @@ import { WishlistProvider } from "../context/WishlistContext";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center bg-[#FAFAF9] px-4 text-center">
+    <div className="flex min-h-[60vh] flex-col items-center justify-center bg-[#29100b] px-4 text-center">
       <div className="max-w-md space-y-4">
-        <h1 className="text-7xl font-bold font-display text-slate-900">404</h1>
-        <h2 className="text-xl font-bold text-slate-800">Shore Not Found</h2>
-        <p className="text-xs text-slate-500">
+        <h1 className="text-7xl font-bold font-display text-[#e3a157]">404</h1>
+        <h2 className="text-xl font-bold text-[#f5edeb]">Shore Not Found</h2>
+        <p className="text-xs text-[#dab38c]">
           The coastal experience or artisan page you are looking for does not
           exist or has shifted with the tide.
         </p>
         <a
           href="/"
-          className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-black transition-colors"
+          className="inline-flex items-center justify-center rounded-xl bg-[#e3a157] px-5 py-2.5 text-xs font-bold text-[#29100b] shadow-md hover:bg-[#dab38c] transition-colors"
         >
           Return to Catalog
         </a>
@@ -42,18 +42,18 @@ function NotFoundComponent() {
 function ErrorComponent({ error }: { error: Error; reset: () => void }) {
   console.error("Root error boundary caught:", error);
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center bg-[#FAFAF9] px-4 text-center">
+    <div className="flex min-h-[60vh] flex-col items-center justify-center bg-[#29100b] px-4 text-center">
       <div className="max-w-md space-y-4">
-        <h1 className="text-2xl font-bold font-display text-slate-900">
+        <h1 className="text-2xl font-bold font-display text-[#f5edeb]">
           Experience Failed to Load
         </h1>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-[#dab38c]">
           A temporary network or rendering error occurred. Please refresh the
           page to retry.
         </p>
         <button
           onClick={() => window.location.reload()}
-          className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-black transition-colors cursor-pointer"
+          className="inline-flex items-center justify-center rounded-xl bg-[#e3a157] px-5 py-2.5 text-xs font-bold text-[#29100b] shadow-md hover:bg-[#dab38c] transition-colors cursor-pointer"
         >
           Refresh Page
         </button>
@@ -106,7 +106,7 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-[#FAFAF9] text-slate-900 antialiased min-h-screen selection:bg-amber-100 selection:text-amber-900">
+      <body className="bg-[#29100b] text-[#f5edeb] antialiased min-h-screen selection:bg-[#e3a157] selection:text-[#29100b]">
         {children}
         <Scripts />
       </body>
@@ -148,7 +148,7 @@ function RootComponent() {
       <DataProvider>
         <CartProvider>
           <WishlistProvider>
-            <div className="min-h-screen flex flex-col bg-[#FAFAF9] text-slate-900">
+            <div className="min-h-screen flex flex-col bg-[#29100b] text-[#f5edeb]">
               <Navbar />
               <main className="flex-1">
                 <Outlet />

@@ -82,18 +82,18 @@ export const CookieConsentBanner: React.FC = () => {
     <aside
       role="region"
       aria-label="Privacy and Cookie Consent"
-      className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-lg z-50 bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-2xl p-5 text-slate-800 transition-all animate-in fade-in slide-in-from-bottom-5 duration-300"
+      className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-lg z-50 bg-[#29100b]/95 backdrop-blur-md border border-[#dab38c]/30 rounded-2xl shadow-2xl p-5 text-[#f5edeb] transition-all animate-in fade-in slide-in-from-bottom-5 duration-300"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2 text-slate-900 font-semibold text-sm">
-          <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-center shrink-0">
-            <Cookie className="w-4 h-4 text-amber-700" />
+        <div className="flex items-center gap-2 text-[#f5edeb] font-semibold text-sm">
+          <div className="w-7 h-7 rounded-lg bg-[#35160e] border border-[#dab38c]/30 text-[#e3a157] flex items-center justify-center shrink-0">
+            <Cookie className="w-4 h-4 text-[#e3a157]" />
           </div>
           <span>Digital Privacy & Cookie Consent</span>
         </div>
         <button
           onClick={handleAcceptEssential}
-          className="text-slate-400 hover:text-slate-700 p-1 rounded-lg"
+          className="text-[#dab38c] hover:text-[#f5edeb] p-1 rounded-lg"
           title="Dismiss and keep essential only"
           aria-label="Dismiss and accept essential cookies only"
         >
@@ -101,9 +101,9 @@ export const CookieConsentBanner: React.FC = () => {
         </button>
       </div>
 
-      <p className="text-xs text-slate-600 mt-2.5 leading-relaxed">
+      <p className="text-xs text-[#dab38c] mt-2.5 leading-relaxed">
         Under the{" "}
-        <strong className="text-slate-900 font-medium">
+        <strong className="text-[#f5edeb] font-medium">
           Digital Personal Data Protection Act (DPDP), 2023
         </strong>
         , MatsyaMart uses essential session storage and cookies to retain your
@@ -112,18 +112,18 @@ export const CookieConsentBanner: React.FC = () => {
       </p>
 
       {showDetails && (
-        <div className="mt-3.5 pt-3 border-t border-slate-100 space-y-2 text-xs">
-          <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200/70">
+        <div className="mt-3.5 pt-3 border-t border-[#dab38c]/15 space-y-2 text-xs">
+          <div className="flex items-center justify-between p-2 rounded-lg bg-[#35160e]/80 border border-[#dab38c]/20">
             <div className="pr-2">
-              <p className="font-semibold text-slate-900 flex items-center gap-1">
+              <p className="font-semibold text-[#f5edeb] flex items-center gap-1">
                 <span>Essential Functional Storage</span>
-                <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-mono font-medium">
+                <span className="text-[10px] text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded font-mono font-medium border border-emerald-600/30">
                   Required
                 </span>
               </p>
-              <p className="text-[11px] text-slate-500 mt-0.5">
+              <p className="text-[11px] text-[#dab38c]/80 mt-0.5">
                 Anonymous guest wishlist (
-                <code className="text-slate-700">matsyamart_wishlist</code>) and
+                <code className="text-[#e3a157]">matsyamart_wishlist</code>) and
                 basket state. Stored on device only.
               </p>
             </div>
@@ -132,15 +132,15 @@ export const CookieConsentBanner: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200/70">
+          <div className="flex items-center justify-between p-2 rounded-lg bg-[#35160e]/80 border border-[#dab38c]/20">
             <div className="pr-2">
-              <p className="font-semibold text-slate-900 flex items-center gap-1">
+              <p className="font-semibold text-[#f5edeb] flex items-center gap-1">
                 <span>Anonymous Performance</span>
-                <span className="text-[10px] text-slate-600 bg-slate-200/70 px-1.5 py-0.5 rounded font-mono font-medium">
+                <span className="text-[10px] text-[#dab38c] bg-[#29100b] px-1.5 py-0.5 rounded font-mono font-medium border border-[#dab38c]/20">
                   Optional
                 </span>
               </p>
-              <p className="text-[11px] text-slate-500 mt-0.5">
+              <p className="text-[11px] text-[#dab38c]/80 mt-0.5">
                 Aggregated page views and speed metrics to improve experience
                 trails.
               </p>
@@ -150,17 +150,17 @@ export const CookieConsentBanner: React.FC = () => {
               id="analytics-optin"
               checked={analyticsOptIn}
               onChange={(e) => setAnalyticsOptIn(e.target.checked)}
-              className="w-4 h-4 rounded text-slate-900 border-slate-300 focus:ring-amber-500 cursor-pointer"
+              className="w-4 h-4 rounded text-[#e3a157] border-[#dab38c]/30 focus:ring-[#e3a157] cursor-pointer"
             />
           </div>
         </div>
       )}
 
       {/* Buttons */}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#dab38c]/15">
         <button
           onClick={() => setShowDetails(!showDetails)}
-          className="text-xs text-slate-600 hover:text-slate-900 underline font-medium cursor-pointer"
+          className="text-xs text-[#dab38c] hover:text-[#f5edeb] underline font-medium cursor-pointer"
         >
           {showDetails ? "Hide options" : "Manage preferences"}
         </button>
@@ -169,14 +169,14 @@ export const CookieConsentBanner: React.FC = () => {
           {showDetails ? (
             <button
               onClick={handleSaveCustom}
-              className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-semibold cursor-pointer transition-colors"
+              className="px-3 py-1.5 rounded-lg border border-[#dab38c]/30 text-[#f5edeb] hover:bg-[#35160e] text-xs font-semibold cursor-pointer transition-colors"
             >
               Save Choices
             </button>
           ) : (
             <button
               onClick={handleAcceptEssential}
-              className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-semibold cursor-pointer transition-colors"
+              className="px-3 py-1.5 rounded-lg border border-[#dab38c]/30 text-[#f5edeb] hover:bg-[#35160e] text-xs font-semibold cursor-pointer transition-colors"
             >
               Essential Only
             </button>
@@ -184,9 +184,9 @@ export const CookieConsentBanner: React.FC = () => {
 
           <button
             onClick={handleAcceptAll}
-            className="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-semibold shadow-xs cursor-pointer transition-colors flex items-center gap-1"
+            className="px-3.5 py-1.5 rounded-lg bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] text-xs font-bold shadow-md cursor-pointer transition-colors flex items-center gap-1"
           >
-            <ShieldCheck className="w-3.5 h-3.5 text-amber-300" />
+            <ShieldCheck className="w-3.5 h-3.5 text-[#29100b]" />
             <span>Accept All</span>
           </button>
         </div>

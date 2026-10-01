@@ -42,16 +42,16 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
   if (!listing) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-20 text-center space-y-4">
-        <h2 className="font-display font-bold text-2xl text-slate-800">
+        <h2 className="font-display font-bold text-2xl text-[#f5edeb]">
           Experience Not Found
         </h2>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-[#dab38c]">
           The coastal tour you are looking for may have concluded or been
           relocated.
         </p>
         <Link
           to="/"
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-black"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#f5edeb] text-[#29100b] rounded-xl text-xs font-bold hover:bg-[#dab38c]"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Return to Catalog
         </Link>
@@ -62,22 +62,23 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
   const isWishlisted = isInWishlist(listing.id);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 text-[#f5edeb]">
       {/* Breadcrumb & Wishlist Action Bar */}
       <div className="flex items-center justify-between">
         <Link
           to="/"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#dab38c] hover:text-[#f5edeb] transition-colors"
         >
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to All Experiences
+          <ArrowLeft className="w-3.5 h-3.5 text-[#e3a157]" /> Back to All
+          Experiences
         </Link>
 
         <button
           onClick={() => toggleWishlist(listing)}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer shadow-2xs ${
+          className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer shadow-xs ${
             isWishlisted
-              ? "bg-rose-50 text-rose-700 border-rose-200 shadow-rose-100"
-              : "bg-white text-slate-600 hover:text-rose-600 border-slate-200 hover:border-rose-200"
+              ? "bg-[#35160e] text-rose-400 border-rose-500/50 shadow-rose-950/50"
+              : "bg-[#35160e]/80 text-[#dab38c] hover:text-rose-400 border-[#dab38c]/25 hover:border-rose-400/40"
           }`}
           title={
             isWishlisted ? "Saved in guest wishlist" : "Save to guest wishlist"
@@ -85,7 +86,7 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
         >
           <Heart
             className={`w-3.5 h-3.5 ${
-              isWishlisted ? "fill-rose-500 text-rose-500" : ""
+              isWishlisted ? "fill-rose-400 text-rose-400" : ""
             }`}
           />
           <span>{isWishlisted ? "Saved" : "Save Experience"}</span>
@@ -95,39 +96,39 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
       {/* Main Experience Header */}
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase bg-amber-100 text-amber-900 border border-amber-300/60">
+          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase bg-[#35160e] text-[#e3a157] border border-[#e3a157]/30">
             Coastal Experience
           </span>
-          <span className="flex items-center gap-1 text-xs font-medium text-slate-500">
-            <MapPin className="w-3.5 h-3.5 text-amber-700" />
+          <span className="flex items-center gap-1 text-xs font-medium text-[#dab38c]">
+            <MapPin className="w-3.5 h-3.5 text-[#e3a157]" />
             {listing.location_name}
           </span>
-          <span className="text-slate-300">•</span>
-          <span className="flex items-center gap-1 text-xs font-medium text-slate-500">
-            <Clock className="w-3.5 h-3.5 text-amber-700" />
+          <span className="text-[#dab38c]/40">•</span>
+          <span className="flex items-center gap-1 text-xs font-medium text-[#dab38c]">
+            <Clock className="w-3.5 h-3.5 text-[#e3a157]" />
             {formatDuration(listing.duration_minutes)}
           </span>
         </div>
 
-        <h1 className="font-display font-bold text-2xl sm:text-4xl text-slate-900 leading-tight">
+        <h1 className="font-display font-bold text-2xl sm:text-4xl text-[#f5edeb] leading-tight">
           {listing.title}
         </h1>
 
-        <p className="text-sm sm:text-base text-slate-600 max-w-3xl leading-relaxed">
+        <p className="text-sm sm:text-base text-[#dab38c] max-w-3xl leading-relaxed">
           {listing.short_summary}
         </p>
       </div>
 
       {/* Photo Gallery Grid */}
       <div className="space-y-3">
-        <div className="aspect-[16/9] sm:aspect-[21/9] w-full rounded-3xl overflow-hidden bg-slate-100 border border-slate-200 shadow-xs relative">
+        <div className="aspect-[16/9] sm:aspect-[21/9] w-full rounded-3xl overflow-hidden bg-[#29100b] border border-[#dab38c]/25 shadow-xl relative">
           <img
             src={listing.images[activeImageIdx] || listing.images[0]}
             alt={listing.title}
             className="w-full h-full object-cover transition-all duration-300"
           />
-          <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-white text-[11px] px-3 py-1 rounded-full flex items-center gap-1.5">
-            <Camera className="w-3.5 h-3.5 text-amber-300" />
+          <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-[#f5edeb] text-[11px] px-3 py-1 rounded-full flex items-center gap-1.5 border border-white/10">
+            <Camera className="w-3.5 h-3.5 text-[#e3a157]" />
             <span>Photo courtesy of {listing.host_name}</span>
           </div>
         </div>
@@ -141,8 +142,8 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
                 onClick={() => setActiveImageIdx(idx)}
                 className={`w-20 h-14 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
                   activeImageIdx === idx
-                    ? "border-amber-500 ring-2 ring-amber-400/30"
-                    : "border-transparent opacity-70 hover:opacity-100"
+                    ? "border-[#e3a157] ring-2 ring-[#e3a157]/40"
+                    : "border-transparent opacity-60 hover:opacity-100"
                 }`}
               >
                 <img
@@ -165,10 +166,10 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
 
           {/* Full Narrative */}
           <div className="space-y-4">
-            <h3 className="font-display font-bold text-xl text-slate-900">
+            <h3 className="font-display font-bold text-xl text-[#f5edeb]">
               About This Experience & Coastal Tradition
             </h3>
-            <div className="prose prose-slate text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+            <div className="text-xs sm:text-sm text-[#dab38c] leading-relaxed whitespace-pre-line">
               {listing.full_description}
             </div>
           </div>
@@ -180,15 +181,15 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
 
           {/* What's Included */}
           {listing.included_items && listing.included_items.length > 0 && (
-            <div className="space-y-3 bg-white border border-slate-200/90 rounded-3xl p-6 shadow-xs">
-              <h4 className="font-display font-bold text-base text-slate-900 flex items-center gap-2">
-                <Utensils className="w-4 h-4 text-emerald-600" />
+            <div className="space-y-3 bg-[#35160e]/85 border border-[#dab38c]/20 rounded-3xl p-6 shadow-md backdrop-blur-md">
+              <h4 className="font-display font-bold text-base text-[#f5edeb] flex items-center gap-2">
+                <Utensils className="w-4 h-4 text-emerald-400" />
                 <span>What's Included in Your Pass</span>
               </h4>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-slate-700">
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-[#dab38c]">
                 {listing.included_items.map((item, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -198,15 +199,15 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
 
           {/* Things to Carry */}
           {listing.things_to_carry && listing.things_to_carry.length > 0 && (
-            <div className="space-y-3 bg-white border border-slate-200/90 rounded-3xl p-6 shadow-xs">
-              <h4 className="font-display font-bold text-base text-slate-900 flex items-center gap-2">
-                <Backpack className="w-4 h-4 text-amber-700" />
+            <div className="space-y-3 bg-[#35160e]/85 border border-[#dab38c]/20 rounded-3xl p-6 shadow-md backdrop-blur-md">
+              <h4 className="font-display font-bold text-base text-[#f5edeb] flex items-center gap-2">
+                <Backpack className="w-4 h-4 text-[#e3a157]" />
                 <span>Essential Things to Carry</span>
               </h4>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-slate-700">
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-[#dab38c]">
                 {listing.things_to_carry.map((item, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-600 shrink-0 mt-1.5" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#e3a157] shrink-0 mt-1.5" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -220,12 +221,12 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
           <SlotBookingSheet listing={listing} slots={slots} />
 
           {/* Host Direct Revenue Guarantee */}
-          <div className="p-4 rounded-2xl bg-white border border-slate-200/90 text-xs text-slate-600 space-y-1 shadow-xs">
-            <div className="flex items-center gap-1.5 font-semibold text-slate-800">
-              <ShieldCheck className="w-4 h-4 text-amber-600" />
+          <div className="p-4 rounded-2xl bg-[#35160e]/85 border border-[#dab38c]/20 text-xs text-[#dab38c] space-y-1 shadow-md">
+            <div className="flex items-center gap-1.5 font-semibold text-[#f5edeb]">
+              <ShieldCheck className="w-4 h-4 text-[#e3a157]" />
               <span>MatsyaMart Community Experience Guarantee</span>
             </div>
-            <p className="text-[11px] leading-relaxed">
+            <p className="text-[11px] leading-relaxed text-[#dab38c]/80">
               Ticket payments directly support coastal guides and hosts. If a
               tidal boat tour is cancelled due to adverse weather or marine
               warnings, a full refund or free date rescheduling is provided

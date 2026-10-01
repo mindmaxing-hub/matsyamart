@@ -23,15 +23,15 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
   if (!order) {
     return (
       <div className="max-w-xl mx-auto px-4 py-20 text-center space-y-4">
-        <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
+        <div className="w-12 h-12 rounded-full bg-[#35160e] text-[#e3a157] border border-[#dab38c]/25 flex items-center justify-center mx-auto">
           <AlertCircle className="w-6 h-6" />
         </div>
-        <h2 className="font-display font-bold text-2xl text-slate-900">
+        <h2 className="font-display font-bold text-2xl text-[#f5edeb]">
           Order Pass Not Found
         </h2>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-[#dab38c]">
           We could not locate reference{" "}
-          <code className="font-mono bg-slate-100 px-2 py-0.5 rounded">
+          <code className="font-mono bg-[#1f0b07] text-[#e3a157] px-2 py-0.5 rounded border border-[#dab38c]/25">
             {orderRef}
           </code>
           . If you recently completed payment, please check your WhatsApp or
@@ -39,7 +39,7 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
         </p>
         <Link
           to="/"
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-semibold transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] rounded-xl text-xs font-bold transition-colors shadow-md"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Return to Catalog
         </Link>
@@ -52,7 +52,7 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
       <div>
         <Link
           to="/"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#dab38c] hover:text-[#f5edeb] transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Return to Catalog Home
         </Link>

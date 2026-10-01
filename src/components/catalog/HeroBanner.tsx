@@ -1,36 +1,31 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import { Link } from "../ui/Link";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { useData } from "../../context/DataContext";
 
 interface HeroBannerProps {
   onScrollToCatalog?: () => void;
 }
 
+// Gentle rotational degrees to create the organic Lu.ma fanned card deck
 const ROTATIONS = [
-  "-3deg",
-  "2deg",
+  "-4deg",
+  "2.5deg",
+  "-1.5deg",
+  "3.5deg",
   "-2deg",
   "3deg",
   "-3deg",
-  "2deg",
-  "-1deg",
-  "3deg",
 ];
 
 export const HeroBanner: React.FC<HeroBannerProps> = ({
   onScrollToCatalog,
 }) => {
-  const { listings, spotlightListingIds } = useData();
+  const { listings } = useData();
   const [hasLoaded, setHasLoaded] = useState(false);
 
-  // Resolve spotlight listings in exact ordered sequence
-  const displayListings = useMemo(() => {
-    const list = spotlightListingIds
-      .map((id) => listings.find((l) => l.id === id))
-      .filter((l): l is NonNullable<typeof l> => Boolean(l && l.is_active));
-    return list.length > 0 ? list : listings.slice(0, 6);
-  }, [spotlightListingIds, listings]);
+  // Take top 7 listings across all pillars for the hero deck
+  const displayListings = listings.slice(0, 7);
 
   useEffect(() => {
     const timer = setTimeout(() => setHasLoaded(true), 50);
@@ -39,41 +34,41 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 
   return (
     <div
-      className="relative text-slate-900 flex flex-col items-center justify-start overflow-hidden pt-12 sm:pt-16 md:pt-20 pb-10 selection:bg-[#e3a157] selection:text-slate-900"
+      className="relative text-[#f5edeb] flex flex-col items-center justify-start overflow-hidden pt-12 sm:pt-16 md:pt-20 pb-10 selection:bg-[#e3a157] selection:text-[#29100b]"
       style={{
         background: `
-          radial-gradient(1100px 550px at 50% 12%, rgba(227, 161, 87, 0.09), transparent 70%),
-          linear-gradient(180deg, #FFFFFF 0%, #FAFAF9 60%, #F5EDEB 100%)
+          radial-gradient(1100px 550px at 50% 12%, rgba(93, 58, 36, 0.45), transparent 70%),
+          linear-gradient(180deg, #29100b 0%, #240c08 50%, #1f0b07 100%)
         `,
       }}
     >
-      {/* 1. TOP SECTION: Focal Point Typography (100% Unobstructed, Exactly like Lu.ma) */}
+      {/* 1. TOP SECTION: Focal Point Typography */}
       <div className="relative z-20 w-full max-w-sm sm:max-w-xl lg:max-w-2xl text-center space-y-4 sm:space-y-6 mx-auto px-4">
-        {/* Minimal Wordmark / Eyebrow (Lu.ma Style) */}
+        {/* Minimal Wordmark / Eyebrow */}
         <div
           className={`inline-flex items-center gap-1 text-sm sm:text-base font-semibold tracking-wider transition-opacity duration-500 ${
             hasLoaded ? "opacity-100" : "opacity-0"
           }`}
         >
-          <span className="font-display font-bold tracking-tight text-slate-900">
+          <span className="font-display font-bold tracking-tight text-[#f5edeb]">
             MatsyaMart
           </span>
           <span className="text-[#e3a157] font-bold leading-none">✦</span>
         </div>
 
-        {/* Lu.ma-Style Big Headline (Exact 4 Words) */}
+        {/* Big Headline */}
         <h1
-          className={`font-display text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 leading-[1.06] transition-all duration-700 px-2 ${
+          className={`font-display text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-[#f5edeb] leading-[1.06] transition-all duration-700 px-2 ${
             hasLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
           Coastal experiences <br />
-          <span className="text-amber-700">start here</span>
+          <span className="text-[#e3a157]">start here</span>
         </h1>
 
-        {/* Lu.ma-Style Subtitle (Exact 15 Words matching Lu.ma's 15 words) */}
+        {/* Subtitle */}
         <p
-          className={`text-xs sm:text-base text-slate-600 max-w-xs sm:max-w-xl mx-auto leading-relaxed font-normal transition-all duration-700 delay-150 px-2 ${
+          className={`text-xs sm:text-base text-[#dab38c] max-w-xs sm:max-w-xl mx-auto leading-relaxed font-normal transition-all duration-700 delay-150 px-2 ${
             hasLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
@@ -81,7 +76,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           makes every experience feel effortless.
         </p>
 
-        {/* Clean Lu.ma Action Row */}
+        {/* Action Row */}
         <div
           className={`flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-1 transition-all duration-700 delay-300 ${
             hasLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
@@ -97,22 +92,22 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                   ?.scrollIntoView({ behavior: "smooth" });
               }
             }}
-            className="px-6 sm:px-7 py-2.5 sm:py-3 rounded-full bg-slate-900 hover:bg-black text-white font-bold text-xs sm:text-sm transition-all shadow-lg hover:scale-105 active:scale-95 cursor-pointer"
+            className="px-6 sm:px-7 py-2.5 sm:py-3 rounded-full bg-[#f5edeb] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs sm:text-sm transition-all shadow-xl hover:scale-105 active:scale-95 cursor-pointer"
           >
             Explore Experiences
           </button>
 
           <Link
             to="/host-with-us"
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#dab38c] hover:text-[#f5edeb] transition-colors"
           >
             <span>Submit Experience</span>
-            <ArrowRight className="w-3.5 h-3.5 text-amber-700" />
+            <ArrowRight className="w-3.5 h-3.5 text-[#e3a157]" />
           </Link>
         </div>
       </div>
 
-      {/* 2. BOTTOM SECTION: Event Card Collage (Below Headlines & Buttons — Image 3 Lu.ma Style) */}
+      {/* 2. BOTTOM SECTION: Event Card Collage */}
       <div
         className={`w-full max-w-6xl mx-auto pt-8 sm:pt-12 px-4 transition-all duration-1000 delay-400 ${
           hasLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
@@ -143,27 +138,27 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
               <Link
                 key={listing.id}
                 to={detailPath}
-                className="group shrink-0 w-28 sm:w-36 md:w-44 p-1.5 sm:p-2 bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-md hover:scale-105 hover:-translate-y-1 transition-all hover:border-amber-400 block cursor-pointer"
+                className="group shrink-0 w-28 sm:w-36 md:w-44 p-1.5 sm:p-2 bg-[#35160e]/85 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-[#dab38c]/25 shadow-[0_15px_35px_rgba(41,16,11,0.7)] hover:scale-105 hover:-translate-y-1 transition-all hover:border-[#e3a157]/60 block cursor-pointer"
                 style={{
                   transform: `rotate(${rotation})`,
                 }}
               >
-                <div className="w-full aspect-[4/3] rounded-lg sm:rounded-xl overflow-hidden mb-1.5 sm:mb-2 bg-slate-100 relative">
+                <div className="w-full aspect-[4/3] rounded-lg sm:rounded-xl overflow-hidden mb-1.5 sm:mb-2 bg-[#29100b] relative">
                   <img
                     src={listing.images[0]}
                     alt={listing.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                   />
-                  <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded-full bg-white/90 backdrop-blur-xs text-[7px] sm:text-[8px] font-bold tracking-wider uppercase text-slate-800 border border-slate-200">
+                  <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded-full bg-[#29100b]/90 backdrop-blur-xs text-[7px] sm:text-[8px] font-bold tracking-wider uppercase text-[#e3a157] border border-[#e3a157]/30">
                     {categoryLabel}
                   </span>
                 </div>
                 <div className="px-0.5 sm:px-1">
-                  <div className="font-display font-bold text-[9px] sm:text-xs text-slate-900 group-hover:text-amber-800 transition-colors truncate tracking-tight">
+                  <div className="font-display font-bold text-[9px] sm:text-xs text-[#f5edeb] group-hover:text-[#dab38c] transition-colors truncate tracking-tight">
                     {listing.title}
                   </div>
-                  <div className="text-[8px] sm:text-[10px] text-slate-500 truncate">
+                  <div className="text-[8px] sm:text-[10px] text-[#dab38c]/80 truncate">
                     {subtitle}
                   </div>
                 </div>
@@ -173,7 +168,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         </div>
       </div>
 
-      {/* Floating Animated Scroll Down Cue (Seamless flow into feed) */}
+      {/* Floating Animated Scroll Down Cue */}
       <div
         onClick={() => {
           if (onScrollToCatalog) {
@@ -184,10 +179,10 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
               ?.scrollIntoView({ behavior: "smooth" });
           }
         }}
-        className="pt-4 text-slate-400 hover:text-slate-700 text-[10px] uppercase tracking-[0.25em] flex items-center gap-1 cursor-pointer transition-colors"
+        className="pt-4 text-[#dab38c]/60 hover:text-[#f5edeb] text-[10px] uppercase tracking-[0.25em] flex items-center gap-1 cursor-pointer transition-colors"
       >
         <span>SCROLL</span>
-        <ChevronDown className="w-3.5 h-3.5 animate-bounce text-amber-600" />
+        <ChevronDown className="w-3.5 h-3.5 animate-bounce text-[#e3a157]" />
       </div>
     </div>
   );

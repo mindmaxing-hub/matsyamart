@@ -43,10 +43,10 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
   return (
     <Link
       to={detailPath}
-      className="group block bg-white hover:bg-slate-50/50 border border-slate-200/90 hover:border-amber-300 rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-300 shadow-xs hover:shadow-lg hover:-translate-y-1 flex flex-col cursor-pointer shrink-0 w-[270px] sm:w-auto snap-start"
+      className="group block bg-[#35160e]/85 hover:bg-[#481f14] border border-[#dab38c]/20 hover:border-[#e3a157]/45 rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 flex flex-col cursor-pointer backdrop-blur-md shrink-0 w-[270px] sm:w-auto snap-start"
     >
       {/* Thumbnail Aspect Container */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
+      <div className="relative aspect-[16/10] overflow-hidden bg-[#29100b]">
         <img
           src={listing.images[0]}
           alt={listing.title}
@@ -56,7 +56,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
 
         {/* Pillar Tag */}
         <div className="absolute top-3 left-3 pointer-events-none">
-          <span className="px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-md border border-slate-200/80 text-[10px] font-bold tracking-wider uppercase text-slate-800 shadow-xs">
+          <span className="px-2.5 py-1 rounded-full bg-[#29100b]/85 backdrop-blur-md border border-[#e3a157]/30 text-[10px] font-bold tracking-wider uppercase text-[#e3a157] shadow-xs">
             {getPillarLabel()}
           </span>
         </div>
@@ -66,8 +66,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
           onClick={handleWishlistToggle}
           className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-200 shadow-xs cursor-pointer z-10 ${
             isWishlisted
-              ? "bg-rose-50 border border-rose-200 text-rose-600 shadow-rose-200/50"
-              : "bg-white/90 hover:bg-white text-slate-500 hover:text-rose-600 border border-slate-200/80"
+              ? "bg-[#29100b]/90 border border-rose-500/50 text-rose-400"
+              : "bg-[#29100b]/80 hover:bg-[#29100b] text-[#dab38c] hover:text-rose-400 border border-[#dab38c]/30"
           }`}
           title={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
           aria-label={
@@ -83,7 +83,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
 
         {/* Price Pill */}
         <div className="absolute bottom-3 right-3 pointer-events-none">
-          <span className="px-3 py-1 rounded-full bg-white/95 backdrop-blur-md border border-slate-200/90 text-xs font-bold text-slate-900 shadow-xs">
+          <span className="px-3 py-1 rounded-full bg-[#29100b]/95 backdrop-blur-md border border-[#e3a157]/35 text-xs font-bold text-[#e3a157] shadow-xs">
             {formatINR(listing.price_inr)}
           </span>
         </div>
@@ -93,8 +93,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
       <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
         <div className="space-y-1.5">
           {/* Date / Availability Line (Amber Style) */}
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-800">
-            <Calendar className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#e3a157]">
+            <Calendar className="w-3.5 h-3.5 text-[#e3a157] shrink-0" />
             <span>
               {isExperience
                 ? `Every Weekend • ${listing.duration_minutes ? Math.floor(listing.duration_minutes / 60) + "h " + (listing.duration_minutes % 60 ? (listing.duration_minutes % 60) + "m" : "") : "2h"}`
@@ -103,13 +103,13 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
           </div>
 
           {/* Title */}
-          <h3 className="font-display font-bold text-sm sm:text-base text-slate-900 group-hover:text-amber-800 transition-colors line-clamp-2 leading-snug">
+          <h3 className="font-display font-bold text-sm sm:text-base text-[#f5edeb] group-hover:text-[#e3a157] transition-colors line-clamp-2 leading-snug">
             {listing.title}
           </h3>
 
           {/* Host & Location Line */}
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 line-clamp-1 pt-0.5">
-            <MapPin className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+          <div className="flex items-center gap-1.5 text-[11px] text-[#dab38c] line-clamp-1 pt-0.5">
+            <MapPin className="w-3.5 h-3.5 text-[#e3a157] shrink-0" />
             <span className="truncate">
               {listing.location_name || listing.artisan_collective}
             </span>
@@ -117,22 +117,22 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
         </div>
 
         {/* Action Button Row */}
-        <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-          <span className="text-[11px] text-slate-500 font-medium truncate max-w-[55%]">
+        <div className="pt-2 border-t border-[#dab38c]/15 flex items-center justify-between">
+          <span className="text-[11px] text-[#dab38c] font-medium truncate max-w-[55%]">
             By {listing.host_name.split("&")[0]?.trim()}
           </span>
 
           {isExperience ? (
-            <span className="text-xs font-semibold text-amber-800 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+            <span className="text-xs font-semibold text-[#e3a157] group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
               <span>Book</span>
-              <ArrowRight className="w-3 h-3" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </span>
           ) : (
             <button
               onClick={handleQuickAdd}
-              className="px-3 py-1 rounded-full bg-slate-900 hover:bg-black text-white text-[11px] font-semibold transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+              className="px-3 py-1 rounded-full bg-[#5d3a24]/50 hover:bg-[#e3a157] hover:text-[#29100b] text-[#f5edeb] text-[11px] font-semibold transition-colors flex items-center gap-1.5 border border-[#dab38c]/30 shadow-xs cursor-pointer"
             >
-              <ShoppingBag className="w-3 h-3 text-amber-300" />
+              <ShoppingBag className="w-3.5 h-3.5 text-[#e3a157]" />
               <span>Add</span>
             </button>
           )}

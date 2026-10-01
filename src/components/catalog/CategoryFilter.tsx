@@ -23,18 +23,18 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
   pillarCounts,
 }) => {
   return (
-    <div className="w-full flex items-center justify-between border-b border-slate-200 pb-4 gap-4">
+    <div className="w-full flex items-center justify-between border-b border-[#dab38c]/15 pb-4 gap-4">
       {/* 4 Pillars Pill Tabs (Lu.ma Style) */}
-      <div className="flex items-center gap-1.5 p-1 sm:p-1.5 bg-slate-100/90 rounded-full border border-slate-200/80 overflow-x-auto scrollbar-none max-w-full shadow-xs shrink-0">
+      <div className="flex items-center gap-1.5 p-1 sm:p-1.5 bg-[#35160e]/80 rounded-full border border-[#dab38c]/20 backdrop-blur-md overflow-x-auto scrollbar-none max-w-full shadow-md shrink-0">
         <button
           onClick={() => setSelectedPillar("all")}
           className={`px-4 py-2 text-xs font-semibold rounded-full transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
             selectedPillar === "all"
-              ? "bg-white text-slate-900 shadow-xs border border-slate-200/90 font-bold"
-              : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+              ? "bg-[#f5edeb] text-[#29100b] shadow-md border-transparent font-bold"
+              : "text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#481f14]"
           }`}
         >
-          <Layers className="w-3.5 h-3.5 text-amber-600" />
+          <Layers className="w-3.5 h-3.5 text-[#e3a157]" />
           <span>All</span>
           <span className="text-[10px] opacity-70">({totalListingsCount})</span>
         </button>
@@ -43,11 +43,11 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
           onClick={() => setSelectedPillar("walks")}
           className={`px-4 py-2 text-xs font-semibold rounded-full transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
             selectedPillar === "walks"
-              ? "bg-white text-slate-900 shadow-xs border border-slate-200/90 font-bold"
-              : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+              ? "bg-[#f5edeb] text-[#29100b] shadow-md border-transparent font-bold"
+              : "text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#481f14]"
           }`}
         >
-          <Compass className="w-3.5 h-3.5 text-amber-600" />
+          <Compass className="w-3.5 h-3.5 text-[#e3a157]" />
           <span>Walks</span>
           <span className="text-[10px] opacity-70">
             ({pillarCounts.walks || 0})
@@ -58,11 +58,11 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
           onClick={() => setSelectedPillar("workshops")}
           className={`px-4 py-2 text-xs font-semibold rounded-full transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
             selectedPillar === "workshops"
-              ? "bg-white text-slate-900 shadow-xs border border-slate-200/90 font-bold"
-              : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+              ? "bg-[#f5edeb] text-[#29100b] shadow-md border-transparent font-bold"
+              : "text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#481f14]"
           }`}
         >
-          <Hammer className="w-3.5 h-3.5 text-amber-600" />
+          <Hammer className="w-3.5 h-3.5 text-[#e3a157]" />
           <span>Workshops</span>
           <span className="text-[10px] opacity-70">
             ({pillarCounts.workshops || 0})
@@ -73,11 +73,11 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
           onClick={() => setSelectedPillar("food")}
           className={`px-4 py-2 text-xs font-semibold rounded-full transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
             selectedPillar === "food"
-              ? "bg-white text-slate-900 shadow-xs border border-slate-200/90 font-bold"
-              : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+              ? "bg-[#f5edeb] text-[#29100b] shadow-md border-transparent font-bold"
+              : "text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#481f14]"
           }`}
         >
-          <UtensilsCrossed className="w-3.5 h-3.5 text-amber-600" />
+          <UtensilsCrossed className="w-3.5 h-3.5 text-[#e3a157]" />
           <span>Food</span>
           <span className="text-[10px] opacity-70">
             ({pillarCounts.food || 0})
@@ -88,20 +88,16 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
           onClick={() => setSelectedPillar("goods")}
           className={`px-4 py-2 text-xs font-semibold rounded-full transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
             selectedPillar === "goods"
-              ? "bg-white text-slate-900 shadow-xs border border-slate-200/90 font-bold"
-              : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+              ? "bg-[#f5edeb] text-[#29100b] shadow-md border-transparent font-bold"
+              : "text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#481f14]"
           }`}
         >
-          <ShoppingBag className="w-3.5 h-3.5 text-amber-600" />
+          <ShoppingBag className="w-3.5 h-3.5 text-[#e3a157]" />
           <span>Goods</span>
           <span className="text-[10px] opacity-70">
             ({pillarCounts.goods || 0})
           </span>
         </button>
-      </div>
-
-      <div className="hidden md:block text-xs text-slate-500 font-medium">
-        Curated coastal experiences &amp; authentic goods
       </div>
     </div>
   );
