@@ -112,14 +112,14 @@ export const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#29100b] text-[#f5edeb] min-h-screen space-y-10 sm:space-y-14 pb-24 selection:bg-[#e3a157] selection:text-[#29100b]">
+    <div className="bg-[#29100b] text-[#f5edeb] min-h-screen pb-24 selection:bg-[#e3a157] selection:text-[#29100b]">
       {/* 1. Minimal Hero with Roast Radial Gradient & Focal Typography */}
       <HeroBanner onScrollToCatalog={scrollToCatalog} />
 
       {/* 2. Main Discovery Section */}
       <main
         id="catalog-feed"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-14"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 space-y-10 sm:space-y-14"
       >
         {/* 2. Browse by Category Squircle Tile Grid */}
         <section className="space-y-4 pt-0">

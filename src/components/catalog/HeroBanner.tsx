@@ -34,19 +34,19 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 
   return (
     <div
-      className="relative text-[#f5edeb] flex flex-col items-center justify-start overflow-hidden pt-12 sm:pt-16 md:pt-20 pb-10 selection:bg-[#e3a157] selection:text-[#29100b]"
+      className="relative text-[#f5edeb] flex flex-col items-center justify-start overflow-hidden pt-12 sm:pt-16 md:pt-20 pb-4 sm:pb-6 selection:bg-[#e3a157] selection:text-[#29100b]"
       style={{
         background: `
-          radial-gradient(1100px 550px at 50% 12%, rgba(93, 58, 36, 0.45), transparent 70%),
-          linear-gradient(180deg, #29100b 0%, #240c08 50%, #1f0b07 100%)
+          radial-gradient(1100px 550px at 50% 0%, rgba(93, 58, 36, 0.45), transparent 75%),
+          linear-gradient(180deg, #1f0b07 0%, #240c08 30%, #29100b 75%, #29100b 100%)
         `,
       }}
     >
       {/* 1. TOP SECTION: Focal Point Typography */}
-      <div className="relative z-20 w-full max-w-sm sm:max-w-xl lg:max-w-2xl text-center space-y-4 sm:space-y-6 mx-auto px-4">
+      <div className="relative z-20 w-full max-w-md sm:max-w-2xl lg:max-w-4xl text-center space-y-4 sm:space-y-6 mx-auto px-4">
         {/* Minimal Wordmark / Eyebrow */}
         <div
-          className={`inline-flex items-center gap-1 text-sm sm:text-base font-semibold tracking-wider transition-opacity duration-500 ${
+          className={`inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold tracking-wider transition-opacity duration-500 ${
             hasLoaded ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -56,19 +56,22 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           <span className="text-[#e3a157] font-bold leading-none">✦</span>
         </div>
 
-        {/* Big Headline */}
+        {/* Big Headline: Exact 1-line each Lu.ma Stacked Editorial Layout */}
         <h1
-          className={`font-display text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-[#f5edeb] leading-[1.06] transition-all duration-700 px-2 ${
+          className={`font-display text-[clamp(2.85rem,11.5vw,6.25rem)] font-bold tracking-[-0.035em] text-[#f5edeb] leading-[0.93] sm:leading-[0.92] transition-all duration-700 px-2 ${
             hasLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          Coastal experiences <br />
-          <span className="text-[#e3a157]">start here</span>
+          <span className="block whitespace-nowrap">Coastal</span>
+          <span className="block whitespace-nowrap">experiences</span>
+          <span className="block whitespace-nowrap text-[#e3a157]">
+            start here
+          </span>
         </h1>
 
         {/* Subtitle */}
         <p
-          className={`text-xs sm:text-base text-[#dab38c] max-w-xs sm:max-w-xl mx-auto leading-relaxed font-normal transition-all duration-700 delay-150 px-2 ${
+          className={`text-sm sm:text-lg text-[#dab38c] max-w-xs sm:max-w-xl mx-auto leading-relaxed font-normal transition-all duration-700 delay-150 px-2 pt-1 sm:pt-2 ${
             hasLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
@@ -78,7 +81,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 
         {/* Action Row */}
         <div
-          className={`flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-1 transition-all duration-700 delay-300 ${
+          className={`flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-2 sm:pt-3 transition-all duration-700 delay-300 ${
             hasLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
