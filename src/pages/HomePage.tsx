@@ -155,12 +155,9 @@ export const HomePage: React.FC = () => {
                   : "bg-[#35160e]/85 hover:bg-[#481f14] border-[#dab38c]/20 hover:border-[#e3a157]/40"
               }`}
             >
-              <div className="w-10 h-10 rounded-2xl bg-[#e3a157]/15 border border-[#e3a157]/30 flex items-center justify-center text-[#e3a157] group-hover:scale-110 transition-transform">
-                <Compass className="w-5 h-5 text-[#e3a157]" />
-              </div>
               <div>
                 <div className="font-display font-bold text-sm sm:text-base text-[#f5edeb] group-hover:text-[#e3a157] transition-colors">
-                  Walks & Trails
+                  Walks
                 </div>
                 <div className="text-[11px] text-[#dab38c] font-medium">
                   {pillarCounts.walks || 0} Experiences
@@ -180,9 +177,6 @@ export const HomePage: React.FC = () => {
                   : "bg-[#35160e]/85 hover:bg-[#481f14] border-[#dab38c]/20 hover:border-[#e3a157]/40"
               }`}
             >
-              <div className="w-10 h-10 rounded-2xl bg-[#e3a157]/15 border border-[#e3a157]/30 flex items-center justify-center text-[#e3a157] group-hover:scale-110 transition-transform">
-                <Hammer className="w-5 h-5 text-[#e3a157]" />
-              </div>
               <div>
                 <div className="font-display font-bold text-sm sm:text-base text-[#f5edeb] group-hover:text-[#e3a157] transition-colors">
                   Workshops
@@ -205,12 +199,9 @@ export const HomePage: React.FC = () => {
                   : "bg-[#35160e]/85 hover:bg-[#481f14] border-[#dab38c]/20 hover:border-[#e3a157]/40"
               }`}
             >
-              <div className="w-10 h-10 rounded-2xl bg-[#e3a157]/15 border border-[#e3a157]/30 flex items-center justify-center text-[#e3a157] group-hover:scale-110 transition-transform">
-                <UtensilsCrossed className="w-5 h-5 text-[#e3a157]" />
-              </div>
               <div>
                 <div className="font-display font-bold text-sm sm:text-base text-[#f5edeb] group-hover:text-[#e3a157] transition-colors">
-                  Food & Feasts
+                  Food
                 </div>
                 <div className="text-[11px] text-[#dab38c] font-medium">
                   {pillarCounts.food || 0} Feasts
@@ -230,12 +221,9 @@ export const HomePage: React.FC = () => {
                   : "bg-[#35160e]/85 hover:bg-[#481f14] border-[#dab38c]/20 hover:border-[#e3a157]/40"
               }`}
             >
-              <div className="w-10 h-10 rounded-2xl bg-[#e3a157]/15 border border-[#e3a157]/30 flex items-center justify-center text-[#e3a157] group-hover:scale-110 transition-transform">
-                <ShoppingBag className="w-5 h-5 text-[#e3a157]" />
-              </div>
               <div>
                 <div className="font-display font-bold text-sm sm:text-base text-[#f5edeb] group-hover:text-[#e3a157] transition-colors">
-                  Artisan Goods
+                  Goods
                 </div>
                 <div className="text-[11px] text-[#dab38c] font-medium">
                   {pillarCounts.goods || 0} Pantry Crafts

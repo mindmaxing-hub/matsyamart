@@ -115,28 +115,28 @@ export const Navbar: React.FC = () => {
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 text-xs font-semibold text-[#f5edeb] hover:text-[#e3a157] bg-[#35160e] rounded-xl text-center hover:bg-[#481f14] transition-colors"
             >
-              🚶 Walks
+              Walks
             </a>
             <a
               href="/#workshops"
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 text-xs font-semibold text-[#f5edeb] hover:text-[#e3a157] bg-[#35160e] rounded-xl text-center hover:bg-[#481f14] transition-colors"
             >
-              🛠️ Workshops
+              Workshops
             </a>
             <a
               href="/#food"
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 text-xs font-semibold text-[#f5edeb] hover:text-[#e3a157] bg-[#35160e] rounded-xl text-center hover:bg-[#481f14] transition-colors"
             >
-              🍲 Food
+              Food
             </a>
             <a
               href="/#goods"
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 text-xs font-semibold text-[#f5edeb] hover:text-[#e3a157] bg-[#35160e] rounded-xl text-center hover:bg-[#481f14] transition-colors"
             >
-              🧺 Goods
+              Goods
             </a>
           </div>
 
