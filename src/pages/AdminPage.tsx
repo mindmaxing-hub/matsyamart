@@ -12,6 +12,7 @@ import { InventoryStockManager } from "../components/admin/InventoryStockManager
 import { CoastalSafetyCommand } from "../components/admin/CoastalSafetyCommand";
 import { RefundsManager } from "../components/admin/RefundsManager";
 import { Link } from "../components/ui/Link";
+import { BrandLogo } from "../components/site/BrandLogo";
 import { formatINR, formatDate } from "../lib/utils";
 import {
   ShieldCheck,
@@ -305,9 +306,11 @@ export const AdminPage: React.FC = () => {
             <div className="text-[11px] font-bold tracking-[0.14em] text-[rgba(41,16,11,0.48)] uppercase">
               WORKSPACE AUTHENTICATION
             </div>
-            <h2 className="font-display text-3xl text-[#29100B]">
-              Matsya<em className="italic text-[#E3A157]">Mart</em>
-            </h2>
+            <BrandLogo
+              variant="color"
+              eager
+              className="mx-auto h-10 w-auto max-w-[220px]"
+            />
             <p className="text-[13px] text-[rgba(41,16,11,0.64)]">
               Coastal Operations Hub · Restricted to verified coordinators.
             </p>
