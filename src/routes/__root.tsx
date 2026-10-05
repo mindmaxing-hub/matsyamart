@@ -39,7 +39,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error }: { error: unknown; reset: () => void }) {
   console.error("Root error boundary caught:", error);
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center bg-[#29100b] px-4 text-center">
