@@ -3,6 +3,7 @@ import { Link } from "../ui/Link";
 import { ShoppingBag, Heart, Menu, X, Plus } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
+import { BrandLogo } from "../site/BrandLogo";
 
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -12,14 +13,13 @@ export const Navbar: React.FC = () => {
   return (
     <header className="sticky top-0 z-50 bg-[#29100b]/90 backdrop-blur-md border-b border-[#dab38c]/20 text-[#f5edeb] transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Minimal Wordmark */}
-        <Link to="/" className="flex items-center gap-1.5 group">
-          <span className="font-display font-bold text-xl text-[#f5edeb] tracking-tight leading-none group-hover:text-[#dab38c] transition-colors">
-            MatsyaMart
-          </span>
-          <span className="text-[#e3a157] font-bold text-lg leading-none">
-            ✦
-          </span>
+        {/* Official Wordmark */}
+        <Link to="/" className="group shrink-0" aria-label="MatsyaMart home">
+          <BrandLogo
+            variant="white"
+            eager
+            className="h-7 w-auto transition-opacity group-hover:opacity-80 sm:h-8"
+          />
         </Link>
 
         {/* Desktop 4-Pillar Links */}

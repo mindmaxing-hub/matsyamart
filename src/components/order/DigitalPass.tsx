@@ -15,6 +15,7 @@ import {
 import { Order } from "../../types";
 import { formatINR, formatDate, formatTime } from "../../lib/utils";
 import { generateQrDataUrl } from "../../lib/qr";
+import { BrandLogo } from "../site/BrandLogo";
 
 interface DigitalPassProps {
   order: Order;
@@ -90,9 +91,7 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
         <div className="bg-[#1f0b07] text-[#f5edeb] p-6 flex items-start justify-between relative overflow-hidden border-b border-[#dab38c]/20">
           <div className="relative z-10 space-y-1">
             <div className="flex items-center gap-2">
-              <span className="font-display font-bold text-lg text-[#e3a157]">
-                MatsyaMart
-              </span>
+              <BrandLogo className="h-7 w-auto max-w-[150px]" />
               <span className="text-[10px] uppercase font-bold tracking-wider bg-[#35160e] text-[#dab38c] px-2 py-0.5 rounded border border-[#dab38c]/20">
                 Official Boarding Permit
               </span>

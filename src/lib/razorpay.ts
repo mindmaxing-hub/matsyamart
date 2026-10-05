@@ -64,7 +64,7 @@ export async function initiatePayment(
         currency: "INR",
         name: "MatsyaMart",
         description: options.description,
-        image: "/favicon.svg",
+        image: "/favicon.png",
         prefill: {
           name: options.customerName,
           email: options.customerEmail,
