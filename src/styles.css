@@ -217,6 +217,43 @@ h4,
   }
 }
 
+@keyframes oceanGlow {
+  0%,
+  100% {
+    background-position: 0% 50%;
+    filter: drop-shadow(0 0 0.12em color-mix(in srgb, var(--color-ocean-400) 24%, transparent));
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: drop-shadow(0 0 0.24em color-mix(in srgb, var(--color-ocean-300) 62%, transparent));
+  }
+}
+
+.ocean-glow-text {
+  color: var(--color-ocean-300);
+  background-image: linear-gradient(
+    100deg,
+    var(--color-ocean-700),
+    var(--color-ocean-300),
+    var(--color-ocean-50),
+    var(--color-ocean-400),
+    var(--color-ocean-700)
+  );
+  background-size: 240% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: oceanGlow 4.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ocean-glow-text {
+    animation: none;
+    background-position: 50% 50%;
+    filter: none;
+  }
+}
+
 .animate-luma-pop {
   animation: lumaPopIn 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
