@@ -64,7 +64,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         >
           <span className="block whitespace-nowrap">Coastal</span>
           <span className="block whitespace-nowrap">experiences</span>
-          <span className="block whitespace-nowrap text-[#e3a157]">
+          <span className="ocean-glow-text block whitespace-nowrap">
             start here
           </span>
         </h1>
