@@ -470,10 +470,7 @@ export const AdminPage: React.FC = () => {
             <div className="text-[11px] tracking-[0.14em] uppercase text-[rgba(245,237,235,0.48)] font-semibold px-3">
               WORKSPACE
             </div>
-            <div className="font-display text-[30px] tracking-[-0.02em] leading-[1.05] px-3 pt-0.5 text-[#F5EDEB]">
-              <span>Matsya</span>
-              <em className="italic text-[#E3A157]">Mart</em>
-            </div>
+            <BrandLogo className="mx-3 mt-2 h-8 w-auto max-w-[190px]" />
             <div className="text-[13px] text-[rgba(245,237,235,0.6)] px-3 pt-0.5">
               Coastal Operations Hub
             </div>

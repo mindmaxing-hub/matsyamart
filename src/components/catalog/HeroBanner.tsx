@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "../ui/Link";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { useData } from "../../context/DataContext";
+import { BrandLogo } from "../site/BrandLogo";
 
 interface HeroBannerProps {
   onScrollToCatalog?: () => void;
@@ -44,16 +45,16 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
     >
       {/* 1. TOP SECTION: Focal Point Typography */}
       <div className="relative z-20 w-full max-w-md sm:max-w-2xl lg:max-w-4xl text-center space-y-4 sm:space-y-6 mx-auto px-4">
-        {/* Minimal Wordmark / Eyebrow */}
+        {/* Official Wordmark / Eyebrow */}
         <div
-          className={`inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold tracking-wider transition-opacity duration-500 ${
+          className={`inline-flex items-center transition-opacity duration-500 ${
             hasLoaded ? "opacity-100" : "opacity-0"
           }`}
         >
-          <span className="font-display font-bold tracking-tight text-[#f5edeb]">
-            MatsyaMart
-          </span>
-          <span className="text-[#e3a157] font-bold leading-none">✦</span>
+          <BrandLogo
+            eager
+            className="h-9 w-auto sm:h-11"
+          />
         </div>
 
         {/* Big Headline: Exact 1-line each Lu.ma Stacked Editorial Layout */}
