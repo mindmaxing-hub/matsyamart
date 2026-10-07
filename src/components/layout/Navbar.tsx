@@ -22,8 +22,20 @@ export const Navbar: React.FC = () => {
           </span>
         </Link>
 
-        {/* Desktop 4-Pillar Links */}
+        {/* Desktop 4-Pillar Links — Goods → Food → Walks → Workshops */}
         <nav className="hidden md:flex items-center gap-1 bg-[#35160e]/80 border border-[#dab38c]/20 rounded-full px-3 py-1">
+          <a
+            href="/#goods"
+            className="text-xs font-medium px-3 py-1 rounded-full text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#481f14] transition-colors"
+          >
+            Goods
+          </a>
+          <a
+            href="/#food"
+            className="text-xs font-medium px-3 py-1 rounded-full text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#481f14] transition-colors"
+          >
+            Food
+          </a>
           <a
             href="/#walks"
             className="text-xs font-medium px-3 py-1 rounded-full text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#481f14] transition-colors"
@@ -35,18 +47,6 @@ export const Navbar: React.FC = () => {
             className="text-xs font-medium px-3 py-1 rounded-full text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#481f14] transition-colors"
           >
             Workshops
-          </a>
-          <a
-            href="/#food"
-            className="text-xs font-medium px-3 py-1 rounded-full text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#481f14] transition-colors"
-          >
-            Food
-          </a>
-          <a
-            href="/#goods"
-            className="text-xs font-medium px-3 py-1 rounded-full text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#481f14] transition-colors"
-          >
-            Goods
           </a>
         </nav>
 
@@ -88,7 +88,7 @@ export const Navbar: React.FC = () => {
             className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#f5edeb] hover:bg-[#dab38c] text-[#29100b] transition-colors shadow-xs"
           >
             <Plus className="w-3.5 h-3.5 text-[#29100b]" />
-            <span>Submit Experience</span>
+            <span>Share Offering</span>
           </Link>
 
           {/* Mobile Menu Trigger */}
@@ -106,10 +106,24 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer — Goods → Food → Walks → Workshops */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-[#29100b] border-b border-[#dab38c]/20 px-4 py-4 space-y-3 shadow-lg">
           <div className="grid grid-cols-2 gap-2 pb-3 border-b border-[#dab38c]/15">
+            <a
+              href="/#goods"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 text-xs font-semibold text-[#f5edeb] hover:text-[#e3a157] bg-[#35160e] rounded-xl text-center hover:bg-[#481f14] transition-colors"
+            >
+              Goods
+            </a>
+            <a
+              href="/#food"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 text-xs font-semibold text-[#f5edeb] hover:text-[#e3a157] bg-[#35160e] rounded-xl text-center hover:bg-[#481f14] transition-colors"
+            >
+              Food
+            </a>
             <a
               href="/#walks"
               onClick={() => setMobileMenuOpen(false)}
@@ -124,20 +138,6 @@ export const Navbar: React.FC = () => {
             >
               Workshops
             </a>
-            <a
-              href="/#food"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 text-xs font-semibold text-[#f5edeb] hover:text-[#e3a157] bg-[#35160e] rounded-xl text-center hover:bg-[#481f14] transition-colors"
-            >
-              Food
-            </a>
-            <a
-              href="/#goods"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 text-xs font-semibold text-[#f5edeb] hover:text-[#e3a157] bg-[#35160e] rounded-xl text-center hover:bg-[#481f14] transition-colors"
-            >
-              Goods
-            </a>
           </div>
 
           <Link
@@ -146,7 +146,7 @@ export const Navbar: React.FC = () => {
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#f5edeb] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs shadow-xs transition-colors"
           >
             <Plus className="w-4 h-4 text-[#29100b]" />
-            <span>Submit an Experience or Craft</span>
+            <span>Share Your Offering</span>
           </Link>
         </div>
       )}

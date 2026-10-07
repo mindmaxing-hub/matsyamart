@@ -36,6 +36,7 @@ export interface Listing {
   // Experience Specifics
   location_name?: string | undefined;
   secret_meeting_point?: string | undefined;
+  meeting_point_maps_url?: string | undefined; // Google Maps link for walks + workshops
   duration_minutes?: number | undefined;
   included_items?: string[] | undefined;
   things_to_carry?: string[] | undefined;
@@ -69,6 +70,8 @@ export interface AttendeeDetail {
   fullName: string;
   phone: string;
   email?: string | undefined;
+  checked_in?: boolean | undefined;
+  check_in_time?: string | undefined;
 }
 
 export interface OrderItem {
@@ -101,6 +104,8 @@ export interface Order {
   customer_email: string;
   customer_phone: string;
   total_amount_inr: number;
+  coupon_code?: string | undefined;
+  discount_amount_inr?: number | undefined;
   razorpay_order_id?: string | undefined;
   razorpay_payment_id?: string | undefined;
   status: BookingStatus;
@@ -190,4 +195,28 @@ export interface RefundTicket {
   razorpay_refund_id?: string | undefined;
   credit_voucher_code?: string | undefined;
   admin_notes?: string | undefined;
+}
+
+export interface Coupon {
+  id: string;
+  code: string;
+  description?: string | undefined;
+  discount_type: "percent" | "flat";
+  discount_value: number;
+  min_order_inr: number;
+  applicable_pillars: PillarType[];
+  max_uses?: number | undefined;
+  used_count: number;
+  expires_at?: string | undefined;
+  is_active: boolean;
+  created_at: string;
+}
+
+export type RoleLevel = "admin" | "manager" | "coordinator";
+
+export interface AdminUserRole {
+  email: string;
+  role: RoleLevel;
+  assigned_event_ids?: string[] | undefined;
+  created_at?: string | undefined;
 }

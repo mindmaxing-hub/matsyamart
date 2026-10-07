@@ -88,21 +88,21 @@ export const HomePage: React.FC = () => {
     });
   }, [listings, selectedPillar, selectedLocation, searchQuery]);
 
-  // Specific groups for the 4 pillars (one-by-one presentation)
-  const walksListings = useMemo(
-    () => listings.filter((l) => l.pillar === "walks"),
-    [listings],
-  );
-  const workshopsListings = useMemo(
-    () => listings.filter((l) => l.pillar === "workshops"),
+  // Specific groups for the 4 pillars (Canonical Order: Goods → Food → Walks → Workshops)
+  const goodsListings = useMemo(
+    () => listings.filter((l) => l.pillar === "goods"),
     [listings],
   );
   const foodListings = useMemo(
     () => listings.filter((l) => l.pillar === "food"),
     [listings],
   );
-  const goodsListings = useMemo(
-    () => listings.filter((l) => l.pillar === "goods"),
+  const walksListings = useMemo(
+    () => listings.filter((l) => l.pillar === "walks"),
+    [listings],
+  );
+  const workshopsListings = useMemo(
+    () => listings.filter((l) => l.pillar === "workshops"),
     [listings],
   );
 
@@ -121,17 +121,12 @@ export const HomePage: React.FC = () => {
         id="catalog-feed"
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 space-y-10 sm:space-y-14"
       >
-        {/* 2. Browse by Category Squircle Tile Grid */}
+        {/* 2. Browse by Category Squircle Tile Grid (Goods → Food → Walks → Workshops) */}
         <section className="space-y-4 pt-0">
           <div className="flex items-center justify-between">
-            <div>
-              <h2 className="font-display font-bold text-xl sm:text-2xl text-[#f5edeb] tracking-tight">
-                Browse by Category
-              </h2>
-              <p className="text-xs text-[#dab38c] mt-0.5">
-                4 pillars of living coastal culture and heritage
-              </p>
-            </div>
+            <h2 className="font-display font-bold text-xl sm:text-2xl text-[#f5edeb] tracking-tight">
+              Browse by Category
+            </h2>
             {selectedPillar !== "all" && (
               <button
                 onClick={() => setSelectedPillar("all")}
@@ -143,51 +138,29 @@ export const HomePage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            {/* Pillar 1: Walks */}
+            {/* Pillar 1: Goods */}
             <button
               onClick={() => {
-                setSelectedPillar("walks");
+                setSelectedPillar("goods");
                 scrollToCatalog();
               }}
               className={`p-4 sm:p-5 rounded-2xl sm:rounded-3xl border transition-all text-left space-y-3 cursor-pointer group backdrop-blur-md shadow-md hover:-translate-y-0.5 ${
-                selectedPillar === "walks"
+                selectedPillar === "goods"
                   ? "bg-[#481f14] border-[#e3a157] ring-2 ring-[#e3a157]/40"
                   : "bg-[#35160e]/85 hover:bg-[#481f14] border-[#dab38c]/20 hover:border-[#e3a157]/40"
               }`}
             >
               <div>
                 <div className="font-display font-bold text-sm sm:text-base text-[#f5edeb] group-hover:text-[#e3a157] transition-colors">
-                  Walks
+                  Goods
                 </div>
                 <div className="text-[11px] text-[#dab38c] font-medium">
-                  {pillarCounts.walks || 0} Experiences
+                  {pillarCounts.goods || 0} Pantry Crafts
                 </div>
               </div>
             </button>
 
-            {/* Pillar 2: Workshops */}
-            <button
-              onClick={() => {
-                setSelectedPillar("workshops");
-                scrollToCatalog();
-              }}
-              className={`p-4 sm:p-5 rounded-2xl sm:rounded-3xl border transition-all text-left space-y-3 cursor-pointer group backdrop-blur-md shadow-md hover:-translate-y-0.5 ${
-                selectedPillar === "workshops"
-                  ? "bg-[#481f14] border-[#e3a157] ring-2 ring-[#e3a157]/40"
-                  : "bg-[#35160e]/85 hover:bg-[#481f14] border-[#dab38c]/20 hover:border-[#e3a157]/40"
-              }`}
-            >
-              <div>
-                <div className="font-display font-bold text-sm sm:text-base text-[#f5edeb] group-hover:text-[#e3a157] transition-colors">
-                  Workshops
-                </div>
-                <div className="text-[11px] text-[#dab38c] font-medium">
-                  {pillarCounts.workshops || 0} Masterclasses
-                </div>
-              </div>
-            </button>
-
-            {/* Pillar 3: Food */}
+            {/* Pillar 2: Food */}
             <button
               onClick={() => {
                 setSelectedPillar("food");
@@ -209,28 +182,56 @@ export const HomePage: React.FC = () => {
               </div>
             </button>
 
-            {/* Pillar 4: Goods */}
+            {/* Pillar 3: Walks */}
             <button
               onClick={() => {
-                setSelectedPillar("goods");
+                setSelectedPillar("walks");
                 scrollToCatalog();
               }}
               className={`p-4 sm:p-5 rounded-2xl sm:rounded-3xl border transition-all text-left space-y-3 cursor-pointer group backdrop-blur-md shadow-md hover:-translate-y-0.5 ${
-                selectedPillar === "goods"
+                selectedPillar === "walks"
                   ? "bg-[#481f14] border-[#e3a157] ring-2 ring-[#e3a157]/40"
                   : "bg-[#35160e]/85 hover:bg-[#481f14] border-[#dab38c]/20 hover:border-[#e3a157]/40"
               }`}
             >
               <div>
                 <div className="font-display font-bold text-sm sm:text-base text-[#f5edeb] group-hover:text-[#e3a157] transition-colors">
-                  Goods
+                  Walks
                 </div>
                 <div className="text-[11px] text-[#dab38c] font-medium">
-                  {pillarCounts.goods || 0} Pantry Crafts
+                  {pillarCounts.walks || 0} Experiences
+                </div>
+              </div>
+            </button>
+
+            {/* Pillar 4: Workshops */}
+            <button
+              onClick={() => {
+                setSelectedPillar("workshops");
+                scrollToCatalog();
+              }}
+              className={`p-4 sm:p-5 rounded-2xl sm:rounded-3xl border transition-all text-left space-y-3 cursor-pointer group backdrop-blur-md shadow-md hover:-translate-y-0.5 ${
+                selectedPillar === "workshops"
+                  ? "bg-[#481f14] border-[#e3a157] ring-2 ring-[#e3a157]/40"
+                  : "bg-[#35160e]/85 hover:bg-[#481f14] border-[#dab38c]/20 hover:border-[#e3a157]/40"
+              }`}
+            >
+              <div>
+                <div className="font-display font-bold text-sm sm:text-base text-[#f5edeb] group-hover:text-[#e3a157] transition-colors">
+                  Workshops
+                </div>
+                <div className="text-[11px] text-[#dab38c] font-medium">
+                  {pillarCounts.workshops || 0} Masterclasses
                 </div>
               </div>
             </button>
           </div>
+
+          {/* Editorial 2-line story blurb */}
+          <p className="text-xs text-[#dab38c]/80 text-center max-w-lg mx-auto leading-relaxed pt-1">
+            Matsya Mart is a curated marketplace of coastal experiences and goods,
+            run by the Koli fishing communities of Mumbai and Konkan.
+          </p>
         </section>
 
         {/* 3. Prominent Command Search & Discovery Bar */}
@@ -241,7 +242,7 @@ export const HomePage: React.FC = () => {
               <Search className="w-5 h-5 text-[#e3a157] shrink-0 group-focus-within:scale-110 transition-transform" />
               <input
                 type="text"
-                placeholder="Search walks, workshops, feasts, crafts..."
+                placeholder="Search goods, feasts, walks, workshops..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-transparent border-none outline-none text-sm sm:text-base text-[#f5edeb] placeholder:text-[#dab38c]/60 font-normal py-1.5"
@@ -260,7 +261,7 @@ export const HomePage: React.FC = () => {
                 className="bg-transparent border-none outline-none text-xs sm:text-sm text-[#f5edeb] font-medium cursor-pointer pr-1 w-full sm:w-auto"
               >
                 <option value="all" className="bg-[#29100b] text-[#f5edeb]">
-                  All Locations
+                  All Coastal Ports
                 </option>
                 {uniqueLocations.map((loc) => (
                   <option
@@ -274,32 +275,32 @@ export const HomePage: React.FC = () => {
               </select>
             </div>
 
-            {/* Clear Button if active */}
-            {searchQuery || selectedLocation !== "all" ? (
+            {/* Clear Filters Button */}
+            {(searchQuery || selectedLocation !== "all") && (
               <button
+                type="button"
                 onClick={() => {
                   setSearchQuery("");
                   setSelectedLocation("all");
                 }}
-                className="w-full sm:w-auto px-4 py-2 rounded-full bg-[#5d3a24]/50 hover:bg-[#5d3a24] text-xs font-semibold text-[#f5edeb] cursor-pointer flex items-center justify-center gap-1 transition-colors"
+                className="p-1.5 hover:bg-[#481f14] rounded-full text-[#dab38c] hover:text-[#f5edeb] transition-colors"
+                title="Clear Search"
               >
-                <X className="w-3.5 h-3.5 text-[#e3a157]" />
-                <span>Clear</span>
+                <X className="w-4 h-4" />
               </button>
-            ) : null}
+            )}
           </div>
 
-          {/* Quick Suggestion Chips */}
-          <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-[#dab38c]">
-            <span className="font-semibold text-[#dab38c]/70 text-[11px]">
-              Popular:
+          {/* Quick Filter Tag Chips */}
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <span className="text-[11px] text-[#dab38c]/70 uppercase tracking-wider font-semibold">
+              Trending:
             </span>
             {[
-              { label: "Dawn Harbor Walk", query: "Harbor Walk" },
-              { label: "Net-Weaving Class", query: "Net-Weaving" },
-              { label: "Crab Feast", query: "Crab" },
-              { label: "Mangrove Safari", query: "Mangrove" },
               { label: "Sun-Dried Jawla", query: "Jawla" },
+              { label: "Crab Feast", query: "Crab" },
+              { label: "Versova Dawn Trail", query: "Versova" },
+              { label: "Mangrove Safari", query: "Mangrove" },
             ].map((chip) => (
               <button
                 key={chip.label}
@@ -365,90 +366,9 @@ export const HomePage: React.FC = () => {
             )}
           </div>
         ) : (
-          /* Default Feed: One-By-One Pillars with Mobile Touch-Swipe Rails */
+          /* Default Feed: Goods → Food → Walks → Workshops */
           <div className="space-y-16">
-            {/* Pillar 1: Walks */}
-            <section id="walks" className="space-y-4 scroll-mt-24">
-              <div className="flex items-end justify-between border-b border-[#dab38c]/15 pb-3">
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-[#e3a157]/15 border border-[#e3a157]/30 flex items-center justify-center text-[#e3a157]">
-                      <Compass className="w-3.5 h-3.5 text-[#e3a157]" />
-                    </div>
-                    <h2 className="font-display font-bold text-lg sm:text-xl text-[#f5edeb]">
-                      Coastal Walks & Safaris
-                    </h2>
-                  </div>
-                  <p className="text-xs text-[#dab38c]">
-                    Guided dawn village harbor trails and tidal mangrove boat
-                    safaris.
-                  </p>
-                </div>
-              </div>
-
-              {/* Mobile horizontal swipe / Desktop grid */}
-              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-                {walksListings.map((listing) => (
-                  <ListingCard key={listing.id} listing={listing} />
-                ))}
-              </div>
-            </section>
-
-            {/* Pillar 2: Workshops */}
-            <section id="workshops" className="space-y-4 scroll-mt-24">
-              <div className="flex items-end justify-between border-b border-[#dab38c]/15 pb-3">
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-[#e3a157]/15 border border-[#e3a157]/30 flex items-center justify-center text-[#e3a157]">
-                      <Hammer className="w-3.5 h-3.5 text-[#e3a157]" />
-                    </div>
-                    <h2 className="font-display font-bold text-lg sm:text-xl text-[#f5edeb]">
-                      Traditional Workshops & Crafts
-                    </h2>
-                  </div>
-                  <p className="text-xs text-[#dab38c]">
-                    Hands-on masterclasses in net-weaving and wooden boat
-                    carpentry.
-                  </p>
-                </div>
-              </div>
-
-              {/* Mobile horizontal swipe / Desktop grid */}
-              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-                {workshopsListings.map((listing) => (
-                  <ListingCard key={listing.id} listing={listing} />
-                ))}
-              </div>
-            </section>
-
-            {/* Pillar 3: Food */}
-            <section id="food" className="space-y-4 scroll-mt-24">
-              <div className="flex items-end justify-between border-b border-[#dab38c]/15 pb-3">
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-[#e3a157]/15 border border-[#e3a157]/30 flex items-center justify-center text-[#e3a157]">
-                      <UtensilsCrossed className="w-3.5 h-3.5 text-[#e3a157]" />
-                    </div>
-                    <h2 className="font-display font-bold text-lg sm:text-xl text-[#f5edeb]">
-                      Coastal Food & Feasts
-                    </h2>
-                  </div>
-                  <p className="text-xs text-[#dab38c]">
-                    Authentic harbor breakfasts, crab curries, and home-cooked
-                    seafood dining.
-                  </p>
-                </div>
-              </div>
-
-              {/* Mobile horizontal swipe / Desktop grid */}
-              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-                {foodListings.map((listing) => (
-                  <ListingCard key={listing.id} listing={listing} />
-                ))}
-              </div>
-            </section>
-
-            {/* Pillar 4: Goods */}
+            {/* Pillar 1: Goods */}
             <section id="goods" className="space-y-4 scroll-mt-24">
               <div className="flex items-end justify-between border-b border-[#dab38c]/15 pb-3">
                 <div className="space-y-0.5">
@@ -461,15 +381,88 @@ export const HomePage: React.FC = () => {
                     </h2>
                   </div>
                   <p className="text-xs text-[#dab38c]">
-                    Naturally sun-cured seasonal catch, stoneground spices, and
-                    wild mangrove honey.
+                    Naturally sun-cured seasonal catch, stoneground spices, and wild mangrove honey.
                   </p>
                 </div>
               </div>
 
-              {/* Mobile horizontal swipe / Desktop grid */}
               <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
                 {goodsListings.map((listing) => (
+                  <ListingCard key={listing.id} listing={listing} />
+                ))}
+              </div>
+            </section>
+
+            {/* Pillar 2: Food */}
+            <section id="food" className="space-y-4 scroll-mt-24">
+              <div className="flex items-end justify-between border-b border-[#dab38c]/15 pb-3">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-[#e3a157]/15 border border-[#e3a157]/30 flex items-center justify-center text-[#e3a157]">
+                      <UtensilsCrossed className="w-3.5 h-3.5 text-[#e3a157]" />
+                    </div>
+                    <h2 className="font-display font-bold text-lg sm:text-xl text-[#f5edeb]">
+                      Coastal Food & Feasts
+                    </h2>
+                  </div>
+                  <p className="text-xs text-[#dab38c]">
+                    Authentic harbor breakfasts, crab curries, and home-cooked seafood dining.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+                {foodListings.map((listing) => (
+                  <ListingCard key={listing.id} listing={listing} />
+                ))}
+              </div>
+            </section>
+
+            {/* Pillar 3: Walks */}
+            <section id="walks" className="space-y-4 scroll-mt-24">
+              <div className="flex items-end justify-between border-b border-[#dab38c]/15 pb-3">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-[#e3a157]/15 border border-[#e3a157]/30 flex items-center justify-center text-[#e3a157]">
+                      <Compass className="w-3.5 h-3.5 text-[#e3a157]" />
+                    </div>
+                    <h2 className="font-display font-bold text-lg sm:text-xl text-[#f5edeb]">
+                      Coastal Walks & Safaris
+                    </h2>
+                  </div>
+                  <p className="text-xs text-[#dab38c]">
+                    Guided dawn village harbor trails and tidal mangrove boat safaris.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+                {walksListings.map((listing) => (
+                  <ListingCard key={listing.id} listing={listing} />
+                ))}
+              </div>
+            </section>
+
+            {/* Pillar 4: Workshops */}
+            <section id="workshops" className="space-y-4 scroll-mt-24">
+              <div className="flex items-end justify-between border-b border-[#dab38c]/15 pb-3">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-[#e3a157]/15 border border-[#e3a157]/30 flex items-center justify-center text-[#e3a157]">
+                      <Hammer className="w-3.5 h-3.5 text-[#e3a157]" />
+                    </div>
+                    <h2 className="font-display font-bold text-lg sm:text-xl text-[#f5edeb]">
+                      Traditional Workshops & Crafts
+                    </h2>
+                  </div>
+                  <p className="text-xs text-[#dab38c]">
+                    Hands-on masterclasses in net-weaving and wooden boat carpentry.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+                {workshopsListings.map((listing) => (
                   <ListingCard key={listing.id} listing={listing} />
                 ))}
               </div>
@@ -502,7 +495,7 @@ export const HomePage: React.FC = () => {
                 to="/host-with-us"
                 className="px-6 py-3 rounded-full bg-[#5d3a24]/50 text-[#f5edeb] font-semibold text-xs sm:text-sm hover:bg-[#5d3a24] border border-[#dab38c]/30 transition-all hover:scale-105 active:scale-95"
               >
-                Partner With Us
+                Share Offering
               </Link>
             </div>
           </div>

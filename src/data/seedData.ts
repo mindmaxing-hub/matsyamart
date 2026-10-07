@@ -2,24 +2,14 @@ import { Category, Listing, ExperienceSlot } from "../types";
 
 export const SEED_CATEGORIES: Category[] = [
   {
-    id: "cat-walks",
-    name: "Walks",
-    slug: "walks",
-    pillar: "walks",
+    id: "cat-goods",
+    name: "Goods",
+    slug: "goods",
+    pillar: "goods",
     description:
-      "Guided coastal village trails, harbor dawn walks, and mangrove boat safaris.",
-    icon: "Compass",
+      "Artisanal sun-dried catch, small-batch stoneground masalas, and estuary treasures.",
+    icon: "ShoppingBag",
     sort_order: 1,
-  },
-  {
-    id: "cat-workshops",
-    name: "Workshops",
-    slug: "workshops",
-    pillar: "workshops",
-    description:
-      "Hands-on masterclasses in net-weaving, wooden boat carpentry, and maritime crafts.",
-    icon: "Hammer",
-    sort_order: 2,
   },
   {
     id: "cat-food",
@@ -29,16 +19,26 @@ export const SEED_CATEGORIES: Category[] = [
     description:
       "Authentic coastal home meals, harbor dawn breakfasts, and traditional seafood dining.",
     icon: "UtensilsCrossed",
+    sort_order: 2,
+  },
+  {
+    id: "cat-walks",
+    name: "Walks",
+    slug: "walks",
+    pillar: "walks",
+    description:
+      "Guided coastal village trails, harbor dawn walks, and mangrove boat safaris.",
+    icon: "Compass",
     sort_order: 3,
   },
   {
-    id: "cat-goods",
-    name: "Goods",
-    slug: "goods",
-    pillar: "goods",
+    id: "cat-workshops",
+    name: "Workshops",
+    slug: "workshops",
+    pillar: "workshops",
     description:
-      "Artisanal sun-dried catch, small-batch stoneground masalas, and estuary treasures.",
-    icon: "ShoppingBag",
+      "Hands-on masterclasses in net-weaving, wooden boat carpentry, and maritime crafts.",
+    icon: "Hammer",
     sort_order: 4,
   },
 ];
@@ -66,6 +66,7 @@ export const SEED_LISTINGS: Listing[] = [
     location_name: "Versova Coastal Village, Andheri West, Mumbai",
     secret_meeting_point:
       "Beside the Sacred Banyan Tree at Versova Jetty No. 1 (GPS: 19.1352° N, 72.8124° E). Guide Devendra will welcome you.",
+    meeting_point_maps_url: "https://maps.google.com/?q=19.1352,72.8124",
     duration_minutes: 150,
     included_items: [
       "Guided walk led by community elder & youth historian",
@@ -134,6 +135,7 @@ export const SEED_LISTINGS: Listing[] = [
     location_name: "Airoli Coastal Marine Sanctuary, Thane Creek",
     secret_meeting_point:
       "Marine Biodiversity Interpretation Centre, Jetty Pier 2, Airoli (GPS: 19.1678° N, 72.9934° E). Look for Captain Ramesh in green vest.",
+    meeting_point_maps_url: "https://maps.google.com/?q=19.1678,72.9934",
     duration_minutes: 120,
     included_items: [
       "2-hour boat cruise with experienced tidal boatman",
@@ -202,6 +204,7 @@ export const SEED_LISTINGS: Listing[] = [
     location_name: "Worli Coastal Boatyard, Mumbai",
     secret_meeting_point:
       "Worli Coastal Boat Ramp, foot of Worli Fort steps (GPS: 19.0234° N, 72.8167° E). Guide Nana Patil will welcome you.",
+    meeting_point_maps_url: "https://maps.google.com/?q=19.0234,72.8167",
     duration_minutes: 120,
     included_items: [
       "All workshop materials: traditional bamboo needle, hemp cord & frame",
@@ -263,6 +266,7 @@ export const SEED_LISTINGS: Listing[] = [
     location_name: "Sassoon Docks, Colaba, South Mumbai",
     secret_meeting_point:
       "Under the Historic Sassoon Docks Clock Tower Arch, Colaba (GPS: 18.9134° N, 72.8245° E). Ashwini will wear a signature yellow scarf.",
+    meeting_point_maps_url: "https://maps.google.com/?q=18.9134,72.8245",
     duration_minutes: 180,
     included_items: [
       "Expert seafood curation masterclass by community fish merchant",

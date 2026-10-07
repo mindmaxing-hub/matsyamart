@@ -10,9 +10,11 @@ import {
   Download,
   AlertCircle,
   ExternalLink,
+  Printer,
 } from "lucide-react";
 import { Order, Listing, FulfillmentStatus } from "../../types";
 import { formatINR, formatDate } from "../../lib/utils";
+import { CourierLabel } from "./CourierLabel";
 
 interface ProductOrdersTableProps {
   orders: Order[];
@@ -35,6 +37,7 @@ export const ProductOrdersTable: React.FC<ProductOrdersTableProps> = ({
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
   const [courierInput, setCourierInput] = useState("");
   const [awbInput, setAwbInput] = useState("");
+  const [labelOrder, setLabelOrder] = useState<Order | null>(null);
 
   // Filter orders that contain at least one physical product
   const productOrders = orders.filter((order) =>
@@ -453,14 +456,25 @@ export const ProductOrdersTable: React.FC<ProductOrdersTableProps> = ({
                                 No tracking added
                               </div>
                             )}
-                            <button
-                              onClick={() => handleStartEdit(order)}
-                              className="text-[10px] text-amber-700 hover:text-amber-800 font-medium hover:underline cursor-pointer"
-                            >
-                              {order.tracking_awb
-                                ? "Edit Tracking"
-                                : "+ Add Courier AWB"}
-                            </button>
+                            <div className="flex items-center gap-2 pt-1">
+                              <button
+                                onClick={() => handleStartEdit(order)}
+                                className="text-[10px] text-amber-700 hover:text-amber-800 font-medium hover:underline cursor-pointer"
+                              >
+                                {order.tracking_awb
+                                  ? "Edit Tracking"
+                                  : "+ Add AWB"}
+                              </button>
+                              <span className="text-slate-300">·</span>
+                              <button
+                                onClick={() => setLabelOrder(order)}
+                                className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 px-2 py-0.5 rounded cursor-pointer transition-colors"
+                                title="Print courier shipping label"
+                              >
+                                <Printer className="w-2.5 h-2.5" />
+                                <span>Print Label</span>
+                              </button>
+                            </div>
                           </div>
                         )}
                       </td>
@@ -472,6 +486,14 @@ export const ProductOrdersTable: React.FC<ProductOrdersTableProps> = ({
           </div>
         )}
       </div>
+
+      {/* Courier Label Modal */}
+      {labelOrder && (
+        <CourierLabel
+          order={labelOrder}
+          onClose={() => setLabelOrder(null)}
+        />
+      )}
     </div>
   );
 };

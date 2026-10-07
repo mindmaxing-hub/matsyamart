@@ -21,7 +21,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   onClose,
 }) => {
   const router = useRouter();
-  const { createOrder, slots } = useData();
+  const { createOrder, slots, validateCoupon } = useData();
   const { clearCart } = useCart();
 
   const isExperience = items.some((i) => i.listing.type === "experience");
@@ -32,6 +32,18 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [emergencyContact, setEmergencyContact] = useState("");
+
+  // Promo Code State
+  const [couponCodeInput, setCouponCodeInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discountAmount: number;
+    description?: string | undefined;
+  } | null>(null);
+  const [couponFeedback, setCouponFeedback] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
   // Shipping details for physical goods
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
@@ -59,10 +71,52 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const totalAmount = items.reduce(
+  const subtotalAmount = items.reduce(
     (sum, item) => sum + item.listing.price_inr * item.quantity,
     0,
   );
+
+  const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  const finalAmount = Math.max(0, subtotalAmount - discountAmount);
+
+  const handleApplyCoupon = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCouponFeedback(null);
+
+    if (!couponCodeInput.trim()) {
+      setCouponFeedback({
+        type: "error",
+        message: "Please enter a promo code.",
+      });
+      return;
+    }
+
+    const result = validateCoupon(couponCodeInput, items);
+    if (!result.valid || !result.coupon) {
+      setCouponFeedback({
+        type: "error",
+        message: result.error || "Invalid promo code.",
+      });
+      return;
+    }
+
+    setAppliedCoupon({
+      code: result.coupon.code,
+      discountAmount: result.discountAmount || 0,
+      description: result.coupon.description,
+    });
+
+    setCouponFeedback({
+      type: "success",
+      message: `${result.coupon.code} applied! Saved ₹${result.discountAmount}.`,
+    });
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCodeInput("");
+    setCouponFeedback(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,7 +171,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     try {
       // Trigger Razorpay Modal / Sandbox Bridge
       await initiatePayment({
-        amountInr: totalAmount,
+        amountInr: finalAmount,
         orderRef:
           "MM-" + Math.random().toString(36).substring(2, 8).toUpperCase(),
         customerName,
@@ -136,6 +190,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               shippingAddress: hasPhysicalProduct ? shippingAddress : undefined,
               razorpayPaymentId: rzpResult.razorpay_payment_id,
               razorpayOrderId: rzpResult.razorpay_order_id,
+              couponCode: appliedCoupon?.code,
+              discountAmount: discountAmount > 0 ? discountAmount : undefined,
               items: items.map((i) => ({
                 listing: i.listing,
                 quantity: i.quantity,
@@ -147,6 +203,35 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             // If checked out from cart, clear cart
             clearCart();
             onClose();
+
+            // Asynchronously dispatch confirmation ticket email with QR code
+            try {
+              const supabaseUrl = import.meta.env["VITE_SUPABASE_URL"];
+              if (supabaseUrl) {
+                fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    orderRef: confirmedOrder.order_ref,
+                    customerName: confirmedOrder.customer_name,
+                    customerEmail: confirmedOrder.customer_email,
+                    totalAmountInr: confirmedOrder.total_amount_inr,
+                    couponCode: confirmedOrder.coupon_code,
+                    discountAmountInr: confirmedOrder.discount_amount_inr,
+                    items: confirmedOrder.items.map((it) => ({
+                      title: it.listing?.title || "Coastal Offering",
+                      pillar: it.listing?.pillar,
+                      quantity: it.quantity,
+                      unitPrice: it.unit_price_inr,
+                      meetingPoint: it.listing?.secret_meeting_point,
+                      meetingPointMapsUrl: it.listing?.meeting_point_maps_url,
+                    })),
+                  }),
+                }).catch((e) => console.log("Email dispatch queued", e));
+              }
+            } catch {
+              // Ignore network dispatch errors
+            }
 
             // Redirect to digital ticket pass via TanStack router
             router.navigate({
@@ -208,7 +293,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           className="p-6 space-y-6 max-h-[80vh] overflow-y-auto"
         >
           {/* Order Summary Strip */}
-          <div className="bg-[#1f0b07] border border-[#dab38c]/20 rounded-2xl p-4 space-y-2 text-xs">
+          <div className="bg-[#1f0b07] border border-[#dab38c]/20 rounded-2xl p-4 space-y-3 text-xs">
             <div className="font-semibold text-[#dab38c] uppercase tracking-wider text-[11px]">
               Order Summary ({items.length}{" "}
               {items.length === 1 ? "item" : "items"})
@@ -226,11 +311,78 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 </span>
               </div>
             ))}
-            <div className="flex justify-between items-center text-sm font-bold text-[#f5edeb] pt-2 border-t border-[#dab38c]/20">
-              <span>Total Payable</span>
-              <span className="font-display text-base text-[#e3a157] font-bold">
-                {formatINR(totalAmount)}
-              </span>
+
+            {/* Promo Code Input & Status */}
+            <div className="pt-2 border-t border-[#dab38c]/15 space-y-2">
+              {appliedCoupon ? (
+                <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300">
+                  <div className="flex items-center gap-1.5 font-mono">
+                    <span className="font-bold text-emerald-400">{appliedCoupon.code}</span>
+                    <span className="text-[11px] text-emerald-300/80 font-sans">
+                      (Saved {formatINR(appliedCoupon.discountAmount)})
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveCoupon}
+                    className="text-[11px] text-emerald-400 hover:text-emerald-200 underline cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Promo code (e.g. BHOOMI2025)"
+                      value={couponCodeInput}
+                      onChange={(e) => setCouponCodeInput(e.target.value.toUpperCase())}
+                      className="flex-1 px-3 py-1.5 rounded-xl bg-[#29100b] border border-[#dab38c]/30 text-xs font-mono text-[#f5edeb] placeholder:text-[#dab38c]/40 focus:outline-none focus:border-[#e3a157]"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      className="px-3 py-1.5 rounded-xl bg-[#35160e] hover:bg-[#481f14] border border-[#dab38c]/30 text-[#e3a157] font-semibold text-xs cursor-pointer transition-colors"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                  {couponFeedback && (
+                    <div
+                      className={`text-[11px] mt-1.5 ${
+                        couponFeedback.type === "success"
+                          ? "text-emerald-400"
+                          : "text-rose-400"
+                      }`}
+                    >
+                      {couponFeedback.message}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Price Calculations */}
+            <div className="pt-2 border-t border-[#dab38c]/20 space-y-1">
+              {appliedCoupon && (
+                <>
+                  <div className="flex justify-between items-center text-[#dab38c]">
+                    <span>Subtotal</span>
+                    <span>{formatINR(subtotalAmount)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-emerald-400 font-semibold">
+                    <span>Discount ({appliedCoupon.code})</span>
+                    <span>-{formatINR(discountAmount)}</span>
+                  </div>
+                </>
+              )}
+              <div className="flex justify-between items-center text-sm font-bold text-[#f5edeb] pt-1">
+                <span>Total Payable</span>
+                <span className="font-display text-base text-[#e3a157] font-bold">
+                  {formatINR(finalAmount)}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -395,7 +547,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <span>
                 {isSubmitting
                   ? "Securing Spot..."
-                  : `Pay ${formatINR(totalAmount)} via UPI / Cards`}
+                  : `Pay ${formatINR(finalAmount)} via UPI / Cards`}
               </span>
             </button>
 

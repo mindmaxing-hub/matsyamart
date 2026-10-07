@@ -9,6 +9,7 @@ import {
   ShippingAddress,
   AttendeeDetail,
   FulfillmentStatus,
+  Coupon,
 } from "../types";
 import {
   SEED_CATEGORIES,
@@ -32,6 +33,15 @@ interface CreateOrderInput {
   emergencyContact?: string | undefined;
   razorpayPaymentId?: string | undefined;
   razorpayOrderId?: string | undefined;
+  couponCode?: string | undefined;
+  discountAmount?: number | undefined;
+}
+
+interface ValidateCouponResult {
+  valid: boolean;
+  coupon?: Coupon;
+  discountAmount?: number;
+  error?: string;
 }
 
 interface DataContextType {
@@ -40,6 +50,7 @@ interface DataContextType {
   slots: ExperienceSlot[];
   orders: Order[];
   proposals: CommunityVendorProposal[];
+  coupons: Coupon[];
   spotlightListingIds: string[];
   getListingBySlug: (slug: string) => Listing | undefined;
   getSlotsByListingId: (listingId: string) => ExperienceSlot[];
@@ -71,6 +82,21 @@ interface DataContextType {
     courier?: string,
     awb?: string,
   ) => void;
+  addCoupon: (
+    coupon: Omit<Coupon, "id" | "used_count" | "created_at">,
+  ) => void;
+  deleteCoupon: (couponId: string) => void;
+  toggleCouponStatus: (couponId: string) => void;
+  validateCoupon: (
+    code: string,
+    cartItems: { listing: Listing; quantity: number }[],
+  ) => ValidateCouponResult;
+  updateAttendeeCheckIn: (
+    orderId: string,
+    itemId: string,
+    attendeeIndex: number,
+    checkedIn: boolean,
+  ) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -80,6 +106,46 @@ const STORAGE_SLOTS = "matsyamart_slots_v2";
 const STORAGE_ORDERS = "matsyamart_orders_v1";
 const STORAGE_PROPOSALS = "matsyamart_proposals_v1";
 const STORAGE_SPOTLIGHT = "matsyamart_spotlight_v1";
+const STORAGE_COUPONS = "matsyamart_coupons_v1";
+
+const SEED_COUPONS: Coupon[] = [
+  {
+    id: "coup-bhoomi-2025",
+    code: "BHOOMI2025",
+    description: "Bhoomiputra Foundation Member Discount (Food, Walks, Workshops)",
+    discount_type: "percent",
+    discount_value: 15,
+    min_order_inr: 0,
+    applicable_pillars: ["food", "walks", "workshops"],
+    used_count: 3,
+    is_active: true,
+    created_at: new Date(Date.now() - 3600000 * 48).toISOString(),
+  },
+  {
+    id: "coup-coastal-10",
+    code: "COASTAL10",
+    description: "Welcome Coastal Community Discount",
+    discount_type: "percent",
+    discount_value: 10,
+    min_order_inr: 500,
+    applicable_pillars: ["goods", "food", "walks", "workshops"],
+    used_count: 8,
+    is_active: true,
+    created_at: new Date(Date.now() - 3600000 * 72).toISOString(),
+  },
+  {
+    id: "coup-fish-100",
+    code: "FISHFEAST100",
+    description: "Special Flat ₹100 Off on Coastal Feasts",
+    discount_type: "flat",
+    discount_value: 100,
+    min_order_inr: 1000,
+    applicable_pillars: ["food"],
+    used_count: 14,
+    is_active: true,
+    created_at: new Date(Date.now() - 3600000 * 96).toISOString(),
+  },
+];
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -265,6 +331,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   }, [spotlightListingIds]);
 
+  const [coupons, setCoupons] = useState<Coupon[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_COUPONS);
+      if (saved) return JSON.parse(saved);
+      return SEED_COUPONS;
+    } catch {
+      return SEED_COUPONS;
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_COUPONS, JSON.stringify(coupons));
+  }, [coupons]);
+
   // Optionally fetch from Supabase if configured
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) return;
@@ -310,10 +390,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     );
     const orderRef = generateOrderRef(isExperience ? "EXP" : "PRD");
 
-    const totalAmount = input.items.reduce(
+    const subtotalAmount = input.items.reduce(
       (sum, item) => sum + item.listing.price_inr * item.quantity,
       0,
     );
+
+    const discountAmount = Math.min(subtotalAmount, input.discountAmount || 0);
+    const finalTotalAmount = Math.max(0, subtotalAmount - discountAmount);
 
     const orderId = "ord-" + Math.random().toString(36).substring(2, 9);
 
@@ -335,7 +418,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
       customer_name: input.customerName,
       customer_email: input.customerEmail,
       customer_phone: input.customerPhone,
-      total_amount_inr: totalAmount,
+      total_amount_inr: finalTotalAmount,
+      coupon_code: input.couponCode || undefined,
+      discount_amount_inr: discountAmount > 0 ? discountAmount : undefined,
       razorpay_order_id: input.razorpayOrderId,
       razorpay_payment_id: input.razorpayPaymentId,
       status: "confirmed",
@@ -345,6 +430,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
       created_at: new Date().toISOString(),
       items: orderItems,
     };
+
+    // Increment coupon used_count if a coupon was used
+    if (input.couponCode) {
+      setCoupons((prev) =>
+        prev.map((c) =>
+          c.code.toUpperCase() === input.couponCode?.toUpperCase()
+            ? { ...c, used_count: c.used_count + 1 }
+            : c,
+        ),
+      );
+    }
 
     // Atomically increment booked_count on slots
     setSlots((prev) =>
@@ -375,7 +471,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
           customer_name: input.customerName,
           customer_email: input.customerEmail,
           customer_phone: input.customerPhone,
-          total_amount_inr: totalAmount,
+          total_amount_inr: finalTotalAmount,
+          coupon_code: input.couponCode,
+          discount_amount_inr: discountAmount,
           razorpay_order_id: input.razorpayOrderId,
           razorpay_payment_id: input.razorpayPaymentId,
           status: "confirmed",
@@ -540,6 +638,134 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
+  const addCoupon = (
+    couponData: Omit<Coupon, "id" | "used_count" | "created_at">,
+  ) => {
+    const newCoupon: Coupon = {
+      id: "coup-" + Math.random().toString(36).substring(2, 9),
+      used_count: 0,
+      created_at: new Date().toISOString(),
+      ...couponData,
+      code: couponData.code.trim().toUpperCase(),
+    };
+    setCoupons((prev) => [newCoupon, ...prev]);
+  };
+
+  const deleteCoupon = (couponId: string) => {
+    setCoupons((prev) => prev.filter((c) => c.id !== couponId));
+  };
+
+  const toggleCouponStatus = (couponId: string) => {
+    setCoupons((prev) =>
+      prev.map((c) => (c.id === couponId ? { ...c, is_active: !c.is_active } : c)),
+    );
+  };
+
+  const validateCoupon = (
+    rawCode: string,
+    cartItems: { listing: Listing; quantity: number }[],
+  ): ValidateCouponResult => {
+    const code = rawCode.trim().toUpperCase();
+    if (!code) {
+      return { valid: false, error: "Please enter a coupon code." };
+    }
+
+    const coupon = coupons.find((c) => c.code.toUpperCase() === code);
+    if (!coupon) {
+      return { valid: false, error: "Invalid coupon code." };
+    }
+
+    if (!coupon.is_active) {
+      return { valid: false, error: "This coupon is no longer active." };
+    }
+
+    if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+      return { valid: false, error: "This coupon has expired." };
+    }
+
+    if (coupon.max_uses && coupon.used_count >= coupon.max_uses) {
+      return { valid: false, error: "This coupon has reached its usage limit." };
+    }
+
+    // Check eligible items based on applicable_pillars
+    const eligibleItems = cartItems.filter((i) =>
+      i.listing.pillar
+        ? coupon.applicable_pillars.includes(i.listing.pillar)
+        : false,
+    );
+
+    if (eligibleItems.length === 0) {
+      return {
+        valid: false,
+        error: `Coupon applies only to ${coupon.applicable_pillars.join(", ")}. None found in your cart.`,
+      };
+    }
+
+    const eligibleTotal = eligibleItems.reduce(
+      (sum, i) => sum + i.listing.price_inr * i.quantity,
+      0,
+    );
+
+    const cartTotal = cartItems.reduce(
+      (sum, i) => sum + i.listing.price_inr * i.quantity,
+      0,
+    );
+
+    if (cartTotal < coupon.min_order_inr) {
+      return {
+        valid: false,
+        error: `Minimum order amount of ₹${coupon.min_order_inr} required.`,
+      };
+    }
+
+    let discountAmount = 0;
+    if (coupon.discount_type === "percent") {
+      discountAmount = Math.round(
+        (eligibleTotal * coupon.discount_value) / 100,
+      );
+    } else {
+      discountAmount = Math.min(coupon.discount_value, eligibleTotal);
+    }
+
+    return {
+      valid: true,
+      coupon,
+      discountAmount,
+    };
+  };
+
+  const updateAttendeeCheckIn = (
+    orderId: string,
+    itemId: string,
+    attendeeIndex: number,
+    checkedIn: boolean,
+  ) => {
+    setOrders((prev) =>
+      prev.map((order) => {
+        if (order.id !== orderId) return order;
+        const updatedItems = order.items.map((item) => {
+          if (item.id !== itemId) return item;
+          const currentAttendees = [...(item.attendee_details || [])];
+          if (currentAttendees[attendeeIndex]) {
+            currentAttendees[attendeeIndex] = {
+              ...currentAttendees[attendeeIndex]!,
+              checked_in: checkedIn,
+              check_in_time: checkedIn ? new Date().toISOString() : undefined,
+            };
+          }
+          return {
+            ...item,
+            attendee_details: currentAttendees,
+          };
+        });
+        return {
+          ...order,
+          items: updatedItems,
+        };
+      }),
+    );
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -548,6 +774,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         slots,
         orders,
         proposals,
+        coupons,
         spotlightListingIds,
         getListingBySlug,
         getSlotsByListingId,
@@ -562,6 +789,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         toggleSpotlight,
         setSpotlightListingIds,
         updateOrderFulfillment,
+        addCoupon,
+        deleteCoupon,
+        toggleCouponStatus,
+        validateCoupon,
+        updateAttendeeCheckIn,
       }}
     >
       {children}

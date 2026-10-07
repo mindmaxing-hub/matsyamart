@@ -1,6 +1,9 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useData } from "../context/DataContext";
-import { supabase, isSupabaseConfigured } from "../lib/supabase";
+import {
+  AdminAuthProvider,
+  useAdminAuth,
+} from "../context/AdminAuthContext";
 import { ManifestTable } from "../components/admin/ManifestTable";
 import { SlotManager } from "../components/admin/SlotManager";
 import { ProductOrdersTable } from "../components/admin/ProductOrdersTable";
@@ -11,6 +14,8 @@ import { HostPayoutsLedger } from "../components/admin/HostPayoutsLedger";
 import { InventoryStockManager } from "../components/admin/InventoryStockManager";
 import { CoastalSafetyCommand } from "../components/admin/CoastalSafetyCommand";
 import { RefundsManager } from "../components/admin/RefundsManager";
+import { CouponManager } from "../components/admin/CouponManager";
+import { StaffRolesManager } from "../components/admin/StaffRolesManager";
 import { Link } from "../components/ui/Link";
 import { formatINR, formatDate } from "../lib/utils";
 import {
@@ -36,6 +41,8 @@ import {
   Wallet,
   Boxes,
   Radio,
+  Tag,
+  Users,
 } from "lucide-react";
 
 type AdminSectionId =
@@ -49,6 +56,8 @@ type AdminSectionId =
   | "payouts"
   | "refunds"
   | "spotlight"
+  | "coupons"
+  | "roles"
   | "communications";
 
 interface NavItem {
@@ -61,7 +70,7 @@ interface NavItem {
   badge?: number;
 }
 
-export const AdminPage: React.FC = () => {
+const AdminPageContent: React.FC = () => {
   const {
     orders,
     listings,
@@ -73,130 +82,70 @@ export const AdminPage: React.FC = () => {
     updateOrderFulfillment,
   } = useData();
 
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return sessionStorage.getItem("matsya_admin_auth") === "true";
-  });
+  const {
+    user,
+    role,
+    signInWithGoogle,
+    devSignInAs,
+    signOut,
+    canAccessSection,
+    isLoading: isAuthLoading,
+  } = useAdminAuth();
 
-  const [authMode, setAuthMode] = useState<"passcode" | "supabase">("passcode");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [activeSection, setActiveSection] = useState<AdminSectionId>("overview");
   const [passcode, setPasscode] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [passcodeError, setPasscodeError] = useState("");
 
-  // Active section (defaults to overview matching redesign)
-  const [activeSection, setActiveSection] =
-    useState<AdminSectionId>("overview");
-
-  const handlePasscodeLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (passcode.trim() === "matsya2026" || passcode.trim() === "admin") {
-      setIsAuthenticated(true);
-      sessionStorage.setItem("matsya_admin_auth", "true");
-      setErrorMsg("");
-    } else {
-      setErrorMsg(
-        "Invalid coordinator passcode. (Default demo pass: matsya2026)",
-      );
+  // Ensure activeSection is accessible by the user's role
+  useEffect(() => {
+    if (user && role === "coordinator") {
+      setActiveSection("manifest");
     }
-  };
+  }, [user, role]);
 
-  const handleSupabaseLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isSupabaseConfigured || !supabase) {
-      setErrorMsg(
-        "Supabase credentials not configured in environment variables.",
-      );
-      return;
-    }
+  const pendingProposalsCount = useMemo(
+    () => proposals.filter((p) => p.status === "pending_review").length,
+    [proposals],
+  );
 
-    setIsLoading(true);
-    setErrorMsg("");
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        setErrorMsg(error.message);
-      } else if (data.session) {
-        setIsAuthenticated(true);
-        sessionStorage.setItem("matsya_admin_auth", "true");
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Authentication error.";
-      setErrorMsg(msg);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    if (typeof window !== "undefined") {
-      sessionStorage.removeItem("matsya_admin_auth");
-    }
-    if (isSupabaseConfigured && supabase) {
-      supabase.auth.signOut().catch(console.warn);
-    }
-  };
-
-  // Pending count for Review Queue badge
-  const pendingProposalsCount = useMemo(() => {
-    return proposals.filter((p) => p.status === "pending_review").length;
-  }, [proposals]);
-
-  // Operational metrics for Overview
   const overviewMetrics = useMemo(() => {
-    const totalRevenue = orders.reduce((sum, o) => sum + o.total_amount_inr, 0);
-    const experienceOrders = orders.filter((o) =>
-      o.items.some(
-        (i) => i.listing?.type === "experience" || !o.shipping_address,
-      ),
-    );
-    const productOrders = orders.filter((o) =>
-      o.items.some(
-        (i) => i.listing?.type === "product" || Boolean(o.shipping_address),
-      ),
-    );
-    const pendingFulfillments = productOrders.filter(
-      (o) => o.fulfillment_status === "unfulfilled" || !o.fulfillment_status,
+    const totalRev = orders.reduce((sum, o) => sum + o.total_amount_inr, 0);
+    const expCount = orders.filter((o) =>
+      o.items.some((i) => i.listing?.type === "experience"),
+    ).length;
+    const goodsCount = orders.filter((o) =>
+      o.items.some((i) => i.listing?.type === "product"),
+    ).length;
+    const pendingFulfillments = orders.filter(
+      (o) =>
+        o.fulfillment_status === "unfulfilled" ||
+        o.fulfillment_status === "processing",
     ).length;
 
-    return {
-      totalRevenue,
-      experienceOrdersCount: experienceOrders.length,
-      productOrdersCount: productOrders.length,
-      pendingFulfillments,
-      totalListings: listings.length,
-      activeSpotlightCount: spotlightListingIds.length,
-    };
-  }, [orders, listings, spotlightListingIds]);
+    return { totalRev, expCount, goodsCount, pendingFulfillments };
+  }, [orders]);
 
-  const NAV_ITEMS: NavItem[] = [
+  const ALL_NAV_ITEMS: NavItem[] = [
     {
       id: "overview",
-      label: "Executive Overview",
+      label: "Overview",
       icon: Layers,
-      kicker: "Daily pulse · Today",
+      kicker: "Pulse · this morning",
       editorialTitle:
-        "Good morning — here's the coast <em class='italic text-[#E3A157]'>at a glance.</em>",
+        "The tide is in. <em class='italic text-[#E3A157]'>Here's the harbor.</em>",
       subtitle:
-        "One calm surface for walks, pantry goods, moderation and tides. No noise, just what needs you today.",
+        "Revenue, bookings and active slots across Mumbai's coastal koliwadas — updated live from every booking.",
     },
     {
       id: "queues",
-      label: "Review Queue",
+      label: "Review Queues",
       icon: ShieldCheck,
-      kicker: `Moderation · ${pendingProposalsCount} waiting`,
-      editorialTitle:
-        "Review queue, <em class='italic text-[#E3A157]'>without the dread.</em>",
-      subtitle:
-        "Host tours, artisan goods, corporate asks and reschedules — each with just enough context to say yes or no with confidence.",
       badge: pendingProposalsCount,
+      kicker: "Review & moderation",
+      editorialTitle:
+        "New proposals, <em class='italic text-[#E3A157]'>ready for a call.</em>",
+      subtitle:
+        "Village guides, home dining hosts and artisans waiting for onboarding — approve, decline or request details.",
     },
     {
       id: "manifest",
@@ -216,7 +165,7 @@ export const AdminPage: React.FC = () => {
       editorialTitle:
         "Parcels out, <em class='italic text-[#E3A157]'>money home.</em>",
       subtitle:
-        "Packing, AWBs and artisan remittances. Right now the shelf is quiet — that's fine, the layout stays ready.",
+        "Packing, AWBs, 10×4 shipping labels, and artisan remittances.",
     },
     {
       id: "inventory",
@@ -236,7 +185,7 @@ export const AdminPage: React.FC = () => {
       editorialTitle:
         "Tides you can <em class='italic text-[#E3A157]'>actually sell.</em>",
       subtitle:
-        "Weekend batches, sunrise slots and guide assignments. Fill is shown as a quiet bar — no shouting colours.",
+        "Weekend batches, sunrise slots and guide assignments with guest list check-in roster.",
     },
     {
       id: "safety",
@@ -256,7 +205,7 @@ export const AdminPage: React.FC = () => {
       editorialTitle:
         "Money split, <em class='italic text-[#E3A157]'>community paid.</em>",
       subtitle:
-        "Reconcile 85% village guide & artisan shares vs 15% platform retainer. Track bank accounts, UPI IDs, and UTR settlements.",
+        "Reconcile village guide & artisan shares vs platform retainer. Track bank accounts, UPI IDs, and settlements.",
     },
     {
       id: "refunds",
@@ -266,7 +215,7 @@ export const AdminPage: React.FC = () => {
       editorialTitle:
         "Fair terms, <em class='italic text-[#E3A157]'>smooth vouchers.</em>",
       subtitle:
-        "Audit cancellation policy eligibility (>48h vs <24h), track Razorpay refund IDs, and issue digital credit vouchers.",
+        "Audit cancellation policy eligibility, track Razorpay refund IDs, and issue digital credit vouchers.",
     },
     {
       id: "spotlight",
@@ -276,7 +225,27 @@ export const AdminPage: React.FC = () => {
       editorialTitle:
         "Curate the <em class='italic text-[#E3A157]'>first impression.</em>",
       subtitle:
-        "Six cards fan across the homepage banner. Reorder with arrows — card 1 sits far-left.",
+        "Listings that fan across the homepage banner. Reorder with arrows — card 1 sits far-left.",
+    },
+    {
+      id: "coupons",
+      label: "Promos & Coupons",
+      icon: Tag,
+      kicker: "Promotion Engine · BPF & seasonal discounts",
+      editorialTitle:
+        "Special terms, <em class='italic text-[#E3A157]'>happy members.</em>",
+      subtitle:
+        "Manage Bhoomiputra Foundation member codes, percentage discounts, and community seasonal promo codes.",
+    },
+    {
+      id: "roles",
+      label: "Staff Roles & Access",
+      icon: Users,
+      kicker: "RBAC Security · Admin / Manager / Coordinator",
+      editorialTitle:
+        "Verified staff, <em class='italic text-[#E3A157]'>safe harbours.</em>",
+      subtitle:
+        "Control Google sign-in permissions across Admin, Manager, and Jetty Coordinator levels.",
     },
     {
       id: "communications",
@@ -286,172 +255,149 @@ export const AdminPage: React.FC = () => {
       editorialTitle:
         "Messages that <em class='italic text-[#E3A157]'>reach the jetty.</em>",
       subtitle:
-        "Tidal advisories, digital passes and receipts — one amber button per panel, everything else stays quiet.",
+        "Tidal advisories, digital passes and receipts from hello@matsyamart.com.",
     },
   ];
 
-  const currentNav =
-    NAV_ITEMS.find((item) => item.id === activeSection) ?? NAV_ITEMS[0]!;
+  // Filter NAV items based on current role permissions
+  const visibleNavItems = useMemo(
+    () => ALL_NAV_ITEMS.filter((item) => canAccessSection(item.id)),
+    [role],
+  );
 
-  // 1. Passcode / Login Gate (Warm Cream Canvas + Elevated Editorial Card)
-  if (!isAuthenticated) {
+  const currentNav =
+    visibleNavItems.find((item) => item.id === activeSection) ||
+    visibleNavItems[0] ||
+    ALL_NAV_ITEMS[0]!;
+
+  // 1. Google Auth Gate & Role Tier Switcher (Dark Roast Editorial Theme)
+  if (!user) {
     return (
-      <div className="min-h-screen bg-[#F5EDEB] flex flex-col items-center justify-center p-4 selection:bg-[#29100B] selection:text-[#F5EDEB] font-body-sans">
-        <div className="bg-[#FFFDFB] rounded-[24px] border border-[rgba(41,16,11,0.1)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_12px_36px_-12px_rgba(41,16,11,0.16)] w-full max-w-md p-8 sm:p-10 space-y-6 text-[#29100B]">
+      <div className="min-h-screen bg-[#1f0b07] flex flex-col items-center justify-center p-4 selection:bg-[#e3a157] selection:text-[#29100b] text-[#f5edeb]">
+        <div className="bg-[#29100b] rounded-3xl border border-[#dab38c]/25 shadow-2xl w-full max-w-md p-8 sm:p-10 space-y-6">
+          {/* Header */}
           <div className="text-center space-y-2">
-            <div className="w-12 h-12 rounded-2xl bg-[#29100B] text-[#E3A157] border border-[#29100B] flex items-center justify-center mx-auto shadow-md">
-              <Lock className="w-6 h-6" />
+            <div className="w-14 h-14 rounded-2xl bg-[#35160e] text-[#e3a157] border border-[#dab38c]/30 flex items-center justify-center mx-auto shadow-md">
+              <Lock className="w-7 h-7" />
             </div>
-            <div className="text-[11px] font-bold tracking-[0.14em] text-[rgba(41,16,11,0.48)] uppercase">
-              WORKSPACE AUTHENTICATION
+            <div className="text-[11px] font-bold tracking-[0.14em] text-[#dab38c]/70 uppercase">
+              COASTAL WORKSPACE AUTHENTICATION
             </div>
-            <h2 className="font-display text-3xl text-[#29100B]">
-              Matsya<em className="italic text-[#E3A157]">Mart</em>
+            <h2 className="font-display font-bold text-3xl text-[#f5edeb]">
+              Matsya<em className="italic text-[#e3a157]">Mart</em>
             </h2>
-            <p className="text-[13px] text-[rgba(41,16,11,0.64)]">
-              Coastal Operations Hub · Restricted to verified coordinators.
+            <p className="text-xs text-[#dab38c] leading-relaxed">
+              Google Workspace portal for Kolibaba Seafood Inc &amp; Bhoomiputra Foundation team members.
             </p>
           </div>
 
-          {/* Toggle between Passcode and Supabase Auth */}
-          {isSupabaseConfigured && (
-            <div className="flex rounded-full bg-[#F5EDEB] p-1 border border-[rgba(41,16,11,0.1)] text-xs">
+          {/* Primary Action: Sign in with Google */}
+          <div className="space-y-3 pt-2">
+            <button
+              onClick={() => signInWithGoogle()}
+              disabled={isAuthLoading}
+              className="w-full py-3.5 px-4 rounded-2xl bg-[#f5edeb] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs sm:text-sm flex items-center justify-center gap-3 transition-all shadow-lg hover:scale-102 cursor-pointer"
+            >
+              {/* Google G SVG */}
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                />
+              </svg>
+              <span>Sign in with Google Workspace</span>
+            </button>
+          </div>
+
+          {/* Quick Role Tester Buttons (Admin / Manager / Coordinator) */}
+          <div className="pt-2 border-t border-[#dab38c]/15 space-y-2.5">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-[#dab38c]/60 text-center">
+              Direct Role Simulator (Development / Evaluation)
+            </div>
+            <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
-                onClick={() => setAuthMode("passcode")}
-                className={`flex-1 py-1.5 rounded-full font-semibold transition-all cursor-pointer ${
-                  authMode === "passcode"
-                    ? "bg-[#29100B] text-[#F5EDEB] shadow-xs"
-                    : "text-[rgba(41,16,11,0.64)] hover:text-[#29100B]"
-                }`}
+                onClick={() => devSignInAs("admin")}
+                className="py-2 px-1.5 rounded-xl bg-[#35160e] hover:bg-[#481f14] border border-[#e3a157]/40 text-[#e3a157] text-[11px] font-bold text-center cursor-pointer transition-colors"
+                title="Full system access"
               >
-                Passcode Gate
+                👑 Admin
               </button>
               <button
                 type="button"
-                onClick={() => setAuthMode("supabase")}
-                className={`flex-1 py-1.5 rounded-full font-semibold transition-all cursor-pointer ${
-                  authMode === "supabase"
-                    ? "bg-[#29100B] text-[#F5EDEB] shadow-xs"
-                    : "text-[rgba(41,16,11,0.64)] hover:text-[#29100B]"
-                }`}
+                onClick={() => devSignInAs("manager")}
+                className="py-2 px-1.5 rounded-xl bg-[#35160e] hover:bg-[#481f14] border border-sky-400/40 text-sky-300 text-[11px] font-bold text-center cursor-pointer transition-colors"
+                title="Operational & logistical access"
               >
-                Supabase Auth
+                💼 Manager
+              </button>
+              <button
+                type="button"
+                onClick={() => devSignInAs("coordinator")}
+                className="py-2 px-1.5 rounded-xl bg-[#35160e] hover:bg-[#481f14] border border-emerald-400/40 text-emerald-300 text-[11px] font-bold text-center cursor-pointer transition-colors"
+                title="On-ground check-in & manifest only"
+              >
+                ⚓ Coordinator
               </button>
             </div>
-          )}
+          </div>
 
-          {authMode === "passcode" ? (
-            <form onSubmit={handlePasscodeLogin} className="space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-[#29100B] block mb-1.5">
-                  Enter Coordinator Passcode
-                </label>
-                <div className="relative">
-                  <KeyRound className="w-4 h-4 text-[rgba(41,16,11,0.44)] absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="password"
-                    required
-                    placeholder="Enter passcode..."
-                    value={passcode}
-                    onChange={(e) => setPasscode(e.target.value)}
-                    className="w-full text-xs pl-10 pr-3 py-3 rounded-full bg-[#FFFDFB] text-[#29100B] border border-[rgba(41,16,11,0.15)] focus:border-[#C67F2A] outline-none shadow-xs font-mono"
-                  />
-                </div>
+          {/* Passcode alternative */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (passcode.trim() === "matsya2026" || passcode.trim() === "admin") {
+                devSignInAs("admin");
+              } else {
+                setPasscodeError("Invalid passcode (Try: matsya2026)");
+              }
+            }}
+            className="space-y-3 pt-1 border-t border-[#dab38c]/15"
+          >
+            <div>
+              <label className="text-[11px] text-[#dab38c] font-semibold block mb-1">
+                Or enter coordinator PIN
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="password"
+                  placeholder="matsya2026"
+                  value={passcode}
+                  onChange={(e) => setPasscode(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] font-mono outline-none focus:border-[#e3a157]"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-[#35160e] hover:bg-[#481f14] border border-[#dab38c]/30 text-[#e3a157] font-bold text-xs rounded-xl cursor-pointer"
+                >
+                  Enter
+                </button>
               </div>
+            </div>
+            {passcodeError && (
+              <div className="text-[11px] text-rose-400">{passcodeError}</div>
+            )}
+          </form>
 
-              {errorMsg && (
-                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-1.5">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
-                  <span>{errorMsg}</span>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                className="admin-btn admin-btn-primary w-full py-3 text-xs font-bold shadow-md cursor-pointer"
-              >
-                <span>Unlock Operations Command Center</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setPasscode("matsya2026");
-                  setIsAuthenticated(true);
-                  if (typeof window !== "undefined") {
-                    sessionStorage.setItem("matsya_admin_auth", "true");
-                  }
-                }}
-                className="w-full text-center text-[12px] text-[rgba(41,16,11,0.64)] font-semibold hover:text-[#29100B] hover:underline pt-1 cursor-pointer"
-              >
-                ⚡ Quick Demo Login (matsya2026)
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleSupabaseLogin} className="space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-[#29100B] block mb-1.5">
-                  Coordinator Email
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-[rgba(41,16,11,0.44)] absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="email"
-                    required
-                    placeholder="coordinator@bhoomiputra.org"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full text-xs pl-10 pr-3 py-3 rounded-full bg-[#FFFDFB] text-[#29100B] border border-[rgba(41,16,11,0.15)] focus:border-[#C67F2A] outline-none shadow-xs"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-[#29100B] block mb-1.5">
-                  Password
-                </label>
-                <div className="relative">
-                  <KeyRound className="w-4 h-4 text-[rgba(41,16,11,0.44)] absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full text-xs pl-10 pr-3 py-3 rounded-full bg-[#FFFDFB] text-[#29100B] border border-[rgba(41,16,11,0.15)] focus:border-[#C67F2A] outline-none shadow-xs"
-                  />
-                </div>
-              </div>
-
-              {errorMsg && (
-                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-1.5">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
-                  <span>{errorMsg}</span>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="admin-btn admin-btn-primary w-full py-3 text-xs font-bold shadow-md cursor-pointer disabled:opacity-50"
-              >
-                <span>
-                  {isLoading ? "Verifying..." : "Sign In with Supabase"}
-                </span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </form>
-          )}
-
-          <div className="pt-2 border-t border-[rgba(41,16,11,0.08)] text-center">
+          <div className="text-center">
             <Link
               to="/"
-              className="text-xs text-[rgba(41,16,11,0.64)] hover:text-[#29100B] inline-flex items-center gap-1 transition-colors"
+              className="text-xs text-[#dab38c]/70 hover:text-[#f5edeb] inline-flex items-center gap-1 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Return to Customer Storefront</span>
+              <span>Back to Storefront</span>
             </Link>
           </div>
         </div>
@@ -459,7 +405,7 @@ export const AdminPage: React.FC = () => {
     );
   }
 
-  // 2. Main Authenticated Dashboard Shell (Matching matsya-mart-admin-redesign.html)
+  // 2. Main Authenticated Dashboard Shell
   return (
     <div className="min-h-screen flex bg-[#F5EDEB] text-[#29100B] font-sans selection:bg-[#29100B] selection:text-[#F5EDEB]">
       {/* LEFT SIDEBAR: Roast Anchor #29100B */}
@@ -479,9 +425,9 @@ export const AdminPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Navigation Rows */}
+          {/* Navigation Rows (Filtered by RBAC) */}
           <nav className="flex flex-col gap-1 overflow-y-auto max-h-[calc(100vh-210px)] scrollbar-none">
-            {NAV_ITEMS.map((item) => {
+            {visibleNavItems.map((item) => {
               const isActive = activeSection === item.id;
               const Icon = item.icon;
 
@@ -547,90 +493,90 @@ export const AdminPage: React.FC = () => {
             </strong>
           </div>
 
-          <div className="flex items-center gap-2.5">
-            <span className="font-mono text-[12.5px] text-[rgba(41,16,11,0.64)] hidden sm:inline">
-              social@bhoomiputra.org
-            </span>
-            <span className="text-[10.5px] font-bold tracking-[0.06em] border border-[#29100B] rounded-full px-2.5 py-0.5 uppercase text-[#29100B]">
-              Admin
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-[12px] text-[rgba(41,16,11,0.64)] hidden sm:inline">
+              {user.email}
             </span>
 
-            <button
-              onClick={() => window.location.reload()}
-              className="admin-btn text-xs py-1.5 px-3 cursor-pointer"
-              title="Refresh Data"
+            {/* Role Badge */}
+            <span
+              className={`text-[10px] font-bold tracking-[0.06em] rounded-full px-2.5 py-0.5 uppercase ${
+                role === "admin"
+                  ? "bg-[#29100B] text-[#E3A157] border border-[#29100B]"
+                  : role === "manager"
+                    ? "bg-sky-100 text-sky-800 border border-sky-300"
+                    : "bg-emerald-100 text-emerald-800 border border-emerald-300"
+              }`}
             >
-              <RotateCcw className="w-3.5 h-3.5 text-[rgba(41,16,11,0.64)]" />
-              <span>Refresh</span>
-            </button>
+              {role || "STAFF"}
+            </span>
 
             <button
-              onClick={handleLogout}
-              className="admin-btn admin-btn-quiet text-xs py-1.5 px-3 cursor-pointer"
+              onClick={() => signOut()}
+              className="p-1.5 rounded-lg hover:bg-[rgba(41,16,11,0.08)] text-[rgba(41,16,11,0.64)] hover:text-[#29100B] transition-colors cursor-pointer"
               title="Sign Out"
             >
-              <LogOut className="w-3.5 h-3.5 text-[rgba(41,16,11,0.64)]" />
-              <span>Sign out →</span>
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         </header>
 
-        {/* Workspace Canvas Container */}
-        <div className="p-6 sm:p-8 pb-20 max-w-[1140px] w-full mx-auto space-y-6">
-          {/* Editorial Page Header & Kicker */}
-          <div>
-            <div className="admin-page-kicker">{currentNav.kicker}</div>
+        {/* Hero Banner for current section */}
+        <section className="px-6 sm:px-8 py-6 border-b border-[rgba(41,16,11,0.08)] bg-[#FFFDFB]/60">
+          <div className="max-w-5xl">
+            <div className="text-[11px] font-bold tracking-[0.08em] uppercase text-[#C67F2A]">
+              {currentNav.kicker}
+            </div>
             <h1
-              className="font-display font-normal text-[36px] sm:text-[40px] tracking-[-0.02em] leading-[1.05] text-[#29100B] max-w-[24ch]"
+              className="font-display text-[28px] sm:text-[34px] tracking-[-0.02em] leading-[1.15] text-[#29100B] mt-1"
               dangerouslySetInnerHTML={{ __html: currentNav.editorialTitle }}
             />
-            <p className="text-[rgba(41,16,11,0.64)] text-[15px] mt-2 max-w-[65ch]">
+            <p className="text-[13px] text-[rgba(41,16,11,0.64)] mt-1.5 max-w-3xl leading-relaxed">
               {currentNav.subtitle}
             </p>
           </div>
+        </section>
 
-          {/* Section Rendering */}
-          {/* 1. EXECUTIVE OVERVIEW */}
+        {/* Section Content Area */}
+        <div className="p-6 sm:p-8 flex-1 max-w-7xl w-full">
+          {/* 1. OVERVIEW */}
           {activeSection === "overview" && (
-            <div className="space-y-7">
-              {/* 4 KPI Metric Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="p-5 rounded-[16px] bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)] relative shadow-[inset_3px_0_0_#E3A157]">
+            <div className="space-y-8">
+              {/* Metric Tiles */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="p-5 rounded-[16px] bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)]">
                   <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
-                    Total revenue
+                    Gross revenue
                   </div>
                   <div className="font-display text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
-                    {formatINR(overviewMetrics.totalRevenue)}
+                    {formatINR(overviewMetrics.totalRev)}
                   </div>
                   <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
-                    Experiences + D2C Goods
-                  </div>
-                  <div className="absolute top-4 right-4 w-[26px] h-[26px] rounded-full bg-[rgba(227,161,87,0.14)] flex items-center justify-center text-[#C67F2A] font-bold text-xs">
-                    ↗
+                    Across {orders.length} total orders
                   </div>
                 </div>
 
                 <div className="p-5 rounded-[16px] bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)]">
                   <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
-                    Tidal walk bookings
+                    Walks &amp; workshops
                   </div>
                   <div className="font-display text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
-                    {overviewMetrics.experienceOrdersCount}
+                    {overviewMetrics.expCount}
                   </div>
                   <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
-                    Confirmed guest passes
+                    Booked experience passes
                   </div>
                 </div>
 
                 <div className="p-5 rounded-[16px] bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)]">
                   <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[rgba(41,16,11,0.64)]">
-                    D2C orders to ship
+                    D2C goods packing
                   </div>
                   <div className="font-display text-[36px] tracking-[-0.02em] leading-[1.1] my-1.5 text-[#29100B]">
                     {overviewMetrics.pendingFulfillments}
                   </div>
                   <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
-                    Awaiting courier AWB
+                    Awaiting courier AWB / label
                   </div>
                 </div>
 
@@ -642,150 +588,16 @@ export const AdminPage: React.FC = () => {
                     {pendingProposalsCount}
                   </div>
                   <div className="text-[13px] text-[rgba(41,16,11,0.44)]">
-                    Community proposals awaiting review
+                    Community host proposals
                   </div>
                 </div>
               </div>
 
-              {/* Quick Navigation Cards: Needs your eye */}
-              <div className="space-y-3 pt-2">
+              {/* Recent Orders Overview */}
+              <div className="space-y-3">
                 <div className="flex items-baseline gap-3">
                   <h2 className="font-display text-[22px] tracking-[-0.01em] font-normal text-[#29100B]">
-                    Needs your eye
-                  </h2>
-                  <p className="text-[13px] text-[rgba(41,16,11,0.44)] ml-auto">
-                    6 jumps · sorted by urgency
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  <button
-                    onClick={() => setActiveSection("queues")}
-                    className="flex items-center gap-3.5 p-4 rounded-[16px] bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] hover:border-[#C67F2A] hover:-translate-y-0.5 transition-all text-left cursor-pointer shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)] group"
-                  >
-                    <span className="w-[38px] h-[38px] rounded-[12px] bg-[rgba(227,161,87,0.14)] border border-[rgba(198,127,42,0.3)] flex items-center justify-center shrink-0 text-[#29100B] font-bold text-base">
-                      ◈
-                    </span>
-                    <div>
-                      <b className="block text-[14px] text-[#29100B]">
-                        Moderate submissions
-                      </b>
-                      <span className="text-[12.5px] text-[rgba(41,16,11,0.64)]">
-                        {pendingProposalsCount} pending decisions
-                      </span>
-                    </div>
-                    <span className="ml-auto text-[#C67F2A] text-lg font-bold group-hover:translate-x-1 transition-transform">
-                      →
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveSection("manifest")}
-                    className="flex items-center gap-3.5 p-4 rounded-[16px] bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] hover:border-[#C67F2A] hover:-translate-y-0.5 transition-all text-left cursor-pointer shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)] group"
-                  >
-                    <span className="w-[38px] h-[38px] rounded-[12px] bg-[rgba(227,161,87,0.14)] border border-[rgba(198,127,42,0.3)] flex items-center justify-center shrink-0 text-[#29100B] font-bold text-base">
-                      ◐
-                    </span>
-                    <div>
-                      <b className="block text-[14px] text-[#29100B]">
-                        Check-in manifest
-                      </b>
-                      <span className="text-[12.5px] text-[rgba(41,16,11,0.64)]">
-                        Validate passes &amp; export CSV
-                      </span>
-                    </div>
-                    <span className="ml-auto text-[#C67F2A] text-lg font-bold group-hover:translate-x-1 transition-transform">
-                      →
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveSection("slots")}
-                    className="flex items-center gap-3.5 p-4 rounded-[16px] bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] hover:border-[#C67F2A] hover:-translate-y-0.5 transition-all text-left cursor-pointer shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)] group"
-                  >
-                    <span className="w-[38px] h-[38px] rounded-[12px] bg-[rgba(227,161,87,0.14)] border border-[rgba(198,127,42,0.3)] flex items-center justify-center shrink-0 text-[#29100B] font-bold text-base">
-                      ≈
-                    </span>
-                    <div>
-                      <b className="block text-[14px] text-[#29100B]">
-                        Tidal capacity
-                      </b>
-                      <span className="text-[12.5px] text-[rgba(41,16,11,0.64)]">
-                        {slots.length} low-tide windows open
-                      </span>
-                    </div>
-                    <span className="ml-auto text-[#C67F2A] text-lg font-bold group-hover:translate-x-1 transition-transform">
-                      →
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveSection("payouts")}
-                    className="flex items-center gap-3.5 p-4 rounded-[16px] bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] hover:border-[#C67F2A] hover:-translate-y-0.5 transition-all text-left cursor-pointer shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)] group"
-                  >
-                    <span className="w-[38px] h-[38px] rounded-[12px] bg-[rgba(227,161,87,0.14)] border border-[rgba(198,127,42,0.3)] flex items-center justify-center shrink-0 text-[#29100B] font-bold text-base">
-                      ₹
-                    </span>
-                    <div>
-                      <b className="block text-[14px] text-[#29100B]">
-                        Host payouts ledger
-                      </b>
-                      <span className="text-[12.5px] text-[rgba(41,16,11,0.64)]">
-                        85/15 split &amp; UTR settlements
-                      </span>
-                    </div>
-                    <span className="ml-auto text-[#C67F2A] text-lg font-bold group-hover:translate-x-1 transition-transform">
-                      →
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveSection("inventory")}
-                    className="flex items-center gap-3.5 p-4 rounded-[16px] bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] hover:border-[#C67F2A] hover:-translate-y-0.5 transition-all text-left cursor-pointer shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)] group"
-                  >
-                    <span className="w-[38px] h-[38px] rounded-[12px] bg-[rgba(227,161,87,0.14)] border border-[rgba(198,127,42,0.3)] flex items-center justify-center shrink-0 text-[#29100B] font-bold text-base">
-                      ⬢
-                    </span>
-                    <div>
-                      <b className="block text-[14px] text-[#29100B]">
-                        Pantry stock &amp; lots
-                      </b>
-                      <span className="text-[12.5px] text-[rgba(41,16,11,0.64)]">
-                        Expiry dates &amp; quick restock
-                      </span>
-                    </div>
-                    <span className="ml-auto text-[#C67F2A] text-lg font-bold group-hover:translate-x-1 transition-transform">
-                      →
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveSection("safety")}
-                    className="flex items-center gap-3.5 p-4 rounded-[16px] bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] hover:border-[#C67F2A] hover:-translate-y-0.5 transition-all text-left cursor-pointer shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)] group"
-                  >
-                    <span className="w-[38px] h-[38px] rounded-[12px] bg-[rgba(227,161,87,0.14)] border border-[rgba(198,127,42,0.3)] flex items-center justify-center shrink-0 text-[#29100B] font-bold text-base">
-                      〜
-                    </span>
-                    <div>
-                      <b className="block text-[14px] text-[#29100B]">
-                        Coastal swell &amp; safety
-                      </b>
-                      <span className="text-[12.5px] text-[rgba(41,16,11,0.64)]">
-                        Live zone matrix &amp; alerts
-                      </span>
-                    </div>
-                    <span className="ml-auto text-[#C67F2A] text-lg font-bold group-hover:translate-x-1 transition-transform">
-                      →
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Recent Orders Snapshot */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-baseline gap-3">
-                  <h2 className="font-display text-[22px] tracking-[-0.01em] font-normal text-[#29100B]">
-                    Latest transactions
+                    Recent activity
                   </h2>
                   <p className="text-[13px] text-[rgba(41,16,11,0.44)] ml-auto">
                     <button
@@ -824,6 +636,11 @@ export const AdminPage: React.FC = () => {
                             >
                               {isExp ? "Coastal Experience" : "Artisan Goods"}
                             </span>
+                            {order.coupon_code && (
+                              <span className="text-[10px] font-mono bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">
+                                {order.coupon_code}
+                              </span>
+                            )}
                           </div>
                           <div className="mt-1 text-[14px] text-[#29100B]">
                             <b>{order.customer_name}</b>{" "}
@@ -901,12 +718,26 @@ export const AdminPage: React.FC = () => {
             />
           )}
 
-          {/* 11. COMMUNICATIONS HUB */}
+          {/* 11. PROMOS & COUPONS */}
+          {activeSection === "coupons" && <CouponManager />}
+
+          {/* 12. STAFF ROLES & ACCESS TIERS */}
+          {activeSection === "roles" && <StaffRolesManager />}
+
+          {/* 13. COMMUNICATIONS HUB */}
           {activeSection === "communications" && (
             <CommunicationsHub orders={orders} listings={listings} />
           )}
         </div>
       </main>
     </div>
+  );
+};
+
+export const AdminPage: React.FC = () => {
+  return (
+    <AdminAuthProvider>
+      <AdminPageContent />
+    </AdminAuthProvider>
   );
 };

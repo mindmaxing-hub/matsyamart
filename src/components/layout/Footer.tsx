@@ -19,13 +19,21 @@ export const Footer: React.FC = () => {
               </span>
             </Link>
             <p className="text-[11px] text-[#dab38c]/80 leading-relaxed">
-              Curated experiential tours and artisanal goods supporting coastal
-              communities across Mumbai and Konkan.
+              Curated coastal experiences and goods, rooted in Koli fishing heritage.
             </p>
           </div>
 
-          {/* Quick Links */}
+          {/* Quick Links — Goods → Food → Walks → Workshops */}
           <div className="flex flex-wrap items-center gap-6 text-xs text-[#dab38c]">
+            <a
+              href="/#goods"
+              className="hover:text-[#e3a157] transition-colors"
+            >
+              Goods
+            </a>
+            <a href="/#food" className="hover:text-[#e3a157] transition-colors">
+              Food
+            </a>
             <a
               href="/#walks"
               className="hover:text-[#e3a157] transition-colors"
@@ -38,20 +46,11 @@ export const Footer: React.FC = () => {
             >
               Workshops
             </a>
-            <a href="/#food" className="hover:text-[#e3a157] transition-colors">
-              Food &amp; Feasts
-            </a>
-            <a
-              href="/#goods"
-              className="hover:text-[#e3a157] transition-colors"
-            >
-              Artisan Goods
-            </a>
             <Link
               to="/host-with-us"
               className="hover:text-[#e3a157] transition-colors"
             >
-              Partner With Us
+              Share Offering
             </Link>
             <Link
               to="/admin"
@@ -73,13 +72,14 @@ export const Footer: React.FC = () => {
         {/* Bottom Attribution */}
         <div className="flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#dab38c]/60 gap-3">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span>© 2026 MatsyaMart. Operated in partnership with</span>
+            <span>© 2026 MatsyaMart · Rooted in Koli fishing heritage ·</span>
             <span className="text-[#dab38c] font-medium">
-              Bhoomiputra Foundation
+              A Bhoomiputra Foundation initiative
             </span>
-            <span>• Built with</span>
-            <Heart className="w-3 h-3 text-[#e3a157] inline" />
-            <span>for coastal communities.</span>
+            <span>· Operated by</span>
+            <span className="text-[#dab38c] font-medium">
+              Kolibaba Seafood Inc
+            </span>
           </div>
 
           <div className="flex items-center gap-4 text-[#dab38c]/70">

@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "../components/ui/Link";
 import { useData } from "../context/DataContext";
 import { DigitalPass } from "../components/order/DigitalPass";
-import { ArrowLeft, AlertCircle } from "lucide-react";
+import { TaxInvoice } from "../components/order/TaxInvoice";
+import { ArrowLeft, AlertCircle, FileText } from "lucide-react";
 
 interface OrderConfirmationPageProps {
   orderRef?: string;
@@ -19,6 +20,7 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
 
   const { getOrderByRef } = useData();
   const order = orderRef ? getOrderByRef(orderRef) : undefined;
+  const [showInvoice, setShowInvoice] = useState(false);
 
   if (!order) {
     return (
@@ -49,16 +51,29 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      <div>
+      <div className="flex items-center justify-between">
         <Link
           to="/"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#dab38c] hover:text-[#f5edeb] transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Return to Catalog Home
         </Link>
+
+        <button
+          onClick={() => setShowInvoice(true)}
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#35160e] hover:bg-[#481f14] text-[#e3a157] text-xs font-semibold border border-[#dab38c]/30 shadow-xs cursor-pointer transition-colors"
+        >
+          <FileText className="w-3.5 h-3.5" />
+          <span>GST Tax Invoice</span>
+        </button>
       </div>
 
       <DigitalPass order={order} />
+
+      {/* Tax Invoice Modal */}
+      {showInvoice && (
+        <TaxInvoice order={order} onClose={() => setShowInvoice(false)} />
+      )}
     </div>
   );
 };

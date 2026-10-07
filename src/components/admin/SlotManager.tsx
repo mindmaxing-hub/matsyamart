@@ -10,6 +10,7 @@ import {
 import { ExperienceSlot, Listing } from "../../types";
 import { useData } from "../../context/DataContext";
 import { formatDate, formatSlotRange } from "../../lib/utils";
+import { GuestListView } from "./GuestListView";
 
 interface SlotManagerProps {
   slots: ExperienceSlot[];
@@ -26,6 +27,7 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
   const [selectedListingId, setSelectedListingId] = useState<string>(
     experienceListings[0]?.id || "",
   );
+  const [activeGuestListSlot, setActiveGuestListSlot] = useState<ExperienceSlot | null>(null);
 
   // Form State for Single Slot
   const [slotDate, setSlotDate] = useState<string>("");
@@ -267,18 +269,35 @@ export const SlotManager: React.FC<SlotManagerProps> = ({
                     / {cap} booked
                   </span>
 
-                  <button
-                    onClick={() => toggleCancelSlot(slot.id)}
-                    className="text-xs font-semibold underline underline-offset-2 hover:text-[var(--admin-fg)] transition-colors cursor-pointer text-[var(--admin-muted)]"
-                  >
-                    {slot.is_cancelled ? "Restore slot" : "Emergency cancel"}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setActiveGuestListSlot(slot)}
+                      className="text-xs font-semibold px-2 py-0.5 rounded bg-[var(--admin-border)] hover:bg-[var(--admin-accent)] hover:text-[#29100B] text-[var(--admin-fg)] transition-colors cursor-pointer"
+                    >
+                      👥 Guest List ({booked})
+                    </button>
+                    <button
+                      onClick={() => toggleCancelSlot(slot.id)}
+                      className="text-xs font-semibold underline underline-offset-2 hover:text-[var(--admin-fg)] transition-colors cursor-pointer text-[var(--admin-muted)]"
+                    >
+                      {slot.is_cancelled ? "Restore slot" : "Emergency cancel"}
+                    </button>
+                  </div>
                 </div>
               </div>
             );
           })
         )}
       </div>
+
+      {/* Guest List Modal */}
+      {activeGuestListSlot && (
+        <GuestListView
+          slot={activeGuestListSlot}
+          listing={selectedListing}
+          onClose={() => setActiveGuestListSlot(null)}
+        />
+      )}
     </div>
   );
 };
