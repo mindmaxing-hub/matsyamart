@@ -73,13 +73,13 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           </span>
         </h1>
 
-        {/* Subtitle — 1 tight line */}
+        {/* Subtitle */}
         <p
-          className={`text-sm sm:text-base text-[#dab38c] max-w-xs sm:max-w-md mx-auto leading-relaxed font-normal transition-all duration-700 delay-150 px-2 ${
+          className={`text-sm sm:text-base text-[#dab38c] max-w-lg mx-auto leading-relaxed font-normal transition-all duration-700 delay-150 px-2 ${
             hasLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          Curated coastal experiences and goods, rooted in Koli fishing heritage.
+          From harbor walks to dawn feasts and artisan workshops, MatsyaMart makes every experience feel effortless.
         </p>
 
         {/* Action Row */}

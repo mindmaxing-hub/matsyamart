@@ -12,7 +12,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-[#29100b]/90 backdrop-blur-md border-b border-[#dab38c]/20 text-[#f5edeb] transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Official Wordmark */}
         <Link to="/" className="group shrink-0" aria-label="MatsyaMart home">
           <BrandLogo
@@ -23,7 +23,7 @@ export const Navbar: React.FC = () => {
         </Link>
 
         {/* Desktop 4-Pillar Links — Goods → Food → Walks → Workshops */}
-        <nav className="hidden md:flex items-center gap-1 bg-[#35160e]/80 border border-[#dab38c]/20 rounded-full px-3 py-1">
+        <nav className="hidden md:flex items-center gap-1 bg-[#35160e]/80 border border-[#dab38c]/20 rounded-full px-3 py-1 md:absolute md:left-1/2 md:-translate-x-1/2">
           <a
             href="/#goods"
             className="text-xs font-medium px-3 py-1 rounded-full text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#481f14] transition-colors"
