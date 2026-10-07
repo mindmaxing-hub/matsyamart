@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "../ui/Link";
 import { Heart } from "lucide-react";
+import { BrandLogo } from "../site/BrandLogo";
 
 export const Footer: React.FC = () => {
   return (
@@ -10,13 +11,8 @@ export const Footer: React.FC = () => {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-8 border-b border-[#dab38c]/15">
           {/* Logo & One-Liner */}
           <div className="space-y-2 max-w-sm">
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-6 h-6 rounded-md bg-[#35160e] border border-[#dab38c]/30 flex items-center justify-center text-[#e3a157] font-bold text-xs shadow-xs group-hover:border-[#e3a157]/60 transition-colors">
-                ✦
-              </div>
-              <span className="font-display font-bold text-lg text-[#f5edeb] group-hover:text-[#dab38c] transition-colors">
-                MatsyaMart<span className="text-[#e3a157]">✦</span>
-              </span>
+            <Link to="/" className="group inline-flex" aria-label="MatsyaMart home">
+              <BrandLogo className="h-8 w-auto transition-opacity group-hover:opacity-80" />
             </Link>
             <p className="text-[11px] text-[#dab38c]/80 leading-relaxed">
               Curated coastal experiences and goods, rooted in Koli fishing heritage.

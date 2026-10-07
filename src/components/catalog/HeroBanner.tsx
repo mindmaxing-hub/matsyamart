@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "../ui/Link";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { useData } from "../../context/DataContext";
+import { BrandLogo } from "../site/BrandLogo";
 
 interface HeroBannerProps {
   onScrollToCatalog?: () => void;
@@ -42,20 +43,17 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         `,
       }}
     >
-      {/* 1. TOP SECTION: Focal Point Typography */}
       <div className="relative z-20 w-full max-w-md sm:max-w-2xl lg:max-w-4xl text-center space-y-4 sm:space-y-5 mx-auto px-4">
-        {/* Koli Identity Eyebrow Stack */}
+        {/* Official Wordmark + Koli Identity Eyebrow Stack */}
         <div
           className={`flex flex-col items-center gap-2 transition-opacity duration-500 ${
             hasLoaded ? "opacity-100" : "opacity-0"
           }`}
         >
-          <div className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold tracking-wider">
-            <span className="font-display font-bold tracking-tight text-[#f5edeb]">
-              MatsyaMart
-            </span>
-            <span className="text-[#e3a157] font-bold leading-none">✦</span>
-          </div>
+          <BrandLogo
+            eager
+            className="h-9 w-auto sm:h-11"
+          />
           {/* Koli Community Badge */}
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#35160e] border border-[#dab38c]/25 text-[10px] sm:text-xs text-[#dab38c] font-medium">
             🐟 By the Koli Coastal Community
@@ -70,7 +68,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         >
           <span className="block whitespace-nowrap">Coastal</span>
           <span className="block whitespace-nowrap">experiences</span>
-          <span className="block whitespace-nowrap text-[#e3a157]">
+          <span className="ocean-glow-text block whitespace-nowrap">
             start here
           </span>
         </h1>

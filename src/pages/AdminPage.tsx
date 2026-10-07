@@ -17,6 +17,7 @@ import { RefundsManager } from "../components/admin/RefundsManager";
 import { CouponManager } from "../components/admin/CouponManager";
 import { StaffRolesManager } from "../components/admin/StaffRolesManager";
 import { Link } from "../components/ui/Link";
+import { BrandLogo } from "../components/site/BrandLogo";
 import { formatINR, formatDate } from "../lib/utils";
 import {
   ShieldCheck,
@@ -280,12 +281,11 @@ const AdminPageContent: React.FC = () => {
             <div className="w-14 h-14 rounded-2xl bg-[#35160e] text-[#e3a157] border border-[#dab38c]/30 flex items-center justify-center mx-auto shadow-md">
               <Lock className="w-7 h-7" />
             </div>
-            <div className="text-[11px] font-bold tracking-[0.14em] text-[#dab38c]/70 uppercase">
-              COASTAL WORKSPACE AUTHENTICATION
-            </div>
-            <h2 className="font-display font-bold text-3xl text-[#f5edeb]">
-              Matsya<em className="italic text-[#e3a157]">Mart</em>
-            </h2>
+            <BrandLogo
+              variant="white"
+              eager
+              className="mx-auto h-10 w-auto max-w-[220px]"
+            />
             <p className="text-xs text-[#dab38c] leading-relaxed">
               Google Workspace portal for Kolibaba Seafood Inc &amp; Bhoomiputra Foundation team members.
             </p>
@@ -416,10 +416,7 @@ const AdminPageContent: React.FC = () => {
             <div className="text-[11px] tracking-[0.14em] uppercase text-[rgba(245,237,235,0.48)] font-semibold px-3">
               WORKSPACE
             </div>
-            <div className="font-display text-[30px] tracking-[-0.02em] leading-[1.05] px-3 pt-0.5 text-[#F5EDEB]">
-              <span>Matsya</span>
-              <em className="italic text-[#E3A157]">Mart</em>
-            </div>
+            <BrandLogo className="mx-3 mt-2 h-8 w-auto max-w-[190px]" />
             <div className="text-[13px] text-[rgba(245,237,235,0.6)] px-3 pt-0.5">
               Coastal Operations Hub
             </div>

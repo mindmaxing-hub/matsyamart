@@ -39,7 +39,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error }: { error: unknown; reset: () => void }) {
   console.error("Root error boundary caught:", error);
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center bg-[#29100b] px-4 text-center">
@@ -89,7 +89,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         },
         {
           rel: "icon",
-          href: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐟</text></svg>",
+          type: "image/png",
+          href: "/favicon.png",
         },
       ],
     }),
