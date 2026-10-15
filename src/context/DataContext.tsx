@@ -10,6 +10,7 @@ import {
   AttendeeDetail,
   FulfillmentStatus,
   Coupon,
+  StockAlert,
 } from "../types";
 import {
   SEED_CATEGORIES,
@@ -52,10 +53,15 @@ interface DataContextType {
   proposals: CommunityVendorProposal[];
   coupons: Coupon[];
   spotlightListingIds: string[];
+  lowStockAlerts: StockAlert[];
   getListingBySlug: (slug: string) => Listing | undefined;
   getSlotsByListingId: (listingId: string) => ExperienceSlot[];
   getOrderByRef: (ref: string) => Order | undefined;
   createOrder: (input: CreateOrderInput) => Promise<Order>;
+  addListing: (listing: Omit<Listing, "id">) => void;
+  updateListing: (id: string, updates: Partial<Listing>) => void;
+  restockListing: (id: string, additionalQuantity: number) => void;
+  updateStockThreshold: (id: string, threshold: number) => void;
   addSlot: (
     slot: Omit<ExperienceSlot, "id" | "booked_count" | "is_cancelled">,
   ) => void;
@@ -766,6 +772,73 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
+  // Derived Low-Stock Alerts for Goods Inventory
+  const lowStockAlerts: StockAlert[] = listings
+    .filter((l) => l.type === "product" && typeof l.stock_count === "number")
+    .filter((l) => {
+      const threshold = l.low_stock_threshold ?? 5;
+      return (l.stock_count ?? 0) <= threshold;
+    })
+    .map((l) => {
+      const threshold = l.low_stock_threshold ?? 5;
+      const count = l.stock_count ?? 0;
+      return {
+        listingId: l.id,
+        title: l.title,
+        currentStock: count,
+        threshold,
+        severity: count === 0 ? ("critical" as const) : ("warning" as const),
+      };
+    });
+
+  const addListing = (newListingData: Omit<Listing, "id">) => {
+    const newListing: Listing = {
+      ...newListingData,
+      id: `prod-${Date.now()}`,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    setListings((prev) => [newListing, ...prev]);
+  };
+
+  const updateListing = (id: string, updates: Partial<Listing>) => {
+    setListings((prev) =>
+      prev.map((l) =>
+        l.id === id
+          ? { ...l, ...updates, updated_at: new Date().toISOString() }
+          : l,
+      ),
+    );
+  };
+
+  const restockListing = (id: string, additionalQuantity: number) => {
+    setListings((prev) =>
+      prev.map((l) =>
+        l.id === id
+          ? {
+              ...l,
+              stock_count: Math.max(0, (l.stock_count ?? 0) + additionalQuantity),
+              updated_at: new Date().toISOString(),
+            }
+          : l,
+      ),
+    );
+  };
+
+  const updateStockThreshold = (id: string, threshold: number) => {
+    setListings((prev) =>
+      prev.map((l) =>
+        l.id === id
+          ? {
+              ...l,
+              low_stock_threshold: Math.max(0, threshold),
+              updated_at: new Date().toISOString(),
+            }
+          : l,
+      ),
+    );
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -776,10 +849,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         proposals,
         coupons,
         spotlightListingIds,
+        lowStockAlerts,
         getListingBySlug,
         getSlotsByListingId,
         getOrderByRef,
         createOrder,
+        addListing,
+        updateListing,
+        restockListing,
+        updateStockThreshold,
         addSlot,
         addRecurringWeekendSlots,
         toggleCancelSlot,

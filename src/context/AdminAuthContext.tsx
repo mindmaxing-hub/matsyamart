@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { RoleLevel, AdminUserRole } from "../types";
+import { RoleLevel, AdminUserRole, PillarType } from "../types";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
 
 interface AuthUser {
@@ -11,15 +11,21 @@ interface AuthUser {
 interface AdminAuthContextType {
   user: AuthUser | null;
   role: RoleLevel | null;
+  assignedPillars: PillarType[];
   assignedEventIds: string[];
   isLoading: boolean;
   signInWithGoogle: () => Promise<void>;
-  devSignInAs: (role: RoleLevel, customEmail?: string) => void;
+  devSignInAs: (
+    role: RoleLevel,
+    customEmail?: string,
+    pillars?: PillarType[],
+  ) => void;
   signOut: () => Promise<void>;
   staffRoles: AdminUserRole[];
   updateStaffRole: (
     email: string,
     role: RoleLevel,
+    assignedPillars?: PillarType[],
     assignedEventIds?: string[],
   ) => void;
   removeStaffRole: (email: string) => void;
@@ -31,12 +37,12 @@ const AdminAuthContext = createContext<AdminAuthContextType | undefined>(
 );
 
 const STORAGE_AUTH_USER = "matsyamart_admin_user_v1";
-const STORAGE_STAFF_ROLES = "matsyamart_staff_roles_v1";
+const STORAGE_STAFF_ROLES = "matsyamart_staff_roles_v2";
 
 const DEFAULT_STAFF_ROLES: AdminUserRole[] = [
   {
     email: "vikas@matsyamart.com",
-    role: "admin",
+    role: "owner",
     created_at: new Date().toISOString(),
   },
   {
@@ -45,8 +51,15 @@ const DEFAULT_STAFF_ROLES: AdminUserRole[] = [
     created_at: new Date().toISOString(),
   },
   {
+    email: "coordinator.food@matsyamart.com",
+    role: "coordinator",
+    assigned_pillars: ["food"],
+    created_at: new Date().toISOString(),
+  },
+  {
     email: "coordinator.versova@matsyamart.com",
     role: "coordinator",
+    assigned_pillars: ["walks", "workshops"],
     assigned_event_ids: ["exp-versova-trail"],
     created_at: new Date().toISOString(),
   },
@@ -94,10 +107,15 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
       )
     : null;
 
-  // Fallback to "admin" if signed in via dev/demo without explicit role match
+  // Fallback to "owner" if signed in via dev/demo without explicit role match
   const role: RoleLevel | null = user
-    ? currentStaff?.role || "admin"
+    ? currentStaff?.role || "owner"
     : null;
+
+  const assignedPillars: PillarType[] =
+    role === "owner" || role === "admin" || role === "manager"
+      ? ["goods", "food", "walks", "workshops"]
+      : currentStaff?.assigned_pillars || [];
 
   const assignedEventIds: string[] = currentStaff?.assigned_event_ids || [];
 
@@ -114,31 +132,61 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
         if (error) throw error;
       } else {
         // Fallback for development / mock mode
-        devSignInAs("admin", "vikas@matsyamart.com");
+        devSignInAs("owner", "vikas@matsyamart.com");
       }
     } catch (err) {
       console.warn("Google sign-in fallback", err);
-      devSignInAs("admin", "vikas@matsyamart.com");
+      devSignInAs("owner", "vikas@matsyamart.com");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const devSignInAs = (selectedRole: RoleLevel, customEmail?: string) => {
+  const devSignInAs = (
+    selectedRole: RoleLevel,
+    customEmail?: string,
+    pillars?: PillarType[],
+  ) => {
     const email =
       customEmail ||
-      (selectedRole === "admin"
+      (selectedRole === "owner" || selectedRole === "admin"
         ? "vikas@matsyamart.com"
         : selectedRole === "manager"
           ? "kolibaba.operations@matsyamart.com"
-          : "coordinator.versova@matsyamart.com");
+          : "coordinator.food@matsyamart.com");
 
     const name =
-      selectedRole === "admin"
-        ? "Vikas (Admin)"
+      selectedRole === "owner" || selectedRole === "admin"
+        ? "Vikas (Owner)"
         : selectedRole === "manager"
           ? "Operations Manager"
-          : "Jetty Coordinator";
+          : "Pillar Coordinator";
+
+    // If custom pillars provided in simulator, persist into staffRoles
+    if (pillars && pillars.length > 0) {
+      setStaffRoles((prev) => {
+        const existing = prev.find(
+          (s) => s.email.toLowerCase() === email.toLowerCase(),
+        );
+        if (existing) {
+          return prev.map((s) =>
+            s.email.toLowerCase() === email.toLowerCase()
+              ? { ...s, role: selectedRole, assigned_pillars: pillars }
+              : s,
+          );
+        } else {
+          return [
+            ...prev,
+            {
+              email: email.trim().toLowerCase(),
+              role: selectedRole,
+              assigned_pillars: pillars,
+              created_at: new Date().toISOString(),
+            },
+          ];
+        }
+      });
+    }
 
     setUser({
       email,
@@ -161,6 +209,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const updateStaffRole = (
     email: string,
     newRole: RoleLevel,
+    pillars?: PillarType[],
     events?: string[],
   ) => {
     setStaffRoles((prev) => {
@@ -170,7 +219,12 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (existing) {
         return prev.map((s) =>
           s.email.toLowerCase() === email.toLowerCase()
-            ? { ...s, role: newRole, assigned_event_ids: events }
+            ? {
+                ...s,
+                role: newRole,
+                assigned_pillars: pillars ?? s.assigned_pillars,
+                assigned_event_ids: events ?? s.assigned_event_ids,
+              }
             : s,
         );
       } else {
@@ -179,6 +233,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
           {
             email: email.trim().toLowerCase(),
             role: newRole,
+            assigned_pillars: pillars,
             assigned_event_ids: events,
             created_at: new Date().toISOString(),
           },
@@ -193,19 +248,33 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
-  // RBAC Permission Gate check
+  // RBAC Permission Gate check: Strictly enforce pillar assignments
   const canAccessSection = (sectionId: string): boolean => {
     if (!role) return false;
-    if (role === "admin") return true;
+    // Owner / Admin has full system access
+    if (role === "owner" || role === "admin") return true;
 
+    // Manager has operational access across all 4 pillars and event manifests, but not financial/role admin
     if (role === "manager") {
-      // Manager has operational access but cannot manage promo codes or staff roles
-      return sectionId !== "coupons" && sectionId !== "roles";
+      return (
+        sectionId !== "payouts" &&
+        sectionId !== "coupons" &&
+        sectionId !== "roles"
+      );
     }
 
+    // Coordinator is strictly scoped to their assigned pillars only
     if (role === "coordinator") {
-      // Coordinator is on-ground: only Manifest (guest roster) and Slots & Check-in
-      return sectionId === "manifest" || sectionId === "slots";
+      if (
+        sectionId === "goods" ||
+        sectionId === "food" ||
+        sectionId === "walks" ||
+        sectionId === "workshops"
+      ) {
+        return assignedPillars.includes(sectionId as PillarType);
+      }
+      // Never allow coordinator to access global config / payouts / roles
+      return false;
     }
 
     return false;
@@ -216,6 +285,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         user,
         role,
+        assignedPillars,
         assignedEventIds,
         isLoading,
         signInWithGoogle,

@@ -6,16 +6,17 @@ import {
 } from "../context/AdminAuthContext";
 import { ManifestTable } from "../components/admin/ManifestTable";
 import { SlotManager } from "../components/admin/SlotManager";
-import { ProductOrdersTable } from "../components/admin/ProductOrdersTable";
 import { CommunicationsHub } from "../components/admin/CommunicationsHub";
 import { SpecialListingsManager } from "../components/admin/SpecialListingsManager";
 import { MultiQueueManager } from "../components/admin/MultiQueueManager";
 import { HostPayoutsLedger } from "../components/admin/HostPayoutsLedger";
-import { InventoryStockManager } from "../components/admin/InventoryStockManager";
-import { CoastalSafetyCommand } from "../components/admin/CoastalSafetyCommand";
 import { RefundsManager } from "../components/admin/RefundsManager";
 import { CouponManager } from "../components/admin/CouponManager";
 import { StaffRolesManager } from "../components/admin/StaffRolesManager";
+import { GoodsWorkspace } from "../components/admin/GoodsWorkspace";
+import { FoodWorkspace } from "../components/admin/FoodWorkspace";
+import { WalksWorkspace } from "../components/admin/WalksWorkspace";
+import { WorkshopsWorkspace } from "../components/admin/WorkshopsWorkspace";
 import { Link } from "../components/ui/Link";
 import { BrandLogo } from "../components/site/BrandLogo";
 import { formatINR, formatDate } from "../lib/utils";
@@ -29,6 +30,7 @@ import {
   ArrowRight,
   ArrowLeft,
   AlertCircle,
+  AlertTriangle,
   Sparkles,
   Package,
   MessageSquare,
@@ -44,16 +46,19 @@ import {
   Radio,
   Tag,
   Users,
+  Bell,
+  Utensils,
+  Palette,
 } from "lucide-react";
 
 type AdminSectionId =
   | "overview"
+  | "goods"
+  | "food"
+  | "walks"
+  | "workshops"
   | "queues"
   | "manifest"
-  | "goods"
-  | "inventory"
-  | "slots"
-  | "safety"
   | "payouts"
   | "refunds"
   | "spotlight"
@@ -68,7 +73,7 @@ interface NavItem {
   kicker: string;
   editorialTitle: string;
   subtitle: string;
-  badge?: number;
+  badge?: number | undefined;
 }
 
 const AdminPageContent: React.FC = () => {
@@ -78,6 +83,8 @@ const AdminPageContent: React.FC = () => {
     slots,
     proposals,
     spotlightListingIds,
+    lowStockAlerts,
+    restockListing,
     reorderSpotlight,
     toggleSpotlight,
     updateOrderFulfillment,
@@ -86,6 +93,7 @@ const AdminPageContent: React.FC = () => {
   const {
     user,
     role,
+    assignedPillars,
     signInWithGoogle,
     devSignInAs,
     signOut,
@@ -96,6 +104,7 @@ const AdminPageContent: React.FC = () => {
   const [activeSection, setActiveSection] = useState<AdminSectionId>("overview");
   const [passcode, setPasscode] = useState("");
   const [passcodeError, setPasscodeError] = useState("");
+  const [isInboxOpen, setIsInboxOpen] = useState(false);
 
   // Ensure activeSection is accessible by the user's role
   useEffect(() => {
@@ -138,6 +147,47 @@ const AdminPageContent: React.FC = () => {
         "Revenue, bookings and active slots across Mumbai's coastal koliwadas — updated live from every booking.",
     },
     {
+      id: "goods",
+      label: "Goods Workspace",
+      icon: Package,
+      badge: lowStockAlerts.length > 0 ? lowStockAlerts.length : undefined,
+      kicker: "Physical Pantry & Craft",
+      editorialTitle:
+        "Parcels out, <em class='italic text-[#E3A157]'>money home.</em>",
+      subtitle:
+        "Manage physical product listings, print 4×6 inch thermal labels, and track inventory stock thresholds.",
+    },
+    {
+      id: "food",
+      label: "Food Workspace",
+      icon: Utensils,
+      kicker: "Coastal Feasts & Home Dining",
+      editorialTitle:
+        "Feasts cooked, <em class='italic text-[#E3A157]'>guests welcomed.</em>",
+      subtitle:
+        "Curate pop-up seafood feasts, configure courtyard venues & seating windows, and issue BookMyShow QR passes.",
+    },
+    {
+      id: "walks",
+      label: "Walks Workspace",
+      icon: Compass,
+      kicker: "Heritage Trails & Dawn Harbors",
+      editorialTitle:
+        "Tides watched, <em class='italic text-[#E3A157]'>trails navigated.</em>",
+      subtitle:
+        "Coordinate low-tide departure windows, guide assignments, GPS meeting pins, and on-ground attendee rosters.",
+    },
+    {
+      id: "workshops",
+      label: "Workshops Workspace",
+      icon: Palette,
+      kicker: "Artisan Masterclasses & Craft",
+      editorialTitle:
+        "Skills passed on, <em class='italic text-[#E3A157]'>artisans honored.</em>",
+      subtitle:
+        "Manage net-weaving, spice blending and shell craft masterclasses, material kits, and enrolled participants.",
+    },
+    {
       id: "queues",
       label: "Review Queues",
       icon: ShieldCheck,
@@ -150,53 +200,13 @@ const AdminPageContent: React.FC = () => {
     },
     {
       id: "manifest",
-      label: "Events & Walks",
+      label: "All Events Manifest",
       icon: Calendar,
-      kicker: "Manifest · Versova trail & bookings",
+      kicker: "Unified Manifest · All Bookings",
       editorialTitle:
         "Who's coming, <em class='italic text-[#E3A157]'>all checked in.</em>",
       subtitle:
-        "Ticket refs, emergency contacts and payouts — printable in one click, searchable in one keystroke.",
-    },
-    {
-      id: "goods",
-      label: "D2C Goods Orders",
-      icon: Package,
-      kicker: "Pantry & craft · fulfilment",
-      editorialTitle:
-        "Parcels out, <em class='italic text-[#E3A157]'>money home.</em>",
-      subtitle:
-        "Packing, AWBs, 10×4 shipping labels, and artisan remittances.",
-    },
-    {
-      id: "inventory",
-      label: "Artisan Stock & Batches",
-      icon: Boxes,
-      kicker: "Inventory · batch freshness & lots",
-      editorialTitle:
-        "Pantry fresh, <em class='italic text-[#E3A157]'>never empty.</em>",
-      subtitle:
-        "Monitor physical pantry shelf-stock, lot harvest numbers, shelf-life expiry dates, and allocate batch replenishment.",
-    },
-    {
-      id: "slots",
-      label: "Tidal Slots & Capacity",
-      icon: Clock,
-      kicker: "Capacity · low-tide windows",
-      editorialTitle:
-        "Tides you can <em class='italic text-[#E3A157]'>actually sell.</em>",
-      subtitle:
-        "Weekend batches, sunrise slots and guide assignments with guest list check-in roster.",
-    },
-    {
-      id: "safety",
-      label: "Coastal Weather & Safety",
-      icon: Radio,
-      kicker: "Safety matrix · Arabian Sea swell",
-      editorialTitle:
-        "Swell watched, <em class='italic text-[#E3A157]'>fishers safe.</em>",
-      subtitle:
-        "Real-time tidal windows, swell heights, IMD warnings, lifeguard directories, and 1-click zone emergency lockdowns.",
+        "Unified ticket roster across trails, dinners, and masterclasses — searchable in one keystroke.",
     },
     {
       id: "payouts",
@@ -242,11 +252,11 @@ const AdminPageContent: React.FC = () => {
       id: "roles",
       label: "Staff Roles & Access",
       icon: Users,
-      kicker: "RBAC Security · Admin / Manager / Coordinator",
+      kicker: "RBAC Security · Owner / Manager / Coordinator",
       editorialTitle:
         "Verified staff, <em class='italic text-[#E3A157]'>safe harbours.</em>",
       subtitle:
-        "Control Google sign-in permissions across Admin, Manager, and Jetty Coordinator levels.",
+        "Assign coordinators to specific pillars (Goods, Food, Walks, Workshops) with instant dynamic visibility.",
     },
     {
       id: "communications",
@@ -263,8 +273,15 @@ const AdminPageContent: React.FC = () => {
   // Filter NAV items based on current role permissions
   const visibleNavItems = useMemo(
     () => ALL_NAV_ITEMS.filter((item) => canAccessSection(item.id)),
-    [role],
+    [role, assignedPillars],
   );
+
+  useEffect(() => {
+    const firstItem = visibleNavItems[0];
+    if (firstItem && !visibleNavItems.some((item) => item.id === activeSection)) {
+      setActiveSection(firstItem.id);
+    }
+  }, [visibleNavItems, activeSection]);
 
   const currentNav =
     visibleNavItems.find((item) => item.id === activeSection) ||
@@ -321,35 +338,55 @@ const AdminPageContent: React.FC = () => {
             </button>
           </div>
 
-          {/* Quick Role Tester Buttons (Admin / Manager / Coordinator) */}
+          {/* Quick Role Tester Buttons (Owner / Manager / Food Coordinator / Walks Coordinator) */}
           <div className="pt-2 border-t border-[#dab38c]/15 space-y-2.5">
             <div className="text-[10px] font-bold uppercase tracking-wider text-[#dab38c]/60 text-center">
               Direct Role Simulator (Development / Evaluation)
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => devSignInAs("admin")}
-                className="py-2 px-1.5 rounded-xl bg-[#35160e] hover:bg-[#481f14] border border-[#e3a157]/40 text-[#e3a157] text-[11px] font-bold text-center cursor-pointer transition-colors"
-                title="Full system access"
+                onClick={() => devSignInAs("owner")}
+                className="py-2 px-2 rounded-xl bg-[#35160e] hover:bg-[#481f14] border border-[#e3a157]/40 text-[#e3a157] text-[11px] font-bold text-center cursor-pointer transition-colors"
+                title="Full system access (All 4 Pillars + Roles)"
               >
-                👑 Admin
+                👑 Owner (Full Access)
               </button>
               <button
                 type="button"
                 onClick={() => devSignInAs("manager")}
-                className="py-2 px-1.5 rounded-xl bg-[#35160e] hover:bg-[#481f14] border border-sky-400/40 text-sky-300 text-[11px] font-bold text-center cursor-pointer transition-colors"
-                title="Operational & logistical access"
+                className="py-2 px-2 rounded-xl bg-[#35160e] hover:bg-[#481f14] border border-sky-400/40 text-sky-300 text-[11px] font-bold text-center cursor-pointer transition-colors"
+                title="Operations manager across all 4 pillars"
               >
-                💼 Manager
+                💼 Manager (All 4 Pillars)
               </button>
               <button
                 type="button"
-                onClick={() => devSignInAs("coordinator")}
-                className="py-2 px-1.5 rounded-xl bg-[#35160e] hover:bg-[#481f14] border border-emerald-400/40 text-emerald-300 text-[11px] font-bold text-center cursor-pointer transition-colors"
-                title="On-ground check-in & manifest only"
+                onClick={() =>
+                  devSignInAs(
+                    "coordinator",
+                    "coordinator.food@matsyamart.com",
+                    ["food"],
+                  )
+                }
+                className="py-2 px-2 rounded-xl bg-[#35160e] hover:bg-[#481f14] border border-orange-400/40 text-orange-300 text-[11px] font-bold text-center cursor-pointer transition-colors"
+                title="Strictly sees Food only"
               >
-                ⚓ Coordinator
+                🍲 Food Coordinator Only
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  devSignInAs(
+                    "coordinator",
+                    "coordinator.walks@matsyamart.com",
+                    ["walks", "workshops"],
+                  )
+                }
+                className="py-2 px-2 rounded-xl bg-[#35160e] hover:bg-[#481f14] border border-emerald-400/40 text-emerald-300 text-[11px] font-bold text-center cursor-pointer transition-colors"
+                title="Strictly sees Walks & Workshops only"
+              >
+                🚶 Walks + Workshops
               </button>
             </div>
           </div>
@@ -358,8 +395,12 @@ const AdminPageContent: React.FC = () => {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (passcode.trim() === "matsya2026" || passcode.trim() === "admin") {
-                devSignInAs("admin");
+              if (
+                passcode.trim() === "matsya2026" ||
+                passcode.trim() === "admin" ||
+                passcode.trim() === "owner"
+              ) {
+                devSignInAs("owner");
               } else {
                 setPasscodeError("Invalid passcode (Try: matsya2026)");
               }
@@ -491,6 +532,97 @@ const AdminPageContent: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Operations Inbox Notification Bell */}
+            <div className="relative">
+              <button
+                onClick={() => setIsInboxOpen(!isInboxOpen)}
+                className={`p-2 rounded-xl border transition-all relative cursor-pointer ${
+                  lowStockAlerts.length > 0
+                    ? "bg-rose-50 border-rose-300 text-rose-700 hover:bg-rose-100"
+                    : "bg-white/80 border-[rgba(41,16,11,0.1)] text-[#29100B] hover:bg-white"
+                }`}
+                title="Operations Inbox (Low-Stock Alerts)"
+              >
+                <Bell className="w-4 h-4" />
+                {lowStockAlerts.length > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-600 text-white font-bold text-[9px] rounded-full flex items-center justify-center shadow-xs animate-pulse">
+                    {lowStockAlerts.length}
+                  </span>
+                )}
+              </button>
+
+              {/* Flyout Inbox Dropdown */}
+              {isInboxOpen && (
+                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-[#29100B] text-[#F5EDEB] rounded-2xl border border-[#dab38c]/30 shadow-2xl p-4 z-50 space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#dab38c]/15">
+                    <div className="flex items-center gap-2">
+                      <Bell className="w-4 h-4 text-[#E3A157]" />
+                      <span className="font-bold text-xs text-[#F5EDEB]">
+                        Operations Inbox ({lowStockAlerts.length} Alerts)
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setIsInboxOpen(false)}
+                      className="text-[#dab38c]/60 hover:text-[#F5EDEB] text-xs cursor-pointer"
+                    >
+                      Close
+                    </button>
+                  </div>
+
+                  {lowStockAlerts.length === 0 ? (
+                    <div className="text-center py-6 text-xs text-[#dab38c]/70">
+                      ✨ All goods inventory is currently above configured thresholds.
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                      {lowStockAlerts.map((alert) => (
+                        <div
+                          key={alert.listingId}
+                          className="p-2.5 rounded-xl bg-[#35160E] border border-[#dab38c]/20 flex items-center justify-between gap-2 text-xs"
+                        >
+                          <div className="min-w-0">
+                            <div className="font-semibold text-xs truncate">
+                              {alert.title}
+                            </div>
+                            <div className="text-[10px] text-[#dab38c]/70 flex items-center gap-1 mt-0.5">
+                              <span
+                                className={
+                                  alert.currentStock === 0
+                                    ? "text-rose-400 font-bold"
+                                    : "text-amber-400 font-bold"
+                                }
+                              >
+                                {alert.currentStock} in stock
+                              </span>
+                              <span>(Threshold: ≤{alert.threshold})</span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => restockListing(alert.listingId, 10)}
+                            className="px-2.5 py-1 bg-[#E3A157] hover:bg-[#dab38c] text-[#29100B] font-bold text-[10px] rounded-lg shrink-0 transition-colors shadow-xs cursor-pointer"
+                          >
+                            +10 Restock
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="pt-2 border-t border-[#dab38c]/15 text-center">
+                    <button
+                      onClick={() => {
+                        setActiveSection("goods");
+                        setIsInboxOpen(false);
+                      }}
+                      className="text-[11px] font-bold text-[#E3A157] hover:underline cursor-pointer"
+                    >
+                      Open Goods Workspace →
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <span className="font-mono text-[12px] text-[rgba(41,16,11,0.64)] hidden sm:inline">
               {user.email}
             </span>
@@ -498,7 +630,7 @@ const AdminPageContent: React.FC = () => {
             {/* Role Badge */}
             <span
               className={`text-[10px] font-bold tracking-[0.06em] rounded-full px-2.5 py-0.5 uppercase ${
-                role === "admin"
+                role === "owner" || role === "admin"
                   ? "bg-[#29100B] text-[#E3A157] border border-[#29100B]"
                   : role === "manager"
                     ? "bg-sky-100 text-sky-800 border border-sky-300"
@@ -673,28 +805,24 @@ const AdminPageContent: React.FC = () => {
             <ManifestTable orders={orders} listings={listings} />
           )}
 
-          {/* 4. D2C GOODS ORDERS */}
+          {/* 1. GOODS WORKSPACE */}
           {activeSection === "goods" && (
-            <ProductOrdersTable
-              orders={orders}
-              listings={listings}
-              onUpdateFulfillment={updateOrderFulfillment}
-            />
+            <GoodsWorkspace orders={orders} listings={listings} />
           )}
 
-          {/* 5. ARTISAN INVENTORY & FRESHNESS BATCHES */}
-          {activeSection === "inventory" && (
-            <InventoryStockManager listings={listings} />
+          {/* 2. FOOD WORKSPACE */}
+          {activeSection === "food" && (
+            <FoodWorkspace orders={orders} listings={listings} slots={slots} />
           )}
 
-          {/* 6. TIDAL SLOTS & CAPACITY */}
-          {activeSection === "slots" && (
-            <SlotManager slots={slots} listings={listings} />
+          {/* 3. WALKS WORKSPACE */}
+          {activeSection === "walks" && (
+            <WalksWorkspace orders={orders} listings={listings} slots={slots} />
           )}
 
-          {/* 7. COASTAL WEATHER & SAFETY COMMAND */}
-          {activeSection === "safety" && (
-            <CoastalSafetyCommand slots={slots} listings={listings} />
+          {/* 4. WORKSHOPS WORKSPACE */}
+          {activeSection === "workshops" && (
+            <WorkshopsWorkspace orders={orders} listings={listings} slots={slots} />
           )}
 
           {/* 8. HOST & ARTISAN PAYOUTS LEDGER */}

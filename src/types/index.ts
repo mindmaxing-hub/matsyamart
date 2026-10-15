@@ -43,8 +43,12 @@ export interface Listing {
   itinerary?: ItineraryItem[] | undefined;
   // Physical Product Specifics
   stock_count?: number | undefined;
+  low_stock_threshold?: number | undefined;
   weight_grams?: number | undefined;
   artisan_collective?: string | undefined;
+  // Food & Workshop Specifics
+  dietary_tags?: string[] | undefined;
+  materials_provided?: string[] | undefined;
   // Meta
   is_active: boolean;
   is_featured: boolean;
@@ -212,11 +216,20 @@ export interface Coupon {
   created_at: string;
 }
 
-export type RoleLevel = "admin" | "manager" | "coordinator";
+export type RoleLevel = "owner" | "admin" | "manager" | "coordinator";
 
 export interface AdminUserRole {
   email: string;
   role: RoleLevel;
+  assigned_pillars?: PillarType[] | undefined;
   assigned_event_ids?: string[] | undefined;
   created_at?: string | undefined;
+}
+
+export interface StockAlert {
+  listingId: string;
+  title: string;
+  currentStock: number;
+  threshold: number;
+  severity: "warning" | "critical";
 }

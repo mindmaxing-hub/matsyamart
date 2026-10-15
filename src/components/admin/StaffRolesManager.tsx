@@ -1,34 +1,53 @@
 import React, { useState } from "react";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useData } from "../../context/DataContext";
-import { RoleLevel } from "../../types";
+import { RoleLevel, PillarType } from "../../types";
 import {
   Users,
   ShieldCheck,
   Plus,
   Trash2,
   KeyRound,
-  Compass,
   AlertCircle,
   X,
   Mail,
+  Check,
+  Package,
+  Utensils,
+  Compass,
+  Palette,
 } from "lucide-react";
 
+const ALL_PILLARS: { id: PillarType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { id: "goods", label: "Goods", icon: Package },
+  { id: "food", label: "Food", icon: Utensils },
+  { id: "walks", label: "Walks", icon: Compass },
+  { id: "workshops", label: "Workshops", icon: Palette },
+];
+
 export const StaffRolesManager: React.FC = () => {
-  const { staffRoles, updateStaffRole, removeStaffRole, user } = useAdminAuth();
+  const { staffRoles, updateStaffRole, removeStaffRole, user, role } = useAdminAuth();
   const { listings } = useData();
-  const experienceListings = listings.filter((l) => l.type === "experience");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [emailInput, setEmailInput] = useState("");
   const [roleInput, setRoleInput] = useState<RoleLevel>("coordinator");
-  const [selectedEventIds, setSelectedEventIds] = useState<string[]>([]);
+  const [selectedPillars, setSelectedPillars] = useState<PillarType[]>(["food"]);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const handleToggleEvent = (id: string) => {
-    setSelectedEventIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+  const handleTogglePillar = (pillar: PillarType) => {
+    setSelectedPillars((prev) =>
+      prev.includes(pillar) ? prev.filter((p) => p !== pillar) : [...prev, pillar],
     );
+  };
+
+  // Instant toggle from table row (for Owner)
+  const handleQuickTogglePillar = (staffEmail: string, pillar: PillarType, currentPillars: PillarType[] = []) => {
+    const updated = currentPillars.includes(pillar)
+      ? currentPillars.filter((p) => p !== pillar)
+      : [...currentPillars, pillar];
+
+    updateStaffRole(staffEmail, "coordinator", updated);
   };
 
   const handleSaveStaff = (e: React.FormEvent) => {
@@ -40,17 +59,24 @@ export const StaffRolesManager: React.FC = () => {
       return;
     }
 
+    if (roleInput === "coordinator" && selectedPillars.length === 0) {
+      setErrorMsg("Please assign at least one pillar to this coordinator.");
+      return;
+    }
+
     updateStaffRole(
       emailInput.trim(),
       roleInput,
-      roleInput === "coordinator" ? selectedEventIds : undefined,
+      roleInput === "coordinator" ? selectedPillars : undefined,
     );
 
     setEmailInput("");
     setRoleInput("coordinator");
-    setSelectedEventIds([]);
+    setSelectedPillars(["food"]);
     setIsModalOpen(false);
   };
+
+  const isOwner = role === "owner" || role === "admin";
 
   return (
     <div className="space-y-6 text-[#f5edeb]">
@@ -59,63 +85,65 @@ export const StaffRolesManager: React.FC = () => {
         <div>
           <h2 className="font-display font-bold text-xl sm:text-2xl text-[#f5edeb] flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-[#e3a157]" />
-            <span>Staff Permissions &amp; Access Tiers</span>
+            <span>Staff Roles &amp; Pillar Assignment</span>
           </h2>
           <p className="text-xs text-[#dab38c] mt-0.5">
-            Manage Google Workspace roles across Admin, Manager, and Jetty Coordinator levels
+            Owner has full access. Coordinators can be assigned any combination of the 4 pillars (Goods, Food, Walks, Workshops) anytime.
           </p>
         </div>
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
-        >
-          <Plus className="w-4 h-4 text-[#29100b]" />
-          <span>Add Staff Member</span>
-        </button>
+        {isOwner && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-4 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <Plus className="w-4 h-4 text-[#29100b]" />
+            <span>Assign Staff Role</span>
+          </button>
+        )}
       </div>
 
-      {/* Role Level Reference Strip */}
+      {/* Role Level Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="p-4 rounded-2xl bg-[#35160e]/85 border border-[#dab38c]/20 backdrop-blur-md space-y-1">
+        <div className="p-4 rounded-2xl bg-[#35160e]/85 border border-[#e3a157]/40 backdrop-blur-md space-y-1">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#e3a157]">
-              ADMIN LEVEL
+              👑 OWNER
             </span>
             <span className="text-[10px] bg-[#e3a157]/20 px-1.5 py-0.5 rounded text-[#e3a157] font-mono">
               FULL
             </span>
           </div>
           <div className="text-xs text-[#dab38c] leading-relaxed">
-            Unrestricted access: financial payouts, coupons, pricing, and system roles.
+            Full authority: All 4 pillars, financial payouts, coupons, and staff pillar assignments.
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#35160e]/85 border border-[#dab38c]/20 backdrop-blur-md space-y-1">
+        <div className="p-4 rounded-2xl bg-[#35160e]/85 border border-sky-400/30 backdrop-blur-md space-y-1">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-sky-400">
-              MANAGER LEVEL
+              💼 MANAGER
             </span>
             <span className="text-[10px] bg-sky-500/20 px-1.5 py-0.5 rounded text-sky-300 font-mono">
               OPS
             </span>
           </div>
           <div className="text-xs text-[#dab38c] leading-relaxed">
-            Operations: bookings, courier dispatch, inventory lots, tidal safety, and refunds.
+            Operational access across all 4 pillars and event manifests, without role or payout control.
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#35160e]/85 border border-[#dab38c]/20 backdrop-blur-md space-y-1">
+        <div className="p-4 rounded-2xl bg-[#35160e]/85 border border-emerald-400/30 backdrop-blur-md space-y-1">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
-              COORDINATOR
+              ⚓ COORDINATOR
             </span>
             <span className="text-[10px] bg-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-300 font-mono">
-              JETTY
+              SCOPED
             </span>
           </div>
           <div className="text-xs text-[#dab38c] leading-relaxed">
-            On-ground: guest manifest roster check-ins and emergency contacts for assigned events.
+            Pillar-scoped: Strictly views and operates ONLY the pillars assigned by the Owner.
           </div>
         </div>
       </div>
@@ -127,8 +155,8 @@ export const StaffRolesManager: React.FC = () => {
             <thead className="bg-[#29100b] text-[#dab38c] border-b border-[#dab38c]/15">
               <tr>
                 <th className="py-3 px-4 font-semibold">Authorized Email</th>
-                <th className="py-3 px-4 font-semibold">Assigned Role Tier</th>
-                <th className="py-3 px-4 font-semibold">Scope / Assigned Events</th>
+                <th className="py-3 px-4 font-semibold">Role Tier</th>
+                <th className="py-3 px-4 font-semibold">Assigned Pillars (Click to Toggle)</th>
                 <th className="py-3 px-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
@@ -136,6 +164,7 @@ export const StaffRolesManager: React.FC = () => {
               {staffRoles.map((staff) => {
                 const isCurrentUser =
                   user?.email.toLowerCase() === staff.email.toLowerCase();
+                const assigned = staff.assigned_pillars || [];
 
                 return (
                   <tr
@@ -157,7 +186,7 @@ export const StaffRolesManager: React.FC = () => {
                     <td className="py-3.5 px-4 font-bold">
                       <span
                         className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${
-                          staff.role === "admin"
+                          staff.role === "owner" || staff.role === "admin"
                             ? "bg-[#e3a157]/20 text-[#e3a157] border border-[#e3a157]/40"
                             : staff.role === "manager"
                               ? "bg-sky-500/20 text-sky-400 border border-sky-500/40"
@@ -168,36 +197,49 @@ export const StaffRolesManager: React.FC = () => {
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4 text-[#dab38c]">
-                      {staff.role === "admin" ? (
-                        <span className="text-xs text-[#dab38c]/80">
-                          Full Platform System Access
+                    {/* Pillar assignment with 1-click toggles */}
+                    <td className="py-3.5 px-4">
+                      {staff.role === "owner" || staff.role === "admin" ? (
+                        <span className="text-xs text-[#e3a157] font-semibold">
+                          ★ All 4 Pillars + Full Governance
                         </span>
                       ) : staff.role === "manager" ? (
-                        <span className="text-xs text-[#dab38c]/80">
-                          All Operations &amp; Fulfillment
+                        <span className="text-xs text-sky-300 font-semibold">
+                          All 4 Operational Pillars (Goods, Food, Walks, Workshops)
                         </span>
-                      ) : staff.assigned_event_ids &&
-                        staff.assigned_event_ids.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {staff.assigned_event_ids.map((id) => (
-                            <span
-                              key={id}
-                              className="text-[9px] px-2 py-0.5 rounded bg-[#29100b] border border-[#dab38c]/25 text-[#f5edeb]"
-                            >
-                              {listings.find((l) => l.id === id)?.title || id}
-                            </span>
-                          ))}
-                        </div>
                       ) : (
-                        <span className="text-xs text-[#dab38c]/60 italic">
-                          All Coastal Trails &amp; Workshops
-                        </span>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {ALL_PILLARS.map((p) => {
+                            const isAssigned = assigned.includes(p.id);
+                            return (
+                              <button
+                                key={p.id}
+                                disabled={!isOwner}
+                                onClick={() =>
+                                  handleQuickTogglePillar(staff.email, p.id, assigned)
+                                }
+                                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-all ${
+                                  isAssigned
+                                    ? "bg-emerald-900/60 text-emerald-300 border border-emerald-500/50 shadow-xs"
+                                    : "bg-[#29100b] text-[#dab38c]/40 border border-[#dab38c]/20 hover:text-[#dab38c]"
+                                } ${isOwner ? "cursor-pointer" : "cursor-default"}`}
+                                title={
+                                  isOwner
+                                    ? `Click to ${isAssigned ? "revoke" : "grant"} ${p.label}`
+                                    : undefined
+                                }
+                              >
+                                {isAssigned && <Check className="w-3 h-3 text-emerald-400" />}
+                                <span>{p.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
                       )}
                     </td>
 
                     <td className="py-3.5 px-4 text-right">
-                      {!isCurrentUser && (
+                      {isOwner && !isCurrentUser && (
                         <button
                           onClick={() => removeStaffRole(staff.email)}
                           className="p-1.5 hover:bg-[#29100b] rounded-lg text-[#dab38c]/70 hover:text-rose-400 transition-colors cursor-pointer"
@@ -222,7 +264,7 @@ export const StaffRolesManager: React.FC = () => {
             <div className="flex items-center justify-between pb-3 border-b border-[#dab38c]/15">
               <h3 className="font-display font-bold text-lg text-[#f5edeb] flex items-center gap-2">
                 <Plus className="w-4 h-4 text-[#e3a157]" />
-                <span>Grant Staff Access</span>
+                <span>Grant Staff Role</span>
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -263,33 +305,42 @@ export const StaffRolesManager: React.FC = () => {
                   onChange={(e) => setRoleInput(e.target.value as RoleLevel)}
                   className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-[#f5edeb] focus:outline-none focus:border-[#e3a157]"
                 >
-                  <option value="coordinator">Coordinator (On-ground Check-in only)</option>
-                  <option value="manager">Manager (All Operations &amp; Logistics)</option>
-                  <option value="admin">Admin (Full System &amp; Promos)</option>
+                  <option value="coordinator">Coordinator (Assigned Pillars Only)</option>
+                  <option value="manager">Manager (All 4 Operational Pillars)</option>
+                  <option value="owner">Owner (Full Authority &amp; Roles)</option>
                 </select>
               </div>
 
               {roleInput === "coordinator" && (
                 <div>
                   <label className="font-semibold text-[#dab38c] block mb-1.5">
-                    Assign Specific Experiences (Optional)
+                    Select Pillars to Assign to this Coordinator *
                   </label>
-                  <div className="space-y-1.5 max-h-36 overflow-y-auto p-2 bg-[#1f0b07] rounded-xl border border-[#dab38c]/20">
-                    {experienceListings.map((exp) => (
-                      <label
-                        key={exp.id}
-                        className="flex items-center gap-2 cursor-pointer hover:bg-[#35160e] p-1 rounded text-[#dab38c] hover:text-[#f5edeb]"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedEventIds.includes(exp.id)}
-                          onChange={() => handleToggleEvent(exp.id)}
-                          className="rounded text-[#e3a157]"
-                        />
-                        <span className="truncate">{exp.title}</span>
-                      </label>
-                    ))}
+                  <div className="grid grid-cols-2 gap-2 p-2 bg-[#1f0b07] rounded-xl border border-[#dab38c]/20">
+                    {ALL_PILLARS.map((p) => {
+                      const Icon = p.icon;
+                      const isSelected = selectedPillars.includes(p.id);
+
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => handleTogglePillar(p.id)}
+                          className={`p-2 rounded-lg border text-left flex items-center gap-2 transition-all cursor-pointer ${
+                            isSelected
+                              ? "bg-[#35160e] border-[#e3a157] text-[#f5edeb]"
+                              : "bg-[#29100b] border-[#dab38c]/20 text-[#dab38c]/60 hover:text-[#dab38c]"
+                          }`}
+                        >
+                          <Icon className={`w-4 h-4 ${isSelected ? "text-[#e3a157]" : "text-[#dab38c]/50"}`} />
+                          <span className="font-bold">{p.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
+                  <p className="text-[10px] text-[#dab38c]/60 mt-1">
+                    The coordinator will only see the selected pillars. All other pillars and administrative tools will be hidden.
+                  </p>
                 </div>
               )}
 
