@@ -16,7 +16,12 @@ import {
   Phone,
   Waves,
   Search,
+  Plus,
+  X,
+  Trash2,
+  Sparkles,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface WalksWorkspaceProps {
   orders: Order[];
@@ -29,7 +34,7 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
   listings,
   slots,
 }) => {
-  const { updateAttendeeCheckIn } = useData();
+  const { updateAttendeeCheckIn, addListing, deleteListing, addSlot } = useData();
 
   const [activeSubTab, setActiveSubTab] = useState<"trails" | "guides" | "manifest">("trails");
   const [selectedTicketOrder, setSelectedTicketOrder] = useState<{
@@ -38,6 +43,84 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
   } | null>(null);
 
   const [manifestSearch, setManifestSearch] = useState("");
+
+  // Add Walk Trail Modal State
+  const [isAddWalkOpen, setIsAddWalkOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newGuideName, setNewGuideName] = useState("Pranay Koli");
+  const [newGuidePhone, setNewGuidePhone] = useState("+91 98201 44512");
+  const [newPrice, setNewPrice] = useState("850");
+  const [newDuration, setNewDuration] = useState("150");
+  const [newLocationName, setNewLocationName] = useState("Versova Koliwada Harbor Jetty");
+  const [newSecretNotes, setNewSecretNotes] = useState("Meet near the net-mending platform at Gate 2. Guide carries a blue MatsyaMart pennant.");
+  const [newMapsUrl, setNewMapsUrl] = useState("https://maps.google.com/?q=19.1316,72.8109");
+  const [newSummary, setNewSummary] = useState("Dawn exploration of traditional intertidal fishing methods, artisanal net casting, and mangrove nursery ecology led by community custodians.");
+  const [newIncluded, setNewIncluded] = useState("Community Elder Guide, High-tide safety briefing, Traditional cutting chai, Mud boots");
+  const [newImage, setNewImage] = useState("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80");
+  const [newSlotDate, setNewSlotDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1); // Tomorrow
+    return d.toISOString().split("T")[0];
+  });
+  const [newSlotStart, setNewSlotStart] = useState("06:30");
+  const [newSlotEnd, setNewSlotEnd] = useState("09:00");
+  const [newCapacity, setNewCapacity] = useState("15");
+
+  const handleCreateWalk = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle.trim()) {
+      toast.error("Please enter a walk title.");
+      return;
+    }
+
+    const slug = newTitle
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
+    const includedArray = newIncluded
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const created = addListing({
+      title: newTitle.trim(),
+      slug: `${slug}-${Date.now().toString().slice(-4)}`,
+      type: "experience",
+      pillar: "walks",
+      price_inr: Number(newPrice) || 850,
+      currency: "INR",
+      images: [newImage.trim()],
+      short_summary: newSummary.trim(),
+      full_description: `${newSummary.trim()}\n\nEssentials Included:\n${includedArray.map((i) => `• ${i}`).join("\n")}`,
+      location_name: newLocationName.trim(),
+      secret_meeting_point: newSecretNotes.trim(),
+      meeting_point_maps_url: newMapsUrl.trim(),
+      duration_minutes: Number(newDuration) || 150,
+      host_name: newGuideName.trim() || "Pranay Koli",
+      host_phone: newGuidePhone.trim() || "+91 98201 44512",
+      host_bio: "Experienced indigenous coastal navigator and intertidal naturalist.",
+      included_items: includedArray,
+      is_active: true,
+      is_featured: true,
+    });
+
+    if (newSlotDate && newSlotStart && newSlotEnd) {
+      const startDateTime = new Date(`${newSlotDate}T${newSlotStart}:00`);
+      const endDateTime = new Date(`${newSlotDate}T${newSlotEnd}:00`);
+
+      addSlot({
+        listing_id: created.id,
+        slot_start: startDateTime.toISOString(),
+        slot_end: endDateTime.toISOString(),
+        capacity: Number(newCapacity) || 15,
+      });
+    }
+
+    toast.success(`Created walk trail "${newTitle}"!`);
+    setIsAddWalkOpen(false);
+    setNewTitle("");
+  };
 
   // Walks listings
   const walkListings = useMemo(() => {
@@ -145,7 +228,243 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
             📋 Trail Manifest &amp; QR Passes ({walkAttendees.length})
           </button>
         </div>
+
+        <button
+          onClick={() => setIsAddWalkOpen(true)}
+          className="px-4 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Add Walk Trail</span>
+        </button>
       </div>
+
+      {/* Add Walk Trail Modal */}
+      {isAddWalkOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
+          <div className="bg-[#29100b] border border-[#dab38c]/30 rounded-3xl max-w-xl w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#dab38c]/15">
+              <div className="flex items-center gap-2">
+                <Compass className="w-5 h-5 text-[#e3a157]" />
+                <h3 className="font-display font-bold text-base text-[#f5edeb]">
+                  Add New Coastal Walk Trail
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsAddWalkOpen(false)}
+                className="p-1.5 hover:bg-[#35160e] rounded-full text-[#dab38c] hover:text-[#f5edeb] cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateWalk} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Walk / Trail Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Dawn Versova Mangrove & Intertidal Forage Walk"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Lead Guide / Custodian
+                  </label>
+                  <input
+                    type="text"
+                    value={newGuideName}
+                    onChange={(e) => setNewGuideName(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Guide Phone (WhatsApp)
+                  </label>
+                  <input
+                    type="text"
+                    value={newGuidePhone}
+                    onChange={(e) => setNewGuidePhone(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Price per Walker (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={newPrice}
+                    onChange={(e) => setNewPrice(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Duration (Minutes)
+                  </label>
+                  <input
+                    type="number"
+                    min="30"
+                    value={newDuration}
+                    onChange={(e) => setNewDuration(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Rendezvous Location
+                </label>
+                <input
+                  type="text"
+                  value={newLocationName}
+                  onChange={(e) => setNewLocationName(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Secret Meeting Pin / Instructions
+                  </label>
+                  <input
+                    type="text"
+                    value={newSecretNotes}
+                    onChange={(e) => setNewSecretNotes(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Google Maps GPS URL
+                  </label>
+                  <input
+                    type="url"
+                    value={newMapsUrl}
+                    onChange={(e) => setNewMapsUrl(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono text-[11px]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Included Essentials (comma separated)
+                </label>
+                <input
+                  type="text"
+                  value={newIncluded}
+                  onChange={(e) => setNewIncluded(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Short Summary &amp; Experience Flow
+                </label>
+                <textarea
+                  rows={2}
+                  value={newSummary}
+                  onChange={(e) => setNewSummary(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Cover Photo URL
+                </label>
+                <input
+                  type="url"
+                  value={newImage}
+                  onChange={(e) => setNewImage(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono text-[11px]"
+                />
+              </div>
+
+              {/* Initial Departure Slot */}
+              <div className="p-3 bg-[#35160e]/90 border border-[#dab38c]/25 rounded-2xl space-y-2">
+                <div className="flex items-center gap-1.5 text-[#e3a157] font-bold text-[11px] uppercase tracking-wider">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Initial Departure Slot &amp; Capacity</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <div>
+                    <label className="block text-[10px] text-[#dab38c]/70 font-bold mb-0.5">Date</label>
+                    <input
+                      type="date"
+                      value={newSlotDate}
+                      onChange={(e) => setNewSlotDate(e.target.value)}
+                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/25 rounded-lg text-xs text-[#f5edeb] outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-[#dab38c]/70 font-bold mb-0.5">Start Time</label>
+                    <input
+                      type="time"
+                      value={newSlotStart}
+                      onChange={(e) => setNewSlotStart(e.target.value)}
+                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/25 rounded-lg text-xs text-[#f5edeb] outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-[#dab38c]/70 font-bold mb-0.5">End Time</label>
+                    <input
+                      type="time"
+                      value={newSlotEnd}
+                      onChange={(e) => setNewSlotEnd(e.target.value)}
+                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/25 rounded-lg text-xs text-[#f5edeb] outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-[#dab38c]/70 font-bold mb-0.5">Capacity</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={newCapacity}
+                      onChange={(e) => setNewCapacity(e.target.value)}
+                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/25 rounded-lg text-xs text-[#f5edeb] outline-none font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#dab38c]/15">
+                <button
+                  type="button"
+                  onClick={() => setIsAddWalkOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs text-[#dab38c] hover:bg-[#35160e] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Publish Walk Trail</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* SUB-TAB 1: Trails & Tidal Schedules */}
       {activeSubTab === "trails" && (
@@ -196,9 +515,23 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
                 <span className="text-[#dab38c]">
                   Guide: <strong className="text-[#f5edeb]">{walk.host_name}</strong>
                 </span>
-                <span className="text-emerald-400 font-semibold text-[11px]">
-                  ● Open for Registration
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-semibold text-[11px]">
+                    ● Open for Registration
+                  </span>
+                  <button
+                    onClick={() => {
+                      if (confirm(`Remove walk trail "${walk.title}"?`)) {
+                        deleteListing(walk.id);
+                        toast.success("Walk trail removed.");
+                      }
+                    }}
+                    className="p-1 rounded-lg hover:bg-rose-950/60 text-[#dab38c]/60 hover:text-rose-400 transition-colors cursor-pointer"
+                    title="Delete walk trail"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}

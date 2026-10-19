@@ -16,7 +16,13 @@ import {
   Scissors,
   Search,
   Hammer,
+  Plus,
+  X,
+  Trash2,
+  Sparkles,
+  Phone,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface WorkshopsWorkspaceProps {
   orders: Order[];
@@ -29,7 +35,7 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
   listings,
   slots,
 }) => {
-  const { updateAttendeeCheckIn } = useData();
+  const { updateAttendeeCheckIn, addListing, deleteListing, addSlot } = useData();
 
   const [activeSubTab, setActiveSubTab] = useState<"sessions" | "instructors" | "roster">("sessions");
   const [selectedTicketOrder, setSelectedTicketOrder] = useState<{
@@ -38,6 +44,84 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
   } | null>(null);
 
   const [rosterSearch, setRosterSearch] = useState("");
+
+  // Add Workshop Modal State
+  const [isAddWorkshopOpen, setIsAddWorkshopOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newInstructorName, setNewInstructorName] = useState("Kashinath Nakhawa");
+  const [newInstructorPhone, setNewInstructorPhone] = useState("+91 98192 33410");
+  const [newPrice, setNewPrice] = useState("1500");
+  const [newDuration, setNewDuration] = useState("180");
+  const [newLocationName, setNewLocationName] = useState("Sassoon Dock Heritage Shed, Colaba");
+  const [newSecretNotes, setNewSecretNotes] = useState("Enter Gate 3, heritage shed on the right overlooking dry dock.");
+  const [newMapsUrl, setNewMapsUrl] = useState("https://maps.google.com/?q=18.9142,72.8277");
+  const [newSummary, setNewSummary] = useState("Hands-on traditional net-weaving masterclass using indigenous shuttle tools and natural fiber knotting techniques.");
+  const [newMaterials, setNewMaterials] = useState("Braided nylon cord, Brass shuttle needle, Mesh gauge sticks, Take-home net planter");
+  const [newImage, setNewImage] = useState("https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1200&q=80");
+  const [newSlotDate, setNewSlotDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1); // Tomorrow
+    return d.toISOString().split("T")[0];
+  });
+  const [newSlotStart, setNewSlotStart] = useState("14:00");
+  const [newSlotEnd, setNewSlotEnd] = useState("17:00");
+  const [newCapacity, setNewCapacity] = useState("10");
+
+  const handleCreateWorkshop = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle.trim()) {
+      toast.error("Please enter a workshop title.");
+      return;
+    }
+
+    const slug = newTitle
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
+    const materialsArray = newMaterials
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const created = addListing({
+      title: newTitle.trim(),
+      slug: `${slug}-${Date.now().toString().slice(-4)}`,
+      type: "experience",
+      pillar: "workshops",
+      price_inr: Number(newPrice) || 1500,
+      currency: "INR",
+      images: [newImage.trim()],
+      short_summary: newSummary.trim(),
+      full_description: `${newSummary.trim()}\n\nMaterials Provided:\n${materialsArray.map((m) => `• ${m}`).join("\n")}`,
+      location_name: newLocationName.trim(),
+      secret_meeting_point: newSecretNotes.trim(),
+      meeting_point_maps_url: newMapsUrl.trim(),
+      duration_minutes: Number(newDuration) || 180,
+      host_name: newInstructorName.trim() || "Kashinath Nakhawa",
+      host_phone: newInstructorPhone.trim() || "+91 98192 33410",
+      host_bio: "Master net-weaving artisan and maritime elder with 35 years preserving coastal craft.",
+      included_items: materialsArray,
+      is_active: true,
+      is_featured: true,
+    });
+
+    if (newSlotDate && newSlotStart && newSlotEnd) {
+      const startDateTime = new Date(`${newSlotDate}T${newSlotStart}:00`);
+      const endDateTime = new Date(`${newSlotDate}T${newSlotEnd}:00`);
+
+      addSlot({
+        listing_id: created.id,
+        slot_start: startDateTime.toISOString(),
+        slot_end: endDateTime.toISOString(),
+        capacity: Number(newCapacity) || 10,
+      });
+    }
+
+    toast.success(`Created workshop masterclass "${newTitle}"!`);
+    setIsAddWorkshopOpen(false);
+    setNewTitle("");
+  };
 
   // Workshops listings
   const workshopListings = useMemo(() => {
@@ -143,7 +227,243 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
             📋 Participant Roster &amp; Passes ({workshopAttendees.length})
           </button>
         </div>
+
+        <button
+          onClick={() => setIsAddWorkshopOpen(true)}
+          className="px-4 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Add Workshop Masterclass</span>
+        </button>
       </div>
+
+      {/* Add Workshop Modal */}
+      {isAddWorkshopOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
+          <div className="bg-[#29100b] border border-[#dab38c]/30 rounded-3xl max-w-xl w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#dab38c]/15">
+              <div className="flex items-center gap-2">
+                <Palette className="w-5 h-5 text-[#e3a157]" />
+                <h3 className="font-display font-bold text-base text-[#f5edeb]">
+                  Add New Workshop Masterclass
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsAddWorkshopOpen(false)}
+                className="p-1.5 hover:bg-[#35160e] rounded-full text-[#dab38c] hover:text-[#f5edeb] cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateWorkshop} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Masterclass Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Traditional Net Weaving & Knotting Masterclass"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Instructor / Artisan
+                  </label>
+                  <input
+                    type="text"
+                    value={newInstructorName}
+                    onChange={(e) => setNewInstructorName(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Instructor Phone (WhatsApp)
+                  </label>
+                  <input
+                    type="text"
+                    value={newInstructorPhone}
+                    onChange={(e) => setNewInstructorPhone(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Price per Seat (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={newPrice}
+                    onChange={(e) => setNewPrice(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Duration (Minutes)
+                  </label>
+                  <input
+                    type="number"
+                    min="30"
+                    value={newDuration}
+                    onChange={(e) => setNewDuration(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Studio / Workshop Venue
+                </label>
+                <input
+                  type="text"
+                  value={newLocationName}
+                  onChange={(e) => setNewLocationName(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Secret Arrival Directions
+                  </label>
+                  <input
+                    type="text"
+                    value={newSecretNotes}
+                    onChange={(e) => setNewSecretNotes(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Google Maps GPS URL
+                  </label>
+                  <input
+                    type="url"
+                    value={newMapsUrl}
+                    onChange={(e) => setNewMapsUrl(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono text-[11px]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Included Toolkits &amp; Materials (comma separated)
+                </label>
+                <input
+                  type="text"
+                  value={newMaterials}
+                  onChange={(e) => setNewMaterials(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Description &amp; Hands-on Curriculum
+                </label>
+                <textarea
+                  rows={2}
+                  value={newSummary}
+                  onChange={(e) => setNewSummary(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Cover Photo URL
+                </label>
+                <input
+                  type="url"
+                  value={newImage}
+                  onChange={(e) => setNewImage(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono text-[11px]"
+                />
+              </div>
+
+              {/* Initial Session Slot */}
+              <div className="p-3 bg-[#35160e]/90 border border-[#dab38c]/25 rounded-2xl space-y-2">
+                <div className="flex items-center gap-1.5 text-[#e3a157] font-bold text-[11px] uppercase tracking-wider">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Initial Masterclass Slot &amp; Bench Capacity</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <div>
+                    <label className="block text-[10px] text-[#dab38c]/70 font-bold mb-0.5">Date</label>
+                    <input
+                      type="date"
+                      value={newSlotDate}
+                      onChange={(e) => setNewSlotDate(e.target.value)}
+                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/25 rounded-lg text-xs text-[#f5edeb] outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-[#dab38c]/70 font-bold mb-0.5">Start Time</label>
+                    <input
+                      type="time"
+                      value={newSlotStart}
+                      onChange={(e) => setNewSlotStart(e.target.value)}
+                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/25 rounded-lg text-xs text-[#f5edeb] outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-[#dab38c]/70 font-bold mb-0.5">End Time</label>
+                    <input
+                      type="time"
+                      value={newSlotEnd}
+                      onChange={(e) => setNewSlotEnd(e.target.value)}
+                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/25 rounded-lg text-xs text-[#f5edeb] outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-[#dab38c]/70 font-bold mb-0.5">Capacity</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={newCapacity}
+                      onChange={(e) => setNewCapacity(e.target.value)}
+                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/25 rounded-lg text-xs text-[#f5edeb] outline-none font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#dab38c]/15">
+                <button
+                  type="button"
+                  onClick={() => setIsAddWorkshopOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs text-[#dab38c] hover:bg-[#35160e] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Publish Masterclass</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* SUB-TAB 1: Sessions */}
       {activeSubTab === "sessions" && (
@@ -194,9 +514,23 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
                 <span className="text-[#dab38c]">
                   Instructor: <strong className="text-[#f5edeb]">{workshop.host_name}</strong>
                 </span>
-                <span className="text-emerald-400 font-semibold text-[11px]">
-                  ● Open for Registration
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-semibold text-[11px]">
+                    ● Open for Registration
+                  </span>
+                  <button
+                    onClick={() => {
+                      if (confirm(`Remove masterclass "${workshop.title}"?`)) {
+                        deleteListing(workshop.id);
+                        toast.success("Masterclass removed.");
+                      }
+                    }}
+                    className="p-1 rounded-lg hover:bg-rose-950/60 text-[#dab38c]/60 hover:text-rose-400 transition-colors cursor-pointer"
+                    title="Delete workshop"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}

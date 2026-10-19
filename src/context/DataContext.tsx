@@ -58,13 +58,15 @@ interface DataContextType {
   getSlotsByListingId: (listingId: string) => ExperienceSlot[];
   getOrderByRef: (ref: string) => Order | undefined;
   createOrder: (input: CreateOrderInput) => Promise<Order>;
-  addListing: (listing: Omit<Listing, "id">) => void;
+  addListing: (listing: Omit<Listing, "id">) => Listing;
+  deleteListing: (id: string) => void;
   updateListing: (id: string, updates: Partial<Listing>) => void;
   restockListing: (id: string, additionalQuantity: number) => void;
   updateStockThreshold: (id: string, threshold: number) => void;
   addSlot: (
     slot: Omit<ExperienceSlot, "id" | "booked_count" | "is_cancelled">,
   ) => void;
+  deleteSlot: (slotId: string) => void;
   addRecurringWeekendSlots: (
     listingId: string,
     weeksCount: number,
@@ -515,6 +517,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     setSlots((prev) => [...prev, newSlot]);
   };
 
+  const deleteSlot = (slotId: string) => {
+    setSlots((prev) => prev.filter((s) => s.id !== slotId));
+  };
+
   const addRecurringWeekendSlots = (
     listingId: string,
     weeksCount: number = 4,
@@ -791,14 +797,26 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
       };
     });
 
-  const addListing = (newListingData: Omit<Listing, "id">) => {
+  const addListing = (newListingData: Omit<Listing, "id">): Listing => {
+    const prefix =
+      newListingData.type === "experience"
+        ? newListingData.pillar
+          ? `exp-${newListingData.pillar}`
+          : "exp"
+        : "prod";
     const newListing: Listing = {
       ...newListingData,
-      id: `prod-${Date.now()}`,
+      id: `${prefix}-${Date.now()}`,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
     setListings((prev) => [newListing, ...prev]);
+    return newListing;
+  };
+
+  const deleteListing = (id: string) => {
+    setListings((prev) => prev.filter((l) => l.id !== id));
+    setSlots((prev) => prev.filter((s) => s.listing_id !== id));
   };
 
   const updateListing = (id: string, updates: Partial<Listing>) => {
@@ -855,10 +873,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         getOrderByRef,
         createOrder,
         addListing,
+        deleteListing,
         updateListing,
         restockListing,
         updateStockThreshold,
         addSlot,
+        deleteSlot,
         addRecurringWeekendSlots,
         toggleCancelSlot,
         addProposal,

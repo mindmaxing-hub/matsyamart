@@ -16,7 +16,15 @@ import {
   Plus,
   Search,
   Sparkles,
+  Phone,
+  Share2,
+  Download,
+  FileSpreadsheet,
+  X,
+  Trash2,
+  Filter,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface FoodWorkspaceProps {
   orders: Order[];
@@ -29,7 +37,7 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
   listings,
   slots,
 }) => {
-  const { updateAttendeeCheckIn } = useData();
+  const { updateAttendeeCheckIn, addListing, deleteListing, addSlot, deleteSlot } = useData();
 
   const [activeSubTab, setActiveSubTab] = useState<"dinners" | "venues" | "roster">("dinners");
   const [selectedTicketOrder, setSelectedTicketOrder] = useState<{
@@ -38,6 +46,47 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
   } | null>(null);
 
   const [guestSearch, setGuestSearch] = useState("");
+  const [selectedFeastFilter, setSelectedFeastFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<"all" | "tomorrow" | "today">("all");
+
+  // Modal 1: Add Food Gathering / Feast
+  const [isAddFeastOpen, setIsAddFeastOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newCookName, setNewCookName] = useState("");
+  const [newCookPhone, setNewCookPhone] = useState("");
+  const [newCookBio, setNewCookBio] = useState("");
+  const [newPrice, setNewPrice] = useState("1200");
+  const [newDuration, setNewDuration] = useState("180");
+  const [newLocationName, setNewLocationName] = useState("Versova Gaothan Courtyard, Andheri West");
+  const [newSecretNotes, setNewSecretNotes] = useState("Pass the blue arched gate; coordinator will welcome you at Villa 4.");
+  const [newMapsUrl, setNewMapsUrl] = useState("https://maps.google.com/?q=19.1316,72.8109");
+  const [newCourses, setNewCourses] = useState("Fresh Surmai Fry, Mud Crab Masala, Sol Kadhi Digestive, Kolim Rice & Modak");
+  const [newSummary, setNewSummary] = useState("Authentic home-cooked Koli seafood banquet prepared fresh by community custodians in their ancestral courtyard.");
+  const [newImage, setNewImage] = useState("https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1200&auto=format&fit=crop");
+  const [newSlotDate, setNewSlotDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1); // Tomorrow by default
+    return d.toISOString().split("T")[0];
+  });
+  const [newSlotStart, setNewSlotStart] = useState("12:30");
+  const [newSlotEnd, setNewSlotEnd] = useState("15:30");
+  const [newCapacity, setNewCapacity] = useState("12");
+
+  // Modal 2: Add Venue & Seating Window
+  const [isAddVenueOpen, setIsAddVenueOpen] = useState(false);
+  const [venueFeastId, setVenueFeastId] = useState("");
+  const [venueLocationName, setVenueLocationName] = useState("");
+  const [venueMapsUrl, setVenueMapsUrl] = useState("");
+  const [venueSecretNotes, setVenueSecretNotes] = useState("");
+  const [venueWindowName, setVenueWindowName] = useState("Sunset Seafood Banquet");
+  const [venueDate, setVenueDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 2);
+    return d.toISOString().split("T")[0];
+  });
+  const [venueStartTime, setVenueStartTime] = useState("18:30");
+  const [venueEndTime, setVenueEndTime] = useState("21:30");
+  const [venueCapacity, setVenueCapacity] = useState("14");
 
   // Food experiences
   const foodListings = useMemo(() => {
@@ -62,6 +111,7 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
       checkedIn: boolean;
       slot?: ExperienceSlot | undefined;
       listing?: Listing | undefined;
+      totalPaid: number;
     }[] = [];
 
     foodOrders.forEach((order) => {
@@ -77,30 +127,255 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
               order,
               item,
               attendeeIndex: idx,
-              name: att.fullName,
-              phone: att.phone,
+              name: att.fullName || order.customer_name,
+              phone: att.phone || order.customer_phone,
               checkedIn: !!att.checked_in,
               slot: item.slot,
               listing: item.listing,
+              totalPaid: item.unit_price_inr * (item.quantity || 1),
             });
           });
         });
     });
 
+    const now = new Date();
+    const todayStr = now.toISOString().split("T")[0] || "";
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split("T")[0] || "";
+
     return list.filter((a) => {
+      // Feast filter
+      if (selectedFeastFilter !== "all" && a.listing?.id !== selectedFeastFilter) {
+        return false;
+      }
+
+      // Date filter
+      if (dateFilter === "today") {
+        if (!a.slot || !todayStr || !a.slot.slot_start.startsWith(todayStr)) return false;
+      } else if (dateFilter === "tomorrow") {
+        if (!a.slot || !tomorrowStr || !a.slot.slot_start.startsWith(tomorrowStr)) return false;
+      }
+
+      // Search
+      const needle = guestSearch.toLowerCase().trim();
+      if (!needle) return true;
       return (
-        a.name.toLowerCase().includes(guestSearch.toLowerCase()) ||
-        a.phone.includes(guestSearch) ||
-        a.order.order_ref.toLowerCase().includes(guestSearch.toLowerCase()) ||
-        (a.listing?.title &&
-          a.listing.title.toLowerCase().includes(guestSearch.toLowerCase()))
+        a.name.toLowerCase().includes(needle) ||
+        a.phone.includes(needle) ||
+        a.order.order_ref.toLowerCase().includes(needle) ||
+        (a.listing?.title && a.listing.title.toLowerCase().includes(needle))
       );
     });
-  }, [foodOrders, guestSearch]);
+  }, [foodOrders, guestSearch, selectedFeastFilter, dateFilter]);
+
+  // Target Cook & Manifest stats for Vikas's day-before CRM flow
+  const targetFeast = useMemo(() => {
+    if (selectedFeastFilter !== "all") {
+      return foodListings.find((l) => l.id === selectedFeastFilter);
+    }
+    return foodListings[0];
+  }, [foodListings, selectedFeastFilter]);
+
+  const totalConfirmedPlates = useMemo(() => {
+    return foodAttendees.length;
+  }, [foodAttendees]);
+
+  const totalFeastRevenue = useMemo(() => {
+    return foodAttendees.reduce((sum, a) => sum + (a.item.unit_price_inr || 1200), 0);
+  }, [foodAttendees]);
+
+  // 1. WhatsApp Manifest to Cook
+  const handleSendManifestToCook = () => {
+    if (!targetFeast) {
+      toast.error("Please select a feast gathering first.");
+      return;
+    }
+
+    const cookPhone = targetFeast.host_phone?.replace(/[^0-9]/g, "") || "";
+    const attendeesLines =
+      foodAttendees.length > 0
+        ? foodAttendees
+            .map(
+              (a, idx) =>
+                `${idx + 1}. *${a.name}* (1 Plate) - Ph: ${a.phone} [${a.order.order_ref}]`,
+            )
+            .join("\n")
+        : "_No confirmed bookings logged yet._";
+
+    const text = encodeURIComponent(
+      `🍲 *MATSYAMART COOK MANIFEST: GUEST ROSTER*\n\n` +
+        `*Cook & Custodian:* ${targetFeast.host_name}\n` +
+        `*Feast:* ${targetFeast.title}\n` +
+        `*Venue:* ${targetFeast.location_name || "Versova Courtyard"}\n` +
+        `*Total Expected Guests:* ${totalConfirmedPlates} Plates Confirmed\n\n` +
+        `📋 *CONFIRMED GUEST LIST:*\n${attendeesLines}\n\n` +
+        `*Secret Arrival Note:* ${targetFeast.secret_meeting_point || "Rendezvous at courtyard gate."}\n\n` +
+        `_Generated via MatsyaMart Operations Hub CRM for Bhoomiputra Foundation._`,
+    );
+
+    const waUrl = cookPhone
+      ? `https://wa.me/${cookPhone}?text=${text}`
+      : `https://api.whatsapp.com/send?text=${text}`;
+    window.open(waUrl, "_blank");
+    toast.success(`Manifest prepared for ${targetFeast.host_name}!`);
+  };
+
+  // 2. Download Cook Manifest as CSV
+  const handleDownloadCsv = () => {
+    if (foodAttendees.length === 0) {
+      toast.error("No attendees found for export.");
+      return;
+    }
+
+    const headers = [
+      "Guest Name",
+      "Phone",
+      "Feast Title",
+      "Cook Name",
+      "Date & Slot",
+      "Venue",
+      "Order Ref",
+      "Amount Paid (INR)",
+      "Checked In",
+    ];
+
+    const rows = foodAttendees.map((a) => [
+      `"${a.name.replace(/"/g, '""')}"`,
+      `"${a.phone}"`,
+      `"${(a.listing?.title || "").replace(/"/g, '""')}"`,
+      `"${(a.listing?.host_name || "").replace(/"/g, '""')}"`,
+      `"${a.slot ? formatDate(a.slot.slot_start) + " " + formatTime(a.slot.slot_start) : "Standard"}"`,
+      `"${(a.listing?.location_name || "").replace(/"/g, '""')}"`,
+      `"${a.order.order_ref}"`,
+      `"${a.item.unit_price_inr}"`,
+      `"${a.checkedIn ? "Yes" : "No"}"`,
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `matsyamart_cook_manifest_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Downloaded Cook Roster CSV!");
+  };
+
+  // 3. Send Pass Directly to Guest via WhatsApp
+  const handleSendPassToGuest = (att: typeof foodAttendees[0]) => {
+    const guestPhone = att.phone?.replace(/[^0-9]/g, "") || "";
+    const passRef = `MM-PASS-${att.order.order_ref.replace(/[^A-Za-z0-9]/g, "").slice(-6).toUpperCase()}`;
+    const verificationUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/order/confirmation/${att.order.order_ref}`;
+
+    const text = encodeURIComponent(
+      `🎟️ *MatsyaMart Official 9:16 Mobile Pass*\n\n` +
+        `Hi *${att.name}*, your coastal seafood feast entry pass is confirmed!\n\n` +
+        `*Feast:* ${att.listing?.title || "Coastal Feast"}\n` +
+        `*Cook & Host:* ${att.listing?.host_name || "Community Host"}\n` +
+        `*Pass ID:* ${passRef}\n` +
+        `*Venue:* ${att.listing?.location_name || "Versova Koliwada"}\n` +
+        (att.slot ? `*Schedule:* ${formatDate(att.slot.slot_start)} at ${formatTime(att.slot.slot_start)}\n` : "") +
+        (att.listing?.secret_meeting_point ? `*Secret Arrival Note:* ${att.listing.secret_meeting_point}\n` : "") +
+        (att.listing?.meeting_point_maps_url ? `*Google Maps GPS:* ${att.listing.meeting_point_maps_url}\n` : "") +
+        `\n👉 *View/Save Your 9:16 Mobile Pass:* ${verificationUrl}`,
+    );
+
+    const waUrl = guestPhone
+      ? `https://wa.me/${guestPhone}?text=${text}`
+      : `https://api.whatsapp.com/send?text=${text}`;
+    window.open(waUrl, "_blank");
+    toast.success(`WhatsApp pass generated for ${att.name}`);
+  };
+
+  // 4. Create New Food Feast Gathering
+  const handleCreateFeast = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle.trim()) {
+      toast.error("Please enter a feast title.");
+      return;
+    }
+
+    const coursesArray = newCourses
+      .split(",")
+      .map((c) => c.trim())
+      .filter(Boolean);
+
+    const slug = newTitle
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
+    const created = addListing({
+      title: newTitle.trim(),
+      slug: `${slug}-${Date.now().toString().slice(-4)}`,
+      type: "experience",
+      pillar: "food",
+      price_inr: Number(newPrice) || 1200,
+      currency: "INR",
+      images: [newImage.trim()],
+      short_summary: newSummary.trim(),
+      full_description: `${newSummary.trim()}\n\nTraditional Courses:\n${coursesArray.map((c) => `• ${c}`).join("\n")}`,
+      location_name: newLocationName.trim(),
+      secret_meeting_point: newSecretNotes.trim(),
+      meeting_point_maps_url: newMapsUrl.trim(),
+      duration_minutes: Number(newDuration) || 180,
+      host_name: newCookName.trim() || "Ashwini Tandel",
+      host_phone: newCookPhone.trim() || "+91 99284 77158",
+      host_bio: newCookBio.trim() || "Heritage home cook and community custodian in Mumbai's original coastal settlements.",
+      dietary_tags: coursesArray,
+      is_active: true,
+      is_featured: true,
+    });
+
+    // Add initial seating slot
+    if (newSlotDate && newSlotStart && newSlotEnd) {
+      const startDateTime = new Date(`${newSlotDate}T${newSlotStart}:00`);
+      const endDateTime = new Date(`${newSlotDate}T${newSlotEnd}:00`);
+
+      addSlot({
+        listing_id: created.id,
+        slot_start: startDateTime.toISOString(),
+        slot_end: endDateTime.toISOString(),
+        capacity: Number(newCapacity) || 12,
+      });
+    }
+
+    toast.success(`Created "${newTitle}" with initial seating window!`);
+    setIsAddFeastOpen(false);
+    // Reset form
+    setNewTitle("");
+    setNewCookName("");
+    setNewCookPhone("");
+  };
+
+  // 5. Add New Venue / Seating Window
+  const handleCreateVenueWindow = (e: React.FormEvent) => {
+    e.preventDefault();
+    const targetListing = foodListings.find((l) => l.id === venueFeastId) || foodListings[0];
+    if (!targetListing) {
+      toast.error("Please create a food feast first.");
+      return;
+    }
+
+    const startDateTime = new Date(`${venueDate}T${venueStartTime}:00`);
+    const endDateTime = new Date(`${venueDate}T${venueEndTime}:00`);
+
+    addSlot({
+      listing_id: targetListing.id,
+      slot_start: startDateTime.toISOString(),
+      slot_end: endDateTime.toISOString(),
+      capacity: Number(venueCapacity) || 12,
+    });
+
+    toast.success(`Seating window "${venueWindowName}" opened for ${targetListing.title}!`);
+    setIsAddVenueOpen(false);
+  };
 
   return (
     <div className="space-y-6 text-[#f5edeb]">
-      {/* BookMyShow Digital Pass Modal */}
+      {/* 9:16 Mobile Pass Modal */}
       {selectedTicketOrder && (
         <BookMyShowPass
           order={selectedTicketOrder.order}
@@ -109,7 +384,7 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
         />
       )}
 
-      {/* Sub-Tab Navigation Strip */}
+      {/* Sub-Tab Navigation Strip & Action Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-[#dab38c]/20">
         <div className="flex items-center gap-1.5 p-1 bg-[#35160e]/80 border border-[#dab38c]/20 rounded-2xl">
           <button
@@ -140,142 +415,164 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                 : "text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#481f14]"
             }`}
           >
-            👥 Guest Roster &amp; BookMyShow Passes ({foodAttendees.length})
+            👥 Cook CRM Roster &amp; Passes ({foodAttendees.length})
           </button>
+        </div>
+
+        {/* Primary CTA Buttons according to active tab */}
+        <div className="flex items-center gap-2">
+          {activeSubTab === "dinners" && (
+            <button
+              onClick={() => setIsAddFeastOpen(true)}
+              className="px-4 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Food Gathering</span>
+            </button>
+          )}
+
+          {activeSubTab === "venues" && (
+            <button
+              onClick={() => {
+                const firstListing = foodListings[0];
+                if (firstListing && !venueFeastId) {
+                  setVenueFeastId(firstListing.id);
+                  setVenueLocationName(firstListing.location_name || "Versova Courtyard");
+                  setVenueMapsUrl(firstListing.meeting_point_maps_url || "");
+                  setVenueSecretNotes(firstListing.secret_meeting_point || "");
+                }
+                setIsAddVenueOpen(true);
+              }}
+              className="px-4 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Venue &amp; Seating Window</span>
+            </button>
+          )}
+
+          {activeSubTab === "roster" && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleSendManifestToCook}
+                className="px-3.5 py-2 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Send Tomorrow's Guest List to Cook via WhatsApp"
+              >
+                <Share2 className="w-4 h-4" />
+                <span>WhatsApp to Cook</span>
+              </button>
+              <button
+                onClick={handleDownloadCsv}
+                className="px-3 py-2 bg-[#35160e] hover:bg-[#481f14] border border-[#dab38c]/30 text-[#e3a157] font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+                <span className="hidden sm:inline">Download CSV</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* SUB-TAB 1: Dinners & Menus */}
       {activeSubTab === "dinners" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {foodListings.map((dinner) => (
-            <div
-              key={dinner.id}
-              className="bg-[#35160e]/90 border border-[#dab38c]/25 rounded-3xl p-5 shadow-xl flex flex-col justify-between space-y-4"
-            >
-              <div className="space-y-3">
-                <div className="relative h-44 rounded-2xl overflow-hidden border border-[#dab38c]/20">
-                  <img
-                    src={dinner.images[0]}
-                    alt={dinner.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-2.5 left-2.5 bg-[#1f0b07]/85 backdrop-blur-xs px-3 py-1 rounded-full text-[11px] font-bold text-[#e3a157] border border-[#dab38c]/30">
-                    Seafood Feasting Experience
-                  </div>
-                  <div className="absolute bottom-2.5 right-2.5 bg-[#29100b]/90 px-3 py-1 rounded-xl text-xs font-bold font-mono text-[#f5edeb] border border-[#dab38c]/30">
-                    {formatINR(dinner.price_inr)} / plate
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-display font-bold text-lg text-[#f5edeb]">
-                    {dinner.title}
-                  </h3>
-                  <p className="text-xs text-[#dab38c]/80 mt-1 line-clamp-2">
-                    {dinner.short_summary}
-                  </p>
-                </div>
-
-                {/* Multi-Course Menu Preview */}
-                <div className="p-3 bg-[#29100b] rounded-2xl border border-[#dab38c]/20 space-y-1.5 text-xs">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-[#e3a157]">
-                    Traditional Course Highlights
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-[11px] text-[#dab38c]">
-                    <div>🐟 Fresh Catch Surmai / Pomfret</div>
-                    <div>🥥 Sol Kadhi Digestive</div>
-                    <div>🦀 Mud Crab Masala &amp; Bhakri</div>
-                    <div>🌾 Ancestral Rice &amp; Sweets</div>
-                  </div>
-                </div>
-
-                {/* Host Cook Details */}
-                <div className="flex items-center justify-between text-xs pt-1">
-                  <div>
-                    <span className="text-[#dab38c]/70">Cook &amp; Custodian:</span>{" "}
-                    <strong className="text-[#f5edeb]">{dinner.host_name}</strong>
-                  </div>
-                  <span className="text-[#dab38c] font-mono text-[11px]">
-                    {dinner.host_phone || "+91 98201 44512"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-[#dab38c]/15 flex items-center justify-between text-xs">
-                <span className="text-[#dab38c] flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-[#e3a157]" />
-                  {dinner.duration_minutes || 180} mins feast
-                </span>
-                <span className="text-emerald-400 font-semibold text-[11px]">
-                  ● Open for Bookings
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* SUB-TAB 2: Venues & Seating Windows */}
-      {activeSubTab === "venues" && (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-center justify-between text-xs text-[#dab38c]">
+            <div>
+              Showing <strong className="text-white">{foodListings.length}</strong> active food experience gathering{foodListings.length > 1 ? "s" : ""}
+            </div>
+            <button
+              onClick={() => setIsAddFeastOpen(true)}
+              className="text-[#e3a157] hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" /> Add another feast
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {foodListings.map((dinner) => (
               <div
                 key={dinner.id}
-                className="bg-[#35160e]/90 border border-[#dab38c]/25 rounded-2xl p-5 shadow-xl space-y-4"
+                className="bg-[#35160e]/90 border border-[#dab38c]/25 rounded-3xl p-5 shadow-xl flex flex-col justify-between space-y-4"
               >
-                <div className="flex items-start justify-between">
+                <div className="space-y-3">
+                  <div className="relative h-44 rounded-2xl overflow-hidden border border-[#dab38c]/20">
+                    <img
+                      src={dinner.images[0]}
+                      alt={dinner.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-2.5 left-2.5 bg-[#1f0b07]/85 backdrop-blur-xs px-3 py-1 rounded-full text-[11px] font-bold text-[#e3a157] border border-[#dab38c]/30">
+                      Seafood Feasting Experience
+                    </div>
+                    <div className="absolute bottom-2.5 right-2.5 bg-[#29100b]/90 px-3 py-1 rounded-xl text-xs font-bold font-mono text-[#f5edeb] border border-[#dab38c]/30">
+                      {formatINR(dinner.price_inr)} / plate
+                    </div>
+                  </div>
+
                   <div>
-                    <h4 className="font-display font-bold text-base text-[#f5edeb]">
-                      {dinner.location_name || "Versova Gaothan, Mumbai"}
-                    </h4>
-                    <p className="text-xs text-[#dab38c] mt-0.5">
+                    <h3 className="font-display font-bold text-lg text-[#f5edeb]">
                       {dinner.title}
+                    </h3>
+                    <p className="text-xs text-[#dab38c]/80 mt-1 line-clamp-2">
+                      {dinner.short_summary}
                     </p>
                   </div>
-                  {dinner.meeting_point_maps_url && (
-                    <a
-                      href={dinner.meeting_point_maps_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-1 bg-[#29100b] hover:bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-[11px] font-bold text-sky-400 flex items-center gap-1"
+
+                  {/* Multi-Course Menu Preview */}
+                  <div className="p-3 bg-[#29100b] rounded-2xl border border-[#dab38c]/20 space-y-1.5 text-xs">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-[#e3a157]">
+                      Traditional Course Highlights
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-[11px] text-[#dab38c]">
+                      {dinner.dietary_tags && dinner.dietary_tags.length > 0 ? (
+                        dinner.dietary_tags.slice(0, 4).map((tag, i) => (
+                          <div key={i} className="truncate">
+                            🦀 {tag}
+                          </div>
+                        ))
+                      ) : (
+                        <>
+                          <div>🐟 Fresh Catch Surmai / Pomfret</div>
+                          <div>🥥 Sol Kadhi Digestive</div>
+                          <div>🦀 Mud Crab Masala &amp; Bhakri</div>
+                          <div>🌾 Ancestral Rice &amp; Sweets</div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Host Cook Details */}
+                  <div className="flex items-center justify-between text-xs pt-1">
+                    <div>
+                      <span className="text-[#dab38c]/70">Cook &amp; Custodian:</span>{" "}
+                      <strong className="text-[#f5edeb]">{dinner.host_name}</strong>
+                    </div>
+                    <span className="text-[#dab38c] font-mono text-[11px]">
+                      {dinner.host_phone || "+91 99284 77158"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-[#dab38c]/15 flex items-center justify-between text-xs">
+                  <span className="text-[#dab38c] flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-[#e3a157]" />
+                    {dinner.duration_minutes || 180} mins feast
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-emerald-400 font-semibold text-[11px]">
+                      ● Open for Bookings
+                    </span>
+                    <button
+                      onClick={() => {
+                        if (confirm(`Remove feast "${dinner.title}"?`)) {
+                          deleteListing(dinner.id);
+                          toast.success("Feast removed");
+                        }
+                      }}
+                      className="p-1 text-red-400 hover:text-red-300 hover:bg-red-950/30 rounded-lg transition-colors"
+                      title="Delete feast"
                     >
-                      <span>Google Maps</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
-                </div>
-
-                <div className="p-3 bg-[#29100b] rounded-xl border border-[#dab38c]/15 text-xs text-[#dab38c] space-y-1">
-                  <div className="text-[10px] uppercase font-bold tracking-wider text-[#e3a157]">
-                    Arrival &amp; Secret Courtyard Note
-                  </div>
-                  <div>{dinner.secret_meeting_point || "Rendezvous details provided to confirmed guests."}</div>
-                </div>
-
-                {/* Seating Capacities & Windows */}
-                <div className="space-y-2 pt-2 border-t border-[#dab38c]/15 text-xs">
-                  <div className="text-[10px] uppercase font-bold tracking-wider text-[#dab38c]/70">
-                    Active Seating Windows
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="p-2.5 rounded-xl bg-[#29100b]/60 border border-[#dab38c]/20">
-                      <div className="font-bold text-xs text-[#f5edeb]">Afternoon Feast</div>
-                      <div className="text-[10px] text-[#dab38c]">12:30 PM – 03:00 PM</div>
-                      <div className="text-[11px] font-mono text-emerald-400 mt-1">
-                        Capacity: 12 Guests Max
-                      </div>
-                    </div>
-
-                    <div className="p-2.5 rounded-xl bg-[#29100b]/60 border border-[#dab38c]/20">
-                      <div className="font-bold text-xs text-[#f5edeb]">Sunset Coastal Supper</div>
-                      <div className="text-[10px] text-[#dab38c]">06:30 PM – 09:30 PM</div>
-                      <div className="text-[11px] font-mono text-emerald-400 mt-1">
-                        Capacity: 14 Guests Max
-                      </div>
-                    </div>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -284,43 +581,254 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
         </div>
       )}
 
-      {/* SUB-TAB 3: Guest Roster & BookMyShow Passes */}
-      {activeSubTab === "roster" && (
+      {/* SUB-TAB 2: Venues & Seating Windows */}
+      {activeSubTab === "venues" && (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="relative flex-1 max-w-md">
+          <div className="flex items-center justify-between text-xs text-[#dab38c]">
+            <div>
+              Manage verified courtyard venues &amp; active seating capacity windows.
+            </div>
+            <button
+              onClick={() => {
+                const firstListing = foodListings[0];
+                if (firstListing) setVenueFeastId(firstListing.id);
+                setIsAddVenueOpen(true);
+              }}
+              className="text-[#e3a157] hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" /> Add seating window
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {foodListings.map((dinner) => {
+              const dinnerSlots = slots.filter((s) => s.listing_id === dinner.id);
+
+              return (
+                <div
+                  key={dinner.id}
+                  className="bg-[#35160e]/90 border border-[#dab38c]/25 rounded-2xl p-5 shadow-xl space-y-4"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="font-display font-bold text-base text-[#f5edeb]">
+                        {dinner.location_name || "Versova Gaothan, Mumbai"}
+                      </h4>
+                      <p className="text-xs text-[#dab38c] mt-0.5">
+                        {dinner.title}
+                      </p>
+                    </div>
+                    {dinner.meeting_point_maps_url && (
+                      <a
+                        href={dinner.meeting_point_maps_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1 bg-[#29100b] hover:bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-[11px] font-bold text-sky-400 flex items-center gap-1"
+                      >
+                        <span>Google Maps</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+
+                  <div className="p-3 bg-[#29100b] rounded-xl border border-[#dab38c]/15 text-xs text-[#dab38c] space-y-1">
+                    <div className="text-[10px] uppercase font-bold tracking-wider text-[#e3a157]">
+                      Arrival &amp; Secret Courtyard Note
+                    </div>
+                    <div>{dinner.secret_meeting_point || "Rendezvous details provided to confirmed guests."}</div>
+                  </div>
+
+                  {/* Seating Capacities & Windows */}
+                  <div className="space-y-2 pt-2 border-t border-[#dab38c]/15 text-xs">
+                    <div className="flex items-center justify-between text-[10px] uppercase font-bold tracking-wider text-[#dab38c]/70">
+                      <span>Active Seating Windows ({dinnerSlots.length})</span>
+                      <button
+                        onClick={() => {
+                          setVenueFeastId(dinner.id);
+                          setVenueLocationName(dinner.location_name || "");
+                          setVenueMapsUrl(dinner.meeting_point_maps_url || "");
+                          setVenueSecretNotes(dinner.secret_meeting_point || "");
+                          setIsAddVenueOpen(true);
+                        }}
+                        className="text-[#e3a157] hover:underline flex items-center gap-0.5"
+                      >
+                        <Plus className="w-3 h-3" /> Add Window
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {dinnerSlots.length === 0 ? (
+                        <div className="col-span-2 p-3 rounded-xl bg-[#29100b]/40 border border-dashed border-[#dab38c]/20 text-center text-[11px] text-[#dab38c]/60">
+                          No seating window open yet. Click "+ Add Window" above.
+                        </div>
+                      ) : (
+                        dinnerSlots.map((slotItem) => (
+                          <div
+                            key={slotItem.id}
+                            className="p-2.5 rounded-xl bg-[#29100b]/60 border border-[#dab38c]/20 relative group"
+                          >
+                            <div className="font-bold text-xs text-[#f5edeb]">
+                              {formatDate(slotItem.slot_start)}
+                            </div>
+                            <div className="text-[10px] text-[#dab38c]">
+                              {formatTime(slotItem.slot_start)} – {formatTime(slotItem.slot_end)}
+                            </div>
+                            <div className="text-[11px] font-mono text-emerald-400 mt-1 flex items-center justify-between">
+                              <span>
+                                {slotItem.booked_count}/{slotItem.capacity} Seats Filled
+                              </span>
+                              <button
+                                onClick={() => {
+                                  if (confirm("Delete this seating window?")) {
+                                    deleteSlot(slotItem.id);
+                                    toast.success("Window removed");
+                                  }
+                                }}
+                                className="text-red-400 hover:text-red-300 opacity-60 hover:opacity-100"
+                                title="Delete slot"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* SUB-TAB 3: Guest Roster & Cook CRM Manifest */}
+      {activeSubTab === "roster" && (
+        <div className="space-y-5">
+          {/* Vikas's Cook CRM Command Card */}
+          <div className="bg-gradient-to-br from-[#35160e] via-[#29100b] to-[#1f0b07] border border-[#dab38c]/30 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#e3a157] flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#ffde59]" />
+                  <span>VIKAS'S COOK CRM &amp; DAY-BEFORE DISPATCH ENGINE</span>
+                </div>
+                <h3 className="font-display font-bold text-xl text-white mt-1">
+                  {targetFeast ? targetFeast.title : "Coastal Seafood Dining"}
+                </h3>
+                <p className="text-xs text-[#dab38c]/80 mt-0.5">
+                  Assigned Cook: <strong className="text-white">{targetFeast?.host_name || "Community Cook"}</strong> ·{" "}
+                  WhatsApp: <strong className="text-[#ffde59] font-mono">{targetFeast?.host_phone || "+91 99284 77158"}</strong>
+                </p>
+              </div>
+
+              {/* One-Click Cook WhatsApp Manifest & CSV Buttons */}
+              <div className="flex flex-wrap items-center gap-2.5">
+                <button
+                  onClick={handleSendManifestToCook}
+                  className="px-4 py-2.5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>Send Roster to Cook (WhatsApp)</span>
+                </button>
+                <button
+                  onClick={handleDownloadCsv}
+                  className="px-3.5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 text-[#f5edeb] font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <FileSpreadsheet className="w-4 h-4 text-[#e3a157]" />
+                  <span>Export CSV</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Metrics Bar */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-[#dab38c]/20 text-xs">
+              <div className="p-3 bg-[#1f0b07]/80 rounded-2xl border border-[#dab38c]/15">
+                <div className="text-[10px] uppercase font-bold text-[#dab38c]/70">Total Guests</div>
+                <div className="font-display text-xl font-bold text-white mt-0.5">{totalConfirmedPlates}</div>
+              </div>
+              <div className="p-3 bg-[#1f0b07]/80 rounded-2xl border border-[#dab38c]/15">
+                <div className="text-[10px] uppercase font-bold text-[#dab38c]/70">Total Plates</div>
+                <div className="font-display text-xl font-bold text-[#e3a157] mt-0.5">{totalConfirmedPlates} Plates</div>
+              </div>
+              <div className="p-3 bg-[#1f0b07]/80 rounded-2xl border border-[#dab38c]/15">
+                <div className="text-[10px] uppercase font-bold text-[#dab38c]/70">Cook Settlement</div>
+                <div className="font-display text-xl font-bold text-emerald-400 mt-0.5">{formatINR(totalFeastRevenue)}</div>
+              </div>
+              <div className="p-3 bg-[#1f0b07]/80 rounded-2xl border border-[#dab38c]/15">
+                <div className="text-[10px] uppercase font-bold text-[#dab38c]/70">Venue GPS</div>
+                <div className="text-[11px] font-semibold text-sky-400 truncate mt-1">
+                  {targetFeast?.location_name || "Versova Courtyard"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Filters Bar */}
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Feast Selector */}
+              <select
+                value={selectedFeastFilter}
+                onChange={(e) => setSelectedFeastFilter(e.target.value)}
+                className="px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] outline-none"
+              >
+                <option value="all">All Feasts &amp; Gatherings</option>
+                {foodListings.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.title}
+                  </option>
+                ))}
+              </select>
+
+              {/* Date Filter Pills */}
+              <div className="inline-flex rounded-xl bg-[#35160e] border border-[#dab38c]/20 p-1 text-xs">
+                {(["all", "tomorrow", "today"] as const).map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setDateFilter(d)}
+                    className={`px-3 py-1 rounded-lg font-bold capitalize transition-all cursor-pointer ${
+                      dateFilter === d ? "bg-[#e3a157] text-[#29100b]" : "text-[#dab38c] hover:text-white"
+                    }`}
+                  >
+                    {d === "all" ? "All Schedules" : d}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Guest Search Input */}
+            <div className="relative flex-1 max-w-sm">
               <Search className="w-4 h-4 text-[#dab38c]/60 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search guest by name, phone, order ref, feast..."
+                placeholder="Search guest by name, phone, order ref..."
                 value={guestSearch}
                 onChange={(e) => setGuestSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 bg-[#35160e]/80 border border-[#dab38c]/25 rounded-xl text-xs text-[#f5edeb] placeholder-[#dab38c]/50 outline-none focus:border-[#e3a157]"
               />
             </div>
-            <div className="text-xs text-[#dab38c]">
-              Total Booked Dining Guests: <strong className="text-[#f5edeb]">{foodAttendees.length}</strong>
-            </div>
           </div>
 
+          {/* Attendees Table */}
           <div className="bg-[#35160e]/90 border border-[#dab38c]/25 rounded-2xl overflow-hidden shadow-xl">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-[#29100b] text-[#dab38c] border-b border-[#dab38c]/15">
                   <tr>
-                    <th className="py-3 px-4 font-semibold">Guest Name &amp; Phone</th>
+                    <th className="py-3 px-4 font-semibold">Guest &amp; Phone</th>
                     <th className="py-3 px-4 font-semibold">Feasting Gathering</th>
                     <th className="py-3 px-4 font-semibold">Slot Schedule</th>
                     <th className="py-3 px-4 font-semibold">Order Ref</th>
                     <th className="py-3 px-4 font-semibold">On-Ground Check-in</th>
-                    <th className="py-3 px-4 font-semibold text-right">Digital Pass</th>
+                    <th className="py-3 px-4 font-semibold text-right">Pass Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#dab38c]/10 text-[#f5edeb]">
                   {foodAttendees.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="text-center py-10 text-[#dab38c]/60">
-                        No food dining guests found matching the search.
+                        No food dining guests found matching the selected filters.
                       </td>
                     </tr>
                   ) : (
@@ -328,9 +836,7 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                       <tr key={idx} className="hover:bg-[#481f14]/50 transition-colors">
                         <td className="py-3.5 px-4">
                           <div className="font-semibold text-sm">{att.name}</div>
-                          <div className="text-[11px] text-[#dab38c] font-mono">
-                            {att.phone}
-                          </div>
+                          <div className="text-[11px] text-[#dab38c] font-mono">{att.phone}</div>
                         </td>
 
                         <td className="py-3.5 px-4 font-medium text-xs max-w-[200px] truncate">
@@ -380,18 +886,28 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                         </td>
 
                         <td className="py-3.5 px-4 text-right">
-                          <button
-                            onClick={() =>
-                              setSelectedTicketOrder({
-                                order: att.order,
-                                item: att.item,
-                              })
-                            }
-                            className="px-3 py-1 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl shadow-xs transition-all inline-flex items-center gap-1 cursor-pointer"
-                          >
-                            <Ticket className="w-3.5 h-3.5" />
-                            <span>BookMyShow Pass</span>
-                          </button>
+                          <div className="inline-flex items-center gap-1.5">
+                            <button
+                              onClick={() => handleSendPassToGuest(att)}
+                              className="px-2.5 py-1 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs rounded-xl shadow-xs transition-all inline-flex items-center gap-1 cursor-pointer"
+                              title="Send 9:16 Pass via WhatsApp directly to this guest"
+                            >
+                              <Share2 className="w-3 h-3" />
+                              <span className="hidden sm:inline">WhatsApp</span>
+                            </button>
+                            <button
+                              onClick={() =>
+                                setSelectedTicketOrder({
+                                  order: att.order,
+                                  item: att.item,
+                                })
+                              }
+                              className="px-3 py-1 bg-[#00759B] hover:bg-[#0088b7] text-white font-bold text-xs rounded-xl shadow-xs transition-all inline-flex items-center gap-1 cursor-pointer"
+                            >
+                              <Ticket className="w-3.5 h-3.5" />
+                              <span>View 9:16 Pass</span>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -399,6 +915,299 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 1: ADD FOOD GATHERING (NEW FEAST) */}
+      {isAddFeastOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs overflow-y-auto">
+          <div className="relative w-full max-w-xl bg-[#29100b] border border-[#dab38c]/30 rounded-3xl p-6 text-[#f5edeb] shadow-2xl my-auto space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#dab38c]/20">
+              <div className="flex items-center gap-2">
+                <Utensils className="w-5 h-5 text-[#e3a157]" />
+                <h3 className="font-display font-bold text-lg text-white">Add Food Gathering &amp; Feast</h3>
+              </div>
+              <button onClick={() => setIsAddFeastOpen(false)} className="text-[#dab38c] hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateFeast} className="space-y-4 text-xs">
+              <div>
+                <label className="font-semibold text-[#dab38c] block mb-1">Feast Title *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Versova Koli Crab Masala &amp; Surmai Feast"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">Cook / Host Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Ashwini Tandel"
+                    value={newCookName}
+                    onChange={(e) => setNewCookName(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">Cook WhatsApp Phone *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. +91 99284 77158"
+                    value={newCookPhone}
+                    onChange={(e) => setNewCookPhone(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">Price per plate (₹ INR) *</label>
+                  <input
+                    type="number"
+                    required
+                    value={newPrice}
+                    onChange={(e) => setNewPrice(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">Duration (Minutes)</label>
+                  <input
+                    type="number"
+                    value={newDuration}
+                    onChange={(e) => setNewDuration(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-semibold text-[#dab38c] block mb-1">Venue / Courtyard Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={newLocationName}
+                  onChange={(e) => setNewLocationName(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-[#dab38c] block mb-1">Secret Arrival Note (On Ticket Pass)</label>
+                <input
+                  type="text"
+                  value={newSecretNotes}
+                  onChange={(e) => setNewSecretNotes(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-[#dab38c] block mb-1">Course Highlights (comma separated)</label>
+                <input
+                  type="text"
+                  value={newCourses}
+                  onChange={(e) => setNewCourses(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-[#dab38c] block mb-1">Cover Image URL</label>
+                <input
+                  type="text"
+                  value={newImage}
+                  onChange={(e) => setNewImage(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                />
+              </div>
+
+              {/* Initial Seating Window Setup */}
+              <div className="p-3.5 bg-[#1f0b07] rounded-2xl border border-[#dab38c]/20 space-y-3">
+                <div className="text-[11px] font-bold text-[#e3a157] uppercase tracking-wider">
+                  Initial Seating Window Setup
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  <div className="col-span-2">
+                    <label className="text-[10px] text-[#dab38c] block mb-1">Date</label>
+                    <input
+                      type="date"
+                      value={newSlotDate}
+                      onChange={(e) => setNewSlotDate(e.target.value)}
+                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/30 rounded-lg text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-[#dab38c] block mb-1">Start Time</label>
+                    <input
+                      type="time"
+                      value={newSlotStart}
+                      onChange={(e) => setNewSlotStart(e.target.value)}
+                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/30 rounded-lg text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-[#dab38c] block mb-1">End Time</label>
+                    <input
+                      type="time"
+                      value={newSlotEnd}
+                      onChange={(e) => setNewSlotEnd(e.target.value)}
+                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/30 rounded-lg text-white"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-[#dab38c] block mb-1">Seating Capacity (Max Guests)</label>
+                  <input
+                    type="number"
+                    value={newCapacity}
+                    onChange={(e) => setNewCapacity(e.target.value)}
+                    className="w-28 px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/30 rounded-lg text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddFeastOpen(false)}
+                  className="px-4 py-2 text-[#dab38c] hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold rounded-xl shadow-md cursor-pointer"
+                >
+                  Publish Feast &amp; Open Seating
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: ADD VENUE & SEATING WINDOW */}
+      {isAddVenueOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs overflow-y-auto">
+          <div className="relative w-full max-w-lg bg-[#29100b] border border-[#dab38c]/30 rounded-3xl p-6 text-[#f5edeb] shadow-2xl my-auto space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#dab38c]/20">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-[#e3a157]" />
+                <h3 className="font-display font-bold text-lg text-white">Add Venue Seating Window</h3>
+              </div>
+              <button onClick={() => setIsAddVenueOpen(false)} className="text-[#dab38c] hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateVenueWindow} className="space-y-4 text-xs">
+              <div>
+                <label className="font-semibold text-[#dab38c] block mb-1">Select Feast Gathering *</label>
+                <select
+                  value={venueFeastId}
+                  onChange={(e) => {
+                    setVenueFeastId(e.target.value);
+                    const sel = foodListings.find((l) => l.id === e.target.value);
+                    if (sel) {
+                      setVenueLocationName(sel.location_name || "");
+                      setVenueMapsUrl(sel.meeting_point_maps_url || "");
+                      setVenueSecretNotes(sel.secret_meeting_point || "");
+                    }
+                  }}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none"
+                >
+                  {foodListings.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.title} ({f.host_name})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="font-semibold text-[#dab38c] block mb-1">Window Title</label>
+                <input
+                  type="text"
+                  value={venueWindowName}
+                  onChange={(e) => setVenueWindowName(e.target.value)}
+                  placeholder="e.g. Afternoon Lunch Feast / Sunset Supper"
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">Date *</label>
+                  <input
+                    type="date"
+                    required
+                    value={venueDate}
+                    onChange={(e) => setVenueDate(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">Start Time *</label>
+                  <input
+                    type="time"
+                    required
+                    value={venueStartTime}
+                    onChange={(e) => setVenueStartTime(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">End Time *</label>
+                  <input
+                    type="time"
+                    required
+                    value={venueEndTime}
+                    onChange={(e) => setVenueEndTime(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-semibold text-[#dab38c] block mb-1">Seating Capacity (Max Guests) *</label>
+                <input
+                  type="number"
+                  required
+                  value={venueCapacity}
+                  onChange={(e) => setVenueCapacity(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddVenueOpen(false)}
+                  className="px-4 py-2 text-[#dab38c] hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold rounded-xl shadow-md cursor-pointer"
+                >
+                  Save Seating Window
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
