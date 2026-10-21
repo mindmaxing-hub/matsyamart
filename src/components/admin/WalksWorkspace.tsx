@@ -20,8 +20,10 @@ import {
   X,
   Trash2,
   Sparkles,
+  Edit2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { ImageDropzone } from "./ImageDropzone";
 
 interface WalksWorkspaceProps {
   orders: Order[];
@@ -34,7 +36,7 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
   listings,
   slots,
 }) => {
-  const { updateAttendeeCheckIn, addListing, deleteListing, addSlot } = useData();
+  const { updateAttendeeCheckIn, addListing, updateListing, deleteListing, addSlot } = useData();
 
   const [activeSubTab, setActiveSubTab] = useState<"trails" | "guides" | "manifest">("trails");
   const [selectedTicketOrder, setSelectedTicketOrder] = useState<{
@@ -120,6 +122,67 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
     toast.success(`Created walk trail "${newTitle}"!`);
     setIsAddWalkOpen(false);
     setNewTitle("");
+  };
+
+  // Edit Walk Trail Modal State
+  const [editingWalk, setEditingWalk] = useState<Listing | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editGuideName, setEditGuideName] = useState("");
+  const [editGuidePhone, setEditGuidePhone] = useState("");
+  const [editPrice, setEditPrice] = useState("850");
+  const [editDuration, setEditDuration] = useState("150");
+  const [editLocationName, setEditLocationName] = useState("");
+  const [editSecretNotes, setEditSecretNotes] = useState("");
+  const [editMapsUrl, setEditMapsUrl] = useState("");
+  const [editSummary, setEditSummary] = useState("");
+  const [editIncluded, setEditIncluded] = useState("");
+  const [editImage, setEditImage] = useState("");
+
+  const handleOpenEditWalk = (walk: Listing) => {
+    setEditingWalk(walk);
+    setEditTitle(walk.title || "");
+    setEditGuideName(walk.host_name || "");
+    setEditGuidePhone(walk.host_phone || "");
+    setEditPrice(String(walk.price_inr || "850"));
+    setEditDuration(String(walk.duration_minutes || "150"));
+    setEditLocationName(walk.location_name || "");
+    setEditSecretNotes(walk.secret_meeting_point || "");
+    setEditMapsUrl(walk.meeting_point_maps_url || "");
+    setEditSummary(walk.short_summary || "");
+    setEditIncluded((walk.included_items || []).join(", "));
+    setEditImage(walk.images?.[0] || "");
+  };
+
+  const handleSaveEditWalk = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingWalk) return;
+    if (!editTitle.trim()) {
+      toast.error("Please enter a walk title.");
+      return;
+    }
+
+    const includedArray = editIncluded
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    updateListing(editingWalk.id, {
+      title: editTitle.trim(),
+      price_inr: Number(editPrice) || editingWalk.price_inr,
+      duration_minutes: Number(editDuration) || 150,
+      host_name: editGuideName.trim() || editingWalk.host_name,
+      host_phone: editGuidePhone.trim() || editingWalk.host_phone,
+      location_name: editLocationName.trim(),
+      secret_meeting_point: editSecretNotes.trim(),
+      meeting_point_maps_url: editMapsUrl.trim(),
+      included_items: includedArray,
+      short_summary: editSummary.trim(),
+      full_description: `${editSummary.trim()}\n\nEssentials Included:\n${includedArray.map((i) => `• ${i}`).join("\n")}`,
+      images: editImage.trim() ? [editImage.trim()] : editingWalk.images,
+    });
+
+    toast.success(`Updated "${editTitle.trim()}" successfully!`);
+    setEditingWalk(null);
   };
 
   // Walks listings
@@ -386,17 +449,12 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
                 />
               </div>
 
-              <div>
-                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
-                  Cover Photo URL
-                </label>
-                <input
-                  type="url"
-                  value={newImage}
-                  onChange={(e) => setNewImage(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono text-[11px]"
-                />
-              </div>
+              <ImageDropzone
+                value={newImage}
+                onChange={setNewImage}
+                label="Trail Cover Photo"
+                helperText="Drop scenic trail picture, or browse from device"
+              />
 
               {/* Initial Departure Slot */}
               <div className="p-3 bg-[#35160e]/90 border border-[#dab38c]/25 rounded-2xl space-y-2">
@@ -466,6 +524,180 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
         </div>
       )}
 
+      {/* Edit Walk Trail Modal */}
+      {editingWalk && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
+          <div className="bg-[#29100b] border border-[#dab38c]/30 rounded-3xl max-w-xl w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#dab38c]/15">
+              <div className="flex items-center gap-2">
+                <Edit2 className="w-5 h-5 text-[#e3a157]" />
+                <h3 className="font-display font-bold text-base text-[#f5edeb]">
+                  Edit Coastal Walk Trail
+                </h3>
+              </div>
+              <button
+                onClick={() => setEditingWalk(null)}
+                className="p-1.5 hover:bg-[#35160e] rounded-full text-[#dab38c] hover:text-[#f5edeb] cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditWalk} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Walk / Trail Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Lead Guide / Custodian
+                  </label>
+                  <input
+                    type="text"
+                    value={editGuideName}
+                    onChange={(e) => setEditGuideName(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Guide Phone (WhatsApp)
+                  </label>
+                  <input
+                    type="text"
+                    value={editGuidePhone}
+                    onChange={(e) => setEditGuidePhone(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Price per Walker (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={editPrice}
+                    onChange={(e) => setEditPrice(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Duration (Minutes)
+                  </label>
+                  <input
+                    type="number"
+                    min="30"
+                    value={editDuration}
+                    onChange={(e) => setEditDuration(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Rendezvous Location
+                </label>
+                <input
+                  type="text"
+                  value={editLocationName}
+                  onChange={(e) => setEditLocationName(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Secret Meeting Pin / Instructions
+                  </label>
+                  <input
+                    type="text"
+                    value={editSecretNotes}
+                    onChange={(e) => setEditSecretNotes(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Google Maps GPS URL
+                  </label>
+                  <input
+                    type="url"
+                    value={editMapsUrl}
+                    onChange={(e) => setEditMapsUrl(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono text-[11px]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Included Essentials (comma separated)
+                </label>
+                <input
+                  type="text"
+                  value={editIncluded}
+                  onChange={(e) => setEditIncluded(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Short Summary &amp; Experience Flow
+                </label>
+                <textarea
+                  rows={2}
+                  value={editSummary}
+                  onChange={(e) => setEditSummary(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none resize-none"
+                />
+              </div>
+
+              <ImageDropzone
+                value={editImage}
+                onChange={setEditImage}
+                label="Trail Cover Photo"
+                helperText="Drop replacement trail picture, or browse from device"
+              />
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#dab38c]/15">
+                <button
+                  type="button"
+                  onClick={() => setEditingWalk(null)}
+                  className="px-4 py-2 rounded-xl text-xs text-[#dab38c] hover:bg-[#35160e] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* SUB-TAB 1: Trails & Tidal Schedules */}
       {activeSubTab === "trails" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -519,6 +751,13 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
                   <span className="text-emerald-400 font-semibold text-[11px]">
                     ● Open for Registration
                   </span>
+                  <button
+                    onClick={() => handleOpenEditWalk(walk)}
+                    className="p-1 text-[#dab38c] hover:text-[#e3a157] hover:bg-[#35160e] rounded-lg transition-colors cursor-pointer"
+                    title="Edit walk trail details & photo"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
                   <button
                     onClick={() => {
                       if (confirm(`Remove walk trail "${walk.title}"?`)) {

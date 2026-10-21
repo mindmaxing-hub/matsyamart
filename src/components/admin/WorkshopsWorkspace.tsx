@@ -3,6 +3,7 @@ import { Order, Listing, ExperienceSlot, OrderItem } from "../../types";
 import { useData } from "../../context/DataContext";
 import { formatINR, formatDate, formatTime } from "../../lib/utils";
 import { BookMyShowPass } from "./BookMyShowPass";
+import { ImageDropzone } from "./ImageDropzone";
 import {
   Palette,
   MapPin,
@@ -21,6 +22,7 @@ import {
   Trash2,
   Sparkles,
   Phone,
+  Edit2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,7 +37,7 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
   listings,
   slots,
 }) => {
-  const { updateAttendeeCheckIn, addListing, deleteListing, addSlot } = useData();
+  const { updateAttendeeCheckIn, addListing, updateListing, deleteListing, addSlot } = useData();
 
   const [activeSubTab, setActiveSubTab] = useState<"sessions" | "instructors" | "roster">("sessions");
   const [selectedTicketOrder, setSelectedTicketOrder] = useState<{
@@ -66,6 +68,67 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
   const [newSlotStart, setNewSlotStart] = useState("14:00");
   const [newSlotEnd, setNewSlotEnd] = useState("17:00");
   const [newCapacity, setNewCapacity] = useState("10");
+
+  // Edit Workshop Modal State
+  const [editingWorkshop, setEditingWorkshop] = useState<Listing | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editInstructorName, setEditInstructorName] = useState("");
+  const [editInstructorPhone, setEditInstructorPhone] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editDuration, setEditDuration] = useState("");
+  const [editLocationName, setEditLocationName] = useState("");
+  const [editSecretNotes, setEditSecretNotes] = useState("");
+  const [editMapsUrl, setEditMapsUrl] = useState("");
+  const [editMaterials, setEditMaterials] = useState("");
+  const [editSummary, setEditSummary] = useState("");
+  const [editImage, setEditImage] = useState("");
+
+  const handleOpenEditWorkshop = (workshop: Listing) => {
+    setEditingWorkshop(workshop);
+    setEditTitle(workshop.title || "");
+    setEditInstructorName(workshop.host_name || "");
+    setEditInstructorPhone(workshop.host_phone || "");
+    setEditPrice(String(workshop.price_inr || 1500));
+    setEditDuration(String(workshop.duration_minutes || 180));
+    setEditLocationName(workshop.location_name || "");
+    setEditSecretNotes(workshop.secret_meeting_point || "");
+    setEditMapsUrl(workshop.meeting_point_maps_url || "");
+    setEditMaterials(workshop.included_items ? workshop.included_items.join(", ") : "");
+    setEditSummary(workshop.short_summary || "");
+    setEditImage(workshop.images?.[0] || "");
+  };
+
+  const handleSaveEditWorkshop = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingWorkshop) return;
+    if (!editTitle.trim()) {
+      toast.error("Please enter a workshop title.");
+      return;
+    }
+
+    const materialsArray = editMaterials
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    updateListing(editingWorkshop.id, {
+      title: editTitle.trim(),
+      price_inr: Number(editPrice) || editingWorkshop.price_inr,
+      images: editImage ? [editImage.trim()] : editingWorkshop.images,
+      short_summary: editSummary.trim(),
+      full_description: `${editSummary.trim()}\n\nMaterials Provided:\n${materialsArray.map((m) => `• ${m}`).join("\n")}`,
+      location_name: editLocationName.trim(),
+      secret_meeting_point: editSecretNotes.trim(),
+      meeting_point_maps_url: editMapsUrl.trim(),
+      duration_minutes: Number(editDuration) || editingWorkshop.duration_minutes,
+      host_name: editInstructorName.trim() || editingWorkshop.host_name,
+      host_phone: editInstructorPhone.trim() || editingWorkshop.host_phone,
+      included_items: materialsArray.length > 0 ? materialsArray : editingWorkshop.included_items,
+    });
+
+    toast.success("Workshop updated successfully!");
+    setEditingWorkshop(null);
+  };
 
   const handleCreateWorkshop = (e: React.FormEvent) => {
     e.preventDefault();
@@ -385,17 +448,11 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
                 />
               </div>
 
-              <div>
-                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
-                  Cover Photo URL
-                </label>
-                <input
-                  type="url"
-                  value={newImage}
-                  onChange={(e) => setNewImage(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono text-[11px]"
-                />
-              </div>
+              <ImageDropzone
+                value={newImage}
+                onChange={setNewImage}
+                label="Workshop Cover Photo"
+              />
 
               {/* Initial Session Slot */}
               <div className="p-3 bg-[#35160e]/90 border border-[#dab38c]/25 rounded-2xl space-y-2">
@@ -465,6 +522,180 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
         </div>
       )}
 
+      {/* Edit Workshop Modal */}
+      {editingWorkshop && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
+          <div className="bg-[#29100b] border border-[#dab38c]/30 rounded-3xl max-w-xl w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#dab38c]/15">
+              <div className="flex items-center gap-2">
+                <Edit2 className="w-5 h-5 text-[#e3a157]" />
+                <h3 className="font-display font-bold text-base text-[#f5edeb]">
+                  Edit Workshop Masterclass
+                </h3>
+              </div>
+              <button
+                onClick={() => setEditingWorkshop(null)}
+                className="p-1.5 hover:bg-[#35160e] rounded-full text-[#dab38c] hover:text-[#f5edeb] cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditWorkshop} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Masterclass Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Instructor / Artisan
+                  </label>
+                  <input
+                    type="text"
+                    value={editInstructorName}
+                    onChange={(e) => setEditInstructorName(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Instructor Phone (WhatsApp)
+                  </label>
+                  <input
+                    type="text"
+                    value={editInstructorPhone}
+                    onChange={(e) => setEditInstructorPhone(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Price per Seat (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={editPrice}
+                    onChange={(e) => setEditPrice(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Duration (Minutes)
+                  </label>
+                  <input
+                    type="number"
+                    min="30"
+                    value={editDuration}
+                    onChange={(e) => setEditDuration(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Studio / Workshop Venue
+                </label>
+                <input
+                  type="text"
+                  value={editLocationName}
+                  onChange={(e) => setEditLocationName(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Secret Arrival Directions
+                  </label>
+                  <input
+                    type="text"
+                    value={editSecretNotes}
+                    onChange={(e) => setEditSecretNotes(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                    Google Maps GPS URL
+                  </label>
+                  <input
+                    type="url"
+                    value={editMapsUrl}
+                    onChange={(e) => setEditMapsUrl(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono text-[11px]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Included Toolkits &amp; Materials (comma separated)
+                </label>
+                <input
+                  type="text"
+                  value={editMaterials}
+                  onChange={(e) => setEditMaterials(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Description &amp; Hands-on Curriculum
+                </label>
+                <textarea
+                  rows={2}
+                  value={editSummary}
+                  onChange={(e) => setEditSummary(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none resize-none"
+                />
+              </div>
+
+              <ImageDropzone
+                value={editImage}
+                onChange={setEditImage}
+                label="Workshop Cover Photo"
+              />
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#dab38c]/15">
+                <button
+                  type="button"
+                  onClick={() => setEditingWorkshop(null)}
+                  className="px-4 py-2 rounded-xl text-xs text-[#dab38c] hover:bg-[#35160e] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Save Changes</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* SUB-TAB 1: Sessions */}
       {activeSubTab === "sessions" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -518,6 +749,13 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
                   <span className="text-emerald-400 font-semibold text-[11px]">
                     ● Open for Registration
                   </span>
+                  <button
+                    onClick={() => handleOpenEditWorkshop(workshop)}
+                    className="p-1 rounded-lg hover:bg-[#35160e] text-[#dab38c]/70 hover:text-[#e3a157] transition-colors cursor-pointer"
+                    title="Edit masterclass"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
                   <button
                     onClick={() => {
                       if (confirm(`Remove masterclass "${workshop.title}"?`)) {

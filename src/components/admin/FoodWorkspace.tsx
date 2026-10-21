@@ -23,8 +23,10 @@ import {
   X,
   Trash2,
   Filter,
+  Edit2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { ImageDropzone } from "./ImageDropzone";
 
 interface FoodWorkspaceProps {
   orders: Order[];
@@ -37,7 +39,7 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
   listings,
   slots,
 }) => {
-  const { updateAttendeeCheckIn, addListing, deleteListing, addSlot, deleteSlot } = useData();
+  const { updateAttendeeCheckIn, addListing, updateListing, deleteListing, addSlot, deleteSlot } = useData();
 
   const [activeSubTab, setActiveSubTab] = useState<"dinners" | "venues" | "roster">("dinners");
   const [selectedTicketOrder, setSelectedTicketOrder] = useState<{
@@ -87,6 +89,21 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
   const [venueStartTime, setVenueStartTime] = useState("18:30");
   const [venueEndTime, setVenueEndTime] = useState("21:30");
   const [venueCapacity, setVenueCapacity] = useState("14");
+
+  // Modal 3: Edit Food Gathering / Feast
+  const [editingFeast, setEditingFeast] = useState<Listing | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editCookName, setEditCookName] = useState("");
+  const [editCookPhone, setEditCookPhone] = useState("");
+  const [editCookBio, setEditCookBio] = useState("");
+  const [editPrice, setEditPrice] = useState("1200");
+  const [editDuration, setEditDuration] = useState("180");
+  const [editLocationName, setEditLocationName] = useState("");
+  const [editSecretNotes, setEditSecretNotes] = useState("");
+  const [editMapsUrl, setEditMapsUrl] = useState("");
+  const [editCourses, setEditCourses] = useState("");
+  const [editSummary, setEditSummary] = useState("");
+  const [editImage, setEditImage] = useState("");
 
   // Food experiences
   const foodListings = useMemo(() => {
@@ -373,6 +390,56 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
     setIsAddVenueOpen(false);
   };
 
+  // 6. Open & Save Edit Feast
+  const handleOpenEditFeast = (feast: Listing) => {
+    setEditingFeast(feast);
+    setEditTitle(feast.title || "");
+    setEditCookName(feast.host_name || "");
+    setEditCookPhone(feast.host_phone || "");
+    setEditCookBio(feast.host_bio || "");
+    setEditPrice(String(feast.price_inr || "1200"));
+    setEditDuration(String(feast.duration_minutes || "180"));
+    setEditLocationName(feast.location_name || "");
+    setEditSecretNotes(feast.secret_meeting_point || "");
+    setEditMapsUrl(feast.meeting_point_maps_url || "");
+    setEditCourses((feast.dietary_tags || []).join(", "));
+    setEditSummary(feast.short_summary || "");
+    setEditImage(feast.images?.[0] || "");
+  };
+
+  const handleSaveEditFeast = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingFeast) return;
+    if (!editTitle.trim()) {
+      toast.error("Please enter a feast title.");
+      return;
+    }
+
+    const coursesArray = editCourses
+      .split(",")
+      .map((c) => c.trim())
+      .filter(Boolean);
+
+    updateListing(editingFeast.id, {
+      title: editTitle.trim(),
+      price_inr: Number(editPrice) || editingFeast.price_inr,
+      duration_minutes: Number(editDuration) || 180,
+      host_name: editCookName.trim() || editingFeast.host_name,
+      host_phone: editCookPhone.trim() || editingFeast.host_phone,
+      host_bio: editCookBio.trim() || editingFeast.host_bio,
+      location_name: editLocationName.trim(),
+      secret_meeting_point: editSecretNotes.trim(),
+      meeting_point_maps_url: editMapsUrl.trim(),
+      dietary_tags: coursesArray,
+      short_summary: editSummary.trim(),
+      full_description: `${editSummary.trim()}\n\nTraditional Courses:\n${coursesArray.map((c) => `• ${c}`).join("\n")}`,
+      images: editImage.trim() ? [editImage.trim()] : editingFeast.images,
+    });
+
+    toast.success(`Updated "${editTitle.trim()}" successfully!`);
+    setEditingFeast(null);
+  };
+
   return (
     <div className="space-y-6 text-[#f5edeb]">
       {/* 9:16 Mobile Pass Modal */}
@@ -562,13 +629,20 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                       ● Open for Bookings
                     </span>
                     <button
+                      onClick={() => handleOpenEditFeast(dinner)}
+                      className="p-1 text-[#dab38c] hover:text-[#e3a157] hover:bg-[#35160e] rounded-lg transition-colors cursor-pointer"
+                      title="Edit feast details & photo"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
                       onClick={() => {
                         if (confirm(`Remove feast "${dinner.title}"?`)) {
                           deleteListing(dinner.id);
                           toast.success("Feast removed");
                         }
                       }}
-                      className="p-1 text-red-400 hover:text-red-300 hover:bg-red-950/30 rounded-lg transition-colors"
+                      className="p-1 text-red-400 hover:text-red-300 hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer"
                       title="Delete feast"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -1024,15 +1098,12 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                 />
               </div>
 
-              <div>
-                <label className="font-semibold text-[#dab38c] block mb-1">Cover Image URL</label>
-                <input
-                  type="text"
-                  value={newImage}
-                  onChange={(e) => setNewImage(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
-                />
-              </div>
+              <ImageDropzone
+                value={newImage}
+                onChange={setNewImage}
+                label="Feast Cover Photo"
+                helperText="Drag & drop appetizing food picture, or browse from device"
+              />
 
               {/* Initial Seating Window Setup */}
               <div className="p-3.5 bg-[#1f0b07] rounded-2xl border border-[#dab38c]/20 space-y-3">
@@ -1099,7 +1170,168 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
         </div>
       )}
 
-      {/* MODAL 2: ADD VENUE & SEATING WINDOW */}
+      {/* MODAL 3: EDIT FOOD GATHERING / FEAST */}
+      {editingFeast && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs overflow-y-auto">
+          <div className="relative w-full max-w-xl bg-[#29100b] border border-[#dab38c]/30 rounded-3xl p-6 text-[#f5edeb] shadow-2xl my-auto max-h-[90vh] overflow-y-auto space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#dab38c]/20">
+              <div className="flex items-center gap-2">
+                <Edit2 className="w-5 h-5 text-[#e3a157]" />
+                <h3 className="font-display font-bold text-lg text-white">Edit Feast Gathering</h3>
+              </div>
+              <button
+                onClick={() => setEditingFeast(null)}
+                className="text-[#dab38c] hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditFeast} className="space-y-4 text-xs">
+              <div>
+                <label className="font-semibold text-[#dab38c] block mb-1">Feast Title *</label>
+                <input
+                  type="text"
+                  required
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">Cook / Host Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editCookName}
+                    onChange={(e) => setEditCookName(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">Cook WhatsApp Phone *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editCookPhone}
+                    onChange={(e) => setEditCookPhone(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157] font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-semibold text-[#dab38c] block mb-1">Cook Heritage Bio</label>
+                <input
+                  type="text"
+                  value={editCookBio}
+                  onChange={(e) => setEditCookBio(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">Price per plate (₹ INR) *</label>
+                  <input
+                    type="number"
+                    required
+                    value={editPrice}
+                    onChange={(e) => setEditPrice(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157] font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">Duration (Minutes)</label>
+                  <input
+                    type="number"
+                    value={editDuration}
+                    onChange={(e) => setEditDuration(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157] font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-semibold text-[#dab38c] block mb-1">Venue / Courtyard Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={editLocationName}
+                  onChange={(e) => setEditLocationName(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">Secret Arrival Note</label>
+                  <input
+                    type="text"
+                    value={editSecretNotes}
+                    onChange={(e) => setEditSecretNotes(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">Google Maps GPS URL</label>
+                  <input
+                    type="url"
+                    value={editMapsUrl}
+                    onChange={(e) => setEditMapsUrl(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157] font-mono text-[11px]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-semibold text-[#dab38c] block mb-1">Course Highlights (comma separated)</label>
+                <input
+                  type="text"
+                  value={editCourses}
+                  onChange={(e) => setEditCourses(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-[#dab38c] block mb-1">Short Description</label>
+                <textarea
+                  rows={2}
+                  value={editSummary}
+                  onChange={(e) => setEditSummary(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157] resize-none"
+                />
+              </div>
+
+              <ImageDropzone
+                value={editImage}
+                onChange={setEditImage}
+                label="Feast Cover Photo"
+                helperText="Drop replacement feast picture, or browse from device"
+              />
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#dab38c]/20">
+                <button
+                  type="button"
+                  onClick={() => setEditingFeast(null)}
+                  className="px-4 py-2 rounded-xl text-[#dab38c] hover:bg-[#35160e] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold rounded-xl shadow-md cursor-pointer"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {isAddVenueOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs overflow-y-auto">
           <div className="relative w-full max-w-lg bg-[#29100b] border border-[#dab38c]/30 rounded-3xl p-6 text-[#f5edeb] shadow-2xl my-auto space-y-4">

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Link } from "../ui/Link";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { useData } from "../../context/DataContext";
-import { BrandLogo } from "../site/BrandLogo";
 
 interface HeroBannerProps {
   onScrollToCatalog?: () => void;
@@ -44,22 +43,6 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       }}
     >
       <div className="relative z-20 w-full max-w-md sm:max-w-2xl lg:max-w-4xl text-center space-y-4 sm:space-y-5 mx-auto px-4">
-        {/* Official Wordmark + Koli Identity Eyebrow Stack */}
-        <div
-          className={`flex flex-col items-center gap-2 transition-opacity duration-500 ${
-            hasLoaded ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <BrandLogo
-            eager
-            className="h-9 w-auto sm:h-11"
-          />
-          {/* Koli Community Badge */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#35160e] border border-[#dab38c]/25 text-[10px] sm:text-xs text-[#dab38c] font-medium">
-            🐟 By the Koli Coastal Community
-          </div>
-        </div>
-
         {/* Big Headline: 3-line Lu.ma Stacked Layout */}
         <h1
           className={`font-display text-[clamp(2.85rem,11.5vw,6.25rem)] font-bold tracking-[-0.035em] text-[#f5edeb] leading-[0.93] sm:leading-[0.92] transition-all duration-700 px-2 ${

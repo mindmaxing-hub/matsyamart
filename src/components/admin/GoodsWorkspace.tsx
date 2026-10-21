@@ -3,6 +3,8 @@ import { Order, Listing, FulfillmentStatus } from "../../types";
 import { useData } from "../../context/DataContext";
 import { formatINR, formatDate } from "../../lib/utils";
 import { CourierLabel } from "./CourierLabel";
+import { ImageDropzone } from "./ImageDropzone";
+import { toast } from "sonner";
 import {
   Package,
   Boxes,
@@ -46,7 +48,7 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
   const [editingAwbOrderId, setEditingAwbOrderId] = useState<string | null>(null);
   const [awbInput, setAwbInput] = useState("");
 
-  // Product Catalog Modal State
+  // Product Catalog Modal State (Add)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newPrice, setNewPrice] = useState("");
@@ -56,6 +58,17 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
   const [newCollective, setNewCollective] = useState("");
   const [newSummary, setNewSummary] = useState("");
   const [newImage, setNewImage] = useState("");
+
+  // Edit Product Modal State
+  const [editingProduct, setEditingProduct] = useState<Listing | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editStock, setEditStock] = useState("");
+  const [editThreshold, setEditThreshold] = useState("");
+  const [editWeight, setEditWeight] = useState("");
+  const [editCollective, setEditCollective] = useState("");
+  const [editSummary, setEditSummary] = useState("");
+  const [editImage, setEditImage] = useState("");
 
   // Filter goods orders
   const goodsOrders = useMemo(() => {
@@ -132,6 +145,44 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
     setNewCollective("");
     setNewSummary("");
     setNewImage("");
+    toast.success("Product published to catalog!");
+  };
+
+  const handleOpenEditProduct = (product: Listing) => {
+    setEditingProduct(product);
+    setEditTitle(product.title || "");
+    setEditPrice(String(product.price_inr || ""));
+    setEditStock(String(product.stock_count ?? "0"));
+    setEditThreshold(String(product.low_stock_threshold ?? "5"));
+    setEditWeight(String(product.weight_grams ?? "500"));
+    setEditCollective(product.artisan_collective || product.host_name || "");
+    setEditSummary(product.short_summary || "");
+    setEditImage(product.images?.[0] || "");
+  };
+
+  const handleSaveEditProduct = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProduct) return;
+    if (!editTitle.trim()) {
+      toast.error("Please enter a product title.");
+      return;
+    }
+
+    updateListing(editingProduct.id, {
+      title: editTitle.trim(),
+      price_inr: Number(editPrice) || editingProduct.price_inr,
+      stock_count: Number(editStock) || 0,
+      low_stock_threshold: Number(editThreshold) || 5,
+      weight_grams: Number(editWeight) || 500,
+      artisan_collective: editCollective.trim(),
+      host_name: editCollective.trim() || editingProduct.host_name,
+      short_summary: editSummary.trim(),
+      full_description: editSummary.trim() || editingProduct.full_description,
+      images: editImage.trim() ? [editImage.trim()] : editingProduct.images,
+    });
+
+    toast.success(`Updated "${editTitle.trim()}" successfully!`);
+    setEditingProduct(null);
   };
 
   return (
@@ -258,18 +309,12 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
                 />
               </div>
 
-              <div>
-                <label className="block text-[#dab38c] font-semibold mb-1">
-                  Image URL (optional)
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://..."
-                  value={newImage}
-                  onChange={(e) => setNewImage(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-[#f5edeb] outline-none focus:border-[#e3a157]"
-                />
-              </div>
+              <ImageDropzone
+                value={newImage}
+                onChange={setNewImage}
+                label="Product Photo"
+                helperText="Drag & drop product picture, or browse from device"
+              />
 
               <div className="flex justify-end gap-2 pt-3 border-t border-[#dab38c]/15">
                 <button
@@ -284,6 +329,141 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
                   className="px-5 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold rounded-xl shadow-md"
                 >
                   Create Product
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Product Modal */}
+      {editingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
+          <div className="bg-[#29100b] border border-[#dab38c]/30 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#dab38c]/15">
+              <div className="flex items-center gap-2">
+                <Edit2 className="w-5 h-5 text-[#e3a157]" />
+                <h3 className="font-display font-bold text-base text-[#f5edeb]">
+                  Edit Coastal Good
+                </h3>
+              </div>
+              <button
+                onClick={() => setEditingProduct(null)}
+                className="p-1.5 hover:bg-[#35160e] rounded-full text-[#dab38c] hover:text-[#f5edeb] cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditProduct} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block text-[#dab38c] font-semibold mb-1">
+                  Product Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-[#f5edeb] outline-none focus:border-[#e3a157]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[#dab38c] font-semibold mb-1">
+                    Price (INR) *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={editPrice}
+                    onChange={(e) => setEditPrice(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-[#f5edeb] outline-none focus:border-[#e3a157]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#dab38c] font-semibold mb-1">
+                    Weight (grams)
+                  </label>
+                  <input
+                    type="number"
+                    value={editWeight}
+                    onChange={(e) => setEditWeight(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-[#f5edeb] outline-none focus:border-[#e3a157]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[#dab38c] font-semibold mb-1">
+                    Stock Count
+                  </label>
+                  <input
+                    type="number"
+                    value={editStock}
+                    onChange={(e) => setEditStock(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-[#f5edeb] outline-none focus:border-[#e3a157]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#dab38c] font-semibold mb-1">
+                    Low-Stock Threshold Alert
+                  </label>
+                  <input
+                    type="number"
+                    value={editThreshold}
+                    onChange={(e) => setEditThreshold(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-[#f5edeb] outline-none focus:border-[#e3a157]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[#dab38c] font-semibold mb-1">
+                  Artisan Collective / Maker
+                </label>
+                <input
+                  type="text"
+                  value={editCollective}
+                  onChange={(e) => setEditCollective(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-[#f5edeb] outline-none focus:border-[#e3a157]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#dab38c] font-semibold mb-1">
+                  Short Description
+                </label>
+                <textarea
+                  rows={2}
+                  value={editSummary}
+                  onChange={(e) => setEditSummary(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-[#f5edeb] outline-none focus:border-[#e3a157]"
+                />
+              </div>
+
+              <ImageDropzone
+                value={editImage}
+                onChange={setEditImage}
+                label="Product Photo"
+                helperText="Drop replacement image or click to browse"
+              />
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#dab38c]/15">
+                <button
+                  type="button"
+                  onClick={() => setEditingProduct(null)}
+                  className="px-4 py-2 rounded-xl text-[#dab38c] hover:bg-[#35160e] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold rounded-xl shadow-md cursor-pointer"
+                >
+                  Save Changes
                 </button>
               </div>
             </form>
@@ -590,6 +770,14 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
                   </div>
 
                   <div className="flex items-center justify-between gap-2 pt-1">
+                    <button
+                      onClick={() => handleOpenEditProduct(product)}
+                      className="px-2.5 py-1 bg-[#29100b] hover:bg-[#1f0b07] border border-[#dab38c]/30 text-[#e3a157] font-bold rounded-lg text-[11px] flex items-center gap-1 cursor-pointer transition-colors"
+                      title="Edit Product Details & Photo"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                      <span>Edit</span>
+                    </button>
                     <button
                       onClick={() =>
                         updateListing(product.id, { is_active: !product.is_active })
