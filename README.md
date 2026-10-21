@@ -1,6 +1,7 @@
 # MatsyaMart (`matsyamart.com`)
 
 ### Coastal Experiences & Community Marketplace — Bhoomiputra Foundation
+<!-- Last synced: 2026-10-21 Drag & Drop Image Uploader and Workspace Listing Editor Update -->
 
 > **Platform Mission:** Dedicated community-led experiential tourism and artisan goods marketplace built for indigenous coastal communities (Koliwadas, Gaothans, and mangrove ecosystems across Mumbai, Thane, Navi Mumbai, and the Konkan coast).
 >
