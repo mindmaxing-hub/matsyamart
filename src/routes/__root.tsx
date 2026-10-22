@@ -14,6 +14,7 @@ import { Footer } from "../components/layout/Footer";
 import { CartDrawer } from "../components/layout/CartDrawer";
 import { WishlistDrawer } from "../components/layout/WishlistDrawer";
 import { CookieConsentBanner } from "../components/site/CookieConsentBanner";
+import { WhatsAppChat } from "../components/site/WhatsAppChat";
 import { DataProvider } from "../context/DataContext";
 import { CartProvider } from "../context/CartContext";
 import { WishlistProvider } from "../context/WishlistContext";
@@ -158,6 +159,7 @@ function RootComponent() {
               <CartDrawer />
               <WishlistDrawer />
               <CookieConsentBanner />
+              <WhatsAppChat />
             </div>
           </WishlistProvider>
         </CartProvider>

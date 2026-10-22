@@ -6,7 +6,7 @@ import {
 } from "../context/AdminAuthContext";
 import { ManifestTable } from "../components/admin/ManifestTable";
 import { SlotManager } from "../components/admin/SlotManager";
-import { CommunicationsHub } from "../components/admin/CommunicationsHub";
+import { WhatsAppHub } from "../components/admin/WhatsAppHub";
 import { SpecialListingsManager } from "../components/admin/SpecialListingsManager";
 import { MultiQueueManager } from "../components/admin/MultiQueueManager";
 import { HostPayoutsLedger } from "../components/admin/HostPayoutsLedger";
@@ -64,7 +64,8 @@ type AdminSectionId =
   | "spotlight"
   | "coupons"
   | "roles"
-  | "communications";
+  | "communications"
+  | "whatsapp";
 
 interface NavItem {
   id: AdminSectionId;
@@ -259,14 +260,14 @@ const AdminPageContent: React.FC = () => {
         "Assign coordinators to specific pillars (Goods, Food, Walks, Workshops) with instant dynamic visibility.",
     },
     {
-      id: "communications",
-      label: "Communications Hub",
+      id: "whatsapp",
+      label: "WhatsApp",
       icon: MessageSquare,
-      kicker: "Dispatch · WhatsApp + email",
+      kicker: "Live Chats · Meta Broadcast Gateway",
       editorialTitle:
-        "Messages that <em class='italic text-[#E3A157]'>reach the jetty.</em>",
+        "Live chats, <em class='italic text-[#E3A157]'>direct dispatch.</em>",
       subtitle:
-        "Tidal advisories, digital passes and receipts from hello@matsyamart.com.",
+        "Two-way customer chats, tidal broadcasts, community cohorts, and verified 9:16 mobile pass dispatch.",
     },
   ];
 
@@ -849,9 +850,9 @@ const AdminPageContent: React.FC = () => {
           {/* 12. STAFF ROLES & ACCESS TIERS */}
           {activeSection === "roles" && <StaffRolesManager />}
 
-          {/* 13. COMMUNICATIONS HUB */}
-          {activeSection === "communications" && (
-            <CommunicationsHub orders={orders} listings={listings} />
+          {/* 13. WHATSAPP & DISPATCH HUB */}
+          {(activeSection === "whatsapp" || activeSection === "communications") && (
+            <WhatsAppHub orders={orders} listings={listings} />
           )}
         </div>
       </main>

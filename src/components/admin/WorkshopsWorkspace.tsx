@@ -5,6 +5,11 @@ import { formatINR, formatDate, formatTime } from "../../lib/utils";
 import { MobilePass } from "./MobilePass";
 import { ImageDropzone } from "./ImageDropzone";
 import {
+  openWhatsApp,
+  buildPassMessage,
+  buildArtisanRosterMessage,
+} from "../../lib/whatsapp";
+import {
   Palette,
   MapPin,
   Clock,
@@ -244,6 +249,53 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
       );
     });
   }, [workshopOrders, rosterSearch]);
+
+  const handleSendPassToParticipant = (att: (typeof workshopAttendees)[0]) => {
+    const ticketRef = `MM-PASS-${att.order.order_ref.replace(/[^A-Za-z0-9]/g, "").slice(-6).toUpperCase()}`;
+    const passUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/order/confirmation/${att.order.order_ref}`;
+
+    const text = buildPassMessage({
+      guestName: att.name,
+      experienceTitle: att.listing?.title || "Craft Masterclass",
+      ticketRef,
+      dateStr: att.slot ? formatDate(att.slot.slot_start) : "Weekend Session",
+      timeStr: att.slot ? formatTime(att.slot.slot_start) : "02:00 PM",
+      venue: att.listing?.location_name || "Sassoon Dock Heritage Shed",
+      secretPin: att.listing?.secret_meeting_point,
+      mapsUrl: att.listing?.meeting_point_maps_url,
+      passUrl,
+    });
+
+    openWhatsApp(att.phone, text);
+    toast.success(`WhatsApp pass generated for ${att.name}`);
+  };
+
+  const handleSendRosterToArtisan = (workshopListing?: Listing) => {
+    const targetWorkshop = workshopListing || workshopListings[0];
+    if (!targetWorkshop) {
+      toast.error("No active workshop found.");
+      return;
+    }
+
+    const attendeesList = workshopAttendees.map((a) => ({
+      name: a.name,
+      phone: a.phone,
+    }));
+
+    const text = buildArtisanRosterMessage({
+      workshopTitle: targetWorkshop.title,
+      artisanName: targetWorkshop.host_name || "Master Artisan",
+      dateStr: "Tomorrow Afternoon",
+      timeStr: "02:00 PM – 05:00 PM",
+      studioVenue: targetWorkshop.location_name || "Heritage Workshop Shed",
+      totalParticipants: attendeesList.length,
+      materialsList: targetWorkshop.included_items ? targetWorkshop.included_items.join(", ") : undefined,
+      attendees: attendeesList,
+    });
+
+    openWhatsApp(targetWorkshop.host_phone || "+91 76665 11511", text);
+    toast.success(`Masterclass roster dispatched to artisan ${targetWorkshop.host_name || "Instructor"} via WhatsApp!`);
+  };
 
   return (
     <div className="space-y-6 text-[#f5edeb]">
@@ -851,8 +903,17 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
                 className="w-full pl-9 pr-4 py-2 bg-[#35160e]/80 border border-[#dab38c]/25 rounded-xl text-xs text-[#f5edeb] placeholder-[#dab38c]/50 outline-none focus:border-[#e3a157]"
               />
             </div>
-            <div className="text-xs text-[#dab38c]">
-              Total Enrolled Participants: <strong className="text-[#f5edeb]">{workshopAttendees.length}</strong>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => handleSendRosterToArtisan()}
+                className="px-3.5 py-2 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Send enrolled participant roster to artisan on WhatsApp"
+              >
+                <span>Send Roster to Artisan (WhatsApp)</span>
+              </button>
+              <div className="text-xs text-[#dab38c]">
+                Enrolled: <strong className="text-[#f5edeb]">{workshopAttendees.length}</strong>
+              </div>
             </div>
           </div>
 
@@ -933,18 +994,27 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
                         </td>
 
                         <td className="py-3.5 px-4 text-right">
-                          <button
-                            onClick={() =>
-                              setSelectedTicketOrder({
-                                order: att.order,
-                                item: att.item,
-                              })
-                            }
-                            className="px-3 py-1 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl shadow-xs transition-all inline-flex items-center gap-1 cursor-pointer"
-                          >
-                            <Ticket className="w-3.5 h-3.5" />
-                            <span>Ticket</span>
-                          </button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => handleSendPassToParticipant(att)}
+                              className="px-2.5 py-1 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs rounded-xl shadow-xs transition-all inline-flex items-center gap-1 cursor-pointer"
+                              title="Send 9:16 verified pass on WhatsApp"
+                            >
+                              <span>WhatsApp</span>
+                            </button>
+                            <button
+                              onClick={() =>
+                                setSelectedTicketOrder({
+                                  order: att.order,
+                                  item: att.item,
+                                })
+                              }
+                              className="px-3 py-1 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl shadow-xs transition-all inline-flex items-center gap-1 cursor-pointer"
+                            >
+                              <Ticket className="w-3.5 h-3.5" />
+                              <span>Pass</span>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))

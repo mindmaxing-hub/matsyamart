@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Order } from "../../types";
 import { formatINR, formatDate, formatTime } from "../../lib/utils";
+import { openWhatsApp, buildPassMessage } from "../../lib/whatsapp";
 import { generateQrDataUrl } from "../../lib/qr";
 import { BrandLogo } from "../site/BrandLogo";
 
@@ -48,10 +49,25 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
   };
 
   const handleShareWhatsApp = () => {
-    const text = encodeURIComponent(
-      `⚓ My MatsyaMart Coastal Pass for ${order.items[0]?.listing?.title || "Community Tour"} is confirmed! Ticket Code: ${order.order_ref}. View pass: ${window.location.href}`,
-    );
-    window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
+    const primaryItem = order.items[0];
+    const listing = primaryItem?.listing;
+    const slot = primaryItem?.slot;
+    const passUrl = typeof window !== "undefined" ? window.location.href : "";
+
+    const text = buildPassMessage({
+      guestName: order.customer_name,
+      experienceTitle: listing?.title || "Coastal Experience",
+      ticketRef: order.order_ref,
+      dateStr: slot ? formatDate(slot.slot_start) : "Confirmed Schedule",
+      timeStr: slot ? `${formatTime(slot.slot_start)} – ${formatTime(slot.slot_end)}` : "As scheduled",
+      venue: listing?.location_name || "Mumbai Coast",
+      secretPin: listing?.secret_meeting_point,
+      mapsUrl: listing?.meeting_point_maps_url,
+      passUrl,
+      seatsCount: primaryItem?.quantity || 1,
+    });
+
+    openWhatsApp(order.customer_phone, text);
   };
 
   const handleCopyLink = () => {

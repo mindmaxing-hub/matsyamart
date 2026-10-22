@@ -4,6 +4,10 @@ import { useData } from "../../context/DataContext";
 import { formatINR, formatDate } from "../../lib/utils";
 import { CourierLabel } from "./CourierLabel";
 import { ImageDropzone } from "./ImageDropzone";
+import {
+  openWhatsApp,
+  buildGoodsTrackingMessage,
+} from "../../lib/whatsapp";
 import { toast } from "sonner";
 import {
   Package,
@@ -183,6 +187,26 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
 
     toast.success(`Updated "${editTitle.trim()}" successfully!`);
     setEditingProduct(null);
+  };
+
+  const handleSendWhatsAppTracking = (order: Order) => {
+    const itemsSummary = order.items
+      .map((i) => `${i.quantity}x ${i.listing?.title || "Item"}`)
+      .join(", ");
+    const awb = order.tracking_awb || "AWB-MUM-892144";
+    const courier = (order as any).shipping_provider || order.courier_partner || "Bluedart Express";
+
+    const text = buildGoodsTrackingMessage({
+      customerName: order.customer_name,
+      orderRef: order.order_ref,
+      itemsSummary,
+      courierName: courier,
+      trackingNumber: awb,
+      trackingUrl: `https://www.bluedart.com/tracking?awb=${awb}`,
+    });
+
+    openWhatsApp(order.customer_phone, text);
+    toast.success(`WhatsApp tracking dispatched to ${order.customer_name}`);
   };
 
   return (
@@ -655,13 +679,22 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
 
                           <td className="py-3.5 px-4 text-right">
                             <div className="flex flex-col items-end gap-1.5">
-                              <button
-                                onClick={() => setSelectedOrderForLabel(order)}
-                                className="px-3 py-1 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-[11px] rounded-lg shadow-sm transition-all flex items-center gap-1 cursor-pointer"
-                              >
-                                <Printer className="w-3.5 h-3.5" />
-                                <span>Print 4×6" Label</span>
-                              </button>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => handleSendWhatsAppTracking(order)}
+                                  className="px-2.5 py-1 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-[10px] rounded-lg shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                                  title="Send tracking to customer on WhatsApp"
+                                >
+                                  <span>WhatsApp</span>
+                                </button>
+                                <button
+                                  onClick={() => setSelectedOrderForLabel(order)}
+                                  className="px-3 py-1 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-[11px] rounded-lg shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+                                >
+                                  <Printer className="w-3.5 h-3.5" />
+                                  <span>Print Label</span>
+                                </button>
+                              </div>
 
                               {editingAwbOrderId === order.id ? (
                                 <div className="flex items-center gap-1 mt-1">
