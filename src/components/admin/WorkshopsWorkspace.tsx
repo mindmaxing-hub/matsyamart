@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { Order, Listing, ExperienceSlot, OrderItem } from "../../types";
 import { useData } from "../../context/DataContext";
 import { formatINR, formatDate, formatTime } from "../../lib/utils";
-import { BookMyShowPass } from "./BookMyShowPass";
+import { MobilePass } from "./MobilePass";
 import { ImageDropzone } from "./ImageDropzone";
 import {
   Palette,
@@ -247,9 +247,9 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
 
   return (
     <div className="space-y-6 text-[#f5edeb]">
-      {/* BookMyShow Digital Pass Modal */}
+      {/* 9:16 Mobile Pass Modal */}
       {selectedTicketOrder && (
-        <BookMyShowPass
+        <MobilePass
           order={selectedTicketOrder.order}
           item={selectedTicketOrder.item}
           onClose={() => setSelectedTicketOrder(null)}

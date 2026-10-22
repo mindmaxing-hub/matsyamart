@@ -69,7 +69,7 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
                 Versova Jetty No. 1, Gaothan, Andheri West<br />
                 Mumbai, Maharashtra, India – 400061<br />
                 <b>GSTIN:</b> 27AAACK1234F1Z5 (State Code: 27)<br />
-                <b>Email:</b> hello@matsyamart.com · <b>Support:</b> +91 98201 44512
+                <b>Email:</b> hello@matsyamart.com · <b>Support:</b> +91 76665 11511
               </div>
             </div>
 

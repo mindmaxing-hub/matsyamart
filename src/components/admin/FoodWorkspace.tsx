@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { Order, Listing, ExperienceSlot, OrderItem } from "../../types";
 import { useData } from "../../context/DataContext";
 import { formatINR, formatDate, formatTime } from "../../lib/utils";
-import { BookMyShowPass } from "./BookMyShowPass";
+import { MobilePass } from "./MobilePass";
 import {
   Utensils,
   MapPin,
@@ -186,7 +186,7 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
     });
   }, [foodOrders, guestSearch, selectedFeastFilter, dateFilter]);
 
-  // Target Cook & Manifest stats for Vikas's day-before CRM flow
+  // Target Cook & Manifest stats for day-before CRM flow
   const targetFeast = useMemo(() => {
     if (selectedFeastFilter !== "all") {
       return foodListings.find((l) => l.id === selectedFeastFilter);
@@ -444,7 +444,7 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
     <div className="space-y-6 text-[#f5edeb]">
       {/* 9:16 Mobile Pass Modal */}
       {selectedTicketOrder && (
-        <BookMyShowPass
+        <MobilePass
           order={selectedTicketOrder.order}
           item={selectedTicketOrder.item}
           onClose={() => setSelectedTicketOrder(null)}
@@ -779,13 +779,13 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
       {/* SUB-TAB 3: Guest Roster & Cook CRM Manifest */}
       {activeSubTab === "roster" && (
         <div className="space-y-5">
-          {/* Vikas's Cook CRM Command Card */}
+          {/* MatsyaMart Cook CRM Command Card */}
           <div className="bg-gradient-to-br from-[#35160e] via-[#29100b] to-[#1f0b07] border border-[#dab38c]/30 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div>
                 <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#e3a157] flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-[#ffde59]" />
-                  <span>VIKAS'S COOK CRM &amp; DAY-BEFORE DISPATCH ENGINE</span>
+                  <span>MATSYAMART COOK CRM &amp; DAY-BEFORE DISPATCH ENGINE</span>
                 </div>
                 <h3 className="font-display font-bold text-xl text-white mt-1">
                   {targetFeast ? targetFeast.title : "Coastal Seafood Dining"}

@@ -15,7 +15,7 @@ export const Footer: React.FC = () => {
               <BrandLogo className="h-8 w-auto transition-opacity group-hover:opacity-80" />
             </Link>
             <p className="text-[11px] text-[#dab38c]/80 leading-relaxed">
-              Curated coastal experiences and goods, rooted in Koli fishing heritage.
+              Curated coastal experiences and goods, rooted in coastal communities heritage.
             </p>
           </div>
 
@@ -68,13 +68,13 @@ export const Footer: React.FC = () => {
         {/* Bottom Attribution */}
         <div className="flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#dab38c]/60 gap-3">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span>© 2026 MatsyaMart · Rooted in Koli fishing heritage ·</span>
-            <span className="text-[#dab38c] font-medium">
-              A Bhoomiputra Foundation initiative
-            </span>
-            <span>· Operated by</span>
+            <span>© 2026 MatsyaMart · Rooted in coastal communities heritage · Operated by</span>
             <span className="text-[#dab38c] font-medium">
               Kolibaba Seafood Inc
+            </span>
+            <span>·</span>
+            <span className="text-[#dab38c] font-medium">
+              A Bhoomiputra Foundation initiative
             </span>
           </div>
 
@@ -92,7 +92,14 @@ export const Footer: React.FC = () => {
               Tidal &amp; Weather Safety
             </span>
             <span>•</span>
-            <span>WhatsApp: +91 98201 44512</span>
+            <a
+              href="https://wa.me/917666511511"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-[#25D366] transition-colors"
+            >
+              WhatsApp: +91 76665 11511
+            </a>
           </div>
         </div>
       </div>

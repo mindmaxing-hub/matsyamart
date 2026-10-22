@@ -165,7 +165,7 @@ const AdminPageContent: React.FC = () => {
       editorialTitle:
         "Feasts cooked, <em class='italic text-[#E3A157]'>guests welcomed.</em>",
       subtitle:
-        "Curate pop-up seafood feasts, configure courtyard venues & seating windows, and issue BookMyShow QR passes.",
+        "Curate pop-up seafood feasts, configure courtyard venues & seating windows, and issue verified 9:16 mobile passes.",
     },
     {
       id: "walks",

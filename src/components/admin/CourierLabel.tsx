@@ -202,7 +202,7 @@ export const CourierLabel: React.FC<CourierLabelProps> = ({ order, onClose }) =>
                 <div class="address-col" style="border-right: 1px dashed #999; padding-right: 6px;">
                   <div class="address-heading">SHIP FROM (SENDER):</div>
                   <div class="address-name">Kolibaba Seafood Inc</div>
-                  <div>Bhoomiputra Coastal Unit<br/>Versova Jetty No. 1, Gaothan<br/>Andheri West, Mumbai – 400061<br/>Ph: +91 98201 44512</div>
+                  <div>Bhoomiputra Coastal Unit<br/>Versova Jetty No. 1, Gaothan<br/>Andheri West, Mumbai – 400061<br/>Ph: +91 76665 11511</div>
                 </div>
                 <div class="address-col">
                   <div class="address-heading">DELIVER TO (CONSIGNEE):</div>
@@ -398,7 +398,7 @@ export const CourierLabel: React.FC<CourierLabelProps> = ({ order, onClose }) =>
                   Bhoomiputra Coastal Unit<br />
                   Versova Jetty No. 1, Gaothan<br />
                   Andheri West, Mumbai – 400061<br />
-                  Ph: +91 98201 44512
+                  Ph: +91 76665 11511
                 </div>
               </div>
 

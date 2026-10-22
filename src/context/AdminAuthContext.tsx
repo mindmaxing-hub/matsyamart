@@ -41,7 +41,7 @@ const STORAGE_STAFF_ROLES = "matsyamart_staff_roles_v2";
 
 const DEFAULT_STAFF_ROLES: AdminUserRole[] = [
   {
-    email: "vikas@matsyamart.com",
+    email: "hello@matsyamart.com",
     role: "owner",
     created_at: new Date().toISOString(),
   },
@@ -71,7 +71,18 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<AuthUser | null>(() => {
     try {
       const saved = sessionStorage.getItem(STORAGE_AUTH_USER);
-      return saved ? JSON.parse(saved) : null;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (
+          parsed.email?.toLowerCase().includes("vikas@matsyamart") ||
+          parsed.email?.toLowerCase().includes("hellow@matsyamart")
+        ) {
+          parsed.email = "hello@matsyamart.com";
+          parsed.name = "MatsyaMart (Owner)";
+        }
+        return parsed;
+      }
+      return null;
     } catch {
       return null;
     }
@@ -80,7 +91,16 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [staffRoles, setStaffRoles] = useState<AdminUserRole[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_STAFF_ROLES);
-      return saved ? JSON.parse(saved) : DEFAULT_STAFF_ROLES;
+      if (saved) {
+        const parsed: AdminUserRole[] = JSON.parse(saved);
+        return parsed.map((item) =>
+          item.email.toLowerCase() === "vikas@matsyamart.com" ||
+          item.email.toLowerCase() === "hellow@matsyamart.com"
+            ? { ...item, email: "hello@matsyamart.com" }
+            : item
+        );
+      }
+      return DEFAULT_STAFF_ROLES;
     } catch {
       return DEFAULT_STAFF_ROLES;
     }
@@ -132,11 +152,11 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
         if (error) throw error;
       } else {
         // Fallback for development / mock mode
-        devSignInAs("owner", "vikas@matsyamart.com");
+        devSignInAs("owner", "hello@matsyamart.com");
       }
     } catch (err) {
       console.warn("Google sign-in fallback", err);
-      devSignInAs("owner", "vikas@matsyamart.com");
+      devSignInAs("owner", "hello@matsyamart.com");
     } finally {
       setIsLoading(false);
     }
@@ -147,17 +167,24 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     customEmail?: string,
     pillars?: PillarType[],
   ) => {
-    const email =
+    let email =
       customEmail ||
       (selectedRole === "owner" || selectedRole === "admin"
-        ? "vikas@matsyamart.com"
+        ? "hello@matsyamart.com"
         : selectedRole === "manager"
           ? "kolibaba.operations@matsyamart.com"
           : "coordinator.food@matsyamart.com");
 
+    if (
+      email.toLowerCase().includes("vikas@matsyamart") ||
+      email.toLowerCase().includes("hellow@matsyamart")
+    ) {
+      email = "hello@matsyamart.com";
+    }
+
     const name =
       selectedRole === "owner" || selectedRole === "admin"
-        ? "Vikas (Owner)"
+        ? "MatsyaMart (Owner)"
         : selectedRole === "manager"
           ? "Operations Manager"
           : "Pillar Coordinator";
