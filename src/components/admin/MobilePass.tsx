@@ -1,24 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Order, OrderItem, Listing, ExperienceSlot } from "../../types";
-import { formatINR, formatDate, formatTime } from "../../lib/utils";
 import { generateQrDataUrl } from "../../lib/qr";
+import { buildGoogleMapsUrl } from "../../lib/services/places";
 import {
-  Ticket,
-  Calendar,
-  Clock,
-  MapPin,
-  ExternalLink,
   Printer,
   X,
   Share2,
-  CheckCircle2,
-  User,
-  Utensils,
-  AlertTriangle,
-  Sparkles,
   Copy,
   Check,
-  ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -26,6 +16,35 @@ export interface MobilePassProps {
   order: Order;
   item?: OrderItem;
   onClose: () => void;
+}
+
+function formatPassDate(isoDate?: string): string {
+  if (!isoDate) return "12/12/2026";
+  try {
+    const d = new Date(isoDate);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  } catch {
+    return "12/12/2026";
+  }
+}
+
+function formatReportingTime(isoDate?: string): string {
+  if (!isoDate) return "6:30 pm";
+  try {
+    const d = new Date(isoDate);
+    return d
+      .toLocaleTimeString("en-IN", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      })
+      .toLowerCase();
+  } catch {
+    return "6:30 pm";
+  }
 }
 
 export const MobilePass: React.FC<MobilePassProps> = ({
@@ -43,8 +62,6 @@ export const MobilePass: React.FC<MobilePassProps> = ({
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [copied, setCopied] = useState(false);
 
-  const isConfirmed = order.status === "confirmed";
-  const ticketRef = `MM-PASS-${order.order_ref.replace(/[^A-Za-z0-9]/g, "").slice(-6).toUpperCase()}`;
   const verificationUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/order/confirmation/${order.order_ref}`;
 
   useEffect(() => {
@@ -65,18 +82,36 @@ export const MobilePass: React.FC<MobilePassProps> = ({
     }
   };
 
+  const formattedPassDate = formatPassDate(slot?.slot_start);
+  const reportingTimeStr = formatReportingTime(slot?.slot_start);
+  const admitCount = item?.quantity || 1;
+  const amountPaid = order.total_amount_inr || 2400;
+
+  const meetingAddress =
+    listing?.secret_meeting_point ||
+    listing?.location_name ||
+    "Tandel House, Sasson Dock, Watch Tower, Amba Mata Mandir Colaba, Mumbai -400 001";
+
+  const mapsUrl =
+    listing?.meeting_point_maps_url ||
+    (listing?.latitude && listing?.longitude
+      ? buildGoogleMapsUrl(listing.latitude, listing.longitude)
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(meetingAddress)}`);
+
+  const displayHostPhone = listing?.host_phone || "+91 99204 77158";
+  const cleanPhone = displayHostPhone.replace(/[^0-9]/g, "");
+
   const handleShareWhatsApp = () => {
     const guestPhone = order.customer_phone?.replace(/[^0-9]/g, "") || "";
     const text = encodeURIComponent(
-      `🎟️ *MatsyaMart Official 9:16 Mobile Pass*\n\n` +
+      `🎟️ *MatsyaMart Official Mobile Pass*\n\n` +
         `*Experience:* ${listing?.title || "Coastal Feast Experience"}\n` +
-        `*Pass Ref:* ${ticketRef}\n` +
-        `*Date:* ${slot ? formatDate(slot.slot_start) : "Confirmed Schedule"}\n` +
-        `*Time:* ${slot ? `${formatTime(slot.slot_start)} – ${formatTime(slot.slot_end)}` : "As scheduled"}\n` +
-        `*Venue:* ${listing?.location_name || "Mumbai Coast"}\n` +
-        (listing?.secret_meeting_point ? `*Secret Arrival Note:* ${listing.secret_meeting_point}\n` : "") +
-        (listing?.meeting_point_maps_url ? `*Google Maps GPS:* ${listing.meeting_point_maps_url}\n` : "") +
-        `*Status:* ${isConfirmed ? "✅ Confirmed & Paid" : "⏳ Payment Pending"}\n\n` +
+        `*Pass Ref:* ${order.order_ref}\n` +
+        `*Date:* ${formattedPassDate}\n` +
+        `*Reporting Time:* ${reportingTimeStr}\n` +
+        `*Venue:* ${meetingAddress}\n` +
+        (mapsUrl ? `*Google Maps Directions:* ${mapsUrl}\n` : "") +
+        `*Admit:* ${admitCount} Person(s)\n\n` +
         `👉 *Open Your Verified Mobile Pass:* ${verificationUrl}`,
     );
 
@@ -85,9 +120,6 @@ export const MobilePass: React.FC<MobilePassProps> = ({
       : `https://api.whatsapp.com/send?text=${text}`;
     window.open(waUrl, "_blank");
   };
-
-  const formattedDate = slot ? formatDate(slot.slot_start) : "Nov 4, 2026";
-  const formattedTimeStr = slot ? formatTime(slot.slot_start) : "10:00 AM";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/90 backdrop-blur-md overflow-y-auto">
@@ -106,9 +138,8 @@ export const MobilePass: React.FC<MobilePassProps> = ({
             top: 50% !important;
             transform: translate(-50%, -50%) !important;
             width: 380px !important;
-            height: 675px !important;
             box-shadow: none !important;
-            border-radius: 24px !important;
+            border-radius: 32px !important;
             z-index: 999999 !important;
             page-break-inside: avoid !important;
           }
@@ -119,16 +150,16 @@ export const MobilePass: React.FC<MobilePassProps> = ({
         {/* Top Control Strip */}
         <div className="w-full flex items-center justify-between px-2 text-[#f5edeb] print:hidden">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-full bg-[#00759B]/40 border border-[#4dc6f4]/40 text-[#cfeffc] text-xs font-bold flex items-center gap-1.5 shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 text-[#ffde59]" />
-              <span>9:16 Mobile Pass</span>
+            <span className="px-2.5 py-1 rounded-full bg-[#e3a157]/20 border border-[#e3a157]/40 text-[#e3a157] text-xs font-bold flex items-center gap-1.5 shadow-xs">
+              <Sparkles className="w-3.5 h-3.5 text-[#e3a157]" />
+              <span>Official Guest Pass Preview</span>
             </span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopyLink}
-              className="p-2 hover:bg-white/10 text-[#cfeffc] hover:text-white rounded-xl transition-colors cursor-pointer"
+              className="p-2 hover:bg-white/10 text-[#dab38c] hover:text-white rounded-xl transition-colors cursor-pointer"
               title="Copy Pass URL"
             >
               {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -157,176 +188,108 @@ export const MobilePass: React.FC<MobilePassProps> = ({
           </div>
         </div>
 
-        {/* 9:16 MOBILE PASS BODY (Matching Luma photo ratio & vibrant oceanic palette) */}
+        {/* 9:16 VERTICAL OFFICIAL PASS CARD (Exact User Mockup Layout) */}
         <div
           id="printable-mobile-ticket"
-          className="relative w-full max-w-[360px] sm:max-w-[380px] aspect-[9/16] rounded-[36px] overflow-hidden shadow-[0_25px_70px_rgba(0,117,155,0.45)] border-2 border-[#4dc6f4]/40 flex flex-col justify-between p-6 sm:p-7 select-none text-white"
-          style={{
-            background:
-              "linear-gradient(180deg, #0968A6 0%, #00759B 40%, #005674 75%, #00364A 100%)",
-          }}
+          className="w-full max-w-[380px] rounded-[32px] overflow-hidden bg-[#2b120c] border border-[#dab38c]/25 shadow-[0_25px_70px_rgba(0,0,0,0.85)] select-none text-[#f5edeb] transition-all"
         >
-          {/* Subtle Coastal Radial Glow Overlay */}
-          <div
-            className="absolute inset-0 pointer-events-none opacity-45 mix-blend-screen"
-            style={{
-              background:
-                "radial-gradient(400px 300px at 80% 15%, rgba(148,220,248,0.4), transparent 60%)",
-            }}
-          />
-
-          {/* 1. TOP HEADER STRIP: Logo on Left, Time & Date on Right */}
-          <div className="relative z-10 flex items-start justify-between">
-            {/* Brand Logo */}
-            <div className="flex items-center gap-1.5">
-              <span className="font-display font-extrabold text-2xl sm:text-[26px] tracking-tight text-white flex items-center">
-                matsyamart
-                <span className="text-[#ffde59] text-xl ml-0.5 animate-pulse">✦</span>
-              </span>
-            </div>
-
-            {/* Time & Date */}
-            <div className="text-right">
-              <div className="text-xs sm:text-[13px] font-semibold text-[#cfeffc] tracking-tight">
-                {formattedTimeStr}
-              </div>
-              <div className="font-display font-bold text-base sm:text-lg text-white leading-tight mt-0.5">
-                {formattedDate}
-              </div>
-            </div>
+          {/* 1. TOP AERIAL COASTAL BANNER WITH MATSYAMART LOGO */}
+          <div className="relative w-full aspect-[576/275] bg-[#1a0805] overflow-hidden border-b border-[#dab38c]/20">
+            <img
+              src="/pass-header-beach.png"
+              alt="MatsyaMart Coastal Banner"
+              className="w-full h-full object-cover object-center"
+              loading="eager"
+              width={576}
+              height={275}
+            />
           </div>
 
-          {/* 2. EVENT TITLE & THUMBNAIL POSTER SECTION */}
-          <div className="relative z-10 grid grid-cols-12 gap-3 items-start my-auto pt-2">
-            <div className="col-span-8 pr-1 space-y-1">
-              <span className="inline-flex items-center gap-1 text-[10px] uppercase font-bold tracking-widest text-[#cfeffc] bg-white/10 px-2 py-0.5 rounded-full border border-white/15">
-                {listing?.pillar === "food"
-                  ? "Seafood Feast"
-                  : listing?.pillar === "walks"
-                    ? "Heritage Walk"
-                    : listing?.pillar === "workshops"
-                      ? "Masterclass"
-                      : "Coastal Experience"}
-              </span>
-              <h2 className="font-display font-bold text-lg sm:text-[21px] leading-[1.2] text-white text-balance drop-shadow-sm">
-                {listing?.title || "Sassoon Docks Dawn Heritage Walk & Seafood Feast"}
-              </h2>
+          {/* 2. PASS MAIN BODY */}
+          <div className="p-6 sm:p-7 space-y-5 text-center">
+            {/* Headline */}
+            <h2 className="font-display font-bold text-2xl sm:text-[27px] text-[#ffffff] tracking-tight leading-tight">
+              We are happy to host you! Yay!
+            </h2>
+
+            {/* Experience Title */}
+            <div className="font-bold text-base sm:text-lg text-[#e3a157] max-w-[280px] mx-auto leading-snug">
+              {listing?.title || "Sassoon Docks Dawn Heritage Walk & Coastal Seafood Feast"}
             </div>
 
-            <div className="col-span-4 flex justify-end">
-              <div className="relative w-16 h-20 sm:w-18 sm:h-22 rounded-2xl overflow-hidden border-2 border-white/30 shadow-lg bg-[#004A63]">
-                {listing?.images?.[0] ? (
-                  <img
-                    src={listing.images[0]}
-                    alt={listing.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-xs font-bold font-display text-[#cfeffc]">
-                    MM
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-              </div>
-            </div>
-          </div>
-
-          {/* 3. DETAILS METADATA (LOCATION, GUEST, HOST) */}
-          <div className="relative z-10 space-y-4 pt-1">
-            {/* Location */}
-            <div>
-              <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#94dcf8]">
-                LOCATION
-              </div>
-              <div className="font-display font-bold text-base sm:text-[17px] text-white leading-tight mt-0.5 flex items-center gap-1.5">
-                <span>{listing?.location_name || "Versova Koliwada, Mumbai"}</span>
-                {listing?.meeting_point_maps_url && (
-                  <a
-                    href={listing.meeting_point_maps_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#ffde59] hover:underline inline-flex items-center"
-                    title="Open in Google Maps"
-                  >
-                    <MapPin className="w-3.5 h-3.5" />
-                  </a>
-                )}
-              </div>
-              {listing?.secret_meeting_point && (
-                <div className="text-[11px] text-[#cfeffc]/80 line-clamp-1 mt-0.5">
-                  {listing.secret_meeting_point}
-                </div>
-              )}
-            </div>
-
-            {/* Guest & Host Two-Column */}
-            <div className="grid grid-cols-2 gap-3 pt-1 border-t border-white/15">
-              <div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#94dcf8]">
-                  GUEST
-                </div>
-                <div className="font-bold text-sm sm:text-[15px] text-white truncate mt-0.5">
-                  {order.customer_name || "Verified Attendee"}
-                </div>
-                <div className="text-[10px] font-mono text-[#cfeffc] mt-0.5">
-                  {item?.quantity || 1} Seat{(item?.quantity || 1) > 1 ? "s" : ""} Booked
-                </div>
-              </div>
-
-              <div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#94dcf8]">
-                  HOST
-                </div>
-                <div className="font-bold text-sm sm:text-[15px] text-white truncate mt-0.5">
-                  {listing?.host_name || "MatsyaMart Custodians"}
-                </div>
-                <div className="text-[10px] font-mono text-[#cfeffc] mt-0.5">
-                  {listing?.host_phone || "+91 76665 11511"}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 4. HERO QR CODE & ENTRY VALIDATION (Centered on clean white card) */}
-          <div className="relative z-10 pt-3">
-            <div className="bg-white rounded-[28px] p-4 sm:p-4.5 shadow-2xl flex flex-col items-center justify-center text-center">
-              {/* QR Code Container */}
-              <div className="relative">
+            {/* Centered QR Code */}
+            <div className="flex justify-center pt-1 pb-1">
+              <div className="bg-white p-3.5 sm:p-4 rounded-2xl shadow-xl flex items-center justify-center">
                 {qrDataUrl ? (
                   <img
                     src={qrDataUrl}
-                    alt="Entry Pass QR"
-                    className="w-40 h-40 sm:w-44 sm:h-44 object-contain mx-auto"
+                    alt="Ticket QR Code"
+                    className="w-40 h-40 sm:w-44 sm:h-44 object-contain"
+                    width={176}
+                    height={176}
                   />
                 ) : (
-                  <div className="w-40 h-40 flex items-center justify-center bg-neutral-100 text-neutral-400 font-mono text-xs rounded-xl">
+                  <div className="w-40 h-40 sm:w-44 sm:h-44 flex items-center justify-center text-xs text-stone-500 font-mono">
                     Generating QR...
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* Pass Ref & Security Status */}
-              <div className="w-full pt-2.5 border-t border-neutral-100 mt-2 flex items-center justify-between text-neutral-800">
-                <span className="font-mono text-xs sm:text-[13px] font-black tracking-wider text-[#004A63]">
-                  {ticketRef}
-                </span>
+            {/* Details Summary */}
+            <div className="space-y-1.5 text-xs sm:text-sm text-[#f5edeb] font-medium tracking-wide">
+              <div>Date - {formattedPassDate}</div>
+              <div>Admit - {admitCount} Person{admitCount > 1 ? "s" : ""}</div>
+              <div>Amount Paid - INR {amountPaid}</div>
+            </div>
 
-                <span
-                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                    isConfirmed
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-300"
-                      : "bg-amber-50 text-amber-800 border border-amber-300"
-                  }`}
+            {/* Location & Directions Row */}
+            <div className="grid grid-cols-12 gap-3 items-center pt-4 border-t border-[#dab38c]/15 text-left">
+              {/* Left Column: Reporting Time & Address */}
+              <div className="col-span-8 space-y-1 pr-1">
+                <div className="text-xs sm:text-sm font-semibold text-[#f5edeb]">
+                  Reporting Time - {reportingTimeStr}
+                </div>
+                <div className="text-[11px] sm:text-xs text-[#dab38c] leading-relaxed">
+                  at {meetingAddress}
+                </div>
+              </div>
+
+              {/* Right Column: 3D Map Pin & Click for Directions */}
+              <div className="col-span-4 flex flex-col items-center justify-center text-center">
+                <a
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col items-center gap-1 cursor-pointer transition-transform hover:scale-105 active:scale-95"
+                  title="Open location in Google Maps"
                 >
-                  <ShieldCheck className="w-3 h-3" />
-                  <span>{isConfirmed ? "PAID PASS" : "PENDING"}</span>
-                </span>
+                  <img
+                    src="/directions-map-pin.png"
+                    alt="Directions Map Pin"
+                    className="w-14 h-11 object-contain drop-shadow-md group-hover:brightness-110 transition-all"
+                    width={56}
+                    height={44}
+                  />
+                  <span className="text-[11px] font-bold text-[#f5edeb] group-hover:text-[#e3a157] underline underline-offset-2 transition-colors">
+                    Click for Directions
+                  </span>
+                </a>
               </div>
             </div>
 
-            {/* Bottom Security / Organizer Tag */}
-            <div className="text-center mt-2.5 text-[10px] text-[#cfeffc]/75 font-medium tracking-wide">
-              Verified by Bhoomiputra Foundation &amp; MatsyaMart
+            {/* Host Support WhatsApp Footer */}
+            <div className="pt-2">
+              <a
+                href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+                  `Hi, I have a question regarding pass ${order.order_ref}.`,
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block text-xs sm:text-sm font-bold text-[#e3a157] hover:text-[#dab38c] transition-colors"
+              >
+                Host Support WhatsApp: {displayHostPhone}
+              </a>
             </div>
           </div>
         </div>
@@ -335,6 +298,5 @@ export const MobilePass: React.FC<MobilePassProps> = ({
   );
 };
 
-// Backwards-compatible export
 export const BookMyShowPass = MobilePass;
 export type BookMyShowPassProps = MobilePassProps;

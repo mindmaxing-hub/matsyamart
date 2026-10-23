@@ -490,6 +490,7 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
               <SharedCoordinateInput
                 latitude={newLat}
                 longitude={newLng}
+                mapsUrl={newMapsUrl}
                 pinVisibility={newPinVisibility}
                 onChange={({ latitude, longitude, pinVisibility, mapsUrl }) => {
                   setNewLat(latitude);
@@ -712,6 +713,7 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
               <SharedCoordinateInput
                 latitude={editLat}
                 longitude={editLng}
+                mapsUrl={editMapsUrl}
                 pinVisibility={editPinVisibility}
                 onChange={({ latitude, longitude, pinVisibility, mapsUrl }) => {
                   setEditLat(latitude);
@@ -818,9 +820,24 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
               </div>
 
               <div className="pt-3 border-t border-[#dab38c]/15 flex items-center justify-between text-xs">
-                <span className="text-[#dab38c]">
-                  Guide: <strong className="text-[#f5edeb]">{walk.host_name}</strong>
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[#dab38c]">
+                    Guide: <strong className="text-[#f5edeb]">{walk.host_name}</strong>
+                  </span>
+                  {walk.meeting_point_maps_url && (
+                    <a
+                      href={walk.meeting_point_maps_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-950/70 border border-sky-400/40 text-[10px] font-bold text-sky-300 hover:text-sky-200 hover:bg-sky-900 transition-colors"
+                      title="View exact meeting point on Google Maps"
+                    >
+                      <MapPin className="w-2.5 h-2.5 text-sky-400" />
+                      <span>Maps</span>
+                      <ExternalLink className="w-2.5 h-2.5" />
+                    </a>
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
                   <span className="text-emerald-400 font-semibold text-[11px]">
                     ● Open for Registration

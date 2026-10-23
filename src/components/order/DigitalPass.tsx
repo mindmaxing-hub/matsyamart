@@ -1,30 +1,57 @@
 import React, { useState, useEffect } from "react";
 import confetti from "canvas-confetti";
 import {
-  ShieldCheck,
-  MapPin,
-  Calendar,
-  Clock,
-  Phone,
   Share2,
   Printer,
-  Anchor,
   CheckCircle,
-  ExternalLink,
+  Copy,
+  Check,
 } from "lucide-react";
 import { Order } from "../../types";
-import { formatINR, formatDate, formatTime } from "../../lib/utils";
 import { openWhatsApp, buildPassMessage } from "../../lib/whatsapp";
 import { generateQrDataUrl } from "../../lib/qr";
-import { BrandLogo } from "../site/BrandLogo";
+import { buildGoogleMapsUrl } from "../../lib/services/places";
 
 interface DigitalPassProps {
   order: Order;
 }
 
+function formatPassDate(isoDate?: string): string {
+  if (!isoDate) return "12/12/2026";
+  try {
+    const d = new Date(isoDate);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  } catch {
+    return "12/12/2026";
+  }
+}
+
+function formatReportingTime(isoDate?: string): string {
+  if (!isoDate) return "6:30 pm";
+  try {
+    const d = new Date(isoDate);
+    return d
+      .toLocaleTimeString("en-IN", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      })
+      .toLowerCase();
+  } catch {
+    return "6:30 pm";
+  }
+}
+
 export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
+
+  const primaryItem = order.items[0];
+  const listing = primaryItem?.listing;
+  const slot = primaryItem?.slot;
 
   useEffect(() => {
     // Launch celebratory confetti on pass load
@@ -33,14 +60,15 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
         particleCount: 60,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ["#0F172A", "#E3A157", "#10B981"],
+        colors: ["#29100B", "#E3A157", "#10B981"],
       });
     } catch {
-      // Ignore if canvas-confetti is not loaded
+      // Ignore if canvas-confetti fails
     }
 
-    // Generate QR verification pass
-    const verificationUrl = `${window.location.origin}/order/confirmation/${order.order_ref}`;
+    // Generate QR verification pass URL for host scanner
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const verificationUrl = `${origin}/order/confirmation/${order.order_ref}`;
     generateQrDataUrl(verificationUrl).then((url) => setQrDataUrl(url));
   }, [order.order_ref]);
 
@@ -49,17 +77,14 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
   };
 
   const handleShareWhatsApp = () => {
-    const primaryItem = order.items[0];
-    const listing = primaryItem?.listing;
-    const slot = primaryItem?.slot;
     const passUrl = typeof window !== "undefined" ? window.location.href : "";
 
     const text = buildPassMessage({
       guestName: order.customer_name,
       experienceTitle: listing?.title || "Coastal Experience",
       ticketRef: order.order_ref,
-      dateStr: slot ? formatDate(slot.slot_start) : "Confirmed Schedule",
-      timeStr: slot ? `${formatTime(slot.slot_start)} – ${formatTime(slot.slot_end)}` : "As scheduled",
+      dateStr: slot ? formatPassDate(slot.slot_start) : "Confirmed Schedule",
+      timeStr: slot ? formatReportingTime(slot.slot_start) : "As scheduled",
       venue: listing?.location_name || "Mumbai Coast",
       secretPin: listing?.secret_meeting_point,
       mapsUrl: listing?.meeting_point_maps_url,
@@ -76,223 +101,199 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const primaryItem = order.items[0];
-  const listing = primaryItem?.listing;
-  const slot = primaryItem?.slot;
-  const isExperience = listing?.type === "experience";
+  const formattedPassDate = formatPassDate(slot?.slot_start);
+  const reportingTimeStr = formatReportingTime(slot?.slot_start);
+  const admitCount = primaryItem?.quantity || 1;
+  const amountPaid = order.total_amount_inr || 2400;
+
+  const meetingAddress =
+    listing?.secret_meeting_point ||
+    listing?.location_name ||
+    "Tandel House, Sasson Dock, Watch Tower, Amba Mata Mandir Colaba, Mumbai -400 001";
+
+  const mapsUrl =
+    listing?.meeting_point_maps_url ||
+    (listing?.latitude && listing?.longitude
+      ? buildGoogleMapsUrl(listing.latitude, listing.longitude)
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(meetingAddress)}`);
+
+  const displayHostPhone = listing?.host_phone || "+91 99204 77158";
+  const cleanPhone = displayHostPhone.replace(/[^0-9]/g, "");
+  const hostWaUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+    `Hi, I hold verified pass ${order.order_ref} for ${listing?.title || "Coastal Experience"}.`,
+  )}`;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      {/* Confirmation Banner */}
-      <div className="text-center space-y-2">
+    <div className="max-w-md mx-auto space-y-6">
+      {/* Print isolation style */}
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden !important;
+          }
+          #matsyamart-digital-pass, #matsyamart-digital-pass * {
+            visibility: visible !important;
+          }
+          #matsyamart-digital-pass {
+            position: fixed !important;
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: 380px !important;
+            box-shadow: none !important;
+            z-index: 999999 !important;
+            page-break-inside: avoid !important;
+          }
+        }
+      `}</style>
+
+      {/* Confirmation Pill */}
+      <div className="text-center print:hidden">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/70 text-emerald-300 text-xs font-semibold border border-emerald-500/30">
           <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Booking & Payment Confirmed</span>
+          <span>Booking &amp; Payment Confirmed</span>
         </div>
-        <h1 className="font-display font-bold text-2xl sm:text-3xl text-[#f5edeb]">
-          Your Verified Coastal Digital Pass
-        </h1>
-        <p className="text-xs text-[#dab38c] max-w-md mx-auto">
-          Please present this pass on your phone or provide ticket code{" "}
-          <span className="font-mono font-bold text-[#e3a157] bg-[#1f0b07] px-2 py-0.5 rounded border border-[#dab38c]/25">
-            {order.order_ref}
-          </span>{" "}
-          upon arrival.
-        </p>
       </div>
 
-      {/* Maritime Permit Card */}
-      <div className="bg-[#29100b] rounded-3xl border border-[#dab38c]/30 shadow-2xl overflow-hidden relative text-[#f5edeb]">
-        {/* Pass Header Band */}
-        <div className="bg-[#1f0b07] text-[#f5edeb] p-6 flex items-start justify-between relative overflow-hidden border-b border-[#dab38c]/20">
-          <div className="relative z-10 space-y-1">
-            <div className="flex items-center gap-2">
-              <BrandLogo className="h-7 w-auto max-w-[150px]" />
-              <span className="text-[10px] uppercase font-bold tracking-wider bg-[#35160e] text-[#dab38c] px-2 py-0.5 rounded border border-[#dab38c]/20">
-                Official Boarding Permit
-              </span>
-            </div>
-            <h2 className="font-display font-bold text-xl text-[#f5edeb] pt-1">
-              {listing?.title || "Community Experience"}
-            </h2>
-            <div className="text-xs text-[#dab38c] flex items-center gap-1.5 pt-0.5">
-              <Anchor className="w-3.5 h-3.5 text-[#e3a157]" />
-              <span>Host: {listing?.host_name || "Indigenous Collective"}</span>
-            </div>
-          </div>
-
-          <div className="relative z-10 text-right shrink-0">
-            <span className="text-[10px] uppercase tracking-wider text-[#dab38c]/70 block">
-              Ticket Ref
-            </span>
-            <span className="font-mono font-bold text-sm text-[#e3a157] bg-[#29100b] px-2.5 py-1 rounded-lg border border-[#dab38c]/30 block mt-0.5">
-              {order.order_ref}
-            </span>
-          </div>
+      {/* 9:16 VERTICAL OFFICIAL PASS CARD (Exact User Mockup Layout) */}
+      <div
+        id="matsyamart-digital-pass"
+        className="w-full max-w-[390px] mx-auto rounded-[32px] overflow-hidden bg-[#2b120c] border border-[#dab38c]/25 shadow-[0_20px_60px_rgba(0,0,0,0.65)] select-none text-[#f5edeb] transition-all"
+      >
+        {/* 1. TOP AERIAL COASTAL BANNER WITH MATSYAMART LOGO */}
+        <div className="relative w-full aspect-[576/275] bg-[#1a0805] overflow-hidden border-b border-[#dab38c]/20">
+          <img
+            src="/pass-header-beach.png"
+            alt="MatsyaMart Coastal Banner"
+            className="w-full h-full object-cover object-center"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            width={576}
+            height={275}
+          />
         </div>
 
-        {/* Pass Core Body */}
-        <div className="p-6 sm:p-8 space-y-6">
-          {/* Schedule & Timing Grid */}
-          {slot && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-[#35160e]/80 border border-[#dab38c]/20">
-              <div className="space-y-1">
-                <span className="text-[11px] font-bold text-[#dab38c] uppercase tracking-wider flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-[#e3a157]" /> Date of
-                  Experience
-                </span>
-                <span className="font-display font-bold text-base text-[#f5edeb] block">
-                  {formatDate(slot.slot_start)}
-                </span>
-              </div>
+        {/* 2. PASS MAIN BODY */}
+        <div className="p-6 sm:p-7 space-y-5 text-center">
+          {/* Headline */}
+          <h2 className="font-display font-bold text-2xl sm:text-[27px] text-[#ffffff] tracking-tight leading-tight">
+            We are happy to host you! Yay!
+          </h2>
 
-              <div className="space-y-1">
-                <span className="text-[11px] font-bold text-[#dab38c] uppercase tracking-wider flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-[#e3a157]" /> Reporting
-                  Time
-                </span>
-                <span className="font-display font-bold text-base text-[#f5edeb] block">
-                  {formatTime(slot.slot_start)} sharp
-                </span>
-              </div>
-            </div>
-          )}
+          {/* Experience Title */}
+          <div className="font-bold text-base sm:text-lg text-[#e3a157] max-w-[280px] mx-auto leading-snug">
+            {listing?.title || "Sassoon Docks Dawn Heritage Walk & Coastal Seafood Feast"}
+          </div>
 
-          {/* Secret Meeting Point Unlocked */}
-          {isExperience && listing?.secret_meeting_point && (
-            <div className="p-5 rounded-2xl bg-[#35160e]/90 border border-[#e3a157]/40 space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#e3a157] animate-ping" />
-                <span className="text-xs font-bold uppercase tracking-wider text-[#e3a157] flex items-center gap-1">
-                  <MapPin className="w-4 h-4 text-[#e3a157]" />
-                  Secret Meeting Point & Coordinates (Unlocked)
-                </span>
-              </div>
-
-              <p className="text-xs sm:text-sm text-[#f5edeb] font-medium leading-relaxed">
-                {listing.secret_meeting_point}
-              </p>
-
-              <div className="pt-2">
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                    listing.secret_meeting_point,
-                  )}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] text-xs font-bold transition-colors shadow-xs"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  <span>Open Coordinates in Google Maps</span>
-                </a>
-              </div>
-            </div>
-          )}
-
-          {/* Guest Breakdown & QR Code Row */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4 border-t border-dashed border-[#dab38c]/25">
-            <div className="space-y-3 w-full sm:w-auto">
-              <div>
-                <span className="text-[10px] uppercase font-bold text-[#dab38c]/70">
-                  Lead Attendee
-                </span>
-                <div className="font-display font-bold text-base text-[#f5edeb]">
-                  {order.customer_name}
-                </div>
-                <div className="text-xs text-[#dab38c]">
-                  {order.customer_phone}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 text-xs">
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-[#dab38c]/70">
-                    Guests
-                  </span>
-                  <div className="font-semibold text-[#f5edeb]">
-                    {primaryItem?.quantity || 1} Person(s)
-                  </div>
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-[#dab38c]/70">
-                    Amount Paid
-                  </span>
-                  <div className="font-semibold text-[#e3a157] font-display">
-                    {formatINR(order.total_amount_inr)}
-                  </div>
-                </div>
-              </div>
-
-              {listing?.host_phone && (
-                <div className="pt-2 text-xs flex items-center gap-2 text-[#dab38c]">
-                  <Phone className="w-3.5 h-3.5 text-[#e3a157]" />
-                  <span>
-                    Host Support WhatsApp:{" "}
-                    <strong className="text-[#f5edeb]">
-                      {listing.host_phone}
-                    </strong>
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* QR Code */}
-            <div className="shrink-0 flex flex-col items-center">
+          {/* Centered QR Code */}
+          <div className="flex justify-center pt-1 pb-1">
+            <div className="bg-white p-3.5 sm:p-4 rounded-2xl shadow-xl flex items-center justify-center">
               {qrDataUrl ? (
                 <img
                   src={qrDataUrl}
-                  alt="Boarding Pass QR"
-                  className="w-32 h-32 rounded-xl border border-[#dab38c]/30 p-1 shadow-xs bg-white"
+                  alt="Ticket QR Code"
+                  className="w-40 h-40 sm:w-44 sm:h-44 object-contain"
+                  width={176}
+                  height={176}
                 />
               ) : (
-                <div className="w-32 h-32 rounded-xl bg-[#1f0b07] border border-[#dab38c]/20 flex items-center justify-center text-xs text-[#dab38c]">
+                <div className="w-40 h-40 sm:w-44 sm:h-44 flex items-center justify-center text-xs text-stone-500 font-mono">
                   Generating QR...
                 </div>
               )}
-              <span className="text-[10px] text-[#dab38c]/70 font-mono mt-1">
-                Scan for Gate Entry
-              </span>
             </div>
           </div>
-        </div>
 
-        {/* Card Tear-off Footer */}
-        <div className="bg-[#1f0b07] border-t border-[#dab38c]/20 px-6 py-4 flex flex-wrap items-center justify-between text-xs text-[#dab38c] gap-2">
-          <div className="flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>
-              Community-Verified Booking • Weather monitored by harbour port
-            </span>
+          {/* Details Summary */}
+          <div className="space-y-1.5 text-xs sm:text-sm text-[#f5edeb] font-medium tracking-wide">
+            <div>Date - {formattedPassDate}</div>
+            <div>Admit - {admitCount} Person{admitCount > 1 ? "s" : ""}</div>
+            <div>Amount Paid - INR {amountPaid}</div>
           </div>
-          <span className="font-mono text-[11px] text-[#dab38c]/70">
-            {new Date(order.created_at).toLocaleDateString()}
-          </span>
+
+          {/* Location & Directions Row */}
+          <div className="grid grid-cols-12 gap-3 items-center pt-4 border-t border-[#dab38c]/15 text-left">
+            {/* Left Column: Reporting Time & Address */}
+            <div className="col-span-8 space-y-1 pr-1">
+              <div className="text-xs sm:text-sm font-semibold text-[#f5edeb]">
+                Reporting Time - {reportingTimeStr}
+              </div>
+              <div className="text-[11px] sm:text-xs text-[#dab38c] leading-relaxed">
+                at {meetingAddress}
+              </div>
+            </div>
+
+            {/* Right Column: 3D Map Pin & Click for Directions */}
+            <div className="col-span-4 flex flex-col items-center justify-center text-center">
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex flex-col items-center gap-1 cursor-pointer transition-transform hover:scale-105 active:scale-95"
+                title="Open location in Google Maps"
+              >
+                <img
+                  src="/directions-map-pin.png"
+                  alt="Directions Map Pin"
+                  className="w-14 h-11 object-contain drop-shadow-md group-hover:brightness-110 transition-all"
+                  width={56}
+                  height={44}
+                />
+                <span className="text-[11px] font-bold text-[#f5edeb] group-hover:text-[#e3a157] underline underline-offset-2 transition-colors">
+                  Click for Directions
+                </span>
+              </a>
+            </div>
+          </div>
+
+          {/* Host Support WhatsApp Footer */}
+          <div className="pt-2">
+            <a
+              href={hostWaUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block text-xs sm:text-sm font-bold text-[#e3a157] hover:text-[#dab38c] transition-colors"
+            >
+              Host Support WhatsApp: {displayHostPhone}
+            </a>
+          </div>
         </div>
       </div>
 
-      {/* Action Buttons: Print, WhatsApp Share, Copy Link */}
-      <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+      {/* Action Buttons (External to the pass card) */}
+      <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2 print:hidden">
         <button
           onClick={handlePrint}
-          className="px-4 py-2.5 rounded-xl border border-[#dab38c]/30 bg-[#35160e]/80 hover:bg-[#481f14] text-[#f5edeb] text-xs font-semibold flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
+          className="px-4 py-2 rounded-xl border border-[#dab38c]/30 bg-[#35160e]/80 hover:bg-[#481f14] text-[#f5edeb] text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
         >
-          <Printer className="w-4 h-4 text-[#dab38c]" />
+          <Printer className="w-3.5 h-3.5 text-[#dab38c]" />
           <span>Print / Save PDF</span>
         </button>
 
         <button
           onClick={handleShareWhatsApp}
-          className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-2 shadow-md transition-colors cursor-pointer"
+          className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md transition-colors cursor-pointer"
         >
-          <Share2 className="w-4 h-4" />
+          <Share2 className="w-3.5 h-3.5" />
           <span>Share to WhatsApp</span>
         </button>
 
         <button
           onClick={handleCopyLink}
-          className="px-4 py-2.5 rounded-xl border border-[#dab38c]/30 bg-[#35160e]/80 hover:bg-[#481f14] text-[#f5edeb] text-xs font-semibold flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
+          className="px-4 py-2 rounded-xl border border-[#dab38c]/30 bg-[#35160e]/80 hover:bg-[#481f14] text-[#f5edeb] text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
         >
-          <span>{copied ? "Link Copied! ✓" : "Copy Pass Link"}</span>
+          {copied ? (
+            <>
+              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Link Copied!</span>
+            </>
+          ) : (
+            <>
+              <Copy className="w-3.5 h-3.5 text-[#dab38c]" />
+              <span>Copy Pass Link</span>
+            </>
+          )}
         </button>
       </div>
     </div>

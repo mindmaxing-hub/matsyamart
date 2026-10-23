@@ -94,6 +94,7 @@ export interface Place {
   arrival_instructions?: string | undefined;
   pin_visibility: PinVisibilityType;
   photos: string[];
+  meeting_point_maps_url?: string | undefined;
   created_at?: string | undefined;
   updated_at?: string | undefined;
 }

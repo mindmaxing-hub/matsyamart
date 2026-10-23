@@ -65,6 +65,7 @@ export const SessionsAndVenuesManager: React.FC<SessionsAndVenuesManagerProps> =
   const [placeArrivalNotes, setPlaceArrivalNotes] = useState("");
   const [placeLat, setPlaceLat] = useState<number>(19.1316);
   const [placeLng, setPlaceLng] = useState<number>(72.8109);
+  const [placeMapsUrl, setPlaceMapsUrl] = useState("");
   const [placeVisibility, setPlaceVisibility] = useState<PinVisibilityType>("public");
   const [placePhoto, setPlacePhoto] = useState("");
 
@@ -106,6 +107,7 @@ export const SessionsAndVenuesManager: React.FC<SessionsAndVenuesManagerProps> =
     setPlaceArrivalNotes("Rendezvous coordinates provided on confirmed pass.");
     setPlaceLat(19.1316);
     setPlaceLng(72.8109);
+    setPlaceMapsUrl("https://maps.google.com/?q=19.1316,72.8109");
     setPlaceVisibility("public");
     setPlacePhoto("");
     setIsPlaceModalOpen(true);
@@ -119,6 +121,10 @@ export const SessionsAndVenuesManager: React.FC<SessionsAndVenuesManagerProps> =
     setPlaceArrivalNotes(p.arrival_instructions || "");
     setPlaceLat(p.latitude);
     setPlaceLng(p.longitude);
+    setPlaceMapsUrl(
+      p.meeting_point_maps_url ||
+        (p.latitude && p.longitude ? buildGoogleMapsUrl(p.latitude, p.longitude) : ""),
+    );
     setPlaceVisibility(p.pin_visibility);
     setPlacePhoto(p.photos?.[0] || "");
     setIsPlaceModalOpen(true);
@@ -139,6 +145,7 @@ export const SessionsAndVenuesManager: React.FC<SessionsAndVenuesManagerProps> =
         arrival_instructions: placeArrivalNotes.trim(),
         latitude: placeLat,
         longitude: placeLng,
+        meeting_point_maps_url: placeMapsUrl || buildGoogleMapsUrl(placeLat, placeLng),
         pin_visibility: placeVisibility,
         photos: placePhoto.trim() ? [placePhoto.trim()] : editingPlace.photos,
       });
@@ -150,6 +157,7 @@ export const SessionsAndVenuesManager: React.FC<SessionsAndVenuesManagerProps> =
         arrival_instructions: placeArrivalNotes.trim(),
         latitude: placeLat,
         longitude: placeLng,
+        meeting_point_maps_url: placeMapsUrl || buildGoogleMapsUrl(placeLat, placeLng),
         pin_visibility: placeVisibility,
         photos: placePhoto.trim() ? [placePhoto.trim()] : [],
       });
@@ -670,12 +678,14 @@ export const SessionsAndVenuesManager: React.FC<SessionsAndVenuesManagerProps> =
               <SharedCoordinateInput
                 latitude={placeLat}
                 longitude={placeLng}
+                mapsUrl={placeMapsUrl}
                 pinVisibility={placeVisibility}
                 required
-                onChange={({ latitude, longitude, pinVisibility }) => {
+                onChange={({ latitude, longitude, pinVisibility, mapsUrl }) => {
                   setPlaceLat(latitude);
                   setPlaceLng(longitude);
                   setPlaceVisibility(pinVisibility);
+                  setPlaceMapsUrl(mapsUrl);
                 }}
               />
 
