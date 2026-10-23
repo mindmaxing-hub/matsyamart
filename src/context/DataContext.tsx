@@ -11,14 +11,21 @@ import {
   FulfillmentStatus,
   Coupon,
   StockAlert,
+  Partner,
+  Place,
+  LoyaltyProgram,
+  LoyaltyProgramConfig,
 } from "../types";
 import {
   SEED_CATEGORIES,
   SEED_LISTINGS,
+  SEED_PARTNERS,
+  SEED_PLACES,
   generateSeedSlots,
 } from "../data/seedData";
 import { generateOrderRef } from "../lib/utils";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
+import { DEFAULT_LOYALTY_CONFIG } from "../lib/services/loyalty";
 
 interface CreateOrderInput {
   customerName: string;
@@ -36,6 +43,8 @@ interface CreateOrderInput {
   razorpayOrderId?: string | undefined;
   couponCode?: string | undefined;
   discountAmount?: number | undefined;
+  pointsRedeemed?: number | undefined;
+  pointsDiscountAmount?: number | undefined;
 }
 
 interface ValidateCouponResult {
@@ -52,6 +61,9 @@ interface DataContextType {
   orders: Order[];
   proposals: CommunityVendorProposal[];
   coupons: Coupon[];
+  partners: Partner[];
+  places: Place[];
+  loyaltyProgram: LoyaltyProgram;
   spotlightListingIds: string[];
   lowStockAlerts: StockAlert[];
   getListingBySlug: (slug: string) => Listing | undefined;
@@ -63,10 +75,18 @@ interface DataContextType {
   updateListing: (id: string, updates: Partial<Listing>) => void;
   restockListing: (id: string, additionalQuantity: number) => void;
   updateStockThreshold: (id: string, threshold: number) => void;
+  addPartner: (partner: Omit<Partner, "id">) => Partner;
+  updatePartner: (id: string, updates: Partial<Partner>) => void;
+  deletePartner: (id: string) => void;
+  addPlace: (place: Omit<Place, "id">) => Place;
+  updatePlace: (id: string, updates: Partial<Place>) => void;
+  deletePlace: (id: string) => void;
   addSlot: (
-    slot: Omit<ExperienceSlot, "id" | "booked_count" | "is_cancelled">,
+    slot: Omit<ExperienceSlot, "id" | "booked_count" | "is_cancelled" | "revision_number">,
   ) => void;
   deleteSlot: (slotId: string) => void;
+  updateSessionRevision: (slotId: string, updates: Partial<ExperienceSlot>) => void;
+  updateLoyaltyProgram: (config: LoyaltyProgramConfig) => void;
   addRecurringWeekendSlots: (
     listingId: string,
     weeksCount: number,
@@ -115,6 +135,9 @@ const STORAGE_ORDERS = "matsyamart_orders_v1";
 const STORAGE_PROPOSALS = "matsyamart_proposals_v1";
 const STORAGE_SPOTLIGHT = "matsyamart_spotlight_v1";
 const STORAGE_COUPONS = "matsyamart_coupons_v1";
+const STORAGE_PARTNERS = "matsyamart_partners_v2";
+const STORAGE_PLACES = "matsyamart_places_v2";
+const STORAGE_LOYALTY = "matsyamart_loyalty_v2";
 
 const SEED_COUPONS: Coupon[] = [
   {
@@ -349,9 +372,62 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   });
 
+  const [partners, setPartners] = useState<Partner[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_PARTNERS);
+      return saved ? JSON.parse(saved) : SEED_PARTNERS;
+    } catch {
+      return SEED_PARTNERS;
+    }
+  });
+
+  const [places, setPlaces] = useState<Place[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_PLACES);
+      return saved ? JSON.parse(saved) : SEED_PLACES;
+    } catch {
+      return SEED_PLACES;
+    }
+  });
+
+  const [loyaltyProgram, setLoyaltyProgram] = useState<LoyaltyProgram>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_LOYALTY);
+      return saved
+        ? JSON.parse(saved)
+        : {
+            id: "prog-default",
+            status: "active" as const,
+            rule_version: 1,
+            config: DEFAULT_LOYALTY_CONFIG,
+            created_at: new Date().toISOString(),
+          };
+    } catch {
+      return {
+        id: "prog-default",
+        status: "active" as const,
+        rule_version: 1,
+        config: DEFAULT_LOYALTY_CONFIG,
+        created_at: new Date().toISOString(),
+      };
+    }
+  });
+
   useEffect(() => {
     localStorage.setItem(STORAGE_COUPONS, JSON.stringify(coupons));
   }, [coupons]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_PARTNERS, JSON.stringify(partners));
+  }, [partners]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_PLACES, JSON.stringify(places));
+  }, [places]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_LOYALTY, JSON.stringify(loyaltyProgram));
+  }, [loyaltyProgram]);
 
   // Optionally fetch from Supabase if configured
   useEffect(() => {
@@ -406,19 +482,28 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     const discountAmount = Math.min(subtotalAmount, input.discountAmount || 0);
     const finalTotalAmount = Math.max(0, subtotalAmount - discountAmount);
 
-    const orderId = "ord-" + Math.random().toString(36).substring(2, 9);
+    const orderId =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : "ord-" + Math.random().toString(36).substring(2, 9);
 
-    const orderItems: OrderItem[] = input.items.map((item, idx) => ({
-      id: `item-${orderId}-${idx}`,
-      order_id: orderId,
-      listing_id: item.listing.id,
-      slot_id: item.slotId,
-      quantity: item.quantity,
-      unit_price_inr: item.listing.price_inr,
-      attendee_details: item.attendeeDetails || [],
-      listing: item.listing,
-      slot: item.slotId ? slots.find((s) => s.id === item.slotId) : undefined,
-    }));
+    const orderItems: OrderItem[] = input.items.map((item, idx) => {
+      const itemId =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `item-${orderId}-${idx}`;
+      return {
+        id: itemId,
+        order_id: orderId,
+        listing_id: item.listing.id,
+        slot_id: item.slotId,
+        quantity: item.quantity,
+        unit_price_inr: item.listing.price_inr,
+        attendee_details: item.attendeeDetails || [],
+        listing: item.listing,
+        slot: item.slotId ? slots.find((s) => s.id === item.slotId) : undefined,
+      };
+    });
 
     const newOrder: Order = {
       id: orderId,
@@ -429,6 +514,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
       total_amount_inr: finalTotalAmount,
       coupon_code: input.couponCode || undefined,
       discount_amount_inr: discountAmount > 0 ? discountAmount : undefined,
+      loyalty_points_redeemed: input.pointsRedeemed,
+      loyalty_discount_inr: input.pointsDiscountAmount,
       razorpay_order_id: input.razorpayOrderId,
       razorpay_payment_id: input.razorpayPaymentId,
       status: "confirmed",
@@ -470,10 +557,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     // Save order
     setOrders((prev) => [newOrder, ...prev]);
 
-    // If Supabase is active, persist to remote tables
+    // If Supabase is active, persist to remote tables with full relational schema
     if (isSupabaseConfigured && supabase) {
       try {
-        await supabase.from("orders").insert({
+        const { error: orderError } = await supabase.from("orders").insert({
           id: orderId,
           order_ref: orderRef,
           customer_name: input.customerName,
@@ -489,30 +576,147 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
           emergency_contact: input.emergencyContact,
         });
 
-        for (const item of input.items) {
-          if (item.slotId) {
+        if (orderError) {
+          console.error("Supabase order insert error:", orderError);
+        }
+
+        for (const item of orderItems) {
+          await supabase.from("booking_items").insert({
+            id: item.id,
+            order_id: orderId,
+            offering_id: item.listing_id,
+            session_id: item.slot_id || null,
+            quantity: item.quantity,
+            unit_price_inr: item.unit_price_inr,
+            discount_allocated_inr: 0,
+            net_revenue_inr: item.unit_price_inr * item.quantity,
+          });
+
+          if (item.slot_id) {
             await supabase.rpc("book_experience_slot", {
-              p_slot_id: item.slotId,
+              p_slot_id: item.slot_id,
               p_seats: item.quantity,
             });
           }
+
+          if (item.attendee_details && item.attendee_details.length > 0) {
+            for (const att of item.attendee_details) {
+              await supabase.from("attendees").insert({
+                booking_item_id: item.id,
+                session_id: item.slot_id || null,
+                full_name: att.fullName,
+                phone: att.phone,
+                email: att.email || null,
+                checked_in: Boolean(att.checked_in),
+              });
+            }
+          }
         }
       } catch (err) {
-        console.warn("Failed to sync order to Supabase", err);
+        console.error("Failed to sync order transaction to Supabase:", err);
       }
     }
 
     return newOrder;
   };
 
-  const addSlot = (
-    slotData: Omit<ExperienceSlot, "id" | "booked_count" | "is_cancelled">,
+  const addPartner = (partnerData: Omit<Partner, "id">): Partner => {
+    const id =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : "part-" + Math.random().toString(36).substring(2, 9);
+    const newPartner: Partner = {
+      id,
+      ...partnerData,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    setPartners((prev) => [newPartner, ...prev]);
+    return newPartner;
+  };
+
+  const updatePartner = (id: string, updates: Partial<Partner>) => {
+    setPartners((prev) =>
+      prev.map((p) =>
+        p.id === id ? { ...p, ...updates, updated_at: new Date().toISOString() } : p,
+      ),
+    );
+  };
+
+  const deletePartner = (id: string) => {
+    setPartners((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const addPlace = (placeData: Omit<Place, "id">): Place => {
+    const id =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : "place-" + Math.random().toString(36).substring(2, 9);
+    const newPlace: Place = {
+      id,
+      ...placeData,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    setPlaces((prev) => [newPlace, ...prev]);
+    return newPlace;
+  };
+
+  const updatePlace = (id: string, updates: Partial<Place>) => {
+    setPlaces((prev) =>
+      prev.map((p) =>
+        p.id === id ? { ...p, ...updates, updated_at: new Date().toISOString() } : p,
+      ),
+    );
+  };
+
+  const deletePlace = (id: string) => {
+    setPlaces((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const updateSessionRevision = (
+    slotId: string,
+    updates: Partial<ExperienceSlot>,
   ) => {
+    setSlots((prev) =>
+      prev.map((s) =>
+        s.id === slotId
+          ? {
+              ...s,
+              ...updates,
+              revision_number: (s.revision_number || 1) + 1,
+              updated_at: new Date().toISOString(),
+            }
+          : s,
+      ),
+    );
+  };
+
+  const updateLoyaltyProgram = (config: LoyaltyProgramConfig) => {
+    setLoyaltyProgram((prev) => ({
+      ...prev,
+      rule_version: prev.rule_version + 1,
+      config,
+    }));
+  };
+
+  const addSlot = (
+    slotData: Omit<ExperienceSlot, "id" | "booked_count" | "is_cancelled" | "revision_number">,
+  ) => {
+    const id =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : "slot-" + Math.random().toString(36).substring(2, 9);
+    const offeringId = (slotData as any).offering_id || (slotData as any).listing_id || "";
+    const listingId = (slotData as any).listing_id || offeringId;
     const newSlot: ExperienceSlot = {
-      id: "slot-" + Math.random().toString(36).substring(2, 9),
-      booked_count: 0,
-      is_cancelled: false,
       ...slotData,
+      id,
+      offering_id: offeringId,
+      listing_id: listingId,
+      booked_count: 0,
+      revision_number: 1,
+      is_cancelled: false,
     };
     setSlots((prev) => [...prev, newSlot]);
   };
@@ -544,11 +748,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
 
         newSlots.push({
           id: `slot-rec-${listingId}-${w}-${dayOffset}`,
+          offering_id: listingId,
           listing_id: listingId,
           slot_start: start.toISOString(),
           slot_end: end.toISOString(),
           capacity,
           booked_count: 0,
+          revision_number: 1,
           is_cancelled: false,
         });
       }
@@ -866,6 +1072,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         orders,
         proposals,
         coupons,
+        partners,
+        places,
+        loyaltyProgram,
         spotlightListingIds,
         lowStockAlerts,
         getListingBySlug,
@@ -877,8 +1086,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         updateListing,
         restockListing,
         updateStockThreshold,
+        addPartner,
+        updatePartner,
+        deletePartner,
+        addPlace,
+        updatePlace,
+        deletePlace,
         addSlot,
         deleteSlot,
+        updateSessionRevision,
+        updateLoyaltyProgram,
         addRecurringWeekendSlots,
         toggleCancelSlot,
         addProposal,

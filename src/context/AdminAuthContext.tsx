@@ -3,6 +3,7 @@ import { RoleLevel, AdminUserRole, PillarType } from "../types";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
 
 interface AuthUser {
+  id?: string | undefined;
   email: string;
   name?: string | undefined;
   picture?: string | undefined;
@@ -36,8 +37,8 @@ const AdminAuthContext = createContext<AdminAuthContextType | undefined>(
   undefined,
 );
 
-const STORAGE_AUTH_USER = "matsyamart_admin_user_v1";
-const STORAGE_STAFF_ROLES = "matsyamart_staff_roles_v2";
+const STORAGE_AUTH_USER = "matsyamart_admin_user_v2";
+const STORAGE_STAFF_ROLES = "matsyamart_staff_roles_v3";
 
 const DEFAULT_STAFF_ROLES: AdminUserRole[] = [
   {
@@ -72,15 +73,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const saved = sessionStorage.getItem(STORAGE_AUTH_USER);
       if (saved) {
-        const parsed = JSON.parse(saved);
-        if (
-          parsed.email?.toLowerCase().includes("vikas@matsyamart") ||
-          parsed.email?.toLowerCase().includes("hellow@matsyamart")
-        ) {
-          parsed.email = "hello@matsyamart.com";
-          parsed.name = "MatsyaMart (Owner)";
-        }
-        return parsed;
+        return JSON.parse(saved);
       }
       return null;
     } catch {
@@ -92,13 +85,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const saved = localStorage.getItem(STORAGE_STAFF_ROLES);
       if (saved) {
-        const parsed: AdminUserRole[] = JSON.parse(saved);
-        return parsed.map((item) =>
-          item.email.toLowerCase() === "vikas@matsyamart.com" ||
-          item.email.toLowerCase() === "hellow@matsyamart.com"
-            ? { ...item, email: "hello@matsyamart.com" }
-            : item
-        );
+        return JSON.parse(saved);
       }
       return DEFAULT_STAFF_ROLES;
     } catch {
@@ -120,17 +107,52 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [user]);
 
-  // Determine current active role from staffRoles based on user email
+  // Sync Supabase Auth session if active
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) return;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.email) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email,
+          name: session.user.user_metadata?.["full_name"] || session.user.email.split("@")[0],
+          picture: session.user.user_metadata?.["avatar_url"],
+        });
+      }
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session?.user?.email) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.user_metadata?.["full_name"] || session.user.email.split("@")[0],
+            picture: session.user.user_metadata?.["avatar_url"],
+          });
+        } else {
+          setUser(null);
+        }
+      },
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  // Determine current active role from staffRoles based strictly on user email
   const currentStaff = user
     ? staffRoles.find(
         (s) => s.email.toLowerCase() === user.email.toLowerCase(),
       )
     : null;
 
-  // Fallback to "owner" if signed in via dev/demo without explicit role match
-  const role: RoleLevel | null = user
-    ? currentStaff?.role || "owner"
-    : null;
+  // STRICT ZERO-TRUST SECURITY:
+  // If the user is not found in staffRoles, they receive role = null and ZERO administrative access.
+  // There is NO fallback to "owner"!
+  const role: RoleLevel | null = currentStaff ? currentStaff.role : null;
 
   const assignedPillars: PillarType[] =
     role === "owner" || role === "admin" || role === "manager"
@@ -151,12 +173,14 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
         });
         if (error) throw error;
       } else {
-        // Fallback for development / mock mode
+        // In local development without Supabase credentials, sign in with verified demo staff
         devSignInAs("owner", "hello@matsyamart.com");
       }
     } catch (err) {
-      console.warn("Google sign-in fallback", err);
-      devSignInAs("owner", "hello@matsyamart.com");
+      console.error("Google sign-in failed:", err);
+      // Strictly do NOT grant owner access on failure!
+      setUser(null);
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -173,47 +197,42 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
         ? "hello@matsyamart.com"
         : selectedRole === "manager"
           ? "kolibaba.operations@matsyamart.com"
-          : "coordinator.food@matsyamart.com");
-
-    if (
-      email.toLowerCase().includes("vikas@matsyamart") ||
-      email.toLowerCase().includes("hellow@matsyamart")
-    ) {
-      email = "hello@matsyamart.com";
-    }
+          : selectedRole === "host"
+            ? "host.pranay@matsyamart.com"
+            : "coordinator.food@matsyamart.com");
 
     const name =
       selectedRole === "owner" || selectedRole === "admin"
         ? "MatsyaMart (Owner)"
         : selectedRole === "manager"
           ? "Operations Manager"
-          : "Pillar Coordinator";
+          : selectedRole === "host"
+            ? "Verified Host"
+            : "Pillar Coordinator";
 
-    // If custom pillars provided in simulator, persist into staffRoles
-    if (pillars && pillars.length > 0) {
-      setStaffRoles((prev) => {
-        const existing = prev.find(
-          (s) => s.email.toLowerCase() === email.toLowerCase(),
+    // Ensure this dev user exists in staffRoles with the selected role
+    setStaffRoles((prev) => {
+      const existing = prev.find(
+        (s) => s.email.toLowerCase() === email.toLowerCase(),
+      );
+      if (existing) {
+        return prev.map((s) =>
+          s.email.toLowerCase() === email.toLowerCase()
+            ? { ...s, role: selectedRole, assigned_pillars: pillars || s.assigned_pillars }
+            : s,
         );
-        if (existing) {
-          return prev.map((s) =>
-            s.email.toLowerCase() === email.toLowerCase()
-              ? { ...s, role: selectedRole, assigned_pillars: pillars }
-              : s,
-          );
-        } else {
-          return [
-            ...prev,
-            {
-              email: email.trim().toLowerCase(),
-              role: selectedRole,
-              assigned_pillars: pillars,
-              created_at: new Date().toISOString(),
-            },
-          ];
-        }
-      });
-    }
+      } else {
+        return [
+          ...prev,
+          {
+            email: email.trim().toLowerCase(),
+            role: selectedRole,
+            assigned_pillars: pillars || (selectedRole === "coordinator" ? ["food"] : undefined),
+            created_at: new Date().toISOString(),
+          },
+        ];
+      }
+    });
 
     setUser({
       email,
@@ -230,6 +249,8 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
         console.warn("Supabase signout failed", err);
       }
     }
+    // Clear all protected caches on logout
+    sessionStorage.removeItem(STORAGE_AUTH_USER);
     setUser(null);
   };
 
@@ -239,6 +260,21 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     pillars?: PillarType[],
     events?: string[],
   ) => {
+    // Permission check: Managers can ONLY update Coordinator workspace grants; they CANNOT promote to Owner or Manager
+    if (role === "manager") {
+      const targetUser = staffRoles.find(
+        (s) => s.email.toLowerCase() === email.toLowerCase(),
+      );
+      if (targetUser && (targetUser.role === "owner" || targetUser.role === "manager")) {
+        throw new Error("Managers cannot modify Owner or Manager accounts.");
+      }
+      if (newRole === "owner" || newRole === "manager" || newRole === "admin") {
+        throw new Error("Managers cannot grant Owner or Manager privileges.");
+      }
+    } else if (role !== "owner" && role !== "admin") {
+      throw new Error("Unauthorized to modify staff roles.");
+    }
+
     setStaffRoles((prev) => {
       const existing = prev.find(
         (s) => s.email.toLowerCase() === email.toLowerCase(),
@@ -270,24 +306,45 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const removeStaffRole = (email: string) => {
+    if (role === "manager") {
+      const targetUser = staffRoles.find(
+        (s) => s.email.toLowerCase() === email.toLowerCase(),
+      );
+      if (targetUser && (targetUser.role === "owner" || targetUser.role === "manager")) {
+        throw new Error("Managers cannot delete Owner or Manager accounts.");
+      }
+    } else if (role !== "owner" && role !== "admin") {
+      throw new Error("Unauthorized to remove staff roles.");
+    }
+
     setStaffRoles((prev) =>
       prev.filter((s) => s.email.toLowerCase() !== email.toLowerCase()),
     );
   };
 
-  // RBAC Permission Gate check: Strictly enforce pillar assignments
+  // RBAC Permission Gate check: Explicit allowlists for all capabilities
   const canAccessSection = (sectionId: string): boolean => {
     if (!role) return false;
+
     // Owner / Admin has full system access
     if (role === "owner" || role === "admin") return true;
 
-    // Manager has operational access across all 4 pillars and event manifests, but not financial/role admin
+    // Manager has operational access across all 4 pillars, manifests, spotlight, queues, and WhatsApp
+    // Managers are explicitly BLOCKED from payouts, coupons, and staff role elevation
     if (role === "manager") {
-      return (
-        sectionId !== "payouts" &&
-        sectionId !== "coupons" &&
-        sectionId !== "roles"
-      );
+      const MANAGER_ALLOWED_SECTIONS = [
+        "overview",
+        "goods",
+        "food",
+        "walks",
+        "workshops",
+        "queues",
+        "manifest",
+        "spotlight",
+        "whatsapp",
+        "roles", // Can view staff list and manage coordinator grants only
+      ];
+      return MANAGER_ALLOWED_SECTIONS.includes(sectionId);
     }
 
     // Coordinator is strictly scoped to their assigned pillars only
@@ -300,8 +357,12 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
       ) {
         return assignedPillars.includes(sectionId as PillarType);
       }
-      // Never allow coordinator to access global config / payouts / roles
       return false;
+    }
+
+    // Host role is only allowed to access the manifest/attendance for assigned sessions
+    if (role === "host") {
+      return sectionId === "manifest";
     }
 
     return false;

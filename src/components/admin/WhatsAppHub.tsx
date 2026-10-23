@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
-import { Order, Listing } from "../../types";
+import { Order, Listing, DispatchJob } from "../../types";
+import { useData } from "../../context/DataContext";
 import { formatDate, formatTime, formatINR } from "../../lib/utils";
 import {
   MATSYAMART_WHATSAPP_NUMBER,
@@ -15,6 +16,11 @@ import {
   buildGoodsTrackingMessage,
   buildTidalAdvisoryMessage,
 } from "../../lib/whatsapp";
+import {
+  buildMultilingualHostNotice,
+  sendMetaCloudWhatsAppMessage,
+  SupportedLanguage,
+} from "../../lib/services/whatsappMeta";
 import {
   Search,
   Send,
@@ -72,7 +78,90 @@ interface Conversation {
 }
 
 export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) => {
-  const [activeSubTab, setActiveSubTab] = useState<"chats" | "broadcasts" | "groups" | "settings">("chats");
+  const { slots, partners, places } = useData();
+  const [activeSubTab, setActiveSubTab] = useState<"dispatches" | "chats" | "broadcasts" | "groups" | "settings">("dispatches");
+
+  // Host Dispatches (Scheduled for 18:00 IST Previous Day)
+  const [hostDispatches, setHostDispatches] = useState<Array<{
+    id: string;
+    hostName: string;
+    hostPhone: string;
+    offeringTitle: string;
+    pillar: "food" | "walks" | "workshops";
+    dateStr: string;
+    timeStr: string;
+    venueName: string;
+    mapsUrl: string;
+    totalGuests: number;
+    totalSeats: number;
+    estimatedPayoutINR: number;
+    attendees: Array<{ name: string; phone: string; seats: number }>;
+    status: "queued" | "sent" | "suppressed";
+    language: SupportedLanguage;
+  }>>([
+    {
+      id: "disp-1",
+      hostName: "Ramesh Koli",
+      hostPhone: "+91 98201 44512",
+      offeringTitle: "Intertidal Dawn Trail & Heritage Harbor Walk",
+      pillar: "walks",
+      dateStr: "Tomorrow (Dawn Tide)",
+      timeStr: "06:30 AM – 09:00 AM",
+      venueName: "Versova Koliwada Harbor Gate 2",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=19.1316,72.8109",
+      totalGuests: 7,
+      totalSeats: 14,
+      estimatedPayoutINR: 10115,
+      attendees: [
+        { name: "Aarav Patel", phone: "+91 98201 11223", seats: 2 },
+        { name: "Pooja Shah", phone: "+91 98201 44556", seats: 3 },
+        { name: "Vikram Mehta", phone: "+91 98201 77889", seats: 2 },
+      ],
+      status: "queued",
+      language: "en",
+    },
+    {
+      id: "disp-2",
+      hostName: "Ashwini Tandel",
+      hostPhone: "+91 99284 77158",
+      offeringTitle: "Authentic Koli Courtyard Seafood Feast",
+      pillar: "food",
+      dateStr: "Tomorrow (Sunset Banquet)",
+      timeStr: "12:30 PM – 03:30 PM",
+      venueName: "Versova Gaothan Courtyard, Villa 4",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=19.1316,72.8109",
+      totalGuests: 5,
+      totalSeats: 12,
+      estimatedPayoutINR: 12240,
+      attendees: [
+        { name: "Rohan Deshmukh", phone: "+91 98202 33445", seats: 4 },
+        { name: "Sneha Nair", phone: "+91 98202 55667", seats: 2 },
+        { name: "Kunal Joshi", phone: "+91 98202 88990", seats: 6 },
+      ],
+      status: "queued",
+      language: "mr",
+    },
+    {
+      id: "disp-3",
+      hostName: "Kashinath Nakhawa",
+      hostPhone: "+91 98192 33410",
+      offeringTitle: "Traditional Net-Weaving & Knotting Masterclass",
+      pillar: "workshops",
+      dateStr: "Tomorrow (Afternoon Session)",
+      timeStr: "02:00 PM – 05:00 PM",
+      venueName: "Sassoon Dock Heritage Shed, Colaba",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=18.9142,72.8277",
+      totalGuests: 4,
+      totalSeats: 8,
+      estimatedPayoutINR: 10200,
+      attendees: [
+        { name: "Aditya Roy", phone: "+91 98203 11224", seats: 2 },
+        { name: "Meera Kulkarni", phone: "+91 98203 44557", seats: 2 },
+      ],
+      status: "queued",
+      language: "hi",
+    },
+  ]);
 
   // Build conversations from existing orders & mock real interactions
   const initialConversations = useMemo<Conversation[]>(() => {
@@ -264,11 +353,94 @@ export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) =>
     );
   }, [conversations, chatSearch]);
 
+  const handleSetDispatchLanguage = (id: string, language: SupportedLanguage) => {
+    setHostDispatches((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, language } : d)),
+    );
+  };
+
+  const handleToggleSuppression = (id: string) => {
+    setHostDispatches((prev) =>
+      prev.map((d) => {
+        if (d.id === id) {
+          const nextStatus = d.status === "suppressed" ? "queued" : "suppressed";
+          toast.info(
+            nextStatus === "suppressed"
+              ? `Host notice for ${d.hostName} suppressed. No automated message will be sent.`
+              : `Host notice for ${d.hostName} re-queued for 18:00 IST dispatch.`,
+          );
+          return { ...d, status: nextStatus };
+        }
+        return d;
+      }),
+    );
+  };
+
+  const handleSendMetaDispatch = async (dispatchItem: (typeof hostDispatches)[0]) => {
+    if (dispatchItem.status === "suppressed") {
+      toast.error("This dispatch is suppressed. Unsuppress it first to send.");
+      return;
+    }
+    const { text } = buildMultilingualHostNotice({
+      hostName: dispatchItem.hostName,
+      offeringTitle: dispatchItem.offeringTitle,
+      pillar: dispatchItem.pillar,
+      dateStr: dispatchItem.dateStr,
+      timeStr: dispatchItem.timeStr,
+      venueName: dispatchItem.venueName,
+      mapsUrl: dispatchItem.mapsUrl,
+      totalGuests: dispatchItem.totalGuests,
+      totalSeats: dispatchItem.totalSeats,
+      estimatedPayoutINR: dispatchItem.estimatedPayoutINR,
+      attendees: dispatchItem.attendees,
+      language: dispatchItem.language,
+    });
+
+    const res = await sendMetaCloudWhatsAppMessage(dispatchItem.hostPhone, text);
+    if (res.success) {
+      setHostDispatches((prev) =>
+        prev.map((d) => (d.id === dispatchItem.id ? { ...d, status: "sent" } : d)),
+      );
+      toast.success(`Dispatched via Meta Cloud API to ${dispatchItem.hostName} (${dispatchItem.hostPhone})!`);
+    } else {
+      toast.error(`Meta Cloud API error: ${res.error}`);
+    }
+  };
+
+  const handleOpenManualWhatsApp = (dispatchItem: (typeof hostDispatches)[0]) => {
+    const { text } = buildMultilingualHostNotice({
+      hostName: dispatchItem.hostName,
+      offeringTitle: dispatchItem.offeringTitle,
+      pillar: dispatchItem.pillar,
+      dateStr: dispatchItem.dateStr,
+      timeStr: dispatchItem.timeStr,
+      venueName: dispatchItem.venueName,
+      mapsUrl: dispatchItem.mapsUrl,
+      totalGuests: dispatchItem.totalGuests,
+      totalSeats: dispatchItem.totalSeats,
+      estimatedPayoutINR: dispatchItem.estimatedPayoutINR,
+      attendees: dispatchItem.attendees,
+      language: dispatchItem.language,
+    });
+    openWhatsApp(dispatchItem.hostPhone, text);
+  };
+
   return (
     <div className="space-y-6 text-[#f5edeb]">
       {/* Top Header & Sub-Tab Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-[#dab38c]/20">
-        <div className="flex items-center gap-1.5 p-1 bg-[#35160e]/80 border border-[#dab38c]/20 rounded-2xl">
+        <div className="flex items-center gap-1.5 p-1 bg-[#35160e]/80 border border-[#dab38c]/20 rounded-2xl flex-wrap">
+          <button
+            onClick={() => setActiveSubTab("dispatches")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              activeSubTab === "dispatches"
+                ? "bg-[#e3a157] text-[#29100b] shadow-md"
+                : "text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#481f14]"
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span>Host Notices (18:00 IST)</span>
+          </button>
           <button
             onClick={() => setActiveSubTab("chats")}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
@@ -408,6 +580,191 @@ export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) =>
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* SUB-TAB 0: AUTOMATED HOST NOTICES (18:00 IST PREVIOUS DAY) */}
+      {activeSubTab === "dispatches" && (
+        <div className="space-y-6">
+          {/* Dispatch Policy & Meta API Status Banner */}
+          <div className="bg-gradient-to-br from-[#35160e] via-[#29100b] to-[#1f0b07] border border-[#dab38c]/30 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#e3a157] flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-[#ffde59]" />
+                  <span>PREVIOUS-DAY 18:00 IST AUTOMATED HOST NOTICES</span>
+                </div>
+                <h3 className="font-display font-bold text-xl text-white mt-1">
+                  Host Manifest Dispatches &amp; Meta Cloud Delivery
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Meta Cloud API Connected</span>
+                </span>
+              </div>
+            </div>
+            <p className="text-xs text-[#dab38c]/80 leading-relaxed max-w-3xl">
+              At <strong>6:00 PM IST on the previous calendar day</strong>, MatsyaMart dispatches the verified attendee manifest, timing, venue GPS, and net payout calculation directly to each host's WhatsApp. Dispatches are translated into <strong>English, Marathi, or Hindi</strong> and can be suppressed or manually expedited below.
+            </p>
+          </div>
+
+          {/* List of Host Dispatches */}
+          <div className="space-y-4">
+            {hostDispatches.map((dispatchItem) => {
+              const notice = buildMultilingualHostNotice({
+                hostName: dispatchItem.hostName,
+                offeringTitle: dispatchItem.offeringTitle,
+                pillar: dispatchItem.pillar,
+                dateStr: dispatchItem.dateStr,
+                timeStr: dispatchItem.timeStr,
+                venueName: dispatchItem.venueName,
+                mapsUrl: dispatchItem.mapsUrl,
+                totalGuests: dispatchItem.totalGuests,
+                totalSeats: dispatchItem.totalSeats,
+                estimatedPayoutINR: dispatchItem.estimatedPayoutINR,
+                attendees: dispatchItem.attendees,
+                language: dispatchItem.language,
+              });
+
+              return (
+                <div
+                  key={dispatchItem.id}
+                  className={`bg-[#35160e]/90 border rounded-3xl p-5 sm:p-6 shadow-xl space-y-4 transition-all ${
+                    dispatchItem.status === "suppressed"
+                      ? "border-rose-500/30 bg-[#29100b]/60 opacity-80"
+                      : "border-[#dab38c]/25 hover:border-[#e3a157]/40"
+                  }`}
+                >
+                  {/* Dispatch Card Header */}
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[#dab38c]/15">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#e3a157]/15 border border-[#e3a157]/30 text-[#e3a157] text-[10px] font-bold uppercase tracking-wider">
+                          {dispatchItem.pillar}
+                        </span>
+                        <h4 className="font-display font-bold text-base text-[#f5edeb]">
+                          {dispatchItem.hostName} ({dispatchItem.hostPhone})
+                        </h4>
+                      </div>
+                      <p className="text-xs text-[#dab38c] mt-0.5">
+                        {dispatchItem.offeringTitle} · {dispatchItem.dateStr} ({dispatchItem.timeStr})
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* Language Switcher */}
+                      <div className="flex items-center bg-[#1f0b07] p-1 rounded-xl border border-[#dab38c]/20 text-[11px]">
+                        {(["en", "mr", "hi"] as const).map((l) => (
+                          <button
+                            key={l}
+                            type="button"
+                            onClick={() => handleSetDispatchLanguage(dispatchItem.id, l)}
+                            className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                              dispatchItem.language === l
+                                ? "bg-[#e3a157] text-[#29100b] shadow-xs"
+                                : "text-[#dab38c] hover:text-[#f5edeb]"
+                            }`}
+                          >
+                            {l === "en" ? "English" : l === "mr" ? "मराठी" : "हिन्दी"}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Status Badge */}
+                      <span
+                        className={`px-3 py-1 rounded-xl text-[11px] font-bold border ${
+                          dispatchItem.status === "sent"
+                            ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
+                            : dispatchItem.status === "suppressed"
+                              ? "bg-rose-500/15 border-rose-500/30 text-rose-300"
+                              : "bg-amber-500/15 border-amber-500/30 text-amber-300"
+                        }`}
+                      >
+                        {dispatchItem.status === "sent"
+                          ? "✓ Dispatched"
+                          : dispatchItem.status === "suppressed"
+                            ? "✕ Suppressed"
+                            : "Scheduled 18:00 IST"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Summary Bar */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                    <div className="p-3 rounded-2xl bg-[#1f0b07]/80 border border-[#dab38c]/15">
+                      <div className="text-[10px] text-[#dab38c]/70 uppercase font-bold">Confirmed Guests</div>
+                      <div className="font-bold text-white mt-0.5">{dispatchItem.totalGuests} guests ({dispatchItem.totalSeats} seats)</div>
+                    </div>
+                    <div className="p-3 rounded-2xl bg-[#1f0b07]/80 border border-[#dab38c]/15">
+                      <div className="text-[10px] text-[#dab38c]/70 uppercase font-bold">Net Payout Accrual</div>
+                      <div className="font-bold text-emerald-400 mt-0.5">{formatINR(dispatchItem.estimatedPayoutINR)}</div>
+                    </div>
+                    <div className="p-3 rounded-2xl bg-[#1f0b07]/80 border border-[#dab38c]/15 col-span-2">
+                      <div className="text-[10px] text-[#dab38c]/70 uppercase font-bold">Rendezvous GPS Venue</div>
+                      <div className="font-bold text-sky-400 truncate mt-0.5">
+                        <a href={dispatchItem.mapsUrl} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+                          <span>{dispatchItem.venueName}</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Message Preview Drawer */}
+                  <div className="p-3.5 rounded-2xl bg-[#1f0b07] border border-[#dab38c]/20 font-mono text-[11px] text-[#dab38c] whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
+                    {notice.text}
+                  </div>
+
+                  {/* Actions Footer */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                    <div className="text-[11px] text-[#dab38c]/70">
+                      Dispatched from official gateway: <strong>{MATSYAMART_WHATSAPP_DISPLAY}</strong>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleSuppression(dispatchItem.id)}
+                        className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                          dispatchItem.status === "suppressed"
+                            ? "bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30"
+                            : "bg-rose-500/15 text-rose-300 border-rose-500/30 hover:bg-rose-500/25"
+                        }`}
+                      >
+                        {dispatchItem.status === "suppressed" ? "Re-enable Dispatch" : "Suppress Dispatch"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleOpenManualWhatsApp(dispatchItem)}
+                        className="px-3.5 py-1.5 bg-[#29100b] hover:bg-[#1f0b07] border border-[#dab38c]/30 text-[#dab38c] hover:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                        title="Open message in WhatsApp Web or App"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>wa.me Link</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={dispatchItem.status === "suppressed"}
+                        onClick={() => handleSendMetaDispatch(dispatchItem)}
+                        className={`px-4 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md cursor-pointer ${
+                          dispatchItem.status === "suppressed"
+                            ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                            : "bg-[#25D366] hover:bg-[#20ba59] text-white"
+                        }`}
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                        <span>{dispatchItem.status === "sent" ? "Re-dispatch Meta API" : "Send Meta Cloud API"}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

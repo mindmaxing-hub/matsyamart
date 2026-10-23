@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as HostRouteImport } from './routes/host'
 import { Route as HostWithUsRouteImport } from './routes/host-with-us'
 import { Route as ExperienceSlugRouteImport } from './routes/experience.$slug'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HostRoute = HostRouteImport.update({
+  id: '/host',
+  path: '/host',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HostWithUsRoute = HostWithUsRouteImport.update({
@@ -51,6 +57,7 @@ const OrderConfirmationOrderRefRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/host': typeof HostRoute
   '/host-with-us': typeof HostWithUsRoute
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/host': typeof HostRoute
   '/host-with-us': typeof HostWithUsRoute
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/host': typeof HostRoute
   '/host-with-us': typeof HostWithUsRoute
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/host'
     | '/host-with-us'
     | '/experience/$slug'
     | '/product/$slug'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/host'
     | '/host-with-us'
     | '/experience/$slug'
     | '/product/$slug'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/host'
     | '/host-with-us'
     | '/experience/$slug'
     | '/product/$slug'
@@ -103,6 +115,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  HostRoute: typeof HostRoute
   HostWithUsRoute: typeof HostWithUsRoute
   ExperienceSlugRoute: typeof ExperienceSlugRoute
   ProductSlugRoute: typeof ProductSlugRoute
@@ -123,6 +136,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/host': {
+      id: '/host'
+      path: '/host'
+      fullPath: '/host'
+      preLoaderRoute: typeof HostRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/host-with-us': {
@@ -159,6 +179,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  HostRoute: HostRoute,
   HostWithUsRoute: HostWithUsRoute,
   ExperienceSlugRoute: ExperienceSlugRoute,
   ProductSlugRoute: ProductSlugRoute,

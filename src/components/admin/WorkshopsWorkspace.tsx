@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Order, Listing, ExperienceSlot, OrderItem } from "../../types";
+import { Order, Listing, ExperienceSlot, OrderItem, PinVisibilityType } from "../../types";
 import { useData } from "../../context/DataContext";
 import { formatINR, formatDate, formatTime } from "../../lib/utils";
 import { MobilePass } from "./MobilePass";
@@ -9,6 +9,9 @@ import {
   buildPassMessage,
   buildArtisanRosterMessage,
 } from "../../lib/whatsapp";
+import { buildGoogleMapsUrl } from "../../lib/services/places";
+import { SharedCoordinateInput } from "./SharedCoordinateInput";
+import { SessionsAndVenuesManager } from "./SessionsAndVenuesManager";
 import {
   Palette,
   MapPin,
@@ -61,7 +64,10 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
   const [newDuration, setNewDuration] = useState("180");
   const [newLocationName, setNewLocationName] = useState("Sassoon Dock Heritage Shed, Colaba");
   const [newSecretNotes, setNewSecretNotes] = useState("Enter Gate 3, heritage shed on the right overlooking dry dock.");
-  const [newMapsUrl, setNewMapsUrl] = useState("https://maps.google.com/?q=18.9142,72.8277");
+  const [newLat, setNewLat] = useState<number>(18.9142);
+  const [newLng, setNewLng] = useState<number>(72.8277);
+  const [newPinVisibility, setNewPinVisibility] = useState<PinVisibilityType>("public");
+  const [newMapsUrl, setNewMapsUrl] = useState("https://www.google.com/maps/search/?api=1&query=18.9142,72.8277");
   const [newSummary, setNewSummary] = useState("Hands-on traditional net-weaving masterclass using indigenous shuttle tools and natural fiber knotting techniques.");
   const [newMaterials, setNewMaterials] = useState("Braided nylon cord, Brass shuttle needle, Mesh gauge sticks, Take-home net planter");
   const [newImage, setNewImage] = useState("https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1200&q=80");
@@ -83,6 +89,9 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
   const [editDuration, setEditDuration] = useState("");
   const [editLocationName, setEditLocationName] = useState("");
   const [editSecretNotes, setEditSecretNotes] = useState("");
+  const [editLat, setEditLat] = useState<number>(18.9142);
+  const [editLng, setEditLng] = useState<number>(72.8277);
+  const [editPinVisibility, setEditPinVisibility] = useState<PinVisibilityType>("public");
   const [editMapsUrl, setEditMapsUrl] = useState("");
   const [editMaterials, setEditMaterials] = useState("");
   const [editSummary, setEditSummary] = useState("");
@@ -97,7 +106,12 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
     setEditDuration(String(workshop.duration_minutes || 180));
     setEditLocationName(workshop.location_name || "");
     setEditSecretNotes(workshop.secret_meeting_point || "");
-    setEditMapsUrl(workshop.meeting_point_maps_url || "");
+    const lat = workshop.latitude || 18.9142;
+    const lng = workshop.longitude || 72.8277;
+    setEditLat(lat);
+    setEditLng(lng);
+    setEditPinVisibility("public");
+    setEditMapsUrl(workshop.meeting_point_maps_url || buildGoogleMapsUrl(lat, lng));
     setEditMaterials(workshop.included_items ? workshop.included_items.join(", ") : "");
     setEditSummary(workshop.short_summary || "");
     setEditImage(workshop.images?.[0] || "");
@@ -116,6 +130,8 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
       .map((s) => s.trim())
       .filter(Boolean);
 
+    const mapsUrl = buildGoogleMapsUrl(editLat, editLng);
+
     updateListing(editingWorkshop.id, {
       title: editTitle.trim(),
       price_inr: Number(editPrice) || editingWorkshop.price_inr,
@@ -124,7 +140,9 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
       full_description: `${editSummary.trim()}\n\nMaterials Provided:\n${materialsArray.map((m) => `• ${m}`).join("\n")}`,
       location_name: editLocationName.trim(),
       secret_meeting_point: editSecretNotes.trim(),
-      meeting_point_maps_url: editMapsUrl.trim(),
+      latitude: editLat,
+      longitude: editLng,
+      meeting_point_maps_url: mapsUrl,
       duration_minutes: Number(editDuration) || editingWorkshop.duration_minutes,
       host_name: editInstructorName.trim() || editingWorkshop.host_name,
       host_phone: editInstructorPhone.trim() || editingWorkshop.host_phone,
@@ -152,6 +170,8 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
       .map((s) => s.trim())
       .filter(Boolean);
 
+    const mapsUrl = buildGoogleMapsUrl(newLat, newLng);
+
     const created = addListing({
       title: newTitle.trim(),
       slug: `${slug}-${Date.now().toString().slice(-4)}`,
@@ -164,7 +184,9 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
       full_description: `${newSummary.trim()}\n\nMaterials Provided:\n${materialsArray.map((m) => `• ${m}`).join("\n")}`,
       location_name: newLocationName.trim(),
       secret_meeting_point: newSecretNotes.trim(),
-      meeting_point_maps_url: newMapsUrl.trim(),
+      latitude: newLat,
+      longitude: newLng,
+      meeting_point_maps_url: mapsUrl,
       duration_minutes: Number(newDuration) || 180,
       host_name: newInstructorName.trim() || "Kashinath Nakhawa",
       host_phone: newInstructorPhone.trim() || "+91 98192 33410",
@@ -451,30 +473,30 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
-                    Secret Arrival Directions
-                  </label>
-                  <input
-                    type="text"
-                    value={newSecretNotes}
-                    onChange={(e) => setNewSecretNotes(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
-                    Google Maps GPS URL
-                  </label>
-                  <input
-                    type="url"
-                    value={newMapsUrl}
-                    onChange={(e) => setNewMapsUrl(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono text-[11px]"
-                  />
-                </div>
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Secret Arrival Directions
+                </label>
+                <input
+                  type="text"
+                  value={newSecretNotes}
+                  onChange={(e) => setNewSecretNotes(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                />
               </div>
+
+              {/* Shared Coordinate Input with Range Validation */}
+              <SharedCoordinateInput
+                latitude={newLat}
+                longitude={newLng}
+                pinVisibility={newPinVisibility}
+                onChange={({ latitude, longitude, pinVisibility, mapsUrl }) => {
+                  setNewLat(latitude);
+                  setNewLng(longitude);
+                  setNewPinVisibility(pinVisibility);
+                  setNewMapsUrl(mapsUrl);
+                }}
+              />
 
               <div>
                 <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
@@ -672,30 +694,30 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
-                    Secret Arrival Directions
-                  </label>
-                  <input
-                    type="text"
-                    value={editSecretNotes}
-                    onChange={(e) => setEditSecretNotes(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
-                    Google Maps GPS URL
-                  </label>
-                  <input
-                    type="url"
-                    value={editMapsUrl}
-                    onChange={(e) => setEditMapsUrl(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono text-[11px]"
-                  />
-                </div>
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Secret Arrival Directions
+                </label>
+                <input
+                  type="text"
+                  value={editSecretNotes}
+                  onChange={(e) => setEditSecretNotes(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                />
               </div>
+
+              {/* Shared Coordinate Input with Range Validation */}
+              <SharedCoordinateInput
+                latitude={editLat}
+                longitude={editLng}
+                pinVisibility={editPinVisibility}
+                onChange={({ latitude, longitude, pinVisibility, mapsUrl }) => {
+                  setEditLat(latitude);
+                  setEditLng(longitude);
+                  setEditPinVisibility(pinVisibility);
+                  setEditMapsUrl(mapsUrl);
+                }}
+              />
 
               <div>
                 <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
@@ -827,66 +849,15 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
         </div>
       )}
 
-      {/* SUB-TAB 2: Instructors & Material Kits */}
+      {/* SUB-TAB 2: Reusable Artisans, Studios & Dated Sessions */}
       {activeSubTab === "instructors" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {workshopListings.map((workshop) => (
-            <div
-              key={workshop.id}
-              className="bg-[#35160e]/90 border border-[#dab38c]/25 rounded-2xl p-5 shadow-xl space-y-4"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <h4 className="font-display font-bold text-base text-[#f5edeb]">
-                    {workshop.host_name}
-                  </h4>
-                  <div className="text-xs text-[#dab38c] font-mono mt-0.5">
-                    {workshop.host_phone || "+91 98201 44512"}
-                  </div>
-                </div>
-                {workshop.meeting_point_maps_url && (
-                  <a
-                    href={workshop.meeting_point_maps_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1 bg-[#29100b] hover:bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-[11px] font-bold text-sky-400 flex items-center gap-1"
-                  >
-                    <span>Studio GPS</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
-              </div>
-
-              <div className="p-3 bg-[#29100b] rounded-xl border border-[#dab38c]/15 text-xs text-[#dab38c] space-y-1">
-                <div className="text-[10px] uppercase font-bold tracking-wider text-[#e3a157]">
-                  Workshop Studio Location
-                </div>
-                <div>{workshop.location_name}</div>
-                {workshop.secret_meeting_point && (
-                  <div className="text-[11px] text-[#dab38c]/70 mt-1">
-                    {workshop.secret_meeting_point}
-                  </div>
-                )}
-              </div>
-
-              <div className="p-3 bg-[#29100b] rounded-xl border border-[#dab38c]/15 text-xs space-y-1">
-                <div className="text-[10px] uppercase font-bold tracking-wider text-amber-400">
-                  Materials &amp; Kits Provided Per Seat
-                </div>
-                <ul className="list-disc list-inside text-[11px] text-[#dab38c] space-y-0.5">
-                  {workshop.included_items?.map((item, idx) => (
-                    <li key={idx}>{item}</li>
-                  )) || (
-                    <>
-                      <li>Individual crafting kit &amp; tools</li>
-                      <li>Take-home handcrafted souvenir</li>
-                    </>
-                  )}
-                </ul>
-              </div>
-            </div>
-          ))}
-        </div>
+        <SessionsAndVenuesManager
+          pillar="workshops"
+          listings={workshopListings}
+          slots={slots}
+          venueLabel="Artisan Studio / Heritage Shed"
+          partnerRoleLabel="Master Craftsman"
+        />
       )}
 
       {/* SUB-TAB 3: Participant Roster & Passes */}

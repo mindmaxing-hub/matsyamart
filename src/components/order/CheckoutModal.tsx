@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useRouter } from "@tanstack/react-router";
-import { X, ShieldCheck, Lock, User, MapPin, AlertCircle } from "lucide-react";
+import { X, ShieldCheck, Lock, User, MapPin, AlertCircle, Sparkles } from "lucide-react";
 import { Listing, AttendeeDetail, ShippingAddress } from "../../types";
 import { formatINR } from "../../lib/utils";
 import { initiatePayment } from "../../lib/razorpay";
@@ -21,7 +21,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   onClose,
 }) => {
   const router = useRouter();
-  const { createOrder, slots, validateCoupon } = useData();
+  const { createOrder, slots, validateCoupon, loyaltyProgram } = useData();
   const { clearCart } = useCart();
 
   const isExperience = items.some((i) => i.listing.type === "experience");
@@ -32,6 +32,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [emergencyContact, setEmergencyContact] = useState("");
+
+  // Loyalty Program State
+  const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false);
+  const availableLoyaltyPoints = 450; // Demo customer spendable points
+  const loyaltyRate = loyaltyProgram?.config?.pointValueINR || 0.1;
+  const pointsCashValue = Math.floor(availableLoyaltyPoints * loyaltyRate);
 
   // Promo Code State
   const [couponCodeInput, setCouponCodeInput] = useState("");
@@ -54,19 +60,39 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     pincode: "",
   });
 
-  // Attendee names for experience
-  const [attendeeDetails, setAttendeeDetails] = useState<AttendeeDetail[]>(
-    () => {
-      const totalExpAttendees = items
-        .filter((i) => i.listing.type === "experience")
-        .reduce((sum, i) => sum + i.quantity, 0);
-      return Array.from({ length: totalExpAttendees }, () => ({
-        fullName: "",
-        phone: "",
-        email: "",
-      }));
-    },
-  );
+  // Discrete Attendee state keyed by item index
+  const [itemAttendees, setItemAttendees] = useState<Record<number, AttendeeDetail[]>>(() => {
+    const map: Record<number, AttendeeDetail[]> = {};
+    items.forEach((item, itemIdx) => {
+      if (item.listing.type === "experience") {
+        map[itemIdx] = Array.from({ length: item.quantity }, (_, seatIdx) => ({
+          fullName: seatIdx === 0 ? "" : "",
+          phone: "",
+          email: "",
+        }));
+      }
+    });
+    return map;
+  });
+
+  const handleUpdateAttendee = (
+    itemIdx: number,
+    seatIdx: number,
+    field: "fullName" | "phone" | "email",
+    val: string,
+  ) => {
+    setItemAttendees((prev) => {
+      const currentList = prev[itemIdx] ? [...prev[itemIdx]!] : [];
+      if (!currentList[seatIdx]) {
+        currentList[seatIdx] = { fullName: "", phone: "" };
+      }
+      currentList[seatIdx] = {
+        ...currentList[seatIdx]!,
+        [field]: val,
+      };
+      return { ...prev, [itemIdx]: currentList };
+    });
+  };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -77,7 +103,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   );
 
   const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
-  const finalAmount = Math.max(0, subtotalAmount - discountAmount);
+  const loyaltyDiscountINR = useLoyaltyPoints
+    ? Math.min(Math.floor(subtotalAmount * 0.5), pointsCashValue)
+    : 0;
+  const finalAmount = Math.max(0, subtotalAmount - discountAmount - loyaltyDiscountINR);
 
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,12 +221,29 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               razorpayOrderId: rzpResult.razorpay_order_id,
               couponCode: appliedCoupon?.code,
               discountAmount: discountAmount > 0 ? discountAmount : undefined,
-              items: items.map((i) => ({
-                listing: i.listing,
-                quantity: i.quantity,
-                slotId: i.slotId,
-                attendeeDetails: isExperience ? attendeeDetails : undefined,
-              })),
+              pointsRedeemed: useLoyaltyPoints ? availableLoyaltyPoints : undefined,
+              pointsDiscountAmount: loyaltyDiscountINR > 0 ? loyaltyDiscountINR : undefined,
+              items: items.map((i, idx) => {
+                // Default first attendee to lead customer if left blank
+                const rawAttendees = itemAttendees[idx] || [];
+                const finalizedAttendees = rawAttendees.map((att, seatIdx) => ({
+                  ...att,
+                  fullName:
+                    att.fullName.trim() ||
+                    (seatIdx === 0 ? customerName : `Guest ${seatIdx + 1}`),
+                  phone: att.phone.trim() || customerPhone,
+                }));
+
+                return {
+                  listing: i.listing,
+                  quantity: i.quantity,
+                  slotId: i.slotId,
+                  attendeeDetails:
+                    i.listing.type === "experience"
+                      ? finalizedAttendees
+                      : undefined,
+                };
+              }),
             });
 
             // If checked out from cart, clear cart
@@ -363,19 +409,51 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               )}
             </div>
 
+            {/* MatsyaPoints Loyalty Redemption */}
+            <div className="p-2.5 rounded-xl bg-[#140604] border border-[#dab38c]/20 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#e3a157]" />
+                <div>
+                  <div className="font-bold text-[#f5edeb]">
+                    {availableLoyaltyPoints} MatsyaPoints Available
+                  </div>
+                  <div className="text-[10px] text-[#dab38c]/70">
+                    Worth {formatINR(pointsCashValue)} · 15-min reservation hold
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setUseLoyaltyPoints(!useLoyaltyPoints)}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  useLoyaltyPoints
+                    ? "bg-[#e3a157] text-[#29100b]"
+                    : "bg-[#29100b] text-[#dab38c] hover:text-white border border-[#dab38c]/30"
+                }`}
+              >
+                {useLoyaltyPoints ? "Points Applied ✓" : "Redeem Points"}
+              </button>
+            </div>
+
             {/* Price Calculations */}
             <div className="pt-2 border-t border-[#dab38c]/20 space-y-1">
+              {(appliedCoupon || useLoyaltyPoints) && (
+                <div className="flex justify-between items-center text-[#dab38c]">
+                  <span>Subtotal</span>
+                  <span>{formatINR(subtotalAmount)}</span>
+                </div>
+              )}
               {appliedCoupon && (
-                <>
-                  <div className="flex justify-between items-center text-[#dab38c]">
-                    <span>Subtotal</span>
-                    <span>{formatINR(subtotalAmount)}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-emerald-400 font-semibold">
-                    <span>Discount ({appliedCoupon.code})</span>
-                    <span>-{formatINR(discountAmount)}</span>
-                  </div>
-                </>
+                <div className="flex justify-between items-center text-emerald-400 font-semibold">
+                  <span>Discount ({appliedCoupon.code})</span>
+                  <span>-{formatINR(discountAmount)}</span>
+                </div>
+              )}
+              {useLoyaltyPoints && loyaltyDiscountINR > 0 && (
+                <div className="flex justify-between items-center text-amber-300 font-semibold">
+                  <span>MatsyaPoints Redeemed</span>
+                  <span>-{formatINR(loyaltyDiscountINR)}</span>
+                </div>
               )}
               <div className="flex justify-between items-center text-sm font-bold text-[#f5edeb] pt-1">
                 <span>Total Payable</span>
@@ -465,6 +543,78 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   className="w-full text-xs p-3 rounded-xl bg-[#1f0b07] text-[#f5edeb] placeholder:text-[#dab38c]/40 border border-[#dab38c]/30 focus:border-[#e3a157] outline-none"
                 />
               </div>
+
+              {/* Discrete Guest Names per Experience Item */}
+              <div className="space-y-3 pt-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#f5edeb] flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-[#e3a157]" />
+                  <span>Attendee Seats per Experience</span>
+                </h4>
+                {items.map((item, itemIdx) => {
+                  if (item.listing.type !== "experience") return null;
+                  const seatList = itemAttendees[itemIdx] || [];
+                  return (
+                    <div
+                      key={itemIdx}
+                      className="p-3 rounded-xl bg-[#140604] border border-[#dab38c]/20 space-y-2.5"
+                    >
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-bold text-[#f5edeb]">
+                          {item.listing.title}
+                        </span>
+                        <span className="text-[#e3a157] font-mono text-[11px]">
+                          {item.quantity} {item.quantity === 1 ? "Seat" : "Seats"}
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        {seatList.map((seat, seatIdx) => (
+                          <div
+                            key={seatIdx}
+                            className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]"
+                          >
+                            <input
+                              type="text"
+                              placeholder={
+                                seatIdx === 0
+                                  ? `Seat 1 (Default: ${customerName || "Lead Guest"})`
+                                  : `Seat ${seatIdx + 1} Full Name`
+                              }
+                              value={seat.fullName}
+                              onChange={(e) =>
+                                handleUpdateAttendee(
+                                  itemIdx,
+                                  seatIdx,
+                                  "fullName",
+                                  e.target.value,
+                                )
+                              }
+                              className="p-2 rounded-lg bg-[#1f0b07] text-[#f5edeb] placeholder:text-[#dab38c]/40 border border-[#dab38c]/30 focus:border-[#e3a157] outline-none"
+                            />
+                            <input
+                              type="tel"
+                              placeholder={
+                                seatIdx === 0
+                                  ? `Seat 1 Phone (Default: ${customerPhone || "Lead"})`
+                                  : `Seat ${seatIdx + 1} Phone`
+                              }
+                              value={seat.phone}
+                              onChange={(e) =>
+                                handleUpdateAttendee(
+                                  itemIdx,
+                                  seatIdx,
+                                  "phone",
+                                  e.target.value,
+                                )
+                              }
+                              className="p-2 rounded-lg bg-[#1f0b07] text-[#f5edeb] placeholder:text-[#dab38c]/40 border border-[#dab38c]/30 focus:border-[#e3a157] outline-none"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 
@@ -495,6 +645,78 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   }
                   className="w-full text-xs p-3 rounded-xl bg-[#1f0b07] text-[#f5edeb] placeholder:text-[#dab38c]/40 border border-[#dab38c]/30 focus:border-[#e3a157] outline-none"
                 />
+              </div>
+
+              {/* Discrete Guest Names per Experience Item */}
+              <div className="space-y-3 pt-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#f5edeb] flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-[#e3a157]" />
+                  <span>Attendee Seats per Experience</span>
+                </h4>
+                {items.map((item, itemIdx) => {
+                  if (item.listing.type !== "experience") return null;
+                  const seatList = itemAttendees[itemIdx] || [];
+                  return (
+                    <div
+                      key={itemIdx}
+                      className="p-3 rounded-xl bg-[#140604] border border-[#dab38c]/20 space-y-2.5"
+                    >
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-bold text-[#f5edeb]">
+                          {item.listing.title}
+                        </span>
+                        <span className="text-[#e3a157] font-mono text-[11px]">
+                          {item.quantity} {item.quantity === 1 ? "Seat" : "Seats"}
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        {seatList.map((seat, seatIdx) => (
+                          <div
+                            key={seatIdx}
+                            className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]"
+                          >
+                            <input
+                              type="text"
+                              placeholder={
+                                seatIdx === 0
+                                  ? `Seat 1 (Default: ${customerName || "Lead Guest"})`
+                                  : `Seat ${seatIdx + 1} Full Name`
+                              }
+                              value={seat.fullName}
+                              onChange={(e) =>
+                                handleUpdateAttendee(
+                                  itemIdx,
+                                  seatIdx,
+                                  "fullName",
+                                  e.target.value,
+                                )
+                              }
+                              className="p-2 rounded-lg bg-[#1f0b07] text-[#f5edeb] placeholder:text-[#dab38c]/40 border border-[#dab38c]/30 focus:border-[#e3a157] outline-none"
+                            />
+                            <input
+                              type="tel"
+                              placeholder={
+                                seatIdx === 0
+                                  ? `Seat 1 Phone (Default: ${customerPhone || "Lead"})`
+                                  : `Seat ${seatIdx + 1} Phone`
+                              }
+                              value={seat.phone}
+                              onChange={(e) =>
+                                handleUpdateAttendee(
+                                  itemIdx,
+                                  seatIdx,
+                                  "phone",
+                                  e.target.value,
+                                )
+                              }
+                              className="p-2 rounded-lg bg-[#1f0b07] text-[#f5edeb] placeholder:text-[#dab38c]/40 border border-[#dab38c]/30 focus:border-[#e3a157] outline-none"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="grid grid-cols-2 gap-3">

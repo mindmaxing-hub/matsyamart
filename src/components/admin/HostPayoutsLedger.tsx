@@ -202,7 +202,7 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
       "Koliwada / Village",
       "UPI ID",
       "Bank Account",
-      "Total Earned (85%)",
+      "Total Accrued (Net Basis)",
       "Total Paid",
       "Outstanding Balance",
       "Status",
@@ -248,7 +248,7 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         <div className="p-5 rounded-[18px] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] shadow-[var(--admin-shadow)] relative flex flex-col justify-between shadow-[inset_3px_0_0_var(--admin-accent)]">
           <div className="text-[11px] font-bold tracking-[0.07em] uppercase text-[var(--admin-muted)] flex items-center justify-between">
-            <span>Community Earnings (85%)</span>
+            <span>Partner Accruals (Net Basis)</span>
             <span className="text-[var(--admin-accent)] font-mono text-sm">
               ↗
             </span>
@@ -356,7 +356,7 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
                   UPI &amp; Account Details
                 </th>
                 <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap text-right">
-                  Total Earned (85%)
+                  Total Accrued (Net Basis)
                 </th>
                 <th className="py-3.5 px-4 font-bold text-[11px] text-[var(--admin-muted)] uppercase tracking-wider whitespace-nowrap text-right">
                   Paid to Date
@@ -403,7 +403,7 @@ export const HostPayoutsLedger: React.FC<HostPayoutsLedgerProps> = ({
                             : "Artisan Co-Op"}
                         </span>
                         <span className="text-[var(--admin-muted)] text-[12px]">
-                          {partner.koliwada}
+                          {partner.koliwada} · 85% Net Agreement
                         </span>
                       </div>
                     </td>

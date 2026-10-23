@@ -213,7 +213,7 @@ const AdminPageContent: React.FC = () => {
       id: "payouts",
       label: "Host & Artisan Payouts",
       icon: Wallet,
-      kicker: "Reconciliation · 85/15 community split",
+      kicker: "Reconciliation · Net Item Revenue agreements",
       editorialTitle:
         "Money split, <em class='italic text-[#E3A157]'>community paid.</em>",
       subtitle:

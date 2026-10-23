@@ -1,4 +1,82 @@
-import { Category, Listing, ExperienceSlot } from "../types";
+import { Category, Listing, ExperienceSlot, Partner, Place } from "../types";
+
+export const SEED_PARTNERS: Partner[] = [
+  {
+    id: "part-anusaya-01",
+    name: "Anusaya Tai Koli",
+    entity_name: "Versova Koli Mahila Dining Collective",
+    phone: "+91 99284 77158",
+    bio: "3rd-generation coastal home-dining custodian specializing in ancestral Surmai, Mud Crab, and Sol Kadhi feasts.",
+    portrait_url: "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600&auto=format&fit=crop",
+    is_verified: true,
+  },
+  {
+    id: "part-pranay-02",
+    name: "Pranay Koli",
+    entity_name: "Sassoon Docks Marine Naturalists",
+    phone: "+91 98201 44512",
+    bio: "Certified coastal intertidal naturalist guide leading dawn harbor auctions and spring low-tide safaris.",
+    portrait_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop",
+    is_verified: true,
+  },
+  {
+    id: "part-laxman-03",
+    name: "Laxman Nakawa",
+    entity_name: "Mahim Bay Net-Weaving Guild",
+    phone: "+91 98211 44332",
+    bio: "Master cotton net-weaver and elder custodian preserving indigenous coastal knotting techniques.",
+    portrait_url: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=600&auto=format&fit=crop",
+    is_verified: true,
+  },
+  {
+    id: "part-sujata-04",
+    name: "Sujata Koli & Mahila Bachat Gat",
+    entity_name: "Madh Island Artisanal Collective",
+    phone: "+91 98205 88990",
+    bio: "Women-led sun-drying and spice collective preserving sustainable artisanal seafood pantry staples.",
+    portrait_url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop",
+    is_verified: true,
+  },
+];
+
+export const SEED_PLACES: Place[] = [
+  {
+    id: "place-versova-gaothan",
+    name: "Versova Gaothan Courtyard",
+    latitude: 19.1316,
+    longitude: 72.8109,
+    arrival_instructions: "Pass the blue arched heritage gate; coordinator will welcome you at Villa 4.",
+    pin_visibility: "confirmed_guests_only",
+    photos: ["https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop"],
+  },
+  {
+    id: "place-sassoon-dock-gate",
+    name: "Sassoon Docks Harbor Clocktower Gate",
+    latitude: 18.9167,
+    longitude: 72.8258,
+    arrival_instructions: "Gather directly in front of the historic stone clocktower gate on Forbes Street.",
+    pin_visibility: "public",
+    photos: ["https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=800&auto=format&fit=crop"],
+  },
+  {
+    id: "place-mahim-guild-studio",
+    name: "Mahim Koliwada Guild Studio",
+    latitude: 19.039,
+    longitude: 72.8402,
+    arrival_instructions: "Lane 3, directly behind the community temple on the beachfront.",
+    pin_visibility: "public",
+    photos: ["https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=800&auto=format&fit=crop"],
+  },
+  {
+    id: "place-thane-creek-jetty",
+    name: "Thane Creek Flamingo Sanctuary Pier",
+    latitude: 19.1663,
+    longitude: 72.9984,
+    arrival_instructions: "Report at the Forest Department jetty gate 20 minutes prior to high tide departure.",
+    pin_visibility: "public",
+    photos: ["https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop"],
+  },
+];
 
 export const SEED_CATEGORIES: Category[] = [
   {
@@ -471,64 +549,76 @@ export function generateSeedSlots(): ExperienceSlot[] {
       // Versova morning slot
       slots.push({
         id: `slot-versova-${d}`,
+        offering_id: "exp-versova-trail",
         listing_id: "exp-versova-trail",
         slot_start: morningStart.toISOString(),
         slot_end: morningEnd.toISOString(),
         capacity: 14,
         booked_count: Math.min(14, 4 + (d % 8)),
+        revision_number: 1,
         is_cancelled: false,
       });
 
       // Thane flamingo slot
       slots.push({
         id: `slot-thane-${d}`,
+        offering_id: "exp-thane-flamingo",
         listing_id: "exp-thane-flamingo",
         slot_start: midMorningStart.toISOString(),
         slot_end: midMorningEnd.toISOString(),
         capacity: 10,
         booked_count: Math.min(10, 3 + (d % 6)),
+        revision_number: 1,
         is_cancelled: false,
       });
 
       // Sassoon trail slot
       slots.push({
         id: `slot-sassoon-${d}`,
+        offering_id: "exp-sassoon-trail",
         listing_id: "exp-sassoon-trail",
         slot_start: morningStart.toISOString(),
         slot_end: morningEnd.toISOString(),
         capacity: 12,
         booked_count: Math.min(12, 5 + (d % 5)),
+        revision_number: 1,
         is_cancelled: false,
       });
 
       // Workshop evening slot
       slots.push({
         id: `slot-workshop-${d}`,
+        offering_id: "exp-net-weaving",
         listing_id: "exp-net-weaving",
         slot_start: eveningStart.toISOString(),
         slot_end: eveningEnd.toISOString(),
         capacity: 12,
         booked_count: Math.min(12, 2 + (d % 7)),
+        revision_number: 1,
         is_cancelled: false,
       });
     } else if (d % 3 === 0) {
       // Selected weekday morning slots
       slots.push({
         id: `slot-versova-wk-${d}`,
+        offering_id: "exp-versova-trail",
         listing_id: "exp-versova-trail",
         slot_start: morningStart.toISOString(),
         slot_end: morningEnd.toISOString(),
         capacity: 14,
         booked_count: 2,
+        revision_number: 1,
         is_cancelled: false,
       });
       slots.push({
         id: `slot-thane-wk-${d}`,
+        offering_id: "exp-thane-flamingo",
         listing_id: "exp-thane-flamingo",
         slot_start: midMorningStart.toISOString(),
         slot_end: midMorningEnd.toISOString(),
         capacity: 10,
         booked_count: 1,
+        revision_number: 1,
         is_cancelled: false,
       });
     }

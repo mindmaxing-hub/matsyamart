@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Order, Listing, ExperienceSlot, OrderItem } from "../../types";
+import { Order, Listing, ExperienceSlot, OrderItem, PinVisibilityType } from "../../types";
 import { useData } from "../../context/DataContext";
 import { formatINR, formatDate, formatTime } from "../../lib/utils";
 import { MobilePass } from "./MobilePass";
@@ -29,6 +29,9 @@ import {
   buildPassMessage,
   buildGuideManifestMessage,
 } from "../../lib/whatsapp";
+import { buildGoogleMapsUrl } from "../../lib/services/places";
+import { SharedCoordinateInput } from "./SharedCoordinateInput";
+import { SessionsAndVenuesManager } from "./SessionsAndVenuesManager";
 
 interface WalksWorkspaceProps {
   orders: Order[];
@@ -60,7 +63,10 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
   const [newDuration, setNewDuration] = useState("150");
   const [newLocationName, setNewLocationName] = useState("Versova Koliwada Harbor Jetty");
   const [newSecretNotes, setNewSecretNotes] = useState("Meet near the net-mending platform at Gate 2. Guide carries a blue MatsyaMart pennant.");
-  const [newMapsUrl, setNewMapsUrl] = useState("https://maps.google.com/?q=19.1316,72.8109");
+  const [newLat, setNewLat] = useState<number>(19.1316);
+  const [newLng, setNewLng] = useState<number>(72.8109);
+  const [newPinVisibility, setNewPinVisibility] = useState<PinVisibilityType>("public");
+  const [newMapsUrl, setNewMapsUrl] = useState("https://www.google.com/maps/search/?api=1&query=19.1316,72.8109");
   const [newSummary, setNewSummary] = useState("Dawn exploration of traditional intertidal fishing methods, artisanal net casting, and mangrove nursery ecology led by community custodians.");
   const [newIncluded, setNewIncluded] = useState("Community Elder Guide, High-tide safety briefing, Traditional cutting chai, Mud boots");
   const [newImage, setNewImage] = useState("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80");
@@ -90,6 +96,8 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
       .map((s) => s.trim())
       .filter(Boolean);
 
+    const mapsUrl = buildGoogleMapsUrl(newLat, newLng);
+
     const created = addListing({
       title: newTitle.trim(),
       slug: `${slug}-${Date.now().toString().slice(-4)}`,
@@ -102,7 +110,9 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
       full_description: `${newSummary.trim()}\n\nEssentials Included:\n${includedArray.map((i) => `• ${i}`).join("\n")}`,
       location_name: newLocationName.trim(),
       secret_meeting_point: newSecretNotes.trim(),
-      meeting_point_maps_url: newMapsUrl.trim(),
+      latitude: newLat,
+      longitude: newLng,
+      meeting_point_maps_url: mapsUrl,
       duration_minutes: Number(newDuration) || 150,
       host_name: newGuideName.trim() || "Pranay Koli",
       host_phone: newGuidePhone.trim() || "+91 98201 44512",
@@ -138,6 +148,9 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
   const [editDuration, setEditDuration] = useState("150");
   const [editLocationName, setEditLocationName] = useState("");
   const [editSecretNotes, setEditSecretNotes] = useState("");
+  const [editLat, setEditLat] = useState<number>(19.1316);
+  const [editLng, setEditLng] = useState<number>(72.8109);
+  const [editPinVisibility, setEditPinVisibility] = useState<PinVisibilityType>("public");
   const [editMapsUrl, setEditMapsUrl] = useState("");
   const [editSummary, setEditSummary] = useState("");
   const [editIncluded, setEditIncluded] = useState("");
@@ -152,7 +165,12 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
     setEditDuration(String(walk.duration_minutes || "150"));
     setEditLocationName(walk.location_name || "");
     setEditSecretNotes(walk.secret_meeting_point || "");
-    setEditMapsUrl(walk.meeting_point_maps_url || "");
+    const lat = walk.latitude || 19.1316;
+    const lng = walk.longitude || 72.8109;
+    setEditLat(lat);
+    setEditLng(lng);
+    setEditPinVisibility("public");
+    setEditMapsUrl(walk.meeting_point_maps_url || buildGoogleMapsUrl(lat, lng));
     setEditSummary(walk.short_summary || "");
     setEditIncluded((walk.included_items || []).join(", "));
     setEditImage(walk.images?.[0] || "");
@@ -171,6 +189,8 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
       .map((s) => s.trim())
       .filter(Boolean);
 
+    const mapsUrl = buildGoogleMapsUrl(editLat, editLng);
+
     updateListing(editingWalk.id, {
       title: editTitle.trim(),
       price_inr: Number(editPrice) || editingWalk.price_inr,
@@ -179,7 +199,9 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
       host_phone: editGuidePhone.trim() || editingWalk.host_phone,
       location_name: editLocationName.trim(),
       secret_meeting_point: editSecretNotes.trim(),
-      meeting_point_maps_url: editMapsUrl.trim(),
+      latitude: editLat,
+      longitude: editLng,
+      meeting_point_maps_url: mapsUrl,
       included_items: includedArray,
       short_summary: editSummary.trim(),
       full_description: `${editSummary.trim()}\n\nEssentials Included:\n${includedArray.map((i) => `• ${i}`).join("\n")}`,
@@ -452,30 +474,30 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
-                    Secret Meeting Pin / Instructions
-                  </label>
-                  <input
-                    type="text"
-                    value={newSecretNotes}
-                    onChange={(e) => setNewSecretNotes(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
-                    Google Maps GPS URL
-                  </label>
-                  <input
-                    type="url"
-                    value={newMapsUrl}
-                    onChange={(e) => setNewMapsUrl(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono text-[11px]"
-                  />
-                </div>
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Secret Meeting Pin / Instructions
+                </label>
+                <input
+                  type="text"
+                  value={newSecretNotes}
+                  onChange={(e) => setNewSecretNotes(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                />
               </div>
+
+              {/* Shared Coordinate Input with Range Validation */}
+              <SharedCoordinateInput
+                latitude={newLat}
+                longitude={newLng}
+                pinVisibility={newPinVisibility}
+                onChange={({ latitude, longitude, pinVisibility, mapsUrl }) => {
+                  setNewLat(latitude);
+                  setNewLng(longitude);
+                  setNewPinVisibility(pinVisibility);
+                  setNewMapsUrl(mapsUrl);
+                }}
+              />
 
               <div>
                 <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
@@ -674,30 +696,30 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
-                    Secret Meeting Pin / Instructions
-                  </label>
-                  <input
-                    type="text"
-                    value={editSecretNotes}
-                    onChange={(e) => setEditSecretNotes(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
-                    Google Maps GPS URL
-                  </label>
-                  <input
-                    type="url"
-                    value={editMapsUrl}
-                    onChange={(e) => setEditMapsUrl(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none font-mono text-[11px]"
-                  />
-                </div>
+              <div>
+                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
+                  Secret Meeting Pin / Instructions
+                </label>
+                <input
+                  type="text"
+                  value={editSecretNotes}
+                  onChange={(e) => setEditSecretNotes(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
+                />
               </div>
+
+              {/* Shared Coordinate Input with Range Validation */}
+              <SharedCoordinateInput
+                latitude={editLat}
+                longitude={editLng}
+                pinVisibility={editPinVisibility}
+                onChange={({ latitude, longitude, pinVisibility, mapsUrl }) => {
+                  setEditLat(latitude);
+                  setEditLng(longitude);
+                  setEditPinVisibility(pinVisibility);
+                  setEditMapsUrl(mapsUrl);
+                }}
+              />
 
               <div>
                 <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
@@ -829,61 +851,15 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
         </div>
       )}
 
-      {/* SUB-TAB 2: Guides & Meeting Pins */}
+      {/* SUB-TAB 2: Reusable Guides, Rendezvous Pins & Sessions */}
       {activeSubTab === "guides" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {walkListings.map((walk) => (
-            <div
-              key={walk.id}
-              className="bg-[#35160e]/90 border border-[#dab38c]/25 rounded-2xl p-5 shadow-xl space-y-4"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <h4 className="font-display font-bold text-base text-[#f5edeb]">
-                    {walk.host_name}
-                  </h4>
-                  <div className="text-xs text-[#dab38c] font-mono mt-0.5">
-                    {walk.host_phone || "+91 98201 44512"}
-                  </div>
-                </div>
-                {walk.meeting_point_maps_url && (
-                  <a
-                    href={walk.meeting_point_maps_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1 bg-[#29100b] hover:bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-[11px] font-bold text-sky-400 flex items-center gap-1"
-                  >
-                    <span>Google Maps GPS</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
-              </div>
-
-              <div className="p-3 bg-[#29100b] rounded-xl border border-[#dab38c]/15 text-xs text-[#dab38c] space-y-1">
-                <div className="text-[10px] uppercase font-bold tracking-wider text-[#e3a157]">
-                  Rendezvous Location
-                </div>
-                <div>{walk.location_name}</div>
-                {walk.secret_meeting_point && (
-                  <div className="text-[11px] text-[#dab38c]/70 mt-1">
-                    {walk.secret_meeting_point}
-                  </div>
-                )}
-              </div>
-
-              <div className="p-3 bg-[#29100b] rounded-xl border border-[#dab38c]/15 text-xs space-y-1">
-                <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-400">
-                  Included Essentials
-                </div>
-                <ul className="list-disc list-inside text-[11px] text-[#dab38c] space-y-0.5">
-                  {walk.included_items?.map((item, idx) => (
-                    <li key={idx}>{item}</li>
-                  )) || <li>Community guide &amp; traditional tea</li>}
-                </ul>
-              </div>
-            </div>
-          ))}
-        </div>
+        <SessionsAndVenuesManager
+          pillar="walks"
+          listings={walkListings}
+          slots={slots}
+          venueLabel="Trail Rendezvous Point"
+          partnerRoleLabel="Lead Guide"
+        />
       )}
 
       {/* SUB-TAB 3: Trail Manifest & QR Passes */}

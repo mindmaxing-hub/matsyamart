@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Order, Listing, ExperienceSlot, OrderItem } from "../../types";
+import { Order, Listing, ExperienceSlot, OrderItem, PinVisibilityType } from "../../types";
 import { useData } from "../../context/DataContext";
 import { formatINR, formatDate, formatTime } from "../../lib/utils";
 import { MobilePass } from "./MobilePass";
@@ -27,6 +27,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ImageDropzone } from "./ImageDropzone";
+import { buildGoogleMapsUrl } from "../../lib/services/places";
+import { SharedCoordinateInput } from "./SharedCoordinateInput";
+import { SessionsAndVenuesManager } from "./SessionsAndVenuesManager";
 
 interface FoodWorkspaceProps {
   orders: Order[];
@@ -61,7 +64,10 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
   const [newDuration, setNewDuration] = useState("180");
   const [newLocationName, setNewLocationName] = useState("Versova Gaothan Courtyard, Andheri West");
   const [newSecretNotes, setNewSecretNotes] = useState("Pass the blue arched gate; coordinator will welcome you at Villa 4.");
-  const [newMapsUrl, setNewMapsUrl] = useState("https://maps.google.com/?q=19.1316,72.8109");
+  const [newLat, setNewLat] = useState<number>(19.1316);
+  const [newLng, setNewLng] = useState<number>(72.8109);
+  const [newPinVisibility, setNewPinVisibility] = useState<PinVisibilityType>("public");
+  const [newMapsUrl, setNewMapsUrl] = useState("https://www.google.com/maps/search/?api=1&query=19.1316,72.8109");
   const [newCourses, setNewCourses] = useState("Fresh Surmai Fry, Mud Crab Masala, Sol Kadhi Digestive, Kolim Rice & Modak");
   const [newSummary, setNewSummary] = useState("Authentic home-cooked Koli seafood banquet prepared fresh by community custodians in their ancestral courtyard.");
   const [newImage, setNewImage] = useState("https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1200&auto=format&fit=crop");
@@ -100,6 +106,9 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
   const [editDuration, setEditDuration] = useState("180");
   const [editLocationName, setEditLocationName] = useState("");
   const [editSecretNotes, setEditSecretNotes] = useState("");
+  const [editLat, setEditLat] = useState<number>(19.1316);
+  const [editLng, setEditLng] = useState<number>(72.8109);
+  const [editPinVisibility, setEditPinVisibility] = useState<PinVisibilityType>("public");
   const [editMapsUrl, setEditMapsUrl] = useState("");
   const [editCourses, setEditCourses] = useState("");
   const [editSummary, setEditSummary] = useState("");
@@ -324,6 +333,8 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
+    const mapsUrl = buildGoogleMapsUrl(newLat, newLng);
+
     const created = addListing({
       title: newTitle.trim(),
       slug: `${slug}-${Date.now().toString().slice(-4)}`,
@@ -336,7 +347,9 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
       full_description: `${newSummary.trim()}\n\nTraditional Courses:\n${coursesArray.map((c) => `• ${c}`).join("\n")}`,
       location_name: newLocationName.trim(),
       secret_meeting_point: newSecretNotes.trim(),
-      meeting_point_maps_url: newMapsUrl.trim(),
+      latitude: newLat,
+      longitude: newLng,
+      meeting_point_maps_url: mapsUrl,
       duration_minutes: Number(newDuration) || 180,
       host_name: newCookName.trim() || "Ashwini Tandel",
       host_phone: newCookPhone.trim() || "+91 99284 77158",
@@ -401,7 +414,12 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
     setEditDuration(String(feast.duration_minutes || "180"));
     setEditLocationName(feast.location_name || "");
     setEditSecretNotes(feast.secret_meeting_point || "");
-    setEditMapsUrl(feast.meeting_point_maps_url || "");
+    const lat = feast.latitude || 19.1316;
+    const lng = feast.longitude || 72.8109;
+    setEditLat(lat);
+    setEditLng(lng);
+    setEditPinVisibility("public");
+    setEditMapsUrl(feast.meeting_point_maps_url || buildGoogleMapsUrl(lat, lng));
     setEditCourses((feast.dietary_tags || []).join(", "));
     setEditSummary(feast.short_summary || "");
     setEditImage(feast.images?.[0] || "");
@@ -420,6 +438,8 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
       .map((c) => c.trim())
       .filter(Boolean);
 
+    const mapsUrl = buildGoogleMapsUrl(editLat, editLng);
+
     updateListing(editingFeast.id, {
       title: editTitle.trim(),
       price_inr: Number(editPrice) || editingFeast.price_inr,
@@ -429,7 +449,9 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
       host_bio: editCookBio.trim() || editingFeast.host_bio,
       location_name: editLocationName.trim(),
       secret_meeting_point: editSecretNotes.trim(),
-      meeting_point_maps_url: editMapsUrl.trim(),
+      latitude: editLat,
+      longitude: editLng,
+      meeting_point_maps_url: mapsUrl,
       dietary_tags: coursesArray,
       short_summary: editSummary.trim(),
       full_description: `${editSummary.trim()}\n\nTraditional Courses:\n${coursesArray.map((c) => `• ${c}`).join("\n")}`,
@@ -655,125 +677,15 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
         </div>
       )}
 
-      {/* SUB-TAB 2: Venues & Seating Windows */}
+      {/* SUB-TAB 2: Reusable Venues, Seating Windows & Cooks */}
       {activeSubTab === "venues" && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between text-xs text-[#dab38c]">
-            <div>
-              Manage verified courtyard venues &amp; active seating capacity windows.
-            </div>
-            <button
-              onClick={() => {
-                const firstListing = foodListings[0];
-                if (firstListing) setVenueFeastId(firstListing.id);
-                setIsAddVenueOpen(true);
-              }}
-              className="text-[#e3a157] hover:underline flex items-center gap-1 font-semibold cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" /> Add seating window
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {foodListings.map((dinner) => {
-              const dinnerSlots = slots.filter((s) => s.listing_id === dinner.id);
-
-              return (
-                <div
-                  key={dinner.id}
-                  className="bg-[#35160e]/90 border border-[#dab38c]/25 rounded-2xl p-5 shadow-xl space-y-4"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="font-display font-bold text-base text-[#f5edeb]">
-                        {dinner.location_name || "Versova Gaothan, Mumbai"}
-                      </h4>
-                      <p className="text-xs text-[#dab38c] mt-0.5">
-                        {dinner.title}
-                      </p>
-                    </div>
-                    {dinner.meeting_point_maps_url && (
-                      <a
-                        href={dinner.meeting_point_maps_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3 py-1 bg-[#29100b] hover:bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-[11px] font-bold text-sky-400 flex items-center gap-1"
-                      >
-                        <span>Google Maps</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    )}
-                  </div>
-
-                  <div className="p-3 bg-[#29100b] rounded-xl border border-[#dab38c]/15 text-xs text-[#dab38c] space-y-1">
-                    <div className="text-[10px] uppercase font-bold tracking-wider text-[#e3a157]">
-                      Arrival &amp; Secret Courtyard Note
-                    </div>
-                    <div>{dinner.secret_meeting_point || "Rendezvous details provided to confirmed guests."}</div>
-                  </div>
-
-                  {/* Seating Capacities & Windows */}
-                  <div className="space-y-2 pt-2 border-t border-[#dab38c]/15 text-xs">
-                    <div className="flex items-center justify-between text-[10px] uppercase font-bold tracking-wider text-[#dab38c]/70">
-                      <span>Active Seating Windows ({dinnerSlots.length})</span>
-                      <button
-                        onClick={() => {
-                          setVenueFeastId(dinner.id);
-                          setVenueLocationName(dinner.location_name || "");
-                          setVenueMapsUrl(dinner.meeting_point_maps_url || "");
-                          setVenueSecretNotes(dinner.secret_meeting_point || "");
-                          setIsAddVenueOpen(true);
-                        }}
-                        className="text-[#e3a157] hover:underline flex items-center gap-0.5"
-                      >
-                        <Plus className="w-3 h-3" /> Add Window
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {dinnerSlots.length === 0 ? (
-                        <div className="col-span-2 p-3 rounded-xl bg-[#29100b]/40 border border-dashed border-[#dab38c]/20 text-center text-[11px] text-[#dab38c]/60">
-                          No seating window open yet. Click "+ Add Window" above.
-                        </div>
-                      ) : (
-                        dinnerSlots.map((slotItem) => (
-                          <div
-                            key={slotItem.id}
-                            className="p-2.5 rounded-xl bg-[#29100b]/60 border border-[#dab38c]/20 relative group"
-                          >
-                            <div className="font-bold text-xs text-[#f5edeb]">
-                              {formatDate(slotItem.slot_start)}
-                            </div>
-                            <div className="text-[10px] text-[#dab38c]">
-                              {formatTime(slotItem.slot_start)} – {formatTime(slotItem.slot_end)}
-                            </div>
-                            <div className="text-[11px] font-mono text-emerald-400 mt-1 flex items-center justify-between">
-                              <span>
-                                {slotItem.booked_count}/{slotItem.capacity} Seats Filled
-                              </span>
-                              <button
-                                onClick={() => {
-                                  if (confirm("Delete this seating window?")) {
-                                    deleteSlot(slotItem.id);
-                                    toast.success("Window removed");
-                                  }
-                                }}
-                                className="text-red-400 hover:text-red-300 opacity-60 hover:opacity-100"
-                                title="Delete slot"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </button>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <SessionsAndVenuesManager
+          pillar="food"
+          listings={foodListings}
+          slots={slots}
+          venueLabel="Courtyard Feast Venue"
+          partnerRoleLabel="Heritage Cook"
+        />
       )}
 
       {/* SUB-TAB 3: Guest Roster & Cook CRM Manifest */}
@@ -1088,6 +1000,19 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                 />
               </div>
 
+              {/* Shared Coordinate Input with Range Validation */}
+              <SharedCoordinateInput
+                latitude={newLat}
+                longitude={newLng}
+                pinVisibility={newPinVisibility}
+                onChange={({ latitude, longitude, pinVisibility, mapsUrl }) => {
+                  setNewLat(latitude);
+                  setNewLng(longitude);
+                  setNewPinVisibility(pinVisibility);
+                  setNewMapsUrl(mapsUrl);
+                }}
+              />
+
               <div>
                 <label className="font-semibold text-[#dab38c] block mb-1">Course Highlights (comma separated)</label>
                 <input
@@ -1265,26 +1190,28 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="font-semibold text-[#dab38c] block mb-1">Secret Arrival Note</label>
-                  <input
-                    type="text"
-                    value={editSecretNotes}
-                    onChange={(e) => setEditSecretNotes(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
-                  />
-                </div>
-                <div>
-                  <label className="font-semibold text-[#dab38c] block mb-1">Google Maps GPS URL</label>
-                  <input
-                    type="url"
-                    value={editMapsUrl}
-                    onChange={(e) => setEditMapsUrl(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157] font-mono text-[11px]"
-                  />
-                </div>
+              <div>
+                <label className="font-semibold text-[#dab38c] block mb-1">Secret Arrival Note</label>
+                <input
+                  type="text"
+                  value={editSecretNotes}
+                  onChange={(e) => setEditSecretNotes(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                />
               </div>
+
+              {/* Shared Coordinate Input with Range Validation */}
+              <SharedCoordinateInput
+                latitude={editLat}
+                longitude={editLng}
+                pinVisibility={editPinVisibility}
+                onChange={({ latitude, longitude, pinVisibility, mapsUrl }) => {
+                  setEditLat(latitude);
+                  setEditLng(longitude);
+                  setEditPinVisibility(pinVisibility);
+                  setEditMapsUrl(mapsUrl);
+                }}
+              />
 
               <div>
                 <label className="font-semibold text-[#dab38c] block mb-1">Course Highlights (comma separated)</label>
