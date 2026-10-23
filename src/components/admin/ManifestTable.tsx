@@ -9,6 +9,9 @@ import {
   CheckCircle2,
   Clock,
   Filter,
+  QrCode,
+  Copy,
+  ExternalLink,
 } from "lucide-react";
 import { Order, Listing } from "../../types";
 import { formatINR, formatDate, formatTime } from "../../lib/utils";
@@ -18,6 +21,7 @@ import {
   exportManifestCsv,
   ManifestRow,
 } from "../../lib/services/manifest";
+import { toast } from "sonner";
 
 interface ManifestTableProps {
   orders: Order[];
@@ -87,6 +91,50 @@ export const ManifestTable: React.FC<ManifestTableProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* Host Gate Scanner Portal Quick Launch & Dispatch Bar */}
+      <div className="bg-[#29100B] text-[#F5EDEB] border border-[#DAB38C]/25 rounded-[18px] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)]">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-[#3D1811] text-[#E3A157] flex items-center justify-center font-bold shrink-0 shadow-inner">
+            <QrCode className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="font-bold text-sm text-[#F5EDEB] flex items-center gap-2">
+              <span>Host Gate Scanner Portal:</span>
+              <code className="text-[#E3A157] font-mono bg-[#3D1811] px-2 py-0.5 rounded-md text-xs border border-[#DAB38C]/15">
+                /host
+              </code>
+            </div>
+            <p className="text-xs text-[#DAB38C]/80 mt-0.5">
+              Mobile QR pass scanner &amp; seat admission portal for on-ground harbor guides, dining hosts, and artisans.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              const url = `${window.location.origin}/host`;
+              navigator.clipboard.writeText(url);
+              toast.success("Copied Host Portal link (https://matsyamart.com/host)!");
+            }}
+            className="px-3.5 py-2 bg-[#3D1811] hover:bg-[#4D1F17] text-[#DAB38C] hover:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-[#DAB38C]/20"
+          >
+            <Copy className="w-3.5 h-3.5 text-[#E3A157]" />
+            <span>Copy Link</span>
+          </button>
+          <a
+            href="/host"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 bg-[#E3A157] hover:bg-[#DAB38C] text-[#29100B] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>Launch Scanner Portal ↗</span>
+          </a>
+        </div>
+      </div>
+
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="p-5 rounded-[16px] bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)]">
