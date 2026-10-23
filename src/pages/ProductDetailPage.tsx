@@ -14,6 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { formatINR } from "../lib/utils";
+import { getOptimizedImageUrl } from "../lib/images";
 import { CheckoutModal } from "../components/order/CheckoutModal";
 
 interface ProductDetailPageProps {
@@ -102,9 +103,15 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
         <div className="lg:col-span-6 space-y-3">
           <div className="aspect-square w-full rounded-3xl overflow-hidden bg-[#1f0b07] border border-[#dab38c]/25 shadow-xl relative">
             <img
-              src={listing.images[activeImgIdx] || listing.images[0]}
+              src={getOptimizedImageUrl(
+                listing.images[activeImgIdx] || listing.images[0],
+                { width: 1000, quality: 80 },
+              )}
               alt={listing.title}
               className="w-full h-full object-cover"
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
             />
             <div className="absolute top-4 left-4">
               <span className="text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider bg-[#e3a157] text-[#29100b] shadow-md">
@@ -127,9 +134,13 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                   }`}
                 >
                   <img
-                    src={img}
+                    src={getOptimizedImageUrl(img, { width: 160, quality: 70 })}
                     alt="Thumb"
                     className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                    width={80}
+                    height={80}
                   />
                 </button>
               ))}

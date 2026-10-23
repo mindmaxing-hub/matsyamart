@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link } from "../ui/Link";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { useData } from "../../context/DataContext";
+import { getOptimizedImageUrl } from "../../lib/images";
 
 interface HeroBannerProps {
   onScrollToCatalog?: () => void;
@@ -22,15 +23,9 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   onScrollToCatalog,
 }) => {
   const { listings } = useData();
-  const [hasLoaded, setHasLoaded] = useState(false);
 
   // Take top 7 listings across all pillars for the hero deck
   const displayListings = listings.slice(0, 7);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setHasLoaded(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <div
@@ -43,12 +38,8 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       }}
     >
       <div className="relative z-20 w-full max-w-md sm:max-w-2xl lg:max-w-4xl text-center space-y-4 sm:space-y-5 mx-auto px-4">
-        {/* Big Headline: 3-line Lu.ma Stacked Layout */}
-        <h1
-          className={`font-display text-[clamp(2.85rem,11.5vw,6.25rem)] font-bold tracking-[-0.035em] text-[#f5edeb] leading-[0.93] sm:leading-[0.92] transition-all duration-700 px-2 ${
-            hasLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-        >
+        {/* Big Headline: 3-line Lu.ma Stacked Layout (Immediate LCP paint without hydration delay) */}
+        <h1 className="font-display text-[clamp(2.85rem,11.5vw,6.25rem)] font-bold tracking-[-0.035em] text-[#f5edeb] leading-[0.93] sm:leading-[0.92] px-2 opacity-100">
           <span className="block whitespace-nowrap">Coastal</span>
           <span className="block whitespace-nowrap">experiences</span>
           <span className="ocean-glow-text block whitespace-nowrap">
@@ -57,20 +48,12 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         </h1>
 
         {/* Subtitle */}
-        <p
-          className={`text-sm sm:text-base text-[#dab38c] max-w-lg mx-auto leading-relaxed font-normal transition-all duration-700 delay-150 px-2 ${
-            hasLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-        >
+        <p className="text-sm sm:text-base text-[#dab38c] max-w-lg mx-auto leading-relaxed font-normal px-2 opacity-100">
           From harbor walks to dawn feasts and artisan workshops, MatsyaMart makes every experience feel effortless.
         </p>
 
         {/* Action Row */}
-        <div
-          className={`flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-1 sm:pt-2 transition-all duration-700 delay-300 ${
-            hasLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-        >
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-1 sm:pt-2 opacity-100">
           <button
             onClick={() => {
               if (onScrollToCatalog) {
@@ -97,11 +80,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       </div>
 
       {/* 2. BOTTOM SECTION: Event Card Collage */}
-      <div
-        className={`w-full max-w-6xl mx-auto pt-8 sm:pt-12 px-4 transition-all duration-1000 delay-400 ${
-          hasLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-        }`}
-      >
+      <div className="w-full max-w-6xl mx-auto pt-8 sm:pt-12 px-4 opacity-100">
         {/* Responsive Scrolling/Fanning Card Deck */}
         <div className="flex items-center justify-start sm:justify-center gap-3 sm:gap-4 md:gap-5 overflow-x-auto pb-4 pt-2 scrollbar-none px-2 sm:px-4">
           {displayListings.map((listing, index) => {
@@ -134,10 +113,17 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
               >
                 <div className="w-full aspect-[4/3] rounded-lg sm:rounded-xl overflow-hidden mb-1.5 sm:mb-2 bg-[#29100b] relative">
                   <img
-                    src={listing.images[0]}
+                    src={getOptimizedImageUrl(listing.images[0], {
+                      width: 380,
+                      quality: 75,
+                    })}
                     alt={listing.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
+                    loading={index < 2 ? "eager" : "lazy"}
+                    fetchPriority={index === 0 ? "high" : "auto"}
+                    decoding="async"
+                    width={176}
+                    height={132}
                   />
                   <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded-full bg-[#29100b]/90 backdrop-blur-xs text-[7px] sm:text-[8px] font-bold tracking-wider uppercase text-[#e3a157] border border-[#e3a157]/30">
                     {categoryLabel}

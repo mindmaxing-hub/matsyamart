@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { formatINR } from "../../lib/utils";
+import { getOptimizedImageUrl } from "../../lib/images";
 import { CheckoutModal } from "../order/CheckoutModal";
 
 export const CartDrawer: React.FC = () => {
@@ -93,9 +94,16 @@ export const CartDrawer: React.FC = () => {
                   className="py-4 flex gap-3.5 first:pt-0 last:pb-0"
                 >
                   <img
-                    src={listing.images[0]}
+                    src={getOptimizedImageUrl(listing.images[0], {
+                      width: 160,
+                      quality: 75,
+                    })}
                     alt={listing.title}
                     className="w-20 h-20 rounded-xl object-cover border border-[#dab38c]/20 shrink-0"
+                    loading="lazy"
+                    decoding="async"
+                    width={80}
+                    height={80}
                   />
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
                     <div>

@@ -21,6 +21,8 @@ export function BrandLogo({
       className={className}
       loading={eager ? "eager" : "lazy"}
       decoding="async"
+      width={140}
+      height={32}
     />
   );
 }

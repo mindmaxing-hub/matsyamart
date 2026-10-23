@@ -17,6 +17,7 @@ import {
   Heart,
 } from "lucide-react";
 import { formatDuration } from "../lib/utils";
+import { getOptimizedImageUrl } from "../lib/images";
 
 interface ExperienceDetailPageProps {
   slug?: string;
@@ -123,9 +124,15 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
       <div className="space-y-3">
         <div className="aspect-[16/9] sm:aspect-[21/9] w-full rounded-3xl overflow-hidden bg-[#29100b] border border-[#dab38c]/25 shadow-xl relative">
           <img
-            src={listing.images[activeImageIdx] || listing.images[0]}
+            src={getOptimizedImageUrl(
+              listing.images[activeImageIdx] || listing.images[0],
+              { width: 1200, quality: 80 },
+            )}
             alt={listing.title}
             className="w-full h-full object-cover transition-all duration-300"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
           />
           <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-[#f5edeb] text-[11px] px-3 py-1 rounded-full flex items-center gap-1.5 border border-white/10">
             <Camera className="w-3.5 h-3.5 text-[#e3a157]" />
@@ -147,9 +154,13 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
                 }`}
               >
                 <img
-                  src={img}
+                  src={getOptimizedImageUrl(img, { width: 160, quality: 70 })}
                   alt="Thumbnail"
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                  width={80}
+                  height={56}
                 />
               </button>
             ))}

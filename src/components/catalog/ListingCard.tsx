@@ -6,6 +6,7 @@ import { formatINR } from "../../lib/utils";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { useData } from "../../context/DataContext";
+import { getOptimizedImageUrl } from "../../lib/images";
 
 interface ListingCardProps {
   listing: Listing;
@@ -62,10 +63,16 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
       {/* Thumbnail Aspect Container */}
       <div className="relative aspect-[16/10] overflow-hidden bg-[#29100b]">
         <img
-          src={listing.images[0]}
+          src={getOptimizedImageUrl(listing.images[0], {
+            width: 560,
+            quality: 75,
+          })}
           alt={listing.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
+          decoding="async"
+          width={280}
+          height={175}
         />
 
         {/* Pillar Tag — top left */}

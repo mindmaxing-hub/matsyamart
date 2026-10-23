@@ -5,6 +5,7 @@ import { useCart } from "../../context/CartContext";
 import { formatINR } from "../../lib/utils";
 import { Link } from "../ui/Link";
 import { Listing } from "../../types";
+import { getOptimizedImageUrl } from "../../lib/images";
 
 export const WishlistDrawer: React.FC = () => {
   const {
@@ -102,9 +103,16 @@ export const WishlistDrawer: React.FC = () => {
                       className="shrink-0"
                     >
                       <img
-                        src={listing.images[0]}
+                        src={getOptimizedImageUrl(listing.images[0], {
+                          width: 160,
+                          quality: 75,
+                        })}
                         alt={listing.title}
                         className="w-20 h-20 rounded-xl object-cover border border-[#dab38c]/20 hover:opacity-90 transition-opacity"
+                        loading="lazy"
+                        decoding="async"
+                        width={80}
+                        height={80}
                       />
                     </Link>
 
