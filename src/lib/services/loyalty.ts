@@ -93,3 +93,54 @@ export function validatePointsRedemption(
     discountINR,
   };
 }
+
+export interface CalculateRefundLoyaltyClawbackInput {
+  orderTotalINR: number;
+  refundAmountINR: number;
+  pointsEarnedOnOrder: number;
+  pointsRedeemedOnOrder: number;
+}
+
+export interface RefundLoyaltyClawbackResult {
+  pendingPointsToCancel: number;
+  spentPointsToRestore: number;
+  summaryMessage: string;
+}
+
+export function calculateRefundLoyaltyClawback(
+  input: CalculateRefundLoyaltyClawbackInput,
+): RefundLoyaltyClawbackResult {
+  const {
+    orderTotalINR,
+    refundAmountINR,
+    pointsEarnedOnOrder,
+    pointsRedeemedOnOrder,
+  } = input;
+  const refundRatio =
+    orderTotalINR > 0
+      ? Math.min(1, Math.max(0, refundAmountINR / orderTotalINR))
+      : 1;
+
+  // Pending points to clawback (unearned due to cancellation/refund)
+  const pendingPointsToCancel = Math.round(pointsEarnedOnOrder * refundRatio);
+
+  // Spent points to restore back to customer's spendable balance
+  const spentPointsToRestore = Math.round(pointsRedeemedOnOrder * refundRatio);
+
+  let summaryMessage = "";
+  if (pendingPointsToCancel > 0 && spentPointsToRestore > 0) {
+    summaryMessage = `Claw back ${pendingPointsToCancel} unearned pending points; restore ${spentPointsToRestore} redeemed points to customer balance.`;
+  } else if (pendingPointsToCancel > 0) {
+    summaryMessage = `Claw back ${pendingPointsToCancel} unearned pending points.`;
+  } else if (spentPointsToRestore > 0) {
+    summaryMessage = `Restore ${spentPointsToRestore} redeemed points to customer balance.`;
+  } else {
+    summaryMessage = "No loyalty points impacted by this refund.";
+  }
+
+  return {
+    pendingPointsToCancel,
+    spentPointsToRestore,
+    summaryMessage,
+  };
+}

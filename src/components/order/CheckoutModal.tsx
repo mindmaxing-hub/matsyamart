@@ -11,7 +11,7 @@ interface CheckoutModalProps {
   items: {
     listing: Listing;
     quantity: number;
-    slotId?: string;
+    slotId?: string | undefined;
   }[];
   onClose: () => void;
 }
@@ -22,7 +22,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 }) => {
   const router = useRouter();
   const { createOrder, slots, validateCoupon, loyaltyProgram } = useData();
-  const { clearCart } = useCart();
+  const { removeItems } = useCart();
 
   const isExperience = items.some((i) => i.listing.type === "experience");
   const hasPhysicalProduct = items.some((i) => i.listing.type === "product");
@@ -246,8 +246,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               }),
             });
 
-            // If checked out from cart, clear cart
-            clearCart();
+            // Remove only the checked-out items; preserve unrelated basket items
+            removeItems(
+              items.map((i) => ({
+                listingId: i.listing.id,
+                slotId: i.slotId,
+              })),
+            );
             onClose();
 
             // Asynchronously dispatch confirmation ticket email with QR code

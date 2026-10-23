@@ -49,6 +49,12 @@ export const Footer: React.FC = () => {
               Share Offering
             </Link>
             <Link
+              to="/host"
+              className="hover:text-[#e3a157] transition-colors"
+            >
+              Host Check-In
+            </Link>
+            <Link
               to="/admin"
               className="hover:text-[#e3a157] transition-colors"
             >

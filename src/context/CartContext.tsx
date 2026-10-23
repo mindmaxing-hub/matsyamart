@@ -1,11 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { Listing, CartItem } from "../types";
+import { Listing, CartItem, ExperienceSlot } from "../types";
+
+export function getCartLineKey(listingId: string, slotId?: string | undefined): string {
+  return slotId ? `${listingId}:${slotId}` : listingId;
+}
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (listing: Listing, quantity?: number) => void;
-  removeItem: (listingId: string) => void;
-  updateQuantity: (listingId: string, quantity: number) => void;
+  addItem: (listing: Listing, quantity?: number, slot?: ExperienceSlot) => void;
+  removeItem: (lineKeyOrListingId: string) => void;
+  removeItems: (itemsToRemove: { listingId: string; slotId?: string | undefined }[]) => void;
+  updateQuantity: (lineKeyOrListingId: string, quantity: number) => void;
   clearCart: () => void;
   totalAmount: number;
   totalItemsCount: number;
@@ -39,33 +44,58 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [items]);
 
-  const addItem = (listing: Listing, quantity: number = 1) => {
+  const addItem = (listing: Listing, quantity: number = 1, slot?: ExperienceSlot) => {
+    const lineKey = getCartLineKey(listing.id, slot?.id);
     setItems((prev) => {
-      const existing = prev.find((item) => item.listing.id === listing.id);
+      const existing = prev.find(
+        (item) => getCartLineKey(item.listing.id, item.slot?.id) === lineKey,
+      );
       if (existing) {
         return prev.map((item) =>
-          item.listing.id === listing.id
+          getCartLineKey(item.listing.id, item.slot?.id) === lineKey
             ? { ...item, quantity: item.quantity + quantity }
             : item,
         );
       }
-      return [...prev, { listing, quantity }];
+      return [...prev, { listing, quantity, slot }];
     });
     setIsCartOpen(true);
   };
 
-  const removeItem = (listingId: string) => {
-    setItems((prev) => prev.filter((item) => item.listing.id !== listingId));
+  const removeItem = (lineKeyOrListingId: string) => {
+    setItems((prev) =>
+      prev.filter(
+        (item) =>
+          getCartLineKey(item.listing.id, item.slot?.id) !== lineKeyOrListingId &&
+          item.listing.id !== lineKeyOrListingId,
+      ),
+    );
   };
 
-  const updateQuantity = (listingId: string, quantity: number) => {
+  const removeItems = (
+    itemsToRemove: { listingId: string; slotId?: string | undefined }[],
+  ) => {
+    const keysToRemove = new Set(
+      itemsToRemove.map((i) => getCartLineKey(i.listingId, i.slotId)),
+    );
+    setItems((prev) =>
+      prev.filter(
+        (item) => !keysToRemove.has(getCartLineKey(item.listing.id, item.slot?.id)),
+      ),
+    );
+  };
+
+  const updateQuantity = (lineKeyOrListingId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeItem(listingId);
+      removeItem(lineKeyOrListingId);
       return;
     }
     setItems((prev) =>
       prev.map((item) =>
-        item.listing.id === listingId ? { ...item, quantity } : item,
+        getCartLineKey(item.listing.id, item.slot?.id) === lineKeyOrListingId ||
+        item.listing.id === lineKeyOrListingId
+          ? { ...item, quantity }
+          : item,
       ),
     );
   };
@@ -87,6 +117,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         items,
         addItem,
         removeItem,
+        removeItems,
         updateQuantity,
         clearCart,
         totalAmount,

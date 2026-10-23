@@ -2,6 +2,7 @@ import { Order, OrderItem, Listing, ExperienceSlot, AttendeeDetail, PillarType }
 
 export interface ManifestRow {
   bookingId: string;
+  orderId?: string | undefined;
   orderRef: string;
   customerName: string;
   customerPhone: string;
@@ -60,6 +61,7 @@ export function buildCanonicalManifest(
         attendees.forEach((att, idx) => {
           rows.push({
             bookingId: `${order.id}-${item.id}-${idx}`,
+            orderId: order.id,
             orderRef: order.order_ref,
             customerName: order.customer_name,
             customerPhone: order.customer_phone,
@@ -86,6 +88,7 @@ export function buildCanonicalManifest(
         for (let idx = 0; idx < totalSeats; idx++) {
           rows.push({
             bookingId: `${order.id}-${item.id}-${idx}`,
+            orderId: order.id,
             orderRef: order.order_ref,
             customerName: order.customer_name,
             customerPhone: order.customer_phone,

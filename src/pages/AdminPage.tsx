@@ -17,6 +17,7 @@ import { GoodsWorkspace } from "../components/admin/GoodsWorkspace";
 import { FoodWorkspace } from "../components/admin/FoodWorkspace";
 import { WalksWorkspace } from "../components/admin/WalksWorkspace";
 import { WorkshopsWorkspace } from "../components/admin/WorkshopsWorkspace";
+import { LoyaltyProgramManager } from "../components/admin/LoyaltyProgramManager";
 import { Link } from "../components/ui/Link";
 import { BrandLogo } from "../components/site/BrandLogo";
 import { formatINR, formatDate } from "../lib/utils";
@@ -63,6 +64,7 @@ type AdminSectionId =
   | "refunds"
   | "spotlight"
   | "coupons"
+  | "loyalty"
   | "roles"
   | "communications"
   | "whatsapp";
@@ -248,6 +250,16 @@ const AdminPageContent: React.FC = () => {
         "Special terms, <em class='italic text-[#E3A157]'>happy members.</em>",
       subtitle:
         "Manage Bhoomiputra Foundation member codes, percentage discounts, and community seasonal promo codes.",
+    },
+    {
+      id: "loyalty",
+      label: "MatsyaPoints Loyalty",
+      icon: Sparkles,
+      kicker: "Community Rewards · Owner Only",
+      editorialTitle:
+        "Coastal loyalty, <em class='italic text-[#E3A157]'>valued patrons.</em>",
+      subtitle:
+        "Manage point valuation, customer tiers, and max order redemption caps across all 4 pillars.",
     },
     {
       id: "roles",
@@ -846,6 +858,9 @@ const AdminPageContent: React.FC = () => {
 
           {/* 11. PROMOS & COUPONS */}
           {activeSection === "coupons" && <CouponManager />}
+
+          {/* 11B. MATSYAPOINTS LOYALTY ENGINE (OWNER ONLY) */}
+          {activeSection === "loyalty" && <LoyaltyProgramManager />}
 
           {/* 12. STAFF ROLES & ACCESS TIERS */}
           {activeSection === "roles" && <StaffRolesManager />}

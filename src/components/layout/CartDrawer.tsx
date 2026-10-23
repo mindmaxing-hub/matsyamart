@@ -24,7 +24,7 @@ export const CartDrawer: React.FC = () => {
   } = useCart();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
-  if (!isCartOpen) return null;
+  if (!isCartOpen && !isCheckoutOpen) return null;
 
   const handleOpenCheckout = () => {
     setIsCartOpen(false);
@@ -33,14 +33,16 @@ export const CartDrawer: React.FC = () => {
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 transition-opacity"
-        onClick={() => setIsCartOpen(false)}
-      />
+      {isCartOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 transition-opacity"
+            onClick={() => setIsCartOpen(false)}
+          />
 
-      {/* Drawer */}
-      <div className="fixed inset-y-0 right-0 max-w-full flex z-50">
+          {/* Drawer */}
+          <div className="fixed inset-y-0 right-0 max-w-full flex z-50">
         <div className="w-screen max-w-md bg-[#29100b] text-[#f5edeb] shadow-2xl flex flex-col border-l border-[#dab38c]/20">
           {/* Header */}
           <div className="p-5 border-b border-[#dab38c]/15 flex items-center justify-between bg-[#1f0b07]">
@@ -198,13 +200,16 @@ export const CartDrawer: React.FC = () => {
           )}
         </div>
       </div>
+      </>
+      )}
 
-      {/* Checkout Modal Bridge */}
+      {/* Checkout Modal Bridge - Kept mounted when basket closes */}
       {isCheckoutOpen && (
         <CheckoutModal
           items={items.map((i) => ({
             listing: i.listing,
             quantity: i.quantity,
+            slotId: i.slot?.id,
           }))}
           onClose={() => setIsCheckoutOpen(false)}
         />

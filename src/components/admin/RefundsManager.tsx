@@ -12,9 +12,12 @@ import {
   Send,
   Clock,
   ShieldCheck,
+  Sparkles,
+  Coins,
 } from "lucide-react";
 import { Order, RefundTicket } from "../../types";
 import { formatINR, formatDate } from "../../lib/utils";
+import { calculateRefundLoyaltyClawback } from "../../lib/services/loyalty";
 
 interface RefundsManagerProps {
   orders: Order[];
@@ -136,6 +139,24 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
     e.preventDefault();
     if (!selectedTicket || !actionType) return;
 
+    const matchingOrder = orders.find(
+      (o) =>
+        o.order_ref === selectedTicket.order_ref ||
+        o.id === selectedTicket.order_ref,
+    );
+    const loyaltyClawback = calculateRefundLoyaltyClawback({
+      orderTotalINR:
+        matchingOrder?.total_amount_inr || selectedTicket.amount_paid_inr,
+      refundAmountINR: selectedTicket.amount_paid_inr,
+      pointsEarnedOnOrder: Math.floor(
+        ((matchingOrder?.total_amount_inr ||
+          selectedTicket.amount_paid_inr) *
+          3) /
+          100,
+      ),
+      pointsRedeemedOnOrder: matchingOrder?.loyalty_points_redeemed || 0,
+    });
+
     const updated = tickets.map((t) => {
       if (t.id === selectedTicket.id) {
         if (actionType === "refund") {
@@ -143,14 +164,14 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
             ...t,
             status: "refunded" as const,
             razorpay_refund_id: razorpayRefundId,
-            admin_notes: `Processed cash refund of ${formatINR(t.amount_paid_inr)} via Razorpay`,
+            admin_notes: `Processed cash refund of ${formatINR(t.amount_paid_inr)} via Razorpay (${razorpayRefundId}). Loyalty impact: ${loyaltyClawback.summaryMessage}`,
           };
         } else {
           return {
             ...t,
             status: "credit_voucher_issued" as const,
             credit_voucher_code: voucherCode,
-            admin_notes: `Issued 100% store credit voucher code ${voucherCode}`,
+            admin_notes: `Issued 100% store credit voucher code ${voucherCode}. Loyalty impact: ${loyaltyClawback.summaryMessage}`,
           };
         }
       }
@@ -584,6 +605,52 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
                   <span className="text-[11.5px] text-[var(--admin-accent-strong)] mt-1 block">
                     Valid for 180 days across any coastal safari or pantry item.
                   </span>
+                </div>
+              )}
+
+              {/* Loyalty Points Impact Assessment */}
+              {selectedTicket && (
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-1.5">
+                  <div className="flex items-center gap-1.5 font-bold text-amber-800">
+                    <Sparkles className="w-4 h-4 text-[#E3A157]" />
+                    <span>MatsyaPoints Loyalty Impact</span>
+                  </div>
+                  {(() => {
+                    const matchingOrder = orders.find(
+                      (o) =>
+                        o.order_ref === selectedTicket.order_ref ||
+                        o.id === selectedTicket.order_ref,
+                    );
+                    const clawback = calculateRefundLoyaltyClawback({
+                      orderTotalINR:
+                        matchingOrder?.total_amount_inr ||
+                        selectedTicket.amount_paid_inr,
+                      refundAmountINR: selectedTicket.amount_paid_inr,
+                      pointsEarnedOnOrder: Math.floor(
+                        ((matchingOrder?.total_amount_inr ||
+                          selectedTicket.amount_paid_inr) *
+                          3) /
+                          100,
+                      ),
+                      pointsRedeemedOnOrder:
+                        matchingOrder?.loyalty_points_redeemed || 0,
+                    });
+                    return (
+                      <div className="space-y-1 text-[#29100B]/80 text-[11.5px]">
+                        <p>{clawback.summaryMessage}</p>
+                        {clawback.pendingPointsToCancel > 0 && (
+                          <div className="text-rose-700 font-semibold">
+                            • -{clawback.pendingPointsToCancel} unearned pending points revoked
+                          </div>
+                        )}
+                        {clawback.spentPointsToRestore > 0 && (
+                          <div className="text-emerald-700 font-semibold">
+                            • +{clawback.spentPointsToRestore} spent points credited back to member
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 

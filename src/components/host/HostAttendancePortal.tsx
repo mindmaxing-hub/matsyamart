@@ -17,6 +17,10 @@ import {
   LogOut,
   MapPin,
   Users,
+  X,
+  RotateCcw,
+  UserCheck,
+  Ticket,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -33,6 +37,7 @@ export const HostAttendancePortal: React.FC = () => {
   // Host Scanner State
   const [selectedSlotId, setSelectedSlotId] = useState<string>("all");
   const [manualRefInput, setManualRefInput] = useState("");
+  const [inspectedOrderId, setInspectedOrderId] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<{
     status: "valid" | "already_arrived" | "invalid" | "outside_window";
     message: string;
@@ -40,6 +45,11 @@ export const HostAttendancePortal: React.FC = () => {
     seats?: number | undefined;
     timestamp?: string | undefined;
   } | null>(null);
+
+  const inspectedOrder = useMemo(() => {
+    if (!inspectedOrderId) return null;
+    return orders.find((o) => o.id === inspectedOrderId) || null;
+  }, [orders, inspectedOrderId]);
 
   const handleSendOtp = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +102,7 @@ export const HostAttendancePortal: React.FC = () => {
     setHostPhoneInput("");
     setOtpInput("");
     setScanResult(null);
+    setInspectedOrderId(null);
   };
 
   // Canonical Manifest rows for this host
@@ -136,61 +147,77 @@ export const HostAttendancePortal: React.FC = () => {
       return;
     }
 
-    // Find the first un-checked in experience item
-    let targetItemIndex = -1;
-    let targetAttendeeIndex = -1;
+    // Set as currently inspected order for individual seat breakdown
+    setInspectedOrderId(matchingOrder.id);
 
-    for (let i = 0; i < matchingOrder.items.length; i++) {
-      const item = matchingOrder.items[i]!;
+    // Calculate total experience seats and arrived count
+    let totalSeats = 0;
+    let arrivedSeats = 0;
+
+    matchingOrder.items.forEach((item) => {
+      totalSeats += item.quantity;
       const attendees = item.attendee_details || [];
-      const pendingIdx = attendees.findIndex((a) => !a.checked_in);
-      if (pendingIdx !== -1) {
-        targetItemIndex = i;
-        targetAttendeeIndex = pendingIdx;
-        break;
-      }
-    }
+      attendees.forEach((att) => {
+        if (att.checked_in) arrivedSeats++;
+      });
+    });
 
-    if (targetItemIndex === -1 || targetAttendeeIndex === -1) {
-      // All attendees in this order are already checked in!
+    if (arrivedSeats >= totalSeats && totalSeats > 0) {
       const firstAtt = matchingOrder.items[0]?.attendee_details?.[0];
       setScanResult({
         status: "already_arrived",
         guestName: matchingOrder.customer_name,
-        seats: matchingOrder.items.reduce((s, it) => s + it.quantity, 0),
+        seats: totalSeats,
         timestamp: firstAtt?.check_in_time
           ? new Date(firstAtt.check_in_time).toLocaleTimeString("en-IN", {
               timeZone: "Asia/Kolkata",
             })
           : "Earlier Today",
-        message: `ALREADY ADMITTED: This pass was previously validated.`,
+        message: `ALREADY ADMITTED: All ${totalSeats} seats previously checked in.`,
       });
-      return;
+    } else {
+      setScanResult({
+        status: "valid",
+        guestName: matchingOrder.customer_name,
+        seats: totalSeats,
+        timestamp: new Date().toLocaleTimeString("en-IN", {
+          timeZone: "Asia/Kolkata",
+        }),
+        message: `PASS VERIFIED: ${arrivedSeats}/${totalSeats} seats arrived. Select seats to admit.`,
+      });
     }
 
-    const item = matchingOrder.items[targetItemIndex]!;
-    // Commit Check-In
-    updateAttendeeCheckIn(
-      matchingOrder.id,
-      item.id,
-      targetAttendeeIndex,
-      true,
-    );
-
-    setScanResult({
-      status: "valid",
-      guestName:
-        item.attendee_details?.[targetAttendeeIndex]?.fullName ||
-        matchingOrder.customer_name,
-      seats: item.quantity,
-      timestamp: new Date().toLocaleTimeString("en-IN", {
-        timeZone: "Asia/Kolkata",
-      }),
-      message: "ADMISSION CONFIRMED: Welcome to the harbor!",
-    });
-
-    toast.success(`Checked in ${matchingOrder.customer_name}`);
     setManualRefInput("");
+  };
+
+  const handleCheckInSingleSeat = (
+    orderId: string,
+    itemId: string,
+    seatIdx: number,
+  ) => {
+    updateAttendeeCheckIn(orderId, itemId, seatIdx, true);
+    toast.success(`Admitted Seat #${seatIdx + 1}`);
+  };
+
+  const handleUndoSeatCheckIn = (
+    orderId: string,
+    itemId: string,
+    seatIdx: number,
+  ) => {
+    updateAttendeeCheckIn(orderId, itemId, seatIdx, false);
+    toast.info(`Restored Seat #${seatIdx + 1} (Marked in error)`);
+  };
+
+  const handleAdmitAllSeats = (order: Order) => {
+    order.items.forEach((item) => {
+      const attendees = item.attendee_details || [];
+      for (let s = 0; s < item.quantity; s++) {
+        if (!attendees[s]?.checked_in) {
+          updateAttendeeCheckIn(order.id, item.id, s, true);
+        }
+      }
+    });
+    toast.success(`Admitted all remaining seats for ${order.customer_name}`);
   };
 
   return (
@@ -342,7 +369,6 @@ export const HostAttendancePortal: React.FC = () => {
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <button
                     onClick={() => {
-                      // Trigger camera simulation
                       const sampleOrder = orders[0];
                       if (sampleOrder) handleProcessAdmission(sampleOrder.order_ref);
                     }}
@@ -400,6 +426,143 @@ export const HostAttendancePortal: React.FC = () => {
               )}
             </div>
 
+            {/* Interactive Seat Inspection Sheet (Shown when an order is verified or selected) */}
+            {inspectedOrder && (
+              <div className="p-5 rounded-2xl bg-[#1f0b07] border-2 border-[#e3a157]/50 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex items-center justify-between pb-3 border-b border-[#dab38c]/20">
+                  <div className="flex items-center gap-2">
+                    <Ticket className="w-4 h-4 text-[#e3a157]" />
+                    <span className="font-mono text-xs font-bold text-[#e3a157]">
+                      {inspectedOrder.order_ref}
+                    </span>
+                    <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30">
+                      {inspectedOrder.status}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setInspectedOrderId(null)}
+                    className="p-1 rounded-lg text-[#dab38c]/60 hover:text-[#f5edeb] hover:bg-[#35160e] transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Lead Customer Info */}
+                <div className="text-xs space-y-1 text-[#dab38c]/90">
+                  <div className="font-bold text-sm text-[#f5edeb]">
+                    {inspectedOrder.customer_name}
+                  </div>
+                  <div className="flex items-center gap-2 text-[11px]">
+                    <Phone className="w-3 h-3 text-[#dab38c]/60" />
+                    <span>{inspectedOrder.customer_phone}</span>
+                    <span>·</span>
+                    <span>{inspectedOrder.customer_email}</span>
+                  </div>
+                </div>
+
+                {/* Batch Action */}
+                <div className="pt-1">
+                  <button
+                    onClick={() => handleAdmitAllSeats(inspectedOrder)}
+                    className="w-full py-2.5 px-4 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  >
+                    <UserCheck className="w-4 h-4" />
+                    <span>Admit All Remaining Seats</span>
+                  </button>
+                </div>
+
+                {/* Individual Seats Breakdown */}
+                <div className="space-y-3 pt-2">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-[#dab38c]/70">
+                    Seat-by-Seat Party Breakdown
+                  </div>
+
+                  {inspectedOrder.items.map((item, itemIdx) => {
+                    const attendees = item.attendee_details || [];
+                    return (
+                      <div key={item.id} className="space-y-2">
+                        <div className="text-xs font-semibold text-[#f5edeb]">
+                          {item.listing?.title || "Coastal Experience"}
+                        </div>
+
+                        {Array.from({ length: item.quantity }).map((_, seatIdx) => {
+                          const att = attendees[seatIdx];
+                          const isArrived = Boolean(att?.checked_in);
+                          const seatName =
+                            att?.fullName ||
+                            (seatIdx === 0
+                              ? inspectedOrder.customer_name
+                              : `Guest ${seatIdx + 1}`);
+
+                          return (
+                            <div
+                              key={seatIdx}
+                              className={`p-3 rounded-xl border flex items-center justify-between text-xs transition-colors ${
+                                isArrived
+                                  ? "bg-emerald-950/40 border-emerald-500/30 text-emerald-100"
+                                  : "bg-[#140604] border-[#dab38c]/20 text-[#dab38c]"
+                              }`}
+                            >
+                              <div className="space-y-0.5">
+                                <div className="font-bold text-[#f5edeb] flex items-center gap-1.5">
+                                  <span>Seat #{seatIdx + 1}:</span>
+                                  <span>{seatName}</span>
+                                </div>
+                                <div className="text-[11px] text-[#dab38c]/70 flex items-center gap-2">
+                                  {isArrived ? (
+                                    <span className="text-emerald-400 font-medium">
+                                      ✓ Arrived {att?.check_in_time ? `at ${new Date(att.check_in_time).toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata" })}` : ""}
+                                    </span>
+                                  ) : (
+                                    <span className="text-amber-400/90 font-medium">
+                                      Pending Arrival
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div>
+                                {isArrived ? (
+                                  <button
+                                    onClick={() =>
+                                      handleUndoSeatCheckIn(
+                                        inspectedOrder.id,
+                                        item.id,
+                                        seatIdx,
+                                      )
+                                    }
+                                    className="px-2.5 py-1 text-[10px] font-semibold text-rose-300 hover:text-rose-100 hover:bg-rose-950/60 rounded-lg border border-rose-500/30 flex items-center gap-1 transition-colors"
+                                    title="Marked in error - restore seat to pending"
+                                  >
+                                    <RotateCcw className="w-3 h-3" />
+                                    <span>Undo</span>
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() =>
+                                      handleCheckInSingleSeat(
+                                        inspectedOrder.id,
+                                        item.id,
+                                        seatIdx,
+                                      )
+                                    }
+                                    className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] rounded-lg shadow transition-colors flex items-center gap-1"
+                                  >
+                                    <UserCheck className="w-3 h-3" />
+                                    <span>Admit</span>
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Session Roster Quick View */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -410,10 +573,16 @@ export const HostAttendancePortal: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                {manifestRows.slice(0, 8).map((row) => (
+                {manifestRows.slice(0, 10).map((row) => (
                   <div
                     key={row.bookingId}
-                    className="p-3 rounded-xl bg-[#1f0b07] border border-[#dab38c]/15 flex items-center justify-between text-xs"
+                    onClick={() => {
+                      const matched = orders.find((o) => o.id === row.orderId);
+                      if (matched) {
+                        setInspectedOrderId(matched.id);
+                      }
+                    }}
+                    className="p-3 rounded-xl bg-[#1f0b07] hover:bg-[#2c100a] border border-[#dab38c]/15 flex items-center justify-between text-xs cursor-pointer transition-colors"
                   >
                     <div>
                       <div className="font-bold text-[#f5edeb]">{row.attendeeName}</div>
@@ -427,12 +596,9 @@ export const HostAttendancePortal: React.FC = () => {
                           ARRIVED
                         </span>
                       ) : (
-                        <button
-                          onClick={() => handleProcessAdmission(row.orderRef)}
-                          className="px-2.5 py-1 rounded-full bg-[#35160e] hover:bg-[#e3a157] text-[#dab38c] hover:text-[#29100b] text-[10px] font-bold transition-colors"
-                        >
-                          Check In
-                        </button>
+                        <span className="px-2.5 py-1 rounded-full bg-[#35160e] text-[#e3a157] text-[10px] font-bold border border-[#dab38c]/20">
+                          Inspect Party →
+                        </span>
                       )}
                     </div>
                   </div>

@@ -15,6 +15,7 @@ import {
   Place,
   LoyaltyProgram,
   LoyaltyProgramConfig,
+  LoyaltyStatus,
 } from "../types";
 import {
   SEED_CATEGORIES,
@@ -86,7 +87,7 @@ interface DataContextType {
   ) => void;
   deleteSlot: (slotId: string) => void;
   updateSessionRevision: (slotId: string, updates: Partial<ExperienceSlot>) => void;
-  updateLoyaltyProgram: (config: LoyaltyProgramConfig) => void;
+  updateLoyaltyProgram: (config: LoyaltyProgramConfig, status?: LoyaltyStatus) => void;
   addRecurringWeekendSlots: (
     listingId: string,
     weeksCount: number,
@@ -692,9 +693,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
-  const updateLoyaltyProgram = (config: LoyaltyProgramConfig) => {
+  const updateLoyaltyProgram = (
+    config: LoyaltyProgramConfig,
+    status?: LoyaltyStatus,
+  ) => {
     setLoyaltyProgram((prev) => ({
       ...prev,
+      status: status !== undefined ? status : prev.status,
       rule_version: prev.rule_version + 1,
       config,
     }));
@@ -964,6 +969,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         const updatedItems = order.items.map((item) => {
           if (item.id !== itemId) return item;
           const currentAttendees = [...(item.attendee_details || [])];
+          // Defensive guard: Ensure attendee array has entries up to item.quantity
+          while (currentAttendees.length < item.quantity) {
+            const seatNum = currentAttendees.length + 1;
+            currentAttendees.push({
+              fullName: seatNum === 1 ? order.customer_name : `Guest ${seatNum}`,
+              phone: seatNum === 1 ? order.customer_phone : (order.customer_phone || ""),
+              checked_in: false,
+            });
+          }
           if (currentAttendees[attendeeIndex]) {
             currentAttendees[attendeeIndex] = {
               ...currentAttendees[attendeeIndex]!,
