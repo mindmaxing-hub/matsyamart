@@ -47,6 +47,7 @@ import {
   Copy,
   ChevronRight,
   Filter,
+  QrCode,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -383,6 +384,7 @@ export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) =>
     }
     const { text } = buildMultilingualHostNotice({
       hostName: dispatchItem.hostName,
+      hostPhone: dispatchItem.hostPhone,
       offeringTitle: dispatchItem.offeringTitle,
       pillar: dispatchItem.pillar,
       dateStr: dispatchItem.dateStr,
@@ -410,6 +412,7 @@ export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) =>
   const handleOpenManualWhatsApp = (dispatchItem: (typeof hostDispatches)[0]) => {
     const { text } = buildMultilingualHostNotice({
       hostName: dispatchItem.hostName,
+      hostPhone: dispatchItem.hostPhone,
       offeringTitle: dispatchItem.offeringTitle,
       pillar: dispatchItem.pillar,
       dateStr: dispatchItem.dateStr,
@@ -611,11 +614,53 @@ export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) =>
             </p>
           </div>
 
+          {/* Quick Host Portal Dispatch & Link Generator */}
+          <div className="bg-[#1f0b07] border border-[#dab38c]/25 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#35160e] text-[#e3a157] flex items-center justify-center font-bold">
+                <QrCode className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-bold text-sm text-[#f5edeb]">
+                  Host Gate Scanner Portal: <code className="text-[#e3a157] font-mono">/host</code>
+                </div>
+                <p className="text-xs text-[#dab38c]/70">
+                  Universal gate scanner for verified community hosts. Direct link with pre-filled phone saves credentials automatically.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => {
+                  const url = `${window.location.origin}/host`;
+                  navigator.clipboard.writeText(url);
+                  toast.success("Copied universal Host Portal URL (/host)!");
+                }}
+                className="px-3.5 py-2 bg-[#35160e] hover:bg-[#4a1f14] text-[#dab38c] hover:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-[#dab38c]/20"
+              >
+                <Copy className="w-3.5 h-3.5 text-[#e3a157]" />
+                <span>Copy Universal Link</span>
+              </button>
+              <a
+                href="/host"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3.5 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Launch Host Portal ↗</span>
+              </a>
+            </div>
+          </div>
+
           {/* List of Host Dispatches */}
           <div className="space-y-4">
             {hostDispatches.map((dispatchItem) => {
               const notice = buildMultilingualHostNotice({
                 hostName: dispatchItem.hostName,
+                hostPhone: dispatchItem.hostPhone,
                 offeringTitle: dispatchItem.offeringTitle,
                 pillar: dispatchItem.pillar,
                 dateStr: dispatchItem.dateStr,
@@ -724,7 +769,37 @@ export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) =>
                       Dispatched from official gateway: <strong>{MATSYAMART_WHATSAPP_DISPLAY}</strong>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const clean = normalizeWhatsAppPhone(dispatchItem.hostPhone);
+                          const url = `${window.location.origin}/host?phone=${clean}`;
+                          navigator.clipboard.writeText(url);
+                          toast.success(`Copied Host Scanner link for ${dispatchItem.hostName}!`);
+                        }}
+                        className="px-3 py-1.5 bg-[#1f0b07] hover:bg-[#2c100a] border border-[#dab38c]/25 text-[#e3a157] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                        title="Copy direct scanner link with host phone pre-filled"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Copy Scanner Link</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const clean = normalizeWhatsAppPhone(dispatchItem.hostPhone);
+                          const url = `${window.location.origin}/host?phone=${clean}`;
+                          const msg = `Namaste ${dispatchItem.hostName}!\n\nHere is your official MatsyaMart Gate Attendance Scanner link for tomorrow:\n👉 ${url}\n\nOpen this on your mobile browser at the jetty/courtyard to scan guest QR passes and check in your party.`;
+                          openWhatsApp(dispatchItem.hostPhone, msg);
+                        }}
+                        className="px-3 py-1.5 bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/35 text-[#4ade80] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                        title="Send direct scanner link to host via WhatsApp"
+                      >
+                        <QrCode className="w-3.5 h-3.5" />
+                        <span>WhatsApp Scanner</span>
+                      </button>
+
                       <button
                         type="button"
                         onClick={() => handleToggleSuppression(dispatchItem.id)}

@@ -5,6 +5,8 @@ export type SupportedLanguage = "en" | "hi" | "mr";
 
 export interface HostNoticeParams {
   hostName: string;
+  hostPhone?: string | undefined;
+  portalUrl?: string | undefined;
   offeringTitle: string;
   pillar: "food" | "walks" | "workshops";
   dateStr: string;
@@ -27,9 +29,17 @@ export function buildMultilingualHostNotice(params: HostNoticeParams): {
   language: SupportedLanguage;
 } {
   const lang = params.language || "en";
-  const guestLines = params.attendees
-    .map((a, i) => `${i + 1}. ${a.name} (${a.seats} seats) - ${a.phone}`)
-    .join("\n") || "No bookings registered";
+  const cleanPhone = params.hostPhone ? normalizeWhatsAppPhone(params.hostPhone) : "";
+  const portalUrl =
+    params.portalUrl ||
+    (cleanPhone
+      ? `https://matsyamart.com/host?phone=${encodeURIComponent(cleanPhone)}`
+      : "https://matsyamart.com/host");
+
+  const guestLines =
+    params.attendees
+      .map((a, i) => `${i + 1}. ${a.name} (${a.seats} seats) - ${a.phone}`)
+      .join("\n") || "No bookings registered";
 
   if (lang === "mr") {
     // Marathi
@@ -44,6 +54,7 @@ export function buildMultilingualHostNotice(params: HostNoticeParams): {
       (params.mapsUrl ? `*गुगल मॅप्स:* ${params.mapsUrl}\n` : "") +
       `*एकूण पाहुणे:* ${params.totalGuests} (${params.totalSeats} जागा)\n` +
       `*अंदाजे मानधन:* ₹${params.estimatedPayoutINR.toLocaleString("en-IN")}\n\n` +
+      `📱 *गेट हजेरी स्कॅनर पोर्टल (QR तपासा):*\n${portalUrl}\n\n` +
       `📋 *पाहुण्यांची यादी:*\n${guestLines}\n\n` +
       `_कृपया वेळेवर उपस्थित राहावे. कोणतीही अडचण असल्यास संपर्क करा: ${MATSYAMART_WHATSAPP_DISPLAY}_\n` +
       `_भूमिपुत्र फाउंडेशन · कोळीबाबा सीफूड_`;
@@ -63,6 +74,7 @@ export function buildMultilingualHostNotice(params: HostNoticeParams): {
       (params.mapsUrl ? `*गूगल मैप्स GPS:* ${params.mapsUrl}\n` : "") +
       `*कुल मेहमान:* ${params.totalGuests} (${params.totalSeats} सीटें)\n` +
       `*अनुमानित भुगतान:* ₹${params.estimatedPayoutINR.toLocaleString("en-IN")}\n\n` +
+      `📱 *गेट उपस्थिति स्कैनर पोर्टल (QR सत्यापित करें):*\n${portalUrl}\n\n` +
       `📋 *मेहमानों की सूची:*\n${guestLines}\n\n` +
       `_सहायता या समन्वय के लिए संपर्क करें: ${MATSYAMART_WHATSAPP_DISPLAY}_\n` +
       `_भूमिपुत्र फाउंडेशन · कोलीबाबा सीफूड_`;
@@ -81,6 +93,7 @@ export function buildMultilingualHostNotice(params: HostNoticeParams): {
     (params.mapsUrl ? `*Google Maps GPS:* ${params.mapsUrl}\n` : "") +
     `*Confirmed Guests:* ${params.totalGuests} guests (${params.totalSeats} confirmed seats)\n` +
     `*Estimated Host Net Payout:* ₹${params.estimatedPayoutINR.toLocaleString("en-IN")}\n\n` +
+    `📱 *Gate Attendance Scanner Portal (Scan Guest QRs):*\n${portalUrl}\n\n` +
     `📋 *Confirmed Guest Roster:*\n${guestLines}\n\n` +
     `_Bhoomiputra Foundation · Kolibaba Seafood Inc_\n` +
     `_Operations Coordinator: ${MATSYAMART_WHATSAPP_DISPLAY}_`;

@@ -27,6 +27,7 @@ describe("Multilingual WhatsApp Host Notice", () => {
     expect(result.text).toContain("Intertidal Dawn Trail");
     expect(result.text).toContain("Aarav Patel (2 seats)");
     expect(result.text).toContain("₹2,167");
+    expect(result.text).toContain("https://matsyamart.com/host");
   });
 
   it("builds Hindi notice with correct translations and format", () => {

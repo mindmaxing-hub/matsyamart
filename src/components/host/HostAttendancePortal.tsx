@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useData } from "../../context/DataContext";
 import { Partner, ExperienceSlot, Listing, Order } from "../../types";
 import { normalizeWhatsAppPhone, formatPhoneDisplay } from "../../lib/whatsapp";
@@ -51,6 +51,40 @@ export const HostAttendancePortal: React.FC = () => {
     return orders.find((o) => o.id === inspectedOrderId) || null;
   }, [orders, inspectedOrderId]);
 
+  const STORAGE_HOST_SESSION = "matsyamart_host_session_v1";
+
+  // URL Query Params & Persistent Host Session Initialization
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const phoneParam = params.get("phone");
+    const sessionParam = params.get("session");
+
+    if (sessionParam) {
+      setSelectedSlotId(sessionParam);
+    }
+
+    const targetPhone = phoneParam || localStorage.getItem(STORAGE_HOST_SESSION);
+
+    if (targetPhone) {
+      const clean = normalizeWhatsAppPhone(targetPhone);
+      setHostPhoneInput(targetPhone);
+
+      const matched = partners.find(
+        (p) => normalizeWhatsAppPhone(p.phone) === clean,
+      );
+
+      if (matched) {
+        // Auto-authenticate if previously logged in on this mobile device
+        const savedSession = localStorage.getItem(STORAGE_HOST_SESSION);
+        if (savedSession && normalizeWhatsAppPhone(savedSession) === clean) {
+          setActivePartner(matched);
+        }
+      }
+    }
+  }, [partners]);
+
   const handleSendOtp = (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError("");
@@ -92,11 +126,13 @@ export const HostAttendancePortal: React.FC = () => {
     if (matchedPartner) {
       setActivePartner(matchedPartner);
       setIsOtpSent(false);
+      localStorage.setItem(STORAGE_HOST_SESSION, clean);
       toast.success(`Welcome, ${matchedPartner.name}!`);
     }
   };
 
   const handleSignOut = () => {
+    localStorage.removeItem(STORAGE_HOST_SESSION);
     setActivePartner(null);
     setIsOtpSent(false);
     setHostPhoneInput("");
