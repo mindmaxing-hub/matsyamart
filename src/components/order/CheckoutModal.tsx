@@ -533,12 +533,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <div className="space-y-3 pt-2 border-t border-[#dab38c]/20">
               <h4 className="text-xs font-bold uppercase tracking-wider text-[#f5edeb] flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#e3a157]" />
-                <span>Maritime Safety & Emergency Contact</span>
+                <span>Maritime Safety & Emergency Contact <span className="text-[#dab38c]/70 font-normal text-[11px] normal-case">(Optional)</span></span>
               </h4>
               <div>
                 <label className="text-xs font-medium text-[#dab38c] block mb-1">
-                  Emergency Contact Name & Phone (Required for boat/harbor
-                  manifests)
+                  Emergency Contact Name & Phone (Optional for boat/harbor manifests)
                 </label>
                 <input
                   type="text"
@@ -773,7 +772,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <Lock className="w-4 h-4 text-[#29100b]" />
               <span>
                 {isSubmitting
-                  ? "Securing Spot..."
+                  ? (isExperience ? "Securing Spot..." : "Placing Order...")
                   : `Pay ${formatINR(finalAmount)} via UPI / Cards`}
               </span>
             </button>

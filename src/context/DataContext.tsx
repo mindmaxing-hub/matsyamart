@@ -70,6 +70,7 @@ interface DataContextType {
   getListingBySlug: (slug: string) => Listing | undefined;
   getSlotsByListingId: (listingId: string) => ExperienceSlot[];
   getOrderByRef: (ref: string) => Order | undefined;
+  addOrHydrateOrder: (order: Order) => void;
   createOrder: (input: CreateOrderInput) => Promise<Order>;
   addListing: (listing: Omit<Listing, "id">) => Listing;
   deleteListing: (id: string) => void;
@@ -467,6 +468,25 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const getOrderByRef = (ref: string) => {
     return orders.find((o) => o.order_ref.toLowerCase() === ref.toLowerCase());
+  };
+
+  const addOrHydrateOrder = (incomingOrder: Order) => {
+    setOrders((prev) => {
+      const exists = prev.some(
+        (o) =>
+          o.order_ref.toLowerCase() === incomingOrder.order_ref.toLowerCase() ||
+          o.id === incomingOrder.id,
+      );
+      if (exists) {
+        return prev.map((o) =>
+          o.order_ref.toLowerCase() === incomingOrder.order_ref.toLowerCase() ||
+          o.id === incomingOrder.id
+            ? { ...o, ...incomingOrder }
+            : o,
+        );
+      }
+      return [incomingOrder, ...prev];
+    });
   };
 
   const createOrder = async (input: CreateOrderInput): Promise<Order> => {
@@ -1094,6 +1114,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         getListingBySlug,
         getSlotsByListingId,
         getOrderByRef,
+        addOrHydrateOrder,
         createOrder,
         addListing,
         deleteListing,

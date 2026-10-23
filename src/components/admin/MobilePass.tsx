@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Order, OrderItem, Listing, ExperienceSlot } from "../../types";
 import { generateQrDataUrl } from "../../lib/qr";
 import { buildGoogleMapsUrl } from "../../lib/services/places";
+import { encodePassPayload } from "../../lib/passPayload";
 import {
   Printer,
   X,
@@ -62,7 +63,11 @@ export const MobilePass: React.FC<MobilePassProps> = ({
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [copied, setCopied] = useState(false);
 
-  const verificationUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/order/confirmation/${order.order_ref}`;
+  const payload = encodePassPayload(order);
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const verificationUrl = payload
+    ? `${origin}/order/confirmation/${order.order_ref}?p=${payload}`
+    : `${origin}/order/confirmation/${order.order_ref}`;
 
   useEffect(() => {
     // Generate high contrast scannable QR
@@ -87,10 +92,22 @@ export const MobilePass: React.FC<MobilePassProps> = ({
   const admitCount = item?.quantity || 1;
   const amountPaid = order.total_amount_inr || 2400;
 
+  const getDefaultVenueForPillar = (pillar?: string) => {
+    switch (pillar) {
+      case "food":
+        return "Versova Gaothan Dining Courtyard, Andheri West, Mumbai - 400061";
+      case "workshops":
+        return "Mahim Bay Net-Weaving Guild, Mahim West, Mumbai - 400016";
+      case "walks":
+      default:
+        return "Historic Sassoon Docks Clock Tower Arch, Colaba, Mumbai - 400005";
+    }
+  };
+
   const meetingAddress =
     listing?.secret_meeting_point ||
     listing?.location_name ||
-    "Tandel House, Sasson Dock, Watch Tower, Amba Mata Mandir Colaba, Mumbai -400 001";
+    getDefaultVenueForPillar(listing?.pillar);
 
   const mapsUrl =
     listing?.meeting_point_maps_url ||

@@ -3,6 +3,7 @@ import { useData } from "../../context/DataContext";
 import { Partner, ExperienceSlot, Listing, Order } from "../../types";
 import { normalizeWhatsAppPhone, formatPhoneDisplay } from "../../lib/whatsapp";
 import { buildCanonicalManifest, ManifestRow } from "../../lib/services/manifest";
+import { decodePassPayload } from "../../lib/passPayload";
 import { BrandLogo } from "../site/BrandLogo";
 import {
   QrCode,
@@ -25,7 +26,14 @@ import {
 import { toast } from "sonner";
 
 export const HostAttendancePortal: React.FC = () => {
-  const { partners, slots, listings, orders, updateAttendeeCheckIn } = useData();
+  const {
+    partners,
+    slots,
+    listings,
+    orders,
+    updateAttendeeCheckIn,
+    addOrHydrateOrder,
+  } = useData();
 
   // Host Phone Auth State
   const [hostPhoneInput, setHostPhoneInput] = useState("");
@@ -150,7 +158,43 @@ export const HostAttendancePortal: React.FC = () => {
 
   // Check-In Validator & Committer
   const handleProcessAdmission = (ticketRef: string) => {
-    const ref = ticketRef.trim().toUpperCase();
+    let cleanRef = ticketRef.trim();
+    let decodedOrder: Order | null = null;
+
+    // Check if ticketRef is a URL or query string containing ?p= or &p=
+    if (cleanRef.includes("?p=") || cleanRef.includes("&p=") || cleanRef.startsWith("p=")) {
+      try {
+        const urlStr = cleanRef.startsWith("http")
+          ? cleanRef
+          : `https://matsyamart.in/${cleanRef.startsWith("?") ? "" : "?"}${cleanRef}`;
+        const urlObj = new URL(urlStr);
+        const token = urlObj.searchParams.get("p");
+        if (token) {
+          decodedOrder = decodePassPayload(token);
+          if (decodedOrder) {
+            cleanRef = decodedOrder.order_ref;
+            addOrHydrateOrder(decodedOrder);
+          }
+        }
+      } catch {
+        // Fallback to direct token decoding if plain base64
+        const token = cleanRef.replace(/^.*[?&]p=/, "").split("&")[0];
+        if (token) {
+          decodedOrder = decodePassPayload(token);
+          if (decodedOrder) {
+            cleanRef = decodedOrder.order_ref;
+            addOrHydrateOrder(decodedOrder);
+          }
+        }
+      }
+    } else if (cleanRef.includes("/order/confirmation/")) {
+      const parts = cleanRef.split("/order/confirmation/");
+      if (parts[1]) {
+        cleanRef = parts[1].split("?")[0] || cleanRef;
+      }
+    }
+
+    const ref = cleanRef.trim().toUpperCase();
     if (!ref) {
       setScanResult({
         status: "invalid",
@@ -159,13 +203,14 @@ export const HostAttendancePortal: React.FC = () => {
       return;
     }
 
-    // Match order by order_ref or partial ID
-    const matchingOrder = orders.find(
-      (o) =>
-        o.order_ref.toUpperCase() === ref ||
-        o.order_ref.toUpperCase().includes(ref) ||
-        o.id === ref,
-    );
+    // Match order by order_ref or partial ID, or use decodedOrder
+    const matchingOrder =
+      orders.find(
+        (o) =>
+          o.order_ref.toUpperCase() === ref ||
+          o.order_ref.toUpperCase().includes(ref) ||
+          o.id === ref,
+      ) || decodedOrder;
 
     if (!matchingOrder) {
       setScanResult({

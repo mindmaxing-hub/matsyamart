@@ -11,6 +11,7 @@ import { Order } from "../../types";
 import { openWhatsApp, buildPassMessage } from "../../lib/whatsapp";
 import { generateQrDataUrl } from "../../lib/qr";
 import { buildGoogleMapsUrl } from "../../lib/services/places";
+import { encodePassPayload } from "../../lib/passPayload";
 
 interface DigitalPassProps {
   order: Order;
@@ -49,9 +50,10 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
 
-  const primaryItem = order.items[0];
-  const listing = primaryItem?.listing;
-  const slot = primaryItem?.slot;
+  const experienceItem =
+    order.items.find((i) => i.listing?.type === "experience") || order.items[0];
+  const listing = experienceItem?.listing;
+  const slot = experienceItem?.slot;
 
   useEffect(() => {
     // Launch celebratory confetti on pass load
@@ -66,11 +68,14 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
       // Ignore if canvas-confetti fails
     }
 
-    // Generate QR verification pass URL for host scanner
+    // Generate QR verification pass URL for host scanner (with compressed payload for cross-device support)
     const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const verificationUrl = `${origin}/order/confirmation/${order.order_ref}`;
+    const payload = encodePassPayload(order);
+    const verificationUrl = payload
+      ? `${origin}/order/confirmation/${order.order_ref}?p=${payload}`
+      : `${origin}/order/confirmation/${order.order_ref}`;
     generateQrDataUrl(verificationUrl).then((url) => setQrDataUrl(url));
-  }, [order.order_ref]);
+  }, [order]);
 
   const handlePrint = () => {
     window.print();
@@ -89,7 +94,7 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
       secretPin: listing?.secret_meeting_point,
       mapsUrl: listing?.meeting_point_maps_url,
       passUrl,
-      seatsCount: primaryItem?.quantity || 1,
+      seatsCount: experienceItem?.quantity || 1,
     });
 
     openWhatsApp(order.customer_phone, text);
@@ -103,13 +108,25 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
 
   const formattedPassDate = formatPassDate(slot?.slot_start);
   const reportingTimeStr = formatReportingTime(slot?.slot_start);
-  const admitCount = primaryItem?.quantity || 1;
+  const admitCount = experienceItem?.quantity || 1;
   const amountPaid = order.total_amount_inr || 2400;
+
+  const getDefaultVenueForPillar = (pillar?: string) => {
+    switch (pillar) {
+      case "food":
+        return "Versova Gaothan Dining Courtyard, Andheri West, Mumbai - 400061";
+      case "workshops":
+        return "Mahim Bay Net-Weaving Guild, Mahim West, Mumbai - 400016";
+      case "walks":
+      default:
+        return "Historic Sassoon Docks Clock Tower Arch, Colaba, Mumbai - 400005";
+    }
+  };
 
   const meetingAddress =
     listing?.secret_meeting_point ||
     listing?.location_name ||
-    "Tandel House, Sasson Dock, Watch Tower, Amba Mata Mandir Colaba, Mumbai -400 001";
+    getDefaultVenueForPillar(listing?.pillar);
 
   const mapsUrl =
     listing?.meeting_point_maps_url ||
