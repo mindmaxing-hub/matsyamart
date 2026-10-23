@@ -903,7 +903,7 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                                   item: att.item,
                                 })
                               }
-                              className="px-3 py-1 bg-[#00759B] hover:bg-[#0088b7] text-white font-bold text-xs rounded-xl shadow-xs transition-all inline-flex items-center gap-1 cursor-pointer"
+                              className="px-3 py-1 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl shadow-xs transition-all inline-flex items-center gap-1 cursor-pointer"
                             >
                               <Ticket className="w-3.5 h-3.5" />
                               <span>View 9:16 Pass</span>
