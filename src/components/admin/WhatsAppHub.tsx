@@ -997,7 +997,7 @@ export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) =>
                   <button
                     onClick={() =>
                       handleInsertCanned(
-                        `📦 Order Update: Your artisan goods have shipped via Bluedart Express (AWB: 8941029341). Track delivery at: https://bluedart.com`,
+                        `📦 Order Update: Your artisan goods have shipped via Coastal Express (AWB: CE-89410293). Track live delivery updates at: https://matsyamart.com/order/confirmation/MM-PRD-2026-0089`,
                       )
                     }
                     className="px-2.5 py-1 bg-[#29100b] hover:bg-[#481f14] border border-[#dab38c]/25 rounded-lg text-[#dab38c] hover:text-[#f5edeb] whitespace-nowrap cursor-pointer transition-colors"

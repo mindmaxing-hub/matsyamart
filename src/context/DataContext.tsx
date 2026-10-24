@@ -288,6 +288,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   });
 
   const DEFAULT_SPOTLIGHT_IDS = [
+    "exp-seafood-thali-madh",
     "exp-net-weaving",
     "exp-sassoon-trail",
     "exp-thane-flamingo",
@@ -441,14 +442,33 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
           .from("listings")
           .select("*");
         if (remoteListings && remoteListings.length > 0) {
-          setListings(remoteListings);
+          // Merge: remote listings take precedence by ID, but all canonical seed listings are preserved
+          setListings((prevListings) => {
+            const remoteMap = new Map(remoteListings.map((l: Listing) => [l.id, l]));
+            const merged = [...remoteListings];
+            for (const seed of SEED_LISTINGS) {
+              if (!remoteMap.has(seed.id)) {
+                merged.push(seed);
+              }
+            }
+            return merged;
+          });
         }
 
         const { data: remoteSlots } = await supabase!
           .from("experience_slots")
           .select("*");
         if (remoteSlots && remoteSlots.length > 0) {
-          setSlots(remoteSlots);
+          setSlots((prevSlots) => {
+            const remoteSlotMap = new Map(remoteSlots.map((s: ExperienceSlot) => [s.id, s]));
+            const merged = [...remoteSlots];
+            for (const seedSlot of generateSeedSlots()) {
+              if (!remoteSlotMap.has(seedSlot.id)) {
+                merged.push(seedSlot);
+              }
+            }
+            return merged;
+          });
         }
       } catch (err) {
         console.warn("Supabase fetch failed; relying on local seed data", err);
@@ -1051,12 +1071,29 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
       updated_at: new Date().toISOString(),
     };
     setListings((prev) => [newListing, ...prev]);
+
+    if (isSupabaseConfigured && supabase) {
+      Promise.resolve(supabase.from("listings").insert(newListing))
+        .then(({ error }) => {
+          if (error) console.warn("Supabase addListing sync failed:", error);
+        })
+        .catch((err: unknown) => console.warn("Supabase addListing exception:", err));
+    }
+
     return newListing;
   };
 
   const deleteListing = (id: string) => {
     setListings((prev) => prev.filter((l) => l.id !== id));
     setSlots((prev) => prev.filter((s) => s.listing_id !== id));
+
+    if (isSupabaseConfigured && supabase) {
+      Promise.resolve(supabase.from("listings").delete().eq("id", id))
+        .then(({ error }) => {
+          if (error) console.warn("Supabase deleteListing sync failed:", error);
+        })
+        .catch((err: unknown) => console.warn("Supabase deleteListing exception:", err));
+    }
   };
 
   const updateListing = (id: string, updates: Partial<Listing>) => {
@@ -1067,6 +1104,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
           : l,
       ),
     );
+
+    if (isSupabaseConfigured && supabase) {
+      Promise.resolve(supabase.from("listings").update(updates).eq("id", id))
+        .then(({ error }) => {
+          if (error) console.warn("Supabase updateListing sync failed:", error);
+        })
+        .catch((err: unknown) => console.warn("Supabase updateListing exception:", err));
+    }
   };
 
   const restockListing = (id: string, additionalQuantity: number) => {

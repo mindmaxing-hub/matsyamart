@@ -207,8 +207,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         customerEmail,
         customerPhone,
         description: isExperience
-          ? `Booking: ${items[0]?.listing.title || "Coastal Experience"}`
+          ? `Booking: ${items[0]?.listing.title || (items[0]?.listing.pillar === "food" ? "Coastal Food Feast" : "Coastal Experience")}`
           : `Order: MatsyaMart Community Goods`,
+        isExperience,
         onSuccess: async (rzpResult) => {
           try {
             const confirmedOrder = await createOrder({
@@ -649,78 +650,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   }
                   className="w-full text-xs p-3 rounded-xl bg-[#1f0b07] text-[#f5edeb] placeholder:text-[#dab38c]/40 border border-[#dab38c]/30 focus:border-[#e3a157] outline-none"
                 />
-              </div>
-
-              {/* Discrete Guest Names per Experience Item */}
-              <div className="space-y-3 pt-2">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#f5edeb] flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-[#e3a157]" />
-                  <span>Attendee Seats per Experience</span>
-                </h4>
-                {items.map((item, itemIdx) => {
-                  if (item.listing.type !== "experience") return null;
-                  const seatList = itemAttendees[itemIdx] || [];
-                  return (
-                    <div
-                      key={itemIdx}
-                      className="p-3 rounded-xl bg-[#140604] border border-[#dab38c]/20 space-y-2.5"
-                    >
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-bold text-[#f5edeb]">
-                          {item.listing.title}
-                        </span>
-                        <span className="text-[#e3a157] font-mono text-[11px]">
-                          {item.quantity} {item.quantity === 1 ? "Seat" : "Seats"}
-                        </span>
-                      </div>
-                      <div className="space-y-2">
-                        {seatList.map((seat, seatIdx) => (
-                          <div
-                            key={seatIdx}
-                            className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]"
-                          >
-                            <input
-                              type="text"
-                              placeholder={
-                                seatIdx === 0
-                                  ? `Seat 1 (Default: ${customerName || "Lead Guest"})`
-                                  : `Seat ${seatIdx + 1} Full Name`
-                              }
-                              value={seat.fullName}
-                              onChange={(e) =>
-                                handleUpdateAttendee(
-                                  itemIdx,
-                                  seatIdx,
-                                  "fullName",
-                                  e.target.value,
-                                )
-                              }
-                              className="p-2 rounded-lg bg-[#1f0b07] text-[#f5edeb] placeholder:text-[#dab38c]/40 border border-[#dab38c]/30 focus:border-[#e3a157] outline-none"
-                            />
-                            <input
-                              type="tel"
-                              placeholder={
-                                seatIdx === 0
-                                  ? `Seat 1 Phone (Default: ${customerPhone || "Lead"})`
-                                  : `Seat ${seatIdx + 1} Phone`
-                              }
-                              value={seat.phone}
-                              onChange={(e) =>
-                                handleUpdateAttendee(
-                                  itemIdx,
-                                  seatIdx,
-                                  "phone",
-                                  e.target.value,
-                                )
-                              }
-                              className="p-2 rounded-lg bg-[#1f0b07] text-[#f5edeb] placeholder:text-[#dab38c]/40 border border-[#dab38c]/30 focus:border-[#e3a157] outline-none"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
 
               <div className="grid grid-cols-2 gap-3">

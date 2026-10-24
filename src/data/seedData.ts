@@ -384,13 +384,92 @@ export const SEED_LISTINGS: Listing[] = [
     ],
     is_active: true,
     is_featured: true,
+    meal_type: "breakfast",
+    custom_tags: ["BREAKFAST", "HERITAGE WALK", "HARBOR FEAST"],
     host_name: "Ashwini Tandel & Colaba Coastal Collective",
     host_phone: "+91 99204 77158",
     host_bio:
       "Ashwini is a community activist and culinary researcher advocating for fair seafood procurement and coastal food rights.",
   },
 
-  // 5. Artisanal Sun-Dried Jawla & Coastal Spice Basket
+  // 5. Authentic Madh Island Coastal Seafood Thali Feast
+  {
+    id: "exp-seafood-thali-madh",
+    title: "Authentic Madh Island Coastal Seafood Thali Feast",
+    slug: "seafood-thali-madh-island",
+    category_id: "cat-food",
+    pillar: "food",
+    type: "experience",
+    meal_type: "lunch",
+    custom_tags: ["LUNCH", "UNLIMITED THALI", "SOL KADHI INCLUDED", "SIGNATURE"],
+    short_summary:
+      "A rich, home-cooked coastal lunch banquet featuring fresh wild Surmai fry, spiced prawn masala, coastal crab curry, hand-pounded jawla chutney, and artisanal bhakris.",
+    full_description:
+      "Step into an authentic open-air gaothan dining courtyard on Madh Island for an unforgettable afternoon coastal feast hosted by Aryan and the indigenous Koli culinary custodians.\n\nEvery dish is prepared using the morning's gillnet catch brought straight from the beach landing. You'll savor crispy semolina-crusted Surmai, claypot mud crab masala slow-cooked with fresh coconut and stone-pounded garam masala, coastal jawla kismoor, warm steamed rice bhakris, and unlimited glasses of pink kokum sol kadhi.\n\nEnjoy the relaxed island breeze under coconut groves, listen to heritage fishing lore, and experience authentic coastal hospitality at its finest.",
+    price_inr: 1200,
+    currency: "INR",
+    images: [
+      "https://images.unsplash.com/photo-1610057099443-fde8c4d50f91?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=1200&q=80",
+    ],
+    location_name: "Madh Gaothan Courtyard, Andheri West / Madh Island, Mumbai",
+    secret_meeting_point:
+      "Madh Gaothan Community Courtyard, opposite St. Bonaventure Church arch, Madh Island, Mumbai - 400061 (GPS: 19.1316° N, 72.7950° E).",
+    meeting_point_maps_url: "https://maps.google.com/?q=19.1316,72.7950",
+    duration_minutes: 180,
+    dietary_tags: [
+      "Crispy Wild Surmai Rawa Fry",
+      "Madh Prawn Masala with Roasted Coconut",
+      "Claypot Mud Crab Curry",
+      "Chilled Kokum Sol Kadhi",
+      "Fresh Rice Bhakri & Steamed Rice",
+    ],
+    included_items: [
+      "Grand 5-Course Coastal Seafood Thali",
+      "Unlimited Sol Kadhi digestive refill",
+      "Traditional Koli spice blend sample pack",
+      "Interactive spice and cooking demonstration",
+    ],
+    things_to_carry: [
+      "Appetite for rich coastal spices",
+      "Comfortable casual clothing",
+    ],
+    itinerary: [
+      {
+        time: "12:30 PM",
+        title: "Welcome & Kokum Cooler",
+        description:
+          "Arrival at the gaothan courtyard with a chilled seasonal coastal welcome drink.",
+      },
+      {
+        time: "01:00 PM",
+        title: "The Seafood Thali Banquet",
+        description:
+          "Served hot on traditional banana leaf-lined plates with freshly patted bhakris and fresh catch.",
+      },
+      {
+        time: "02:15 PM",
+        title: "Sol Kadhi & Heritage Folklore",
+        description:
+          "Relaxed digestive course while host Aryan shares stories of Koli culinary history and sea lore.",
+      },
+      {
+        time: "03:00 PM",
+        title: "Courtyard Farewell & Spice Gifting",
+        description:
+          "Take home an authentic pouch of stoneground coastal curry masala.",
+      },
+    ],
+    is_active: true,
+    is_featured: true,
+    host_name: "Aryan & Madh Gaothan Mahila Collective",
+    host_phone: "+91 99204 77158",
+    host_bio:
+      "Aryan works with indigenous coastal fishing families and women-led culinary cooperatives to safeguard centuries-old seafood heritage recipes.",
+  },
+
+  // 6. Artisanal Sun-Dried Jawla & Coastal Spice Basket
   {
     id: "prd-jawla-basket",
     title: "Artisanal Sun-Dried Jawla & Coastal Spice Basket",
@@ -581,6 +660,24 @@ export function generateSeedSlots(): ExperienceSlot[] {
         slot_end: morningEnd.toISOString(),
         capacity: 12,
         booked_count: Math.min(12, 5 + (d % 5)),
+        revision_number: 1,
+        is_cancelled: false,
+      });
+
+      // Seafood Thali Madh lunch slot
+      const lunchStart = new Date(targetDate);
+      lunchStart.setHours(12, 30, 0, 0);
+      const lunchEnd = new Date(targetDate);
+      lunchEnd.setHours(15, 30, 0, 0);
+
+      slots.push({
+        id: `slot-seafood-thali-${d}`,
+        offering_id: "exp-seafood-thali-madh",
+        listing_id: "exp-seafood-thali-madh",
+        slot_start: lunchStart.toISOString(),
+        slot_end: lunchEnd.toISOString(),
+        capacity: 16,
+        booked_count: Math.min(16, 4 + (d % 6)),
         revision_number: 1,
         is_cancelled: false,
       });

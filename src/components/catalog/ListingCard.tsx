@@ -48,11 +48,19 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
   };
 
   const getPillarLabel = () => {
-    if (listing.pillar === "walks") return "Trail";
-    if (listing.pillar === "workshops") return "Workshop";
-    if (listing.pillar === "food") return "Food & Dining";
+    if (listing.pillar === "food") {
+      if (listing.meal_type) {
+        return `FEAST · ${listing.meal_type.toUpperCase()}`;
+      }
+      if (listing.custom_tags && listing.custom_tags[0]) {
+        return listing.custom_tags[0].toUpperCase();
+      }
+      return "Food Feast";
+    }
+    if (listing.pillar === "walks") return "Trail Walk";
+    if (listing.pillar === "workshops") return "Craft Workshop";
     if (listing.pillar === "goods") return "Artisan Goods";
-    return isExperience ? "Experience" : "Goods";
+    return isExperience ? "Coastal Event" : "Artisan Goods";
   };
 
   return (
@@ -75,11 +83,16 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
           height={175}
         />
 
-        {/* Pillar Tag — top left */}
-        <div className="absolute top-3 left-3 pointer-events-none">
+        {/* Pillar & Category Tag — top left */}
+        <div className="absolute top-3 left-3 pointer-events-none flex items-center gap-1.5 flex-wrap max-w-[80%]">
           <span className="px-2.5 py-1 rounded-full bg-[#29100b]/85 backdrop-blur-md border border-[#e3a157]/30 text-[10px] font-bold tracking-wider uppercase text-[#e3a157] shadow-xs">
             {getPillarLabel()}
           </span>
+          {listing.pillar === "food" && listing.custom_tags && listing.custom_tags[0] && !getPillarLabel().includes(listing.custom_tags[0].toUpperCase()) && (
+            <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-[#35160e]/90 backdrop-blur-md border border-[#dab38c]/25 text-[9px] font-bold tracking-wider uppercase text-[#f5edeb] shadow-xs">
+              {listing.custom_tags[0]}
+            </span>
+          )}
         </div>
 
         {/* Wishlist Button — top right */}

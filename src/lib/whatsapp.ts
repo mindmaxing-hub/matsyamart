@@ -187,6 +187,8 @@ export interface GoodsTrackingParams {
 }
 
 export function buildGoodsTrackingMessage(p: GoodsTrackingParams): string {
+  const portalUrl =
+    p.trackingUrl || `https://matsyamart.com/order/confirmation/${p.orderRef}`;
   return (
     `📦 *MatsyaMart Pantry & Craft · Order Dispatched*\n\n` +
     `Namaste *${p.customerName}*!\n` +
@@ -195,8 +197,8 @@ export function buildGoodsTrackingMessage(p: GoodsTrackingParams): string {
     `*Items:* ${p.itemsSummary}\n` +
     `*Courier Partner:* ${p.courierName}\n` +
     `*Tracking AWB:* ${p.trackingNumber}\n` +
-    (p.trackingUrl ? `*Live Tracking:* ${p.trackingUrl}\n` : "") +
-    `\nThank you for directly supporting indigenous coastal women collectives!\n` +
+    `*Live Delivery Tracking:* ${portalUrl}\n\n` +
+    `Thank you for directly supporting indigenous coastal women collectives!\n` +
     `_Need help? Message MatsyaMart at ${MATSYAMART_WHATSAPP_DISPLAY}_`
   );
 }

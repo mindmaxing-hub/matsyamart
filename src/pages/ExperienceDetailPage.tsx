@@ -62,6 +62,17 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
 
   const isWishlisted = isInWishlist(listing.id);
 
+  const getExperienceCategoryBadge = () => {
+    if (listing.pillar === "food") {
+      return listing.meal_type
+        ? `Coastal Food Feast · ${listing.meal_type.toUpperCase()}`
+        : "Coastal Food Feast";
+    }
+    if (listing.pillar === "workshops") return "Artisan Craft Workshop";
+    if (listing.pillar === "walks") return "Coastal Heritage Trail";
+    return "Coastal Offering";
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 text-[#f5edeb]">
       {/* Breadcrumb & Wishlist Action Bar */}
@@ -98,7 +109,7 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase bg-[#35160e] text-[#e3a157] border border-[#e3a157]/30">
-            Coastal Experience
+            {getExperienceCategoryBadge()}
           </span>
           <span className="flex items-center gap-1 text-xs font-medium text-[#dab38c]">
             <MapPin className="w-3.5 h-3.5 text-[#e3a157]" />

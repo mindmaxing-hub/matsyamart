@@ -26,6 +26,7 @@ export interface RazorpayCheckoutOptions {
   customerEmail: string;
   customerPhone: string;
   description: string;
+  isExperience?: boolean;
   onSuccess: (response: {
     razorpay_payment_id: string;
     razorpay_order_id?: string | undefined;
@@ -105,67 +106,72 @@ function triggerMockRazorpayModal(options: RazorpayCheckoutOptions) {
   const container = document.createElement("div");
   container.id = modalId;
   container.className =
-    "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in";
+    "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in";
+
+  const isExp = options.isExperience !== false;
+  const demoSubtext = isExp
+    ? '* Running in demo mode. Click "Simulate Payment Capture" to generate your verified digital pass and confirm booking.'
+    : '* Running in demo mode. Click "Simulate Payment Capture" to generate your order receipt and delivery tracking portal.';
 
   container.innerHTML = `
-    <div class="bg-white rounded-2xl shadow-modal w-full max-w-md overflow-hidden border border-slate-200">
-      <div class="bg-ocean-900 text-white p-5 flex items-center justify-between">
+    <div class="bg-[#29100B] rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-[#DAB38C]/30 text-[#F5EDEB]">
+      <div class="bg-[#1F0B07] text-[#F5EDEB] p-5 border-b border-[#DAB38C]/20 flex items-center justify-between">
         <div>
           <div class="flex items-center gap-2">
-            <span class="font-display font-bold text-lg tracking-wide">MatsyaMart</span>
-            <span class="text-[10px] font-semibold bg-sun-300 text-ocean-950 px-2 py-0.5 rounded-full uppercase">Test Sandbox</span>
+            <span class="font-display font-bold text-lg tracking-wide text-[#F5EDEB]">MatsyaMart</span>
+            <span class="text-[10px] font-bold bg-[#E3A157] text-[#29100B] px-2.5 py-0.5 rounded-full uppercase tracking-wider">Test Sandbox</span>
           </div>
-          <p class="text-xs text-ocean-200 mt-1">${options.description}</p>
+          <p class="text-xs text-[#DAB38C]/80 mt-1">${options.description}</p>
         </div>
         <div class="text-right">
-          <div class="text-xs text-ocean-200">Amount</div>
-          <div class="text-xl font-bold font-display text-sun-300">₹${options.amountInr.toLocaleString("en-IN")}</div>
+          <div class="text-[11px] text-[#DAB38C]/70 uppercase font-semibold">Total Amount</div>
+          <div class="text-xl font-bold font-display text-[#E3A157]">₹${options.amountInr.toLocaleString("en-IN")}</div>
         </div>
       </div>
 
       <div class="p-6 space-y-4">
-        <div class="bg-ocean-50 rounded-xl p-3 border border-ocean-100 text-xs text-ocean-900 space-y-1">
+        <div class="bg-[#140604] rounded-2xl p-3.5 border border-[#DAB38C]/20 text-xs text-[#DAB38C] space-y-1.5">
           <div class="flex justify-between">
-            <span class="text-slate-500">Customer:</span>
-            <span class="font-medium">${options.customerName}</span>
+            <span class="text-[#DAB38C]/70">Customer:</span>
+            <span class="font-medium text-[#F5EDEB]">${options.customerName}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-slate-500">Phone:</span>
-            <span class="font-medium">${options.customerPhone}</span>
+            <span class="text-[#DAB38C]/70">Phone:</span>
+            <span class="font-medium text-[#F5EDEB]">${options.customerPhone}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-slate-500">Reference:</span>
-            <span class="font-mono font-medium">${options.orderRef}</span>
+            <span class="text-[#DAB38C]/70">Reference:</span>
+            <span class="font-mono font-bold text-[#E3A157]">${options.orderRef}</span>
           </div>
         </div>
 
-        <div class="border border-slate-200 rounded-xl p-3 space-y-2">
-          <div class="text-xs font-semibold text-slate-700 uppercase tracking-wider">Select Payment Simulation Method</div>
-          <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer border border-slate-100">
-            <input type="radio" name="rzp_method" value="upi" checked class="text-ocean-700 focus:ring-ocean-500">
-            <div class="text-xs font-medium text-slate-800">
+        <div class="border border-[#DAB38C]/20 rounded-2xl p-3.5 space-y-2.5 bg-[#1F0B07]/60">
+          <div class="text-xs font-bold text-[#E3A157] uppercase tracking-wider">Select Payment Method</div>
+          <label class="flex items-center gap-3 p-2.5 rounded-xl bg-[#29100B]/80 hover:bg-[#35160E] cursor-pointer border border-[#DAB38C]/20 transition-colors">
+            <input type="radio" name="rzp_method" value="upi" checked class="accent-[#E3A157]">
+            <div class="text-xs font-medium text-[#F5EDEB]">
               ⚡ UPI / QR (Instant GPay, PhonePe, Paytm)
             </div>
           </label>
-          <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer border border-slate-100">
-            <input type="radio" name="rzp_method" value="card" class="text-ocean-700 focus:ring-ocean-500">
-            <div class="text-xs font-medium text-slate-800">
+          <label class="flex items-center gap-3 p-2.5 rounded-xl bg-[#29100B]/80 hover:bg-[#35160E] cursor-pointer border border-[#DAB38C]/20 transition-colors">
+            <input type="radio" name="rzp_method" value="card" class="accent-[#E3A157]">
+            <div class="text-xs font-medium text-[#F5EDEB]">
               💳 Debit / Credit Card (Visa, RuPay, Mastercard)
             </div>
           </label>
         </div>
 
-        <p class="text-[11px] text-slate-500 text-center leading-relaxed">
-          * Running in demo mode. Click "Simulate Payment Capture" to generate your verified digital pass and confirm booking.
+        <p class="text-[11px] text-[#DAB38C]/70 text-center leading-relaxed">
+          ${demoSubtext}
         </p>
 
         <div class="flex items-center gap-3 pt-2">
-          <button id="rzp-mock-cancel" class="flex-1 px-4 py-2.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
+          <button id="rzp-mock-cancel" class="flex-1 px-4 py-2.5 text-xs font-medium text-[#DAB38C] bg-[#35160E] hover:bg-[#481F14] border border-[#DAB38C]/20 rounded-xl transition-colors cursor-pointer">
             Cancel
           </button>
-          <button id="rzp-mock-pay" class="flex-1 px-4 py-2.5 text-xs font-semibold text-white bg-ocean-800 hover:bg-ocean-900 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5">
+          <button id="rzp-mock-pay" class="flex-1 px-4 py-2.5 text-xs font-bold text-[#29100B] bg-[#E3A157] hover:bg-[#DAB38C] rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
             <span>Pay ₹${options.amountInr.toLocaleString("en-IN")}</span>
-            <span class="text-sun-300">✓</span>
+            <span class="text-[#29100B]">✓</span>
           </button>
         </div>
       </div>

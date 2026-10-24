@@ -71,6 +71,8 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
   const [newCourses, setNewCourses] = useState("Fresh Surmai Fry, Mud Crab Masala, Sol Kadhi Digestive, Kolim Rice & Modak");
   const [newSummary, setNewSummary] = useState("Authentic home-cooked Koli seafood banquet prepared fresh by community custodians in their ancestral courtyard.");
   const [newImage, setNewImage] = useState("https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1200&auto=format&fit=crop");
+  const [newMealType, setNewMealType] = useState<"breakfast" | "lunch" | "high_tea" | "dinner" | "snacks">("lunch");
+  const [newCustomTags, setNewCustomTags] = useState("UNLIMITED THALI, SIGNATURE");
   const [newSlotDate, setNewSlotDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + 1); // Tomorrow by default
@@ -113,6 +115,8 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
   const [editCourses, setEditCourses] = useState("");
   const [editSummary, setEditSummary] = useState("");
   const [editImage, setEditImage] = useState("");
+  const [editMealType, setEditMealType] = useState<"breakfast" | "lunch" | "high_tea" | "dinner" | "snacks">("lunch");
+  const [editCustomTags, setEditCustomTags] = useState("");
 
   // Food experiences
   const foodListings = useMemo(() => {
@@ -355,6 +359,8 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
       host_phone: newCookPhone.trim() || "+91 99284 77158",
       host_bio: newCookBio.trim() || "Heritage home cook and community custodian in Mumbai's original coastal settlements.",
       dietary_tags: coursesArray,
+      meal_type: newMealType,
+      custom_tags: newCustomTags.split(",").map((t) => t.trim()).filter(Boolean),
       is_active: true,
       is_featured: true,
     });
@@ -423,6 +429,8 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
     setEditCourses((feast.dietary_tags || []).join(", "));
     setEditSummary(feast.short_summary || "");
     setEditImage(feast.images?.[0] || "");
+    setEditMealType(feast.meal_type || "lunch");
+    setEditCustomTags((feast.custom_tags || []).join(", "));
   };
 
   const handleSaveEditFeast = (e: React.FormEvent) => {
@@ -453,6 +461,8 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
       longitude: editLng,
       meeting_point_maps_url: mapsUrl,
       dietary_tags: coursesArray,
+      meal_type: editMealType,
+      custom_tags: editCustomTags.split(",").map((t) => t.trim()).filter(Boolean),
       short_summary: editSummary.trim(),
       full_description: `${editSummary.trim()}\n\nTraditional Courses:\n${coursesArray.map((c) => `• ${c}`).join("\n")}`,
       images: editImage.trim() ? [editImage.trim()] : editingFeast.images,
@@ -589,8 +599,15 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                       alt={dinner.title}
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute top-2.5 left-2.5 bg-[#1f0b07]/85 backdrop-blur-xs px-3 py-1 rounded-full text-[11px] font-bold text-[#e3a157] border border-[#dab38c]/30">
-                      Seafood Feasting Experience
+                    <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 max-w-[80%]">
+                      <span className="bg-[#1f0b07]/85 backdrop-blur-xs px-2.5 py-0.5 rounded-full text-[10px] font-bold text-[#e3a157] border border-[#dab38c]/30 uppercase tracking-wider">
+                        {dinner.meal_type ? `🍽️ ${dinner.meal_type}` : "🍽️ Feast"}
+                      </span>
+                      {dinner.custom_tags && dinner.custom_tags.length > 0 && (
+                        <span className="bg-[#29100b]/85 backdrop-blur-xs px-2 py-0.5 rounded-full text-[9px] font-bold text-[#f5edeb] border border-[#dab38c]/25 uppercase">
+                          {dinner.custom_tags[0]}
+                        </span>
+                      )}
                     </div>
                     <div className="absolute bottom-2.5 right-2.5 bg-[#29100b]/90 px-3 py-1 rounded-xl text-xs font-bold font-mono text-[#f5edeb] border border-[#dab38c]/30">
                       {formatINR(dinner.price_inr)} / plate
@@ -947,6 +964,33 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                 />
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">Meal Schedule Type *</label>
+                  <select
+                    value={newMealType}
+                    onChange={(e) => setNewMealType(e.target.value as any)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157] cursor-pointer"
+                  >
+                    <option value="lunch" className="bg-[#29100b]">☀️ Lunch Feast</option>
+                    <option value="dinner" className="bg-[#29100b]">🌙 Dinner Banquet</option>
+                    <option value="breakfast" className="bg-[#29100b]">🌅 Harbor Breakfast</option>
+                    <option value="high_tea" className="bg-[#29100b]">☕ High Tea &amp; Fritters</option>
+                    <option value="snacks" className="bg-[#29100b]">🍢 Late Evening Snacks</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">Custom Badges / Tags</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. UNLIMITED THALI, SIGNATURE, SPICY"
+                    value={newCustomTags}
+                    onChange={(e) => setNewCustomTags(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="font-semibold text-[#dab38c] block mb-1">Cook / Host Name *</label>
@@ -1138,6 +1182,33 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                   onChange={(e) => setEditTitle(e.target.value)}
                   className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
                 />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">Meal Schedule Type *</label>
+                  <select
+                    value={editMealType}
+                    onChange={(e) => setEditMealType(e.target.value as any)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157] cursor-pointer"
+                  >
+                    <option value="lunch" className="bg-[#29100b]">☀️ Lunch Feast</option>
+                    <option value="dinner" className="bg-[#29100b]">🌙 Dinner Banquet</option>
+                    <option value="breakfast" className="bg-[#29100b]">🌅 Harbor Breakfast</option>
+                    <option value="high_tea" className="bg-[#29100b]">☕ High Tea &amp; Fritters</option>
+                    <option value="snacks" className="bg-[#29100b]">🍢 Late Evening Snacks</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="font-semibold text-[#dab38c] block mb-1">Custom Badges / Tags</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. UNLIMITED THALI, SIGNATURE, SPICY"
+                    value={editCustomTags}
+                    onChange={(e) => setEditCustomTags(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

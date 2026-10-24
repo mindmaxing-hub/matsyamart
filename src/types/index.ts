@@ -51,6 +51,8 @@ export interface Listing {
   // Food & Workshop Specifics
   dietary_tags?: string[] | undefined;
   materials_provided?: string[] | undefined;
+  meal_type?: "breakfast" | "lunch" | "high_tea" | "dinner" | "snacks" | undefined;
+  custom_tags?: string[] | undefined;
   // Meta
   is_active: boolean;
   is_featured: boolean;

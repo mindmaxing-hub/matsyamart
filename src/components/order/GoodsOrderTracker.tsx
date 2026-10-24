@@ -80,41 +80,69 @@ export const GoodsOrderTracker: React.FC<GoodsOrderTrackerProps> = ({
         .join(", ")
     : "Standard Express Delivery across Greater Mumbai";
 
-  // Stepper milestones
+  // Dynamic stepper milestone mapping based on live fulfillment_status
+  const fulfillmentStatus = order.fulfillment_status || "processing";
+  const courierName = order.courier_partner || "Coastal Express Courier";
+  const awb = order.tracking_awb;
+
+  const getStepStatus = (stepIndex: number): "completed" | "active" | "upcoming" => {
+    switch (fulfillmentStatus) {
+      case "delivered":
+        return "completed";
+      case "shipped":
+        if (stepIndex <= 2) return "completed";
+        if (stepIndex === 3) return "active";
+        return "upcoming";
+      case "processing":
+        if (stepIndex === 0) return "completed";
+        if (stepIndex === 1) return "active";
+        return "upcoming";
+      case "unfulfilled":
+      default:
+        if (stepIndex === 0) return "active";
+        return "upcoming";
+    }
+  };
+
   const steps = [
     {
       id: "placed",
       title: "Order Placed",
       subtitle: `Verified on ${orderDateStr}`,
-      status: "completed",
+      status: getStepStatus(0),
       icon: CheckCircle2,
     },
     {
       id: "packing",
       title: "Hand-Packed by Collective",
       subtitle: "Artisans preparing fresh jars & coastal pack",
-      status: "active",
+      status: getStepStatus(1),
       icon: Package,
     },
     {
       id: "dispatched",
       title: "Dispatched from Coastal Hub",
-      subtitle: "Est. within 24h via Coastal Express Courier",
-      status: "upcoming",
+      subtitle: awb
+        ? `Shipped via ${courierName} (AWB: ${awb})`
+        : `Handed over to ${courierName}`,
+      status: getStepStatus(2),
       icon: Truck,
     },
     {
       id: "transit",
       title: "Out for Delivery",
-      subtitle: "Local delivery partner assignment",
-      status: "upcoming",
+      subtitle: "Local courier partner delivery in progress",
+      status: getStepStatus(3),
       icon: Clock,
     },
     {
       id: "delivered",
       title: "Delivered",
-      subtitle: `Estimated: ${estimatedDeliveryWindow}`,
-      status: "upcoming",
+      subtitle:
+        fulfillmentStatus === "delivered"
+          ? "Package safely delivered"
+          : `Estimated: ${estimatedDeliveryWindow}`,
+      status: getStepStatus(4),
       icon: Sparkles,
     },
   ];

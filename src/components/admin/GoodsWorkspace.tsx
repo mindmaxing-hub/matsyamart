@@ -24,6 +24,7 @@ import {
   Edit2,
   X,
   TrendingDown,
+  ExternalLink,
 } from "lucide-react";
 
 interface GoodsWorkspaceProps {
@@ -51,6 +52,12 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [editingAwbOrderId, setEditingAwbOrderId] = useState<string | null>(null);
   const [awbInput, setAwbInput] = useState("");
+
+  // Shipping Updates Manager Modal State
+  const [shippingModalOrder, setShippingModalOrder] = useState<Order | null>(null);
+  const [shippingModalStatus, setShippingModalStatus] = useState<FulfillmentStatus>("processing");
+  const [shippingModalCourier, setShippingModalCourier] = useState("Coastal Express Courier");
+  const [shippingModalAwb, setShippingModalAwb] = useState("");
 
   // Product Catalog Modal State (Add)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -189,12 +196,34 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
     setEditingProduct(null);
   };
 
+  const handleOpenShippingManager = (order: Order) => {
+    setShippingModalOrder(order);
+    setShippingModalStatus(order.fulfillment_status || "processing");
+    setShippingModalCourier(order.courier_partner || "Coastal Express Courier");
+    setShippingModalAwb(order.tracking_awb || "");
+  };
+
+  const handleSaveShippingManager = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!shippingModalOrder) return;
+    updateOrderFulfillment(
+      shippingModalOrder.id,
+      shippingModalStatus,
+      shippingModalCourier.trim() || undefined,
+      shippingModalAwb.trim() || undefined,
+    );
+    toast.success(`Shipping updates saved for ${shippingModalOrder.order_ref}!`);
+    setShippingModalOrder(null);
+  };
+
   const handleSendWhatsAppTracking = (order: Order) => {
     const itemsSummary = order.items
       .map((i) => `${i.quantity}x ${i.listing?.title || "Item"}`)
       .join(", ");
     const awb = order.tracking_awb || "AWB-MUM-892144";
-    const courier = (order as any).shipping_provider || order.courier_partner || "Bluedart Express";
+    const courier = (order as any).shipping_provider || order.courier_partner || "Coastal Express Courier";
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://matsyamart.com";
+    const trackingPortalUrl = `${origin}/order/confirmation/${order.order_ref}`;
 
     const text = buildGoodsTrackingMessage({
       customerName: order.customer_name,
@@ -202,11 +231,11 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
       itemsSummary,
       courierName: courier,
       trackingNumber: awb,
-      trackingUrl: `https://www.bluedart.com/tracking?awb=${awb}`,
+      trackingUrl: trackingPortalUrl,
     });
 
     openWhatsApp(order.customer_phone, text);
-    toast.success(`WhatsApp tracking dispatched to ${order.customer_name}`);
+    toast.success(`WhatsApp tracking portal link dispatched to ${order.customer_name}`);
   };
 
   return (
@@ -217,6 +246,140 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
           order={selectedOrderForLabel}
           onClose={() => setSelectedOrderForLabel(null)}
         />
+      )}
+
+      {/* Shipping Updates Manager Modal */}
+      {shippingModalOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-fade-in">
+          <div className="bg-[#29100b] border border-[#dab38c]/30 rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-[#dab38c]/20">
+              <div className="flex items-center gap-2">
+                <Truck className="w-5 h-5 text-[#e3a157]" />
+                <div>
+                  <h3 className="font-display font-bold text-base text-[#f5edeb]">
+                    Shipping &amp; Delivery Manager
+                  </h3>
+                  <p className="text-[11px] text-[#dab38c]/70 font-mono">
+                    Ref: {shippingModalOrder.order_ref} · {shippingModalOrder.customer_name}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShippingModalOrder(null)}
+                className="p-1.5 hover:bg-[#35160e] rounded-full text-[#dab38c] hover:text-[#f5edeb] cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveShippingManager} className="space-y-4 text-xs">
+              {/* Delivery Address Review */}
+              <div className="p-3 rounded-2xl bg-[#1f0b07] border border-[#dab38c]/20 space-y-1">
+                <div className="text-[10px] font-bold text-[#e3a157] uppercase tracking-wider">
+                  Customer Shipping Address
+                </div>
+                <div className="text-[11px] text-[#f5edeb]">
+                  {shippingModalOrder.shipping_address
+                    ? [
+                        shippingModalOrder.shipping_address.addressLine,
+                        shippingModalOrder.shipping_address.landmark,
+                        `${shippingModalOrder.shipping_address.city}, ${shippingModalOrder.shipping_address.state} - ${shippingModalOrder.shipping_address.pincode}`,
+                      ]
+                        .filter(Boolean)
+                        .join(", ")
+                    : "Standard Express Delivery across Mumbai"}
+                </div>
+                <div className="text-[10px] text-[#dab38c]/70 font-mono">
+                  Phone: {shippingModalOrder.customer_phone}
+                </div>
+              </div>
+
+              {/* Milestone Status */}
+              <div>
+                <label className="block text-[#dab38c] font-semibold mb-1">
+                  Fulfillment Status Milestone *
+                </label>
+                <select
+                  value={shippingModalStatus}
+                  onChange={(e) => setShippingModalStatus(e.target.value as FulfillmentStatus)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157] cursor-pointer"
+                >
+                  <option value="unfulfilled" className="bg-[#29100b]">1. Order Placed (Unfulfilled)</option>
+                  <option value="processing" className="bg-[#29100b]">2. Hand-Packed by Collective (Processing)</option>
+                  <option value="shipped" className="bg-[#29100b]">3. Dispatched from Coastal Hub (Shipped)</option>
+                  <option value="delivered" className="bg-[#29100b]">4. Delivered to Doorstep</option>
+                </select>
+              </div>
+
+              {/* Courier Partner & AWB */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[#dab38c] font-semibold mb-1">
+                    Courier Partner *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Coastal Express Courier"
+                    value={shippingModalCourier}
+                    onChange={(e) => setShippingModalCourier(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#dab38c] font-semibold mb-1">
+                    Tracking AWB / Consignment No
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. BD-892144-IN"
+                    value={shippingModalAwb}
+                    onChange={(e) => setShippingModalAwb(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157] font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex flex-wrap items-center justify-between gap-2 border-t border-[#dab38c]/15">
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`/order/confirmation/${shippingModalOrder.order_ref}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 rounded-xl bg-[#35160e] hover:bg-[#481f14] text-[#dab38c] hover:text-[#f5edeb] border border-[#dab38c]/30 text-[11px] font-semibold flex items-center gap-1 transition-colors"
+                  >
+                    <span>View Customer Portal</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => handleSendWhatsAppTracking(shippingModalOrder)}
+                    className="px-3 py-1.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-[11px] font-bold flex items-center gap-1 shadow-sm transition-colors cursor-pointer"
+                  >
+                    <span>WhatsApp Updates</span>
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShippingModalOrder(null)}
+                    className="px-3 py-1.5 text-[#dab38c] hover:text-white cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-1.5 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] rounded-xl font-bold transition-colors shadow-md cursor-pointer"
+                  >
+                    Save Updates
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {/* Add Product Modal */}
@@ -680,6 +843,14 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
                           <td className="py-3.5 px-4 text-right">
                             <div className="flex flex-col items-end gap-1.5">
                               <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => handleOpenShippingManager(order)}
+                                  className="px-2.5 py-1 bg-[#35160e] hover:bg-[#481f14] text-[#e3a157] font-bold text-[10px] rounded-lg border border-[#dab38c]/30 shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                                  title="Manage courier, AWB, milestones and tracking portal"
+                                >
+                                  <Truck className="w-3 h-3 text-[#e3a157]" />
+                                  <span>Shipping</span>
+                                </button>
                                 <button
                                   onClick={() => handleSendWhatsAppTracking(order)}
                                   className="px-2.5 py-1 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-[10px] rounded-lg shadow-xs transition-all flex items-center gap-1 cursor-pointer"
