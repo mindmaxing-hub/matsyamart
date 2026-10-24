@@ -21,11 +21,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   onClose,
 }) => {
   const router = useRouter();
-  const { createOrder, slots, validateCoupon, loyaltyProgram } = useData();
-  const { removeItems } = useCart();
+  const { createOrder, slots, validateCoupon, loyaltyProgram, getMembershipByPhone } = useData();
+  const { removeItems, clearCart } = useCart();
 
   const isExperience = items.some((i) => i.listing.type === "experience");
   const hasPhysicalProduct = items.some((i) => i.listing.type === "product");
+  const isPureGoods = hasPhysicalProduct && !isExperience;
+  const isMixedCart = hasPhysicalProduct && isExperience;
 
   // Customer Form State
   const [customerName, setCustomerName] = useState("");
@@ -33,9 +35,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [customerPhone, setCustomerPhone] = useState("");
   const [emergencyContact, setEmergencyContact] = useState("");
 
-  // Loyalty Program State
+  // Dynamic Phone-Keyed Loyalty Membership (Westside-style)
   const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false);
-  const availableLoyaltyPoints = 450; // Demo customer spendable points
+  const member = customerPhone ? getMembershipByPhone(customerPhone) : undefined;
+  const availableLoyaltyPoints = member
+    ? member.spendable_points
+    : customerPhone.replace(/[^0-9]/g, "").length >= 10
+      ? 100 // Welcome bonus for new coastal patrons
+      : 450;
   const loyaltyRate = loyaltyProgram?.config?.pointValueINR || 0.1;
   const pointsCashValue = Math.floor(availableLoyaltyPoints * loyaltyRate);
 
@@ -322,12 +329,19 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 Instant Checkout
               </span>
               <span className="text-[10px] font-semibold bg-[#e3a157]/15 text-[#e3a157] border border-[#e3a157]/40 px-2 py-0.5 rounded-full uppercase">
-                Curated Experience
+                {isPureGoods
+                  ? "Coastal Artisan Pantry"
+                  : isMixedCart
+                    ? "Mixed Experience & Pantry Order"
+                    : "Curated Experience"}
               </span>
             </div>
             <p className="text-xs text-[#dab38c] mt-1">
-              Curated and operated in direct partnership with local coastal
-              communities
+              {isPureGoods
+                ? "Direct dispatch from indigenous coastal fisher collectives & artisans"
+                : isMixedCart
+                  ? "Curated coastal experiences combined with direct artisanal pantry dispatch"
+                  : "Curated and operated in direct partnership with local coastal communities"}
             </p>
           </div>
           <button
@@ -420,11 +434,16 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-[#e3a157]" />
                 <div>
-                  <div className="font-bold text-[#f5edeb]">
-                    {availableLoyaltyPoints} MatsyaPoints Available
+                  <div className="font-bold text-[#f5edeb] flex items-center gap-1.5">
+                    <span>{availableLoyaltyPoints} MatsyaPoints Available</span>
+                    {member && (
+                      <span className="text-[10px] px-1.5 py-0.5 bg-[#e3a157]/20 text-[#e3a157] rounded-md uppercase font-semibold">
+                        {member.current_tier} Patron
+                      </span>
+                    )}
                   </div>
                   <div className="text-[10px] text-[#dab38c]/70">
-                    Worth {formatINR(pointsCashValue)} · 15-min reservation hold
+                    Worth {formatINR(pointsCashValue)} · Spendable toward order
                   </div>
                 </div>
               </div>
@@ -516,7 +535,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
             <div>
               <label className="text-xs font-medium text-[#dab38c] block mb-1">
-                Email Address (for pass & tickets) *
+                {isPureGoods
+                  ? "Email Address (for order tracking & tax invoice) *"
+                  : isMixedCart
+                    ? "Email Address (for pass, tracking & tax invoice) *"
+                    : "Email Address (for verified 9:16 pass & tickets) *"}
               </label>
               <input
                 type="email"

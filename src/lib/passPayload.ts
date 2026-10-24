@@ -53,7 +53,13 @@ export function encodePassPayload(order: Order): string {
         price: it.unit_price_inr,
         type: it.listing?.type || "experience",
         pillar: it.listing?.pillar,
-        image: it.listing?.images?.[0],
+        // Never embed heavy data URLs or massive image strings into QR payload to prevent QR generation overflow
+        image:
+          it.listing?.images?.[0] &&
+          !it.listing.images[0].startsWith("data:") &&
+          it.listing.images[0].length < 150
+            ? it.listing.images[0]
+            : undefined,
         weight: it.listing?.weight_grams,
         collective: it.listing?.artisan_collective,
         location: it.listing?.location_name,

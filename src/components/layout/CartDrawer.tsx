@@ -8,8 +8,8 @@ import {
   ShoppingBag,
   ShieldCheck,
 } from "lucide-react";
-import { useCart } from "../../context/CartContext";
-import { formatINR } from "../../lib/utils";
+import { useCart, getCartLineKey } from "../../context/CartContext";
+import { formatINR, formatSlotRange } from "../../lib/utils";
 import { getOptimizedImageUrl } from "../../lib/images";
 import { CheckoutModal } from "../order/CheckoutModal";
 
@@ -88,77 +88,86 @@ export const CartDrawer: React.FC = () => {
                 </button>
               </div>
             ) : (
-              items.map(({ listing, quantity }) => (
-                <div
-                  key={listing.id}
-                  className="py-4 flex gap-3.5 first:pt-0 last:pb-0"
-                >
-                  <img
-                    src={getOptimizedImageUrl(listing.images[0], {
-                      width: 160,
-                      quality: 75,
-                    })}
-                    alt={listing.title}
-                    className="w-20 h-20 rounded-xl object-cover border border-[#dab38c]/20 shrink-0"
-                    loading="lazy"
-                    decoding="async"
-                    width={80}
-                    height={80}
-                  />
-                  <div className="flex-1 min-w-0 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-start justify-between gap-2">
-                        <h4 className="text-sm font-semibold text-[#f5edeb] line-clamp-1">
-                          {listing.title}
-                        </h4>
-                        <button
-                          onClick={() => removeItem(listing.id)}
-                          className="text-[#dab38c]/60 hover:text-rose-400 transition-colors p-1"
-                          title="Remove item"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <p className="text-xs text-[#dab38c] mt-0.5">
-                        {listing.weight_grams
-                          ? `${listing.weight_grams}g`
-                          : listing.artisan_collective}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between mt-2">
-                      {/* Quantity Controls */}
-                      <div className="flex items-center border border-[#dab38c]/30 rounded-lg bg-[#35160e] overflow-hidden">
-                        <button
-                          onClick={() =>
-                            updateQuantity(listing.id, quantity - 1)
-                          }
-                          className="p-1 hover:bg-[#481f14] text-[#dab38c] transition-colors"
-                        >
-                          <Minus className="w-3.5 h-3.5" />
-                        </button>
-                        <span className="px-3 text-xs font-semibold text-[#f5edeb]">
-                          {quantity}
-                        </span>
-                        <button
-                          onClick={() =>
-                            updateQuantity(listing.id, quantity + 1)
-                          }
-                          className="p-1 hover:bg-[#481f14] text-[#dab38c] transition-colors"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                        </button>
+              items.map(({ listing, quantity, slot }) => {
+                const lineKey = getCartLineKey(listing.id, slot?.id);
+                return (
+                  <div
+                    key={lineKey}
+                    className="py-4 flex gap-3.5 first:pt-0 last:pb-0"
+                  >
+                    <img
+                      src={getOptimizedImageUrl(listing.images[0], {
+                        width: 160,
+                        quality: 75,
+                      })}
+                      alt={listing.title}
+                      className="w-20 h-20 rounded-xl object-cover border border-[#dab38c]/20 shrink-0"
+                      loading="lazy"
+                      decoding="async"
+                      width={80}
+                      height={80}
+                    />
+                    <div className="flex-1 min-w-0 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="text-sm font-semibold text-[#f5edeb] line-clamp-1">
+                            {listing.title}
+                          </h4>
+                          <button
+                            onClick={() => removeItem(lineKey)}
+                            className="text-[#dab38c]/60 hover:text-rose-400 transition-colors p-1 cursor-pointer"
+                            title="Remove item"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                        {slot ? (
+                          <p className="text-[11px] text-[#e3a157] mt-0.5 font-medium">
+                            📅 {formatSlotRange(slot.slot_start, slot.slot_end)}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-[#dab38c] mt-0.5">
+                            {listing.weight_grams
+                              ? `${listing.weight_grams}g`
+                              : listing.artisan_collective}
+                          </p>
+                        )}
                       </div>
 
-                      <div className="text-right">
-                        <span className="font-display font-semibold text-sm text-[#e3a157]">
-                          {formatINR(listing.price_inr * quantity)}
-                        </span>
+                      <div className="flex items-center justify-between mt-2">
+                        {/* Quantity Controls */}
+                        <div className="flex items-center border border-[#dab38c]/30 rounded-lg bg-[#35160e] overflow-hidden">
+                          <button
+                            onClick={() =>
+                              updateQuantity(lineKey, quantity - 1)
+                            }
+                            className="p-1 hover:bg-[#481f14] text-[#dab38c] transition-colors cursor-pointer"
+                          >
+                            <Minus className="w-3.5 h-3.5" />
+                          </button>
+                          <span className="px-3 text-xs font-semibold text-[#f5edeb]">
+                            {quantity}
+                          </span>
+                          <button
+                            onClick={() =>
+                              updateQuantity(lineKey, quantity + 1)
+                            }
+                            className="p-1 hover:bg-[#481f14] text-[#dab38c] transition-colors cursor-pointer"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        <div className="text-right">
+                          <span className="font-display font-semibold text-sm text-[#e3a157]">
+                            {formatINR(listing.price_inr * quantity)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 

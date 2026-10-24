@@ -8,10 +8,13 @@ import {
   CheckCircle2,
   ChevronUp,
   X,
+  ShoppingBag,
 } from "lucide-react";
 import { Listing, ExperienceSlot } from "../../types";
 import { formatINR, formatSlotRange } from "../../lib/utils";
 import { CheckoutModal } from "../order/CheckoutModal";
+import { useCart } from "../../context/CartContext";
+import { toast } from "sonner";
 
 interface SlotBookingSheetProps {
   listing: Listing;
@@ -64,11 +67,22 @@ export const SlotBookingSheet: React.FC<SlotBookingSheetProps> = ({
     }
   };
 
+  const { addItem, setIsCartOpen } = useCart();
   const currentSlot = slots.find((s) => s.id === selectedSlotId);
   const remainingSeats = currentSlot
     ? Math.max(0, currentSlot.capacity - currentSlot.booked_count)
     : 0;
   const totalAmount = listing.price_inr * guestCount;
+
+  const handleAddToCart = () => {
+    if (!selectedSlotId || !currentSlot || remainingSeats <= 0) return;
+    addItem(listing, guestCount, currentSlot);
+    toast.success(
+      `Added ${guestCount} spot${guestCount > 1 ? "s" : ""} for ${listing.title} to your basket!`,
+    );
+    if (isMobileDrawerOpen) setIsMobileDrawerOpen(false);
+    setIsCartOpen(true);
+  };
 
   const renderBookingForm = () => (
     <div className="space-y-6">
@@ -269,19 +283,31 @@ export const SlotBookingSheet: React.FC<SlotBookingSheetProps> = ({
             </div>
           </div>
 
-          {/* Action Trigger */}
-          <button
-            type="button"
-            disabled={remainingSeats <= 0 || !selectedSlotId}
-            onClick={() => {
-              setIsMobileDrawerOpen(false);
-              setIsCheckoutModalOpen(true);
-            }}
-            className="w-full py-4 bg-[#e3a157] hover:bg-[#dab38c] disabled:opacity-40 disabled:cursor-not-allowed text-[#29100b] font-bold text-sm rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer"
-          >
-            <Sparkles className="w-4 h-4 text-[#29100b]" />
-            <span>Proceed to Reserve Spot</span>
-          </button>
+          {/* Action Triggers */}
+          <div className="space-y-2.5 pt-1">
+            <button
+              type="button"
+              disabled={remainingSeats <= 0 || !selectedSlotId}
+              onClick={() => {
+                setIsMobileDrawerOpen(false);
+                setIsCheckoutModalOpen(true);
+              }}
+              className="w-full py-3.5 bg-[#e3a157] hover:bg-[#dab38c] disabled:opacity-40 disabled:cursor-not-allowed text-[#29100b] font-bold text-sm rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4 text-[#29100b]" />
+              <span>Instant Reserve Spot</span>
+            </button>
+
+            <button
+              type="button"
+              disabled={remainingSeats <= 0 || !selectedSlotId}
+              onClick={handleAddToCart}
+              className="w-full py-3 bg-[#1f0b07] hover:bg-[#29100b] disabled:opacity-40 disabled:cursor-not-allowed text-[#e3a157] border border-[#e3a157]/40 font-bold text-xs rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+            >
+              <ShoppingBag className="w-4 h-4 text-[#e3a157]" />
+              <span>Add to Basket (Combine with Goods)</span>
+            </button>
+          </div>
 
           <p className="text-[11px] text-[#dab38c]/70 text-center flex items-center justify-center gap-1">
             <ShieldAlert className="w-3.5 h-3.5 text-[#dab38c]/70 shrink-0" />

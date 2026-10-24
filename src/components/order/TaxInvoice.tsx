@@ -25,6 +25,48 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
+      {/* Strict Print Isolation Stylesheet */}
+      <style>{`
+        @page {
+          size: A4 portrait;
+          margin: 10mm;
+        }
+        @media print {
+          html, body {
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          body * {
+            visibility: hidden !important;
+          }
+          #printable-tax-invoice, #printable-tax-invoice * {
+            visibility: visible !important;
+          }
+          #printable-tax-invoice {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 10mm !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: #ffffff !important;
+            box-sizing: border-box !important;
+          }
+          .no-print, .print\\:hidden, button {
+            display: none !important;
+          }
+        }
+      `}</style>
+
       <div className="bg-[#29100b] border border-[#dab38c]/30 rounded-3xl max-w-2xl w-full p-6 space-y-4 shadow-2xl relative max-h-[92vh] flex flex-col text-[#f5edeb]">
         {/* Modal Controls (Not printed) */}
         <div className="flex items-center justify-between pb-3 border-b border-[#dab38c]/15 print:hidden">
@@ -47,25 +89,28 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
                 onClick={onClose}
                 className="p-2 hover:bg-[#35160e] rounded-full text-[#dab38c] hover:text-[#f5edeb] cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             )}
           </div>
         </div>
 
-        {/* Printable Tax Invoice Document */}
-        <div className="overflow-y-auto flex-1 bg-white text-black p-6 sm:p-8 rounded-2xl border border-gray-300 font-sans text-xs space-y-6 shadow-inner print:m-0 print:border-none print:shadow-none print:p-0">
+        {/* Printable Tax Invoice Document Container */}
+        <div
+          id="printable-tax-invoice"
+          className="overflow-y-auto flex-1 bg-white text-black p-6 sm:p-8 rounded-2xl border border-gray-300 font-sans text-xs space-y-5 shadow-inner"
+        >
           {/* Top Invoice Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4 border-b-2 border-black pb-4">
             <div>
-              <div className="text-xs uppercase tracking-widest font-bold text-gray-500 font-mono">
+              <div className="text-[10px] uppercase tracking-widest font-bold text-gray-500 font-mono">
                 ORIGINAL FOR RECIPIENT · TAX INVOICE
               </div>
               <h1 className="font-display font-bold text-2xl text-black mt-1">
                 Kolibaba Seafood Inc
               </h1>
               <div className="text-[11px] text-gray-600 mt-1 leading-relaxed">
-                In strategic partnership with Bhoomiputra Foundation<br />
+                In strategic partnership with <strong>Bhoomiputra Foundation</strong><br />
                 Versova Jetty No. 1, Gaothan, Andheri West<br />
                 Mumbai, Maharashtra, India – 400061<br />
                 <b>GSTIN:</b> 27AAACK1234F1Z5 (State Code: 27)<br />
@@ -73,7 +118,7 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
               </div>
             </div>
 
-            <div className="text-left sm:text-right space-y-1">
+            <div className="text-left sm:text-right space-y-1 shrink-0">
               <div className="bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-300 font-mono text-[11px] inline-block text-left sm:text-right">
                 <div><b>Invoice No:</b> {invoiceNumber}</div>
                 <div><b>Date:</b> {formatDate(order.created_at)}</div>
@@ -96,7 +141,7 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
               <div className="text-[11px] text-gray-700 mt-0.5">
                 Phone: {order.customer_phone}<br />
                 Email: {order.customer_email}<br />
-                Place of Supply: Maharashtra (27)
+                Place of Supply: Maharashtra (State Code: 27)
               </div>
             </div>
 
@@ -133,17 +178,17 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
               <tbody className="divide-y divide-gray-200">
                 {order.items.map((item, idx) => {
                   const isExp = item.listing?.type === "experience";
-                  const hsnCode = isExp ? "9985" : "0305";
+                  const hsnCode = isExp ? "998555" : item.listing?.title.toLowerCase().includes("honey") ? "0409" : "0305";
 
                   return (
-                    <tr key={item.id} className="text-black">
+                    <tr key={item.id || idx} className="text-black">
                       <td className="py-2 px-2 text-gray-500">{idx + 1}</td>
                       <td className="py-2 px-2">
                         <div className="font-bold">
                           {item.listing?.title || "MatsyaMart Coastal Item"}
                         </div>
                         <div className="text-[10px] text-gray-500">
-                          {isExp ? "Experiential Coastal Tourism" : "Sun-Cured Coastal Pantry"}
+                          {isExp ? "Experiential Coastal Tourism & Feasting" : "Sun-Cured Artisanal Coastal Pantry"}
                         </div>
                       </td>
                       <td className="py-2 px-2 text-center font-mono text-gray-600">
@@ -174,8 +219,13 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
                 described and that all particulars are true and correct under CGST Act, 2017.
               </p>
               {order.coupon_code && (
-                <div className="p-2 rounded bg-emerald-50 border border-emerald-200 text-emerald-800 font-medium">
+                <div className="p-1.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-800 font-medium">
                   Promo discount applied: <b>{order.coupon_code}</b> (-{formatINR(order.discount_amount_inr || 0)})
+                </div>
+              )}
+              {order.loyalty_points_redeemed && order.loyalty_points_redeemed > 0 && (
+                <div className="p-1.5 rounded bg-amber-50 border border-amber-200 text-amber-800 font-medium">
+                  MatsyaPoints redeemed: <b>{order.loyalty_points_redeemed} pts</b> (-{formatINR(order.loyalty_discount_inr || 0)})
                 </div>
               )}
             </div>
@@ -195,8 +245,14 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
               </div>
               {order.discount_amount_inr && order.discount_amount_inr > 0 && (
                 <div className="flex justify-between text-emerald-700 font-semibold">
-                  <span>Discount:</span>
+                  <span>Promo Discount:</span>
                   <span className="font-mono">-{formatINR(order.discount_amount_inr)}</span>
+                </div>
+              )}
+              {order.loyalty_discount_inr && order.loyalty_discount_inr > 0 && (
+                <div className="flex justify-between text-amber-700 font-semibold">
+                  <span>Loyalty Discount:</span>
+                  <span className="font-mono">-{formatINR(order.loyalty_discount_inr)}</span>
                 </div>
               )}
               <div className="flex justify-between text-sm font-bold text-black border-t-2 border-black pt-1.5 mt-1">
@@ -212,13 +268,13 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
           </div>
 
           {/* Bottom Signatory */}
-          <div className="pt-6 border-t border-gray-200 flex justify-between items-end text-[10px] text-gray-600">
+          <div className="pt-4 border-t border-gray-200 flex justify-between items-end text-[10px] text-gray-600">
             <div>
-              <span>Terms: Non-transferable digital pass · Subject to Mumbai jurisdiction</span>
+              <span>Terms: Valid digital invoice &amp; admission voucher · Subject to Mumbai jurisdiction</span>
             </div>
             <div className="text-right">
               <div className="font-bold text-black">For Kolibaba Seafood Inc</div>
-              <div className="text-[9px] text-gray-500 mt-6">Authorised Signatory</div>
+              <div className="text-[9px] text-gray-500 mt-5">Authorised Signatory</div>
             </div>
           </div>
         </div>

@@ -18,8 +18,11 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
 }) => {
   let orderRef = refProp;
   if (!orderRef && typeof window !== "undefined") {
-    const parts = window.location.pathname.split("/");
+    const parts = window.location.pathname.split("/").filter(Boolean);
     orderRef = parts[parts.length - 1];
+  }
+  if (orderRef) {
+    orderRef = orderRef.split("?")[0]?.split("#")[0]?.trim();
   }
 
   const { getOrderByRef, addOrHydrateOrder } = useData();

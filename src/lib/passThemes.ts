@@ -62,27 +62,24 @@ export function resolvePassCategory(listing?: Listing): PassThemeCategory {
   if (!listing) return "walk";
 
   const pillar = listing.pillar?.toLowerCase();
+  if (pillar === "walks" || pillar === "walk") return "walk";
   if (pillar === "food") return "food";
   if (pillar === "workshops" || pillar === "workshop") return "workshop";
-  if (pillar === "walks" || pillar === "walk") return "walk";
 
   const catId = listing.category_id?.toLowerCase() || "";
-  if (catId.includes("food") || catId.includes("dining")) return "food";
-  if (catId.includes("workshop") || catId.includes("craft")) return "workshop";
   if (catId.includes("walk") || catId.includes("trail") || catId.includes("tour")) return "walk";
+  if (catId.includes("workshop") || catId.includes("craft")) return "workshop";
+  if (catId.includes("food") || catId.includes("dining")) return "food";
 
   const title = (listing.title || "").toLowerCase();
   if (
-    title.includes("thali") ||
-    title.includes("feast") ||
-    title.includes("dining") ||
-    title.includes("breakfast") ||
-    title.includes("lunch") ||
-    title.includes("dinner") ||
-    title.includes("culinary") ||
-    title.includes("meal")
+    title.includes("walk") ||
+    title.includes("trail") ||
+    title.includes("safari") ||
+    title.includes("tour") ||
+    title.includes("heritage")
   ) {
-    return "food";
+    return "walk";
   }
 
   if (
@@ -95,6 +92,19 @@ export function resolvePassCategory(listing?: Listing): PassThemeCategory {
     title.includes("carpentry")
   ) {
     return "workshop";
+  }
+
+  if (
+    title.includes("thali") ||
+    title.includes("feast") ||
+    title.includes("dining") ||
+    title.includes("breakfast") ||
+    title.includes("lunch") ||
+    title.includes("dinner") ||
+    title.includes("culinary") ||
+    title.includes("meal")
+  ) {
+    return "food";
   }
 
   return "walk";

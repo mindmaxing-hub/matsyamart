@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Order, Listing, DispatchJob } from "../../types";
 import { useData } from "../../context/DataContext";
+import { encodePassPayload } from "../../lib/passPayload";
 import { formatDate, formatTime, formatINR } from "../../lib/utils";
 import {
   MATSYAMART_WHATSAPP_NUMBER,
@@ -79,7 +80,7 @@ interface Conversation {
 }
 
 export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) => {
-  const { slots, partners, places } = useData();
+  const { slots, partners, places, getOrderByRef } = useData();
   const [activeSubTab, setActiveSubTab] = useState<"dispatches" | "chats" | "broadcasts" | "groups" | "settings">("dispatches");
 
   // Host Dispatches (Scheduled for 18:00 IST Previous Day)
@@ -955,11 +956,17 @@ export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) =>
                 </div>
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px]">
                   <button
-                    onClick={() =>
+                    onClick={() => {
+                      const matchingOrder = getOrderByRef(activeConv.orderRef);
+                      const payload = matchingOrder ? encodePassPayload(matchingOrder) : "";
+                      const origin = typeof window !== "undefined" ? window.location.origin : "https://matsyamart.com";
+                      const passUrl = payload
+                        ? `${origin}/order/confirmation/${activeConv.orderRef}?p=${payload}`
+                        : `${origin}/order/confirmation/${activeConv.orderRef}`;
                       handleInsertCanned(
-                        `🎟️ Namaste ${activeConv.customerName}! Here is your verified MatsyaMart 9:16 mobile pass for ${activeConv.experienceTitle} (Ref: ${activeConv.orderRef}): https://matsyamart.com/order/confirmation/${activeConv.orderRef}`,
-                      )
-                    }
+                        `🎟️ Namaste ${activeConv.customerName}! Here is your verified MatsyaMart 9:16 mobile pass for ${activeConv.experienceTitle} (Ref: ${activeConv.orderRef}): ${passUrl}`,
+                      );
+                    }}
                     className="px-2.5 py-1 bg-[#29100b] hover:bg-[#481f14] border border-[#dab38c]/25 rounded-lg text-[#dab38c] hover:text-[#f5edeb] whitespace-nowrap cursor-pointer transition-colors"
                   >
                     🎟️ Resend 9:16 Pass

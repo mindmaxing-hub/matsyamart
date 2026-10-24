@@ -327,8 +327,8 @@ export const SEED_LISTINGS: Listing[] = [
     id: "exp-sassoon-trail",
     title: "Sassoon Docks Dawn Heritage Walk & Coastal Seafood Feast",
     slug: "sassoon-docks-culinary-trail",
-    category_id: "cat-food",
-    pillar: "food",
+    category_id: "cat-walks",
+    pillar: "walks",
     type: "experience",
     short_summary:
       "Explore Mumbai's first commercial wet dock established in 1875, learn to grade fresh wild catch, and enjoy a curated coastal seafood feast.",

@@ -15,6 +15,7 @@ import {
   Utensils,
   Backpack,
   Heart,
+  ExternalLink,
 } from "lucide-react";
 import { formatDuration } from "../lib/utils";
 import { getOptimizedImageUrl } from "../lib/images";
@@ -73,6 +74,14 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
     return "Coastal Offering";
   };
 
+  const mapsUrl =
+    listing.meeting_point_maps_url ||
+    (listing.latitude && listing.longitude
+      ? `https://www.google.com/maps/search/?api=1&query=${listing.latitude},${listing.longitude}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          (listing.location_name || "Mumbai Coast") + ", Mumbai",
+        )}`);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 text-[#f5edeb]">
       {/* Breadcrumb & Wishlist Action Bar */}
@@ -111,10 +120,17 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
           <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase bg-[#35160e] text-[#e3a157] border border-[#e3a157]/30">
             {getExperienceCategoryBadge()}
           </span>
-          <span className="flex items-center gap-1 text-xs font-medium text-[#dab38c]">
-            <MapPin className="w-3.5 h-3.5 text-[#e3a157]" />
-            {listing.location_name}
-          </span>
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#35160e] hover:bg-[#481f14] text-[#e3a157] text-xs font-semibold border border-[#e3a157]/40 transition-all hover:scale-105 group cursor-pointer shadow-xs"
+            title="Open location coordinates in Google Maps"
+          >
+            <MapPin className="w-3.5 h-3.5 text-[#e3a157] group-hover:scale-110 transition-transform" />
+            <span>{listing.location_name}</span>
+            <ExternalLink className="w-3 h-3 text-[#dab38c]/70 group-hover:text-[#f5edeb] transition-colors" />
+          </a>
           <span className="text-[#dab38c]/40">•</span>
           <span className="flex items-center gap-1 text-xs font-medium text-[#dab38c]">
             <Clock className="w-3.5 h-3.5 text-[#e3a157]" />
@@ -194,6 +210,37 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
             <div className="text-xs sm:text-sm text-[#dab38c] leading-relaxed whitespace-pre-line">
               {listing.full_description}
             </div>
+          </div>
+
+          {/* Meeting Point & Google Maps GPS */}
+          <div className="p-5 rounded-3xl bg-[#35160e]/85 border border-[#dab38c]/25 space-y-3 shadow-md backdrop-blur-md">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-[#e3a157]" />
+                <div>
+                  <h4 className="font-display font-bold text-sm text-[#f5edeb]">
+                    Meeting Point &amp; GPS Location
+                  </h4>
+                  <p className="text-xs text-[#dab38c]">
+                    {listing.location_name}
+                  </p>
+                </div>
+              </div>
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3.5 py-1.5 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>Open in Google Maps</span>
+                <ExternalLink className="w-3.5 h-3.5 text-[#29100b]" />
+              </a>
+            </div>
+            {listing.secret_meeting_point && (
+              <p className="text-[11px] text-[#dab38c]/80 border-t border-[#dab38c]/15 pt-2">
+                <strong>Meeting note:</strong> {listing.secret_meeting_point}
+              </p>
+            )}
           </div>
 
           {/* Itinerary Timeline */}

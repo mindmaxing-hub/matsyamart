@@ -311,6 +311,8 @@ export interface LoyaltyMembership {
   id: string;
   user_id?: string | undefined;
   phone: string;
+  name?: string | undefined;
+  email?: string | undefined;
   current_tier: string;
   lifetime_spend_inr: number;
   spendable_points: number;

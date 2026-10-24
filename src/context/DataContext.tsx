@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import {
   Listing,
   Category,
@@ -16,6 +16,7 @@ import {
   LoyaltyProgram,
   LoyaltyProgramConfig,
   LoyaltyStatus,
+  LoyaltyMembership,
 } from "../types";
 import {
   SEED_CATEGORIES,
@@ -92,6 +93,10 @@ interface DataContextType {
   deleteSlot: (slotId: string) => void;
   updateSessionRevision: (slotId: string, updates: Partial<ExperienceSlot>) => void;
   updateLoyaltyProgram: (config: LoyaltyProgramConfig, status?: LoyaltyStatus) => void;
+  memberships: LoyaltyMembership[];
+  getMembershipByPhone: (phone: string) => LoyaltyMembership | undefined;
+  redeemLoyaltyPoints: (phone: string, points: number) => void;
+  awardLoyaltyPoints: (phone: string, points: number, spendINR: number) => void;
   addRecurringWeekendSlots: (
     listingId: string,
     weeksCount?: number,
@@ -209,10 +214,170 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   });
 
+  const CANONICAL_TEST_ORDERS: Order[] = [
+    {
+      id: "ord-test-food",
+      order_ref: "MM-EXP-FOOD-TEST",
+      customer_name: "Kunal Sharma",
+      customer_email: "kunal.sharma@example.com",
+      customer_phone: "+91 98200 44556",
+      total_amount_inr: 2400,
+      status: "confirmed",
+      emergency_contact: "Sunita Sharma (+91 98200 44557)",
+      razorpay_payment_id: "pay_sim_food_test_01",
+      created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+      items: [
+        {
+          id: "item-test-food-01",
+          order_id: "ord-test-food",
+          listing_id: "exp-seafood-thali-madh",
+          slot_id: "slot-madh-1",
+          quantity: 2,
+          unit_price_inr: 1200,
+          attendee_details: [
+            { fullName: "Kunal Sharma", phone: "+91 98200 44556", email: "kunal.sharma@example.com" },
+            { fullName: "Meera Sharma", phone: "+91 98200 44558" },
+          ],
+          listing: SEED_LISTINGS.find((l) => l.id === "exp-seafood-thali-madh") || SEED_LISTINGS[0]!,
+        },
+      ],
+    },
+    {
+      id: "ord-test-walk",
+      order_ref: "MM-EXP-WALK-TEST",
+      customer_name: "Aryan Panchal",
+      customer_email: "aryan@matsyamart.in",
+      customer_phone: "+91 99204 77158",
+      total_amount_inr: 2400,
+      status: "confirmed",
+      emergency_contact: "Harsh Panchal (+91 98200 77159)",
+      razorpay_payment_id: "pay_sim_walk_test_01",
+      created_at: new Date(Date.now() - 3600000 * 3).toISOString(),
+      items: [
+        {
+          id: "item-test-walk-01",
+          order_id: "ord-test-walk",
+          listing_id: "exp-sassoon-trail",
+          slot_id: "slot-sassoon-1",
+          quantity: 2,
+          unit_price_inr: 1200,
+          attendee_details: [
+            { fullName: "Aryan Panchal", phone: "+91 99204 77158", email: "aryan@matsyamart.in" },
+            { fullName: "Kunal Sharma", phone: "+91 98200 44556" },
+          ],
+          listing: SEED_LISTINGS.find((l) => l.id === "exp-sassoon-trail") || SEED_LISTINGS[0]!,
+        },
+      ],
+    },
+    {
+      id: "ord-test-workshop",
+      order_ref: "MM-EXP-WORKSHOP-TEST",
+      customer_name: "Rohan Varma",
+      customer_email: "rohan.varma@example.com",
+      customer_phone: "+91 98199 55443",
+      total_amount_inr: 1100,
+      status: "confirmed",
+      emergency_contact: "Anita Varma (+91 98199 55444)",
+      razorpay_payment_id: "pay_sim_workshop_test_01",
+      created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+      items: [
+        {
+          id: "item-test-workshop-01",
+          order_id: "ord-test-workshop",
+          listing_id: "exp-net-weaving",
+          slot_id: "slot-weaving-1",
+          quantity: 1,
+          unit_price_inr: 1100,
+          attendee_details: [
+            { fullName: "Rohan Varma", phone: "+91 98199 55443", email: "rohan.varma@example.com" },
+          ],
+          listing: SEED_LISTINGS.find((l) => l.id === "exp-net-weaving") || SEED_LISTINGS[0]!,
+        },
+      ],
+    },
+    {
+      id: "ord-test-product",
+      order_ref: "MM-PRD-TEST",
+      customer_name: "Aryan Panchal",
+      customer_email: "mindmaxxxing@gmail.com",
+      customer_phone: "+91 73042 90690",
+      total_amount_inr: 550,
+      status: "confirmed",
+      fulfillment_status: "processing",
+      courier_partner: "Coastal Express Courier",
+      tracking_awb: "CE-89410293",
+      shipping_address: {
+        addressLine: "A-902 Naman Habitat, JP Road, opposite Pathare Prabhu Hall, near Azad Nagar Metro Station, Andheri West",
+        city: "Mumbai",
+        state: "Maharashtra",
+        pincode: "400058",
+      },
+      razorpay_payment_id: "pay_sim_prd_test_01",
+      created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
+      items: [
+        {
+          id: "item-test-prd-01",
+          order_id: "ord-test-product",
+          listing_id: "prd-mangrove-honey",
+          quantity: 1,
+          unit_price_inr: 550,
+          listing: SEED_LISTINGS.find((l) => l.id === "prd-mangrove-honey"),
+        },
+      ],
+    },
+  ];
+
+  const SEED_MEMBERSHIPS: LoyaltyMembership[] = [
+    {
+      id: "mem-seed-01",
+      phone: "9920477158",
+      name: "Aryan Panchal",
+      email: "aryan@matsyamart.in",
+      current_tier: "gold",
+      lifetime_spend_inr: 12400,
+      spendable_points: 450,
+      pending_points: 0,
+      created_at: new Date(Date.now() - 3600000 * 24 * 30).toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: "mem-seed-02",
+      phone: "7304290690",
+      name: "Aryan Panchal",
+      email: "mindmaxxxing@gmail.com",
+      current_tier: "silver",
+      lifetime_spend_inr: 5500,
+      spendable_points: 450,
+      pending_points: 0,
+      created_at: new Date(Date.now() - 3600000 * 24 * 20).toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: "mem-seed-03",
+      phone: "9820012345",
+      name: "Rahul Sharma",
+      email: "rahul@example.com",
+      current_tier: "bronze",
+      lifetime_spend_inr: 2400,
+      spendable_points: 450,
+      pending_points: 0,
+      created_at: new Date(Date.now() - 3600000 * 24 * 10).toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+  ];
+
   const [orders, setOrders] = useState<Order[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_ORDERS);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved) as Order[];
+        // Ensure all canonical test orders exist in the active ledger
+        const existingRefs = new Set(parsed.map((o) => o.order_ref.toUpperCase()));
+        const missing = CANONICAL_TEST_ORDERS.filter(
+          (to) => !existingRefs.has(to.order_ref.toUpperCase()),
+        );
+        return [...parsed, ...missing];
+      }
 
       // Initial mock confirmed order for instant manifest testing
       const initialMockOrder: Order = {
@@ -287,9 +452,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         ],
       };
 
-      return [initialMockOrder, initialMockProductOrder];
+      return [initialMockOrder, initialMockProductOrder, ...CANONICAL_TEST_ORDERS];
     } catch {
-      return [];
+      return CANONICAL_TEST_ORDERS;
     }
   });
 
@@ -484,6 +649,97 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     fetchFromSupabase();
   }, []);
 
+  const STORAGE_MEMBERSHIPS = "matsyamart_memberships_v1";
+
+  const [memberships, setMemberships] = useState<LoyaltyMembership[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_MEMBERSHIPS);
+      if (saved) return JSON.parse(saved);
+      return SEED_MEMBERSHIPS;
+    } catch {
+      return SEED_MEMBERSHIPS;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_MEMBERSHIPS, JSON.stringify(memberships));
+    } catch (e) {
+      console.error("Failed to save memberships to localStorage", e);
+    }
+  }, [memberships]);
+
+  const getMembershipByPhone = useCallback(
+    (phone: string): LoyaltyMembership | undefined => {
+      if (!phone) return undefined;
+      const cleanPhone = phone.replace(/[^0-9]/g, "").slice(-10);
+      if (!cleanPhone) return undefined;
+      return memberships.find(
+        (m) => m.phone.replace(/[^0-9]/g, "").slice(-10) === cleanPhone,
+      );
+    },
+    [memberships],
+  );
+
+  const redeemLoyaltyPoints = useCallback((phone: string, points: number) => {
+    if (!phone || points <= 0) return;
+    const cleanPhone = phone.replace(/[^0-9]/g, "").slice(-10);
+    setMemberships((prev) => {
+      const existing = prev.find(
+        (m) => m.phone.replace(/[^0-9]/g, "").slice(-10) === cleanPhone,
+      );
+      if (existing) {
+        return prev.map((m) =>
+          m.phone.replace(/[^0-9]/g, "").slice(-10) === cleanPhone
+            ? {
+                ...m,
+                spendable_points: Math.max(0, m.spendable_points - points),
+                updated_at: new Date().toISOString(),
+              }
+            : m,
+        );
+      }
+      return prev;
+    });
+  }, []);
+
+  const awardLoyaltyPoints = useCallback(
+    (phone: string, points: number, spendINR: number) => {
+      if (!phone) return;
+      const cleanPhone = phone.replace(/[^0-9]/g, "").slice(-10);
+      setMemberships((prev) => {
+        const existing = prev.find(
+          (m) => m.phone.replace(/[^0-9]/g, "").slice(-10) === cleanPhone,
+        );
+        if (existing) {
+          return prev.map((m) =>
+            m.phone.replace(/[^0-9]/g, "").slice(-10) === cleanPhone
+              ? {
+                  ...m,
+                  spendable_points: m.spendable_points + points,
+                  lifetime_spend_inr: m.lifetime_spend_inr + spendINR,
+                  updated_at: new Date().toISOString(),
+                }
+              : m,
+          );
+        } else {
+          const newMem: LoyaltyMembership = {
+            id: `mem-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+            phone: cleanPhone,
+            current_tier: spendINR > 5000 ? "silver" : "bronze",
+            lifetime_spend_inr: spendINR,
+            spendable_points: points + 100, // 100 welcome bonus + earned points
+            pending_points: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+          return [...prev, newMem];
+        }
+      });
+    },
+    [],
+  );
+
   const getListingBySlug = (slug: string) => {
     return listings.find((l) => l.slug === slug);
   };
@@ -493,7 +749,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getOrderByRef = (ref: string) => {
-    return orders.find((o) => o.order_ref.toLowerCase() === ref.toLowerCase());
+    if (!ref) return undefined;
+    const cleanRef = ref.trim().toLowerCase();
+    const found = orders.find(
+      (o) => o.order_ref.toLowerCase() === cleanRef || o.id === ref,
+    );
+    if (found) return found;
+    return CANONICAL_TEST_ORDERS.find(
+      (o) => o.order_ref.toLowerCase() === cleanRef || o.id === ref,
+    );
   };
 
   const addOrHydrateOrder = (incomingOrder: Order) => {
@@ -600,6 +864,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         return slot;
       }),
     );
+
+    // Deduct redeemed loyalty points from membership account
+    if (input.pointsRedeemed && input.pointsRedeemed > 0) {
+      redeemLoyaltyPoints(input.customerPhone, input.pointsRedeemed);
+    }
+    // Award 5% spend back as spendable points
+    const earnedPoints = Math.max(10, Math.floor(finalTotalAmount * 0.05));
+    awardLoyaltyPoints(input.customerPhone, earnedPoints, finalTotalAmount);
 
     // Save order
     setOrders((prev) => [newOrder, ...prev]);
@@ -1231,6 +1503,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         deleteSlot,
         updateSessionRevision,
         updateLoyaltyProgram,
+        memberships,
+        getMembershipByPhone,
+        redeemLoyaltyPoints,
+        awardLoyaltyPoints,
         addRecurringWeekendSlots,
         toggleCancelSlot,
         addProposal,

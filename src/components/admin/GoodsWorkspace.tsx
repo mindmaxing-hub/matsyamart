@@ -3,6 +3,7 @@ import { Order, Listing, FulfillmentStatus } from "../../types";
 import { useData } from "../../context/DataContext";
 import { formatINR, formatDate } from "../../lib/utils";
 import { CourierLabel } from "./CourierLabel";
+import { CustomerOrderDetailModal } from "./CustomerOrderDetailModal";
 import { ImageDropzone } from "./ImageDropzone";
 import {
   openWhatsApp,
@@ -25,6 +26,7 @@ import {
   X,
   TrendingDown,
   ExternalLink,
+  Eye,
 } from "lucide-react";
 
 interface GoodsWorkspaceProps {
@@ -46,6 +48,7 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
 
   const [activeSubTab, setActiveSubTab] = useState<"orders" | "catalog" | "stock">("orders");
   const [selectedOrderForLabel, setSelectedOrderForLabel] = useState<Order | null>(null);
+  const [inspectedOrder, setInspectedOrder] = useState<Order | null>(null);
 
   // Orders State
   const [orderSearch, setOrderSearch] = useState("");
@@ -245,6 +248,15 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
         <CourierLabel
           order={selectedOrderForLabel}
           onClose={() => setSelectedOrderForLabel(null)}
+        />
+      )}
+
+      {/* Customer & Order Inspection Modal */}
+      {inspectedOrder && (
+        <CustomerOrderDetailModal
+          order={inspectedOrder}
+          onClose={() => setInspectedOrder(null)}
+          onUpdateFulfillment={updateOrderFulfillment}
         />
       )}
 
@@ -770,14 +782,22 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
                           key={order.id}
                           className="hover:bg-[#481f14]/50 transition-colors"
                         >
-                          <td className="py-3.5 px-4 font-mono font-medium">
-                            <div>{order.order_ref}</div>
+                          <td
+                            onClick={() => setInspectedOrder(order)}
+                            className="py-3.5 px-4 font-mono font-medium cursor-pointer hover:text-[#e3a157] transition-colors"
+                            title="Click to inspect order"
+                          >
+                            <div className="underline underline-offset-2">{order.order_ref}</div>
                             <div className="text-[10px] text-[#dab38c]/60 font-sans">
                               {formatDate(order.created_at)}
                             </div>
                           </td>
 
-                          <td className="py-3.5 px-4">
+                          <td
+                            onClick={() => setInspectedOrder(order)}
+                            className="py-3.5 px-4 cursor-pointer hover:text-[#e3a157] transition-colors"
+                            title="Click to inspect customer"
+                          >
                             <div className="font-semibold">{order.customer_name}</div>
                             <div className="text-[11px] text-[#dab38c]/80 font-mono">
                               {order.customer_phone}
@@ -843,6 +863,14 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
                           <td className="py-3.5 px-4 text-right">
                             <div className="flex flex-col items-end gap-1.5">
                               <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => setInspectedOrder(order)}
+                                  className="px-2.5 py-1 bg-[#35160e] hover:bg-[#481f14] text-[#f5edeb] font-bold text-[10px] rounded-lg border border-[#dab38c]/30 shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                                  title="Inspect full customer order details, items and pricing"
+                                >
+                                  <Eye className="w-3 h-3 text-[#e3a157]" />
+                                  <span>Inspect</span>
+                                </button>
                                 <button
                                   onClick={() => handleOpenShippingManager(order)}
                                   className="px-2.5 py-1 bg-[#35160e] hover:bg-[#481f14] text-[#e3a157] font-bold text-[10px] rounded-lg border border-[#dab38c]/30 shadow-xs transition-all flex items-center gap-1 cursor-pointer"

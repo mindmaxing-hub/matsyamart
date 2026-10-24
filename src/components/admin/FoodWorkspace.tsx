@@ -3,6 +3,8 @@ import { Order, Listing, ExperienceSlot, OrderItem, PinVisibilityType, Itinerary
 import { useData } from "../../context/DataContext";
 import { formatINR, formatDate, formatTime } from "../../lib/utils";
 import { MobilePass } from "./MobilePass";
+import { CustomerOrderDetailModal } from "./CustomerOrderDetailModal";
+import { encodePassPayload } from "../../lib/passPayload";
 import {
   Utensils,
   MapPin,
@@ -24,6 +26,7 @@ import {
   Trash2,
   Filter,
   Edit2,
+  Eye,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ImageDropzone } from "./ImageDropzone";
@@ -65,6 +68,7 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
     order: Order;
     item: OrderItem;
   } | null>(null);
+  const [inspectedOrder, setInspectedOrder] = useState<Order | null>(null);
 
   const [guestSearch, setGuestSearch] = useState("");
   const [selectedFeastFilter, setSelectedFeastFilter] = useState<string>("all");
@@ -365,7 +369,11 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
   const handleSendPassToGuest = (att: typeof foodAttendees[0]) => {
     const guestPhone = att.phone?.replace(/[^0-9]/g, "") || "";
     const passRef = `MM-PASS-${att.order.order_ref.replace(/[^A-Za-z0-9]/g, "").slice(-6).toUpperCase()}`;
-    const verificationUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/order/confirmation/${att.order.order_ref}`;
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const payload = encodePassPayload(att.order);
+    const verificationUrl = payload
+      ? `${origin}/order/confirmation/${att.order.order_ref}?p=${payload}`
+      : `${origin}/order/confirmation/${att.order.order_ref}`;
 
     const text = encodeURIComponent(
       `🎟️ *MatsyaMart Official 9:16 Mobile Pass*\n\n` +
@@ -577,6 +585,14 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
           order={selectedTicketOrder.order}
           item={selectedTicketOrder.item}
           onClose={() => setSelectedTicketOrder(null)}
+        />
+      )}
+
+      {/* Full Customer Order Inspection Modal */}
+      {inspectedOrder && (
+        <CustomerOrderDetailModal
+          order={inspectedOrder}
+          onClose={() => setInspectedOrder(null)}
         />
       )}
 
@@ -949,8 +965,12 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                   ) : (
                     foodAttendees.map((att, idx) => (
                       <tr key={idx} className="hover:bg-[#481f14]/50 transition-colors">
-                        <td className="py-3.5 px-4">
-                          <div className="font-semibold text-sm">{att.name}</div>
+                        <td
+                          onClick={() => setInspectedOrder(att.order)}
+                          className="py-3.5 px-4 cursor-pointer hover:text-[#e3a157] transition-colors"
+                          title="Click to inspect customer order"
+                        >
+                          <div className="font-semibold text-sm underline underline-offset-2">{att.name}</div>
                           <div className="text-[11px] text-[#dab38c] font-mono">{att.phone}</div>
                         </td>
 
@@ -971,7 +991,11 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                           )}
                         </td>
 
-                        <td className="py-3.5 px-4 font-mono text-[#e3a157] font-semibold">
+                        <td
+                          onClick={() => setInspectedOrder(att.order)}
+                          className="py-3.5 px-4 font-mono text-[#e3a157] font-semibold cursor-pointer hover:underline"
+                          title="Click to inspect order"
+                        >
                           {att.order.order_ref}
                         </td>
 
@@ -1002,6 +1026,14 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
 
                         <td className="py-3.5 px-4 text-right">
                           <div className="inline-flex items-center gap-1.5">
+                            <button
+                              onClick={() => setInspectedOrder(att.order)}
+                              className="px-2.5 py-1 bg-[#35160e] hover:bg-[#481f14] text-[#f5edeb] font-bold text-xs rounded-xl border border-[#dab38c]/30 shadow-xs transition-all inline-flex items-center gap-1 cursor-pointer"
+                              title="Inspect full booking details, pricing and customer profile"
+                            >
+                              <Eye className="w-3 h-3 text-[#e3a157]" />
+                              <span>Inspect</span>
+                            </button>
                             <button
                               onClick={() => handleSendPassToGuest(att)}
                               className="px-2.5 py-1 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs rounded-xl shadow-xs transition-all inline-flex items-center gap-1 cursor-pointer"
