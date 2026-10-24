@@ -18,6 +18,8 @@ import {
   X,
   Phone,
   Compass,
+  Sparkles,
+  CheckCircle2,
 } from "lucide-react";
 import { useData } from "../../context/DataContext";
 import { Listing, ExperienceSlot, Place, Partner, PinVisibilityType } from "../../types";
@@ -53,9 +55,64 @@ export const SessionsAndVenuesManager: React.FC<SessionsAndVenuesManagerProps> =
     deleteSlot,
     updateSessionRevision,
     updateListing,
+    addRecurringWeekendSlots,
   } = useData();
 
   const [selectedOfferingId, setSelectedOfferingId] = useState<string>("all");
+
+  // Recurring Weekend Generator Modal State
+  const [isRecurringModalOpen, setIsRecurringModalOpen] = useState(false);
+  const [recurringTargetOfferingId, setRecurringTargetOfferingId] = useState("");
+  const [recurringWeeks, setRecurringWeeks] = useState(4);
+  const [recurringDays, setRecurringDays] = useState<("saturday" | "sunday")[]>([
+    "saturday",
+    "sunday",
+  ]);
+  const [recurringStartTime, setRecurringStartTime] = useState(
+    pillar === "food" ? "12:30" : pillar === "walks" ? "06:30" : "16:00",
+  );
+  const [recurringEndTime, setRecurringEndTime] = useState(
+    pillar === "food" ? "15:00" : pillar === "walks" ? "09:00" : "18:30",
+  );
+  const [recurringCapacity, setRecurringCapacity] = useState(
+    pillar === "walks" ? 15 : pillar === "workshops" ? 10 : 12,
+  );
+
+  const openRecurringModal = (offeringId?: string) => {
+    setRecurringTargetOfferingId(offeringId || listings[0]?.id || "");
+    setRecurringWeeks(4);
+    setRecurringDays(["saturday", "sunday"]);
+    setRecurringStartTime(
+      pillar === "food" ? "12:30" : pillar === "walks" ? "06:30" : "16:00",
+    );
+    setRecurringEndTime(
+      pillar === "food" ? "15:00" : pillar === "walks" ? "09:00" : "18:30",
+    );
+    setRecurringCapacity(pillar === "walks" ? 15 : pillar === "workshops" ? 10 : 12);
+    setIsRecurringModalOpen(true);
+  };
+
+  const handleGenerateRecurring = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!recurringTargetOfferingId) {
+      toast.error("Please select an offering");
+      return;
+    }
+    const targetOffering = listings.find((l) => l.id === recurringTargetOfferingId);
+    addRecurringWeekendSlots(
+      recurringTargetOfferingId,
+      recurringWeeks,
+      recurringCapacity,
+      recurringStartTime,
+      recurringEndTime,
+      recurringDays,
+    );
+    const count = recurringWeeks * recurringDays.length;
+    toast.success(
+      `Generated ${count} upcoming weekend sessions for "${targetOffering?.title || "offering"}"!`,
+    );
+    setIsRecurringModalOpen(false);
+  };
 
   // Place Modal State
   const [isPlaceModalOpen, setIsPlaceModalOpen] = useState(false);
@@ -344,6 +401,14 @@ export const SessionsAndVenuesManager: React.FC<SessionsAndVenuesManagerProps> =
           </button>
           <button
             type="button"
+            onClick={() => openRecurringModal()}
+            className="px-3 py-1.5 bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-300 border border-emerald-500/50 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Generate Weekend Batches</span>
+          </button>
+          <button
+            type="button"
             onClick={() => openNewSessionModal()}
             className="px-3.5 py-1.5 bg-[#e3a157] hover:bg-[#d49042] text-[#29100b] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
           >
@@ -396,6 +461,15 @@ export const SessionsAndVenuesManager: React.FC<SessionsAndVenuesManagerProps> =
                 </div>
 
                 <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => openRecurringModal(offering.id)}
+                    className="px-2.5 py-1.5 bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
+                    title="Generate 4-8 weeks of weekend sessions"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>+ Weekend Batches</span>
+                  </button>
                   <button
                     type="button"
                     onClick={() => openNewSessionModal(offering.id)}
@@ -988,6 +1062,184 @@ export const SessionsAndVenuesManager: React.FC<SessionsAndVenuesManagerProps> =
                   className="px-4 py-2 bg-[#e3a157] hover:bg-[#d49042] text-[#29100b] rounded-xl font-bold shadow-md cursor-pointer"
                 >
                   {editingSession ? "Apply Revision" : "Create Session"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* RECURRING WEEKEND SESSIONS GENERATOR MODAL */}
+      {isRecurringModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs overflow-y-auto">
+          <div className="relative w-full max-w-lg bg-[#29100b] border border-[#dab38c]/30 rounded-3xl p-6 text-[#f5edeb] shadow-2xl my-auto space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#dab38c]/20">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-emerald-400" />
+                <h3 className="font-display font-bold text-lg text-white">
+                  Generate Recurring Weekend Sessions
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsRecurringModalOpen(false)}
+                className="text-[#dab38c] hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleGenerateRecurring} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#dab38c] mb-1">
+                  Select Offering *
+                </label>
+                <select
+                  required
+                  value={recurringTargetOfferingId}
+                  onChange={(e) => setRecurringTargetOfferingId(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-hidden cursor-pointer"
+                >
+                  {listings.map((l) => (
+                    <option key={l.id} value={l.id} className="bg-[#29100b]">
+                      {l.title} ({l.pillar?.toUpperCase()})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#dab38c] mb-1.5">
+                  Select Days Every Weekend
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const has = recurringDays.includes("saturday");
+                      let next = has
+                        ? recurringDays.filter((d) => d !== "saturday")
+                        : [...recurringDays, "saturday" as const];
+                      if (next.length === 0) next = ["saturday"];
+                      setRecurringDays(next);
+                    }}
+                    className={`flex-1 py-2 px-3 rounded-xl border font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
+                      recurringDays.includes("saturday")
+                        ? "bg-emerald-950/80 border-emerald-500 text-emerald-300"
+                        : "bg-[#1f0b07] border-[#dab38c]/30 text-[#dab38c]/60"
+                    }`}
+                  >
+                    <CheckCircle2
+                      className={`w-4 h-4 ${
+                        recurringDays.includes("saturday") ? "text-emerald-400" : "opacity-30"
+                      }`}
+                    />
+                    <span>Saturdays</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const has = recurringDays.includes("sunday");
+                      let next = has
+                        ? recurringDays.filter((d) => d !== "sunday")
+                        : [...recurringDays, "sunday" as const];
+                      if (next.length === 0) next = ["sunday"];
+                      setRecurringDays(next);
+                    }}
+                    className={`flex-1 py-2 px-3 rounded-xl border font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
+                      recurringDays.includes("sunday")
+                        ? "bg-emerald-950/80 border-emerald-500 text-emerald-300"
+                        : "bg-[#1f0b07] border-[#dab38c]/30 text-[#dab38c]/60"
+                    }`}
+                  >
+                    <CheckCircle2
+                      className={`w-4 h-4 ${
+                        recurringDays.includes("sunday") ? "text-emerald-400" : "opacity-30"
+                      }`}
+                    />
+                    <span>Sundays</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#dab38c] mb-1">
+                    Weeks Horizon
+                  </label>
+                  <select
+                    value={recurringWeeks}
+                    onChange={(e) => setRecurringWeeks(Number(e.target.value) || 4)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-hidden cursor-pointer"
+                  >
+                    <option value={4} className="bg-[#29100b]">Next 4 Weeks (1 Month)</option>
+                    <option value={8} className="bg-[#29100b]">Next 8 Weeks (2 Months)</option>
+                    <option value={12} className="bg-[#29100b]">Next 12 Weeks (3 Months)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#dab38c] mb-1">
+                    Start Time
+                  </label>
+                  <input
+                    type="time"
+                    required
+                    value={recurringStartTime}
+                    onChange={(e) => setRecurringStartTime(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-hidden"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#dab38c] mb-1">
+                    End Time
+                  </label>
+                  <input
+                    type="time"
+                    required
+                    value={recurringEndTime}
+                    onChange={(e) => setRecurringEndTime(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-hidden"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#dab38c] mb-1">
+                  Seats Capacity per Session
+                </label>
+                <input
+                  type="number"
+                  required
+                  min={1}
+                  max={100}
+                  value={recurringCapacity}
+                  onChange={(e) => setRecurringCapacity(Number(e.target.value) || 12)}
+                  className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-hidden"
+                />
+              </div>
+
+              <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>
+                  Will auto-generate <strong>{recurringWeeks * recurringDays.length} sessions</strong> in
+                  the live booking calendar, scheduled from {recurringStartTime} to {recurringEndTime}.
+                </span>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#dab38c]/20">
+                <button
+                  type="button"
+                  onClick={() => setIsRecurringModalOpen(false)}
+                  className="px-4 py-2 bg-[#29100b] hover:bg-[#1f0b07] text-[#dab38c] rounded-xl font-bold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-md cursor-pointer flex items-center gap-1.5"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Generate Sessions Now</span>
                 </button>
               </div>
             </form>

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Order, Listing, ExperienceSlot, OrderItem, PinVisibilityType } from "../../types";
+import { Order, Listing, ExperienceSlot, OrderItem, PinVisibilityType, ItineraryItem } from "../../types";
 import { useData } from "../../context/DataContext";
 import { formatINR, formatDate, formatTime } from "../../lib/utils";
 import { MobilePass } from "./MobilePass";
@@ -32,6 +32,13 @@ import {
 import { buildGoogleMapsUrl } from "../../lib/services/places";
 import { SharedCoordinateInput } from "./SharedCoordinateInput";
 import { SessionsAndVenuesManager } from "./SessionsAndVenuesManager";
+import {
+  ScheduleSlotBuilder,
+  ScheduleSlotBuilderState,
+  ItineraryBuilder,
+  TagsBuilder,
+  HostBioInput,
+} from "./RichExperienceFields";
 
 interface WalksWorkspaceProps {
   orders: Order[];
@@ -44,7 +51,15 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
   listings,
   slots,
 }) => {
-  const { updateAttendeeCheckIn, addListing, updateListing, deleteListing, addSlot } = useData();
+  const {
+    updateAttendeeCheckIn,
+    addListing,
+    updateListing,
+    deleteListing,
+    addSlot,
+    addRecurringWeekendSlots,
+    addBatchSlots,
+  } = useData();
 
   const [activeSubTab, setActiveSubTab] = useState<"trails" | "guides" | "manifest">("trails");
   const [selectedTicketOrder, setSelectedTicketOrder] = useState<{
@@ -59,6 +74,7 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
   const [newTitle, setNewTitle] = useState("");
   const [newGuideName, setNewGuideName] = useState("Pranay Koli");
   const [newGuidePhone, setNewGuidePhone] = useState("+91 98201 44512");
+  const [newGuideBio, setNewGuideBio] = useState("3rd generation indigenous coastal navigator, tidal reader, and intertidal naturalist born in Versova Koliwada.");
   const [newPrice, setNewPrice] = useState("850");
   const [newDuration, setNewDuration] = useState("150");
   const [newLocationName, setNewLocationName] = useState("Versova Koliwada Harbor Jetty");
@@ -68,16 +84,62 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
   const [newPinVisibility, setNewPinVisibility] = useState<PinVisibilityType>("public");
   const [newMapsUrl, setNewMapsUrl] = useState("https://www.google.com/maps/search/?api=1&query=19.1316,72.8109");
   const [newSummary, setNewSummary] = useState("Dawn exploration of traditional intertidal fishing methods, artisanal net casting, and mangrove nursery ecology led by community custodians.");
-  const [newIncluded, setNewIncluded] = useState("Community Elder Guide, High-tide safety briefing, Traditional cutting chai, Mud boots");
   const [newImage, setNewImage] = useState("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80");
-  const [newSlotDate, setNewSlotDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1); // Tomorrow
-    return d.toISOString().split("T")[0];
+
+  const [newScheduleState, setNewScheduleState] = useState<ScheduleSlotBuilderState>({
+    mode: "recurring",
+    recurringDays: ["saturday", "sunday"],
+    recurringWeeks: 4,
+    recurringStartTime: "06:30",
+    recurringEndTime: "09:00",
+    recurringCapacity: 15,
+    customSlots: [],
+    singleDate: (() => {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      return d.toISOString().split("T")[0] || "";
+    })(),
+    singleStartTime: "06:30",
+    singleEndTime: "09:00",
+    singleCapacity: 15,
   });
-  const [newSlotStart, setNewSlotStart] = useState("06:30");
-  const [newSlotEnd, setNewSlotEnd] = useState("09:00");
-  const [newCapacity, setNewCapacity] = useState("15");
+
+  const [newItinerary, setNewItinerary] = useState<ItineraryItem[]>([
+    {
+      time: "06:00 AM",
+      title: "Harbour Gate Rendezvous & Safety Briefing",
+      description: "Meet your licensed indigenous navigator. Receive high-traction safety gumboots and tidal morning briefing.",
+    },
+    {
+      time: "06:30 AM",
+      title: "Deep-Sea Trawler Landing & Live Fish Auction",
+      description: "Walk between docking wooden trawlers. Witness the dynamic open-outcry bidding and grading of king prawns and pomfret.",
+    },
+    {
+      time: "07:30 AM",
+      title: "Prawn Peeling Courtyards & Ice Mills",
+      description: "Meet veteran women grading catch and see the historic salt-block ice crushers powering the port.",
+    },
+    {
+      time: "08:15 AM",
+      title: "Fishermen Canteen Breakfast & Masala Chai",
+      description: "Conclude at a historic 60-year-old port canteen with fresh spicy fish cutlets, pav, and hot tea.",
+    },
+  ]);
+
+  const [newIncludedItems, setNewIncludedItems] = useState<string[]>([
+    "Licensed Indigenous Navigator & Local Guide",
+    "High-Traction Gumboot & Splash Guard Rental",
+    "Port Authority Gate Access Pass",
+    "Traditional Harbor Canteen Cutting Chai & Breakfast",
+  ]);
+
+  const [newThingsToCarry, setNewThingsToCarry] = useState<string[]>([
+    "Comfortable closed non-slip footwear",
+    "Smartphone or camera with splash protection",
+    "Refillable water bottle",
+    "Cash for optional direct trawler seafood purchases",
+  ]);
 
   const handleCreateWalk = (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,11 +153,6 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
-    const includedArray = newIncluded
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-
     const mapsUrl = buildGoogleMapsUrl(newLat, newLng);
 
     const created = addListing({
@@ -107,7 +164,7 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
       currency: "INR",
       images: [newImage.trim()],
       short_summary: newSummary.trim(),
-      full_description: `${newSummary.trim()}\n\nEssentials Included:\n${includedArray.map((i) => `• ${i}`).join("\n")}`,
+      full_description: `${newSummary.trim()}\n\nEssentials Included:\n${newIncludedItems.map((i) => `• ${i}`).join("\n")}`,
       location_name: newLocationName.trim(),
       secret_meeting_point: newSecretNotes.trim(),
       latitude: newLat,
@@ -116,25 +173,47 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
       duration_minutes: Number(newDuration) || 150,
       host_name: newGuideName.trim() || "Pranay Koli",
       host_phone: newGuidePhone.trim() || "+91 98201 44512",
-      host_bio: "Experienced indigenous coastal navigator and intertidal naturalist.",
-      included_items: includedArray,
+      host_bio: newGuideBio.trim() || "Experienced indigenous coastal navigator and intertidal naturalist.",
+      included_items: newIncludedItems,
+      things_to_carry: newThingsToCarry,
+      itinerary: newItinerary,
       is_active: true,
       is_featured: true,
     });
 
-    if (newSlotDate && newSlotStart && newSlotEnd) {
-      const startDateTime = new Date(`${newSlotDate}T${newSlotStart}:00`);
-      const endDateTime = new Date(`${newSlotDate}T${newSlotEnd}:00`);
-
+    let slotsCreatedCount = 0;
+    if (newScheduleState.mode === "recurring") {
+      addRecurringWeekendSlots(
+        created.id,
+        newScheduleState.recurringWeeks,
+        newScheduleState.recurringCapacity,
+        newScheduleState.recurringStartTime,
+        newScheduleState.recurringEndTime,
+        newScheduleState.recurringDays,
+      );
+      slotsCreatedCount = newScheduleState.recurringWeeks * newScheduleState.recurringDays.length;
+    } else if (newScheduleState.mode === "custom" && newScheduleState.customSlots.length > 0) {
+      const customBatch = newScheduleState.customSlots.map((s) => ({
+        listing_id: created.id,
+        offering_id: created.id,
+        slot_start: new Date(`${s.date}T${s.startTime}:00`).toISOString(),
+        slot_end: new Date(`${s.date}T${s.endTime}:00`).toISOString(),
+        capacity: Number(s.capacity) || 15,
+      }));
+      addBatchSlots(customBatch);
+      slotsCreatedCount = customBatch.length;
+    } else if (newScheduleState.singleDate && newScheduleState.singleStartTime && newScheduleState.singleEndTime) {
       addSlot({
         listing_id: created.id,
-        slot_start: startDateTime.toISOString(),
-        slot_end: endDateTime.toISOString(),
-        capacity: Number(newCapacity) || 15,
+        offering_id: created.id,
+        slot_start: new Date(`${newScheduleState.singleDate}T${newScheduleState.singleStartTime}:00`).toISOString(),
+        slot_end: new Date(`${newScheduleState.singleDate}T${newScheduleState.singleEndTime}:00`).toISOString(),
+        capacity: Number(newScheduleState.singleCapacity) || 15,
       });
+      slotsCreatedCount = 1;
     }
 
-    toast.success(`Created walk trail "${newTitle}"!`);
+    toast.success(`Created walk trail "${newTitle}" with ${slotsCreatedCount} calendar slots!`);
     setIsAddWalkOpen(false);
     setNewTitle("");
   };
@@ -144,6 +223,7 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
   const [editTitle, setEditTitle] = useState("");
   const [editGuideName, setEditGuideName] = useState("");
   const [editGuidePhone, setEditGuidePhone] = useState("");
+  const [editGuideBio, setEditGuideBio] = useState("");
   const [editPrice, setEditPrice] = useState("850");
   const [editDuration, setEditDuration] = useState("150");
   const [editLocationName, setEditLocationName] = useState("");
@@ -153,14 +233,17 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
   const [editPinVisibility, setEditPinVisibility] = useState<PinVisibilityType>("public");
   const [editMapsUrl, setEditMapsUrl] = useState("");
   const [editSummary, setEditSummary] = useState("");
-  const [editIncluded, setEditIncluded] = useState("");
   const [editImage, setEditImage] = useState("");
+  const [editItinerary, setEditItinerary] = useState<ItineraryItem[]>([]);
+  const [editIncludedItems, setEditIncludedItems] = useState<string[]>([]);
+  const [editThingsToCarry, setEditThingsToCarry] = useState<string[]>([]);
 
   const handleOpenEditWalk = (walk: Listing) => {
     setEditingWalk(walk);
     setEditTitle(walk.title || "");
     setEditGuideName(walk.host_name || "");
     setEditGuidePhone(walk.host_phone || "");
+    setEditGuideBio(walk.host_bio || "");
     setEditPrice(String(walk.price_inr || "850"));
     setEditDuration(String(walk.duration_minutes || "150"));
     setEditLocationName(walk.location_name || "");
@@ -172,8 +255,10 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
     setEditPinVisibility("public");
     setEditMapsUrl(walk.meeting_point_maps_url || buildGoogleMapsUrl(lat, lng));
     setEditSummary(walk.short_summary || "");
-    setEditIncluded((walk.included_items || []).join(", "));
     setEditImage(walk.images?.[0] || "");
+    setEditItinerary(walk.itinerary ? [...walk.itinerary] : []);
+    setEditIncludedItems(walk.included_items ? [...walk.included_items] : []);
+    setEditThingsToCarry(walk.things_to_carry ? [...walk.things_to_carry] : []);
   };
 
   const handleSaveEditWalk = (e: React.FormEvent) => {
@@ -184,11 +269,6 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
       return;
     }
 
-    const includedArray = editIncluded
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-
     const mapsUrl = buildGoogleMapsUrl(editLat, editLng);
 
     updateListing(editingWalk.id, {
@@ -197,14 +277,17 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
       duration_minutes: Number(editDuration) || 150,
       host_name: editGuideName.trim() || editingWalk.host_name,
       host_phone: editGuidePhone.trim() || editingWalk.host_phone,
+      host_bio: editGuideBio.trim() || editingWalk.host_bio,
       location_name: editLocationName.trim(),
       secret_meeting_point: editSecretNotes.trim(),
       latitude: editLat,
       longitude: editLng,
       meeting_point_maps_url: mapsUrl,
-      included_items: includedArray,
+      included_items: editIncludedItems,
+      things_to_carry: editThingsToCarry,
+      itinerary: editItinerary,
       short_summary: editSummary.trim(),
-      full_description: `${editSummary.trim()}\n\nEssentials Included:\n${includedArray.map((i) => `• ${i}`).join("\n")}`,
+      full_description: `${editSummary.trim()}\n\nEssentials Included:\n${editIncludedItems.map((i) => `• ${i}`).join("\n")}`,
       images: editImage.trim() ? [editImage.trim()] : editingWalk.images,
     });
 
@@ -500,17 +583,49 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
                 }}
               />
 
-              <div>
-                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
-                  Included Essentials (comma separated)
-                </label>
-                <input
-                  type="text"
-                  value={newIncluded}
-                  onChange={(e) => setNewIncluded(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
-                />
-              </div>
+              {/* Guide Heritage Bio */}
+              <HostBioInput
+                value={newGuideBio}
+                onChange={setNewGuideBio}
+                roleLabel="Lead Guide & Navigator"
+              />
+
+              {/* What's Included */}
+              <TagsBuilder
+                label="What's Included in This Walk Pass"
+                sublabel="Pass inclusions displayed on frontend"
+                icon="included"
+                items={newIncludedItems}
+                onChange={setNewIncludedItems}
+                presetSuggestions={[
+                  "Licensed Indigenous Navigator & Local Guide",
+                  "High-Traction Gumboot & Splash Guard Rental",
+                  "Port Authority Gate Access Pass",
+                  "Traditional Harbor Canteen Cutting Chai & Breakfast",
+                ]}
+              />
+
+              {/* Things to Carry */}
+              <TagsBuilder
+                label="Essential Guidelines & Things to Carry"
+                sublabel="Gear & safety instructions for guests"
+                icon="carry"
+                items={newThingsToCarry}
+                onChange={setNewThingsToCarry}
+                presetSuggestions={[
+                  "Comfortable closed non-slip footwear",
+                  "Smartphone or camera with splash protection",
+                  "Refillable water bottle",
+                  "Cash for optional direct trawler seafood purchases",
+                ]}
+              />
+
+              {/* Trail Itinerary & Timeline Builder */}
+              <ItineraryBuilder
+                itinerary={newItinerary}
+                onChange={setNewItinerary}
+                pillar="walks"
+              />
 
               <div>
                 <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
@@ -531,52 +646,12 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
                 helperText="Drop scenic trail picture, or browse from device"
               />
 
-              {/* Initial Departure Slot */}
-              <div className="p-3 bg-[#35160e]/90 border border-[#dab38c]/25 rounded-2xl space-y-2">
-                <div className="flex items-center gap-1.5 text-[#e3a157] font-bold text-[11px] uppercase tracking-wider">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>Initial Departure Slot &amp; Capacity</span>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div>
-                    <label className="block text-[10px] text-[#dab38c]/70 font-bold mb-0.5">Date</label>
-                    <input
-                      type="date"
-                      value={newSlotDate}
-                      onChange={(e) => setNewSlotDate(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/25 rounded-lg text-xs text-[#f5edeb] outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-[#dab38c]/70 font-bold mb-0.5">Start Time</label>
-                    <input
-                      type="time"
-                      value={newSlotStart}
-                      onChange={(e) => setNewSlotStart(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/25 rounded-lg text-xs text-[#f5edeb] outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-[#dab38c]/70 font-bold mb-0.5">End Time</label>
-                    <input
-                      type="time"
-                      value={newSlotEnd}
-                      onChange={(e) => setNewSlotEnd(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/25 rounded-lg text-xs text-[#f5edeb] outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-[#dab38c]/70 font-bold mb-0.5">Capacity</label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={newCapacity}
-                      onChange={(e) => setNewCapacity(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/25 rounded-lg text-xs text-[#f5edeb] outline-none font-mono"
-                    />
-                  </div>
-                </div>
-              </div>
+              {/* Multi-Slot & Recurring Schedule Builder */}
+              <ScheduleSlotBuilder
+                state={newScheduleState}
+                onChange={setNewScheduleState}
+                defaultTimePreset="morning"
+              />
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#dab38c]/15">
                 <button
@@ -723,17 +798,82 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
                 }}
               />
 
-              <div>
-                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
-                  Included Essentials (comma separated)
-                </label>
-                <input
-                  type="text"
-                  value={editIncluded}
-                  onChange={(e) => setEditIncluded(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
-                />
-              </div>
+              {/* Guide Heritage Bio */}
+              <HostBioInput
+                value={editGuideBio}
+                onChange={setEditGuideBio}
+                roleLabel="Lead Guide & Navigator"
+              />
+
+              {/* What's Included */}
+              <TagsBuilder
+                label="What's Included in This Walk Pass"
+                sublabel="Pass inclusions displayed on frontend"
+                icon="included"
+                items={editIncludedItems}
+                onChange={setEditIncludedItems}
+                presetSuggestions={[
+                  "Licensed Indigenous Navigator & Local Guide",
+                  "High-Traction Gumboot & Splash Guard Rental",
+                  "Port Authority Gate Access Pass",
+                  "Traditional Harbor Canteen Cutting Chai & Breakfast",
+                ]}
+              />
+
+              {/* Things to Carry */}
+              <TagsBuilder
+                label="Essential Guidelines & Things to Carry"
+                sublabel="Gear & safety instructions for guests"
+                icon="carry"
+                items={editThingsToCarry}
+                onChange={setEditThingsToCarry}
+                presetSuggestions={[
+                  "Comfortable closed non-slip footwear",
+                  "Smartphone or camera with splash protection",
+                  "Refillable water bottle",
+                  "Cash for optional direct trawler seafood purchases",
+                ]}
+              />
+
+              {/* Trail Itinerary & Timeline Builder */}
+              <ItineraryBuilder
+                itinerary={editItinerary}
+                onChange={setEditItinerary}
+                pillar="walks"
+              />
+
+              {/* Quick Recurring Weekend Generator for Existing Trail */}
+              {editingWalk && (
+                <div className="p-3 bg-[#1f0b07] rounded-xl border border-[#dab38c]/20 flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <div className="text-[11px] font-bold text-[#e3a157]">
+                      Need More Departure Dates?
+                    </div>
+                    <div className="text-[10px] text-[#dab38c]/70">
+                      Generate the next 4 upcoming weekends of morning trail slots instantly
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      addRecurringWeekendSlots(
+                        editingWalk.id,
+                        4,
+                        15,
+                        "06:30",
+                        "09:00",
+                        ["saturday", "sunday"],
+                      );
+                      toast.success(
+                        `Generated 8 upcoming weekend departure slots for "${editingWalk.title}"!`,
+                      );
+                    }}
+                    className="px-3 py-1.5 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-[11px] rounded-lg cursor-pointer"
+                  >
+                    + Generate 4 Weeks (8 Slots)
+                  </button>
+                </div>
+              )}
 
               <div>
                 <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">

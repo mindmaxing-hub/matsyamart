@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Order, Listing, ExperienceSlot, OrderItem, PinVisibilityType } from "../../types";
+import { Order, Listing, ExperienceSlot, OrderItem, PinVisibilityType, ItineraryItem } from "../../types";
 import { useData } from "../../context/DataContext";
 import { formatINR, formatDate, formatTime } from "../../lib/utils";
 import { MobilePass } from "./MobilePass";
@@ -30,6 +30,13 @@ import { ImageDropzone } from "./ImageDropzone";
 import { buildGoogleMapsUrl } from "../../lib/services/places";
 import { SharedCoordinateInput } from "./SharedCoordinateInput";
 import { SessionsAndVenuesManager } from "./SessionsAndVenuesManager";
+import {
+  ScheduleSlotBuilder,
+  ScheduleSlotBuilderState,
+  ItineraryBuilder,
+  TagsBuilder,
+  HostBioInput,
+} from "./RichExperienceFields";
 
 interface FoodWorkspaceProps {
   orders: Order[];
@@ -42,7 +49,16 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
   listings,
   slots,
 }) => {
-  const { updateAttendeeCheckIn, addListing, updateListing, deleteListing, addSlot, deleteSlot } = useData();
+  const {
+    updateAttendeeCheckIn,
+    addListing,
+    updateListing,
+    deleteListing,
+    addSlot,
+    deleteSlot,
+    addRecurringWeekendSlots,
+    addBatchSlots,
+  } = useData();
 
   const [activeSubTab, setActiveSubTab] = useState<"dinners" | "venues" | "roster">("dinners");
   const [selectedTicketOrder, setSelectedTicketOrder] = useState<{
@@ -73,14 +89,63 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
   const [newImage, setNewImage] = useState("https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1200&auto=format&fit=crop");
   const [newMealType, setNewMealType] = useState<"breakfast" | "lunch" | "high_tea" | "dinner" | "snacks">("lunch");
   const [newCustomTags, setNewCustomTags] = useState("UNLIMITED THALI, SIGNATURE");
-  const [newSlotDate, setNewSlotDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1); // Tomorrow by default
-    return d.toISOString().split("T")[0];
+  
+  // Rich Experience States for Add Feast Modal
+  const [newScheduleState, setNewScheduleState] = useState<ScheduleSlotBuilderState>({
+    mode: "recurring",
+    recurringDays: ["saturday", "sunday"],
+    recurringWeeks: 4,
+    recurringStartTime: "12:30",
+    recurringEndTime: "15:00",
+    recurringCapacity: 12,
+    customSlots: [],
+    singleDate: (() => {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      return d.toISOString().split("T")[0] || "";
+    })(),
+    singleStartTime: "12:30",
+    singleEndTime: "15:00",
+    singleCapacity: 12,
   });
-  const [newSlotStart, setNewSlotStart] = useState("12:30");
-  const [newSlotEnd, setNewSlotEnd] = useState("15:30");
-  const [newCapacity, setNewCapacity] = useState("12");
+
+  const [newItinerary, setNewItinerary] = useState<ItineraryItem[]>([
+    {
+      time: "12:30 PM",
+      title: "Courtyard Welcome & Sol Kadhi Refreshment",
+      description: "Arrive at the coastal home courtyard. Sip freshly churned kokum sol kadhi while the host introduces today's fresh morning catch.",
+    },
+    {
+      time: "01:00 PM",
+      title: "Appetizers: Crispy Rava Fry Platter",
+      description: "Live fried Surmai and golden prawns seasoned with artisanal Koli masala straight from the cast-iron skillet.",
+    },
+    {
+      time: "01:45 PM",
+      title: "The Main Coastal Thali: Crab Masala & Steamed Bhakri",
+      description: "Rich, slow-simmered mud crab curry served with piping-hot rice bhakris, fragrant fish ambat, and steamed coastal rice.",
+    },
+    {
+      time: "02:30 PM",
+      title: "Sweet Finale & Custodian Conversation",
+      description: "Traditional Ukdiche Modak sweet dumplings paired with tales of indigenous fishing routes and ancestral recipes.",
+    },
+  ]);
+
+  const [newIncludedItems, setNewIncludedItems] = useState<string[]>([
+    "5-Course Traditional Seafood Thali",
+    "Unlimited Steamed Rice & Fresh Bhakris",
+    "Fresh Catch Surmai / Pomfret Fry",
+    "Mud Crab Masala Coastal Gravy",
+    "Chilled Kokum Sol Kadhi Refills",
+    "Ukdiche Modak Sweet Finale",
+  ]);
+
+  const [newThingsToCarry, setNewThingsToCarry] = useState<string[]>([
+    "Appetite for rich coastal spices and generous portions",
+    "Casual, comfortable clothing suited for courtyard seating",
+    "Personal water bottle if preferred",
+  ]);
 
   // Modal 2: Add Venue & Seating Window
   const [isAddVenueOpen, setIsAddVenueOpen] = useState(false);
@@ -117,6 +182,9 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
   const [editImage, setEditImage] = useState("");
   const [editMealType, setEditMealType] = useState<"breakfast" | "lunch" | "high_tea" | "dinner" | "snacks">("lunch");
   const [editCustomTags, setEditCustomTags] = useState("");
+  const [editItinerary, setEditItinerary] = useState<ItineraryItem[]>([]);
+  const [editIncludedItems, setEditIncludedItems] = useState<string[]>([]);
+  const [editThingsToCarry, setEditThingsToCarry] = useState<string[]>([]);
 
   // Food experiences
   const foodListings = useMemo(() => {
@@ -361,24 +429,47 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
       dietary_tags: coursesArray,
       meal_type: newMealType,
       custom_tags: newCustomTags.split(",").map((t) => t.trim()).filter(Boolean),
+      included_items: newIncludedItems,
+      things_to_carry: newThingsToCarry,
+      itinerary: newItinerary,
       is_active: true,
       is_featured: true,
     });
 
-    // Add initial seating slot
-    if (newSlotDate && newSlotStart && newSlotEnd) {
-      const startDateTime = new Date(`${newSlotDate}T${newSlotStart}:00`);
-      const endDateTime = new Date(`${newSlotDate}T${newSlotEnd}:00`);
-
+    // Generate slots based on schedule state
+    let slotsCreatedCount = 0;
+    if (newScheduleState.mode === "recurring") {
+      addRecurringWeekendSlots(
+        created.id,
+        newScheduleState.recurringWeeks,
+        newScheduleState.recurringCapacity,
+        newScheduleState.recurringStartTime,
+        newScheduleState.recurringEndTime,
+        newScheduleState.recurringDays,
+      );
+      slotsCreatedCount = newScheduleState.recurringWeeks * newScheduleState.recurringDays.length;
+    } else if (newScheduleState.mode === "custom" && newScheduleState.customSlots.length > 0) {
+      const customBatch = newScheduleState.customSlots.map((s) => ({
+        listing_id: created.id,
+        offering_id: created.id,
+        slot_start: new Date(`${s.date}T${s.startTime}:00`).toISOString(),
+        slot_end: new Date(`${s.date}T${s.endTime}:00`).toISOString(),
+        capacity: Number(s.capacity) || 12,
+      }));
+      addBatchSlots(customBatch);
+      slotsCreatedCount = customBatch.length;
+    } else if (newScheduleState.singleDate && newScheduleState.singleStartTime && newScheduleState.singleEndTime) {
       addSlot({
         listing_id: created.id,
-        slot_start: startDateTime.toISOString(),
-        slot_end: endDateTime.toISOString(),
-        capacity: Number(newCapacity) || 12,
+        offering_id: created.id,
+        slot_start: new Date(`${newScheduleState.singleDate}T${newScheduleState.singleStartTime}:00`).toISOString(),
+        slot_end: new Date(`${newScheduleState.singleDate}T${newScheduleState.singleEndTime}:00`).toISOString(),
+        capacity: Number(newScheduleState.singleCapacity) || 12,
       });
+      slotsCreatedCount = 1;
     }
 
-    toast.success(`Created "${newTitle}" with initial seating window!`);
+    toast.success(`Created "${newTitle}" with ${slotsCreatedCount} scheduled calendar dates & full rich details!`);
     setIsAddFeastOpen(false);
     // Reset form
     setNewTitle("");
@@ -431,6 +522,9 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
     setEditImage(feast.images?.[0] || "");
     setEditMealType(feast.meal_type || "lunch");
     setEditCustomTags((feast.custom_tags || []).join(", "));
+    setEditItinerary(feast.itinerary ? [...feast.itinerary] : []);
+    setEditIncludedItems(feast.included_items ? [...feast.included_items] : []);
+    setEditThingsToCarry(feast.things_to_carry ? [...feast.things_to_carry] : []);
   };
 
   const handleSaveEditFeast = (e: React.FormEvent) => {
@@ -463,6 +557,9 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
       dietary_tags: coursesArray,
       meal_type: editMealType,
       custom_tags: editCustomTags.split(",").map((t) => t.trim()).filter(Boolean),
+      included_items: editIncludedItems,
+      things_to_carry: editThingsToCarry,
+      itinerary: editItinerary,
       short_summary: editSummary.trim(),
       full_description: `${editSummary.trim()}\n\nTraditional Courses:\n${coursesArray.map((c) => `• ${c}`).join("\n")}`,
       images: editImage.trim() ? [editImage.trim()] : editingFeast.images,
@@ -1083,6 +1180,51 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                 />
               </div>
 
+              {/* Host Heritage Story */}
+              <HostBioInput
+                value={newCookBio}
+                onChange={setNewCookBio}
+                roleLabel="Cook & Custodian"
+              />
+
+              {/* What's Included Builder */}
+              <TagsBuilder
+                label="What's Included in This Feast Pass"
+                sublabel="Dishes, beverages & inclusions displayed on frontend"
+                icon="included"
+                items={newIncludedItems}
+                onChange={setNewIncludedItems}
+                presetSuggestions={[
+                  "5-Course Traditional Seafood Thali",
+                  "Unlimited Steamed Rice & Bhakris",
+                  "Fresh Catch Surmai / Pomfret Fry",
+                  "Mud Crab Masala Coastal Gravy",
+                  "Chilled Kokum Sol Kadhi Refills",
+                  "Ukdiche Modak Sweet Finale",
+                ]}
+              />
+
+              {/* Things to Carry Builder */}
+              <TagsBuilder
+                label="Essential Guidelines & Things to Bring"
+                sublabel="Guest instructions & checklist"
+                icon="carry"
+                items={newThingsToCarry}
+                onChange={setNewThingsToCarry}
+                presetSuggestions={[
+                  "Appetite for bold authentic coastal spices",
+                  "Casual comfortable attire for courtyard seating",
+                  "Personal water bottle if preferred",
+                ]}
+              />
+
+              {/* Experience Itinerary & Course Timeline Builder */}
+              <ItineraryBuilder
+                itinerary={newItinerary}
+                onChange={setNewItinerary}
+                pillar="food"
+              />
+
               <ImageDropzone
                 value={newImage}
                 onChange={setNewImage}
@@ -1090,50 +1232,12 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                 helperText="Drag & drop appetizing food picture, or browse from device"
               />
 
-              {/* Initial Seating Window Setup */}
-              <div className="p-3.5 bg-[#1f0b07] rounded-2xl border border-[#dab38c]/20 space-y-3">
-                <div className="text-[11px] font-bold text-[#e3a157] uppercase tracking-wider">
-                  Initial Seating Window Setup
-                </div>
-                <div className="grid grid-cols-4 gap-2">
-                  <div className="col-span-2">
-                    <label className="text-[10px] text-[#dab38c] block mb-1">Date</label>
-                    <input
-                      type="date"
-                      value={newSlotDate}
-                      onChange={(e) => setNewSlotDate(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/30 rounded-lg text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-[#dab38c] block mb-1">Start Time</label>
-                    <input
-                      type="time"
-                      value={newSlotStart}
-                      onChange={(e) => setNewSlotStart(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/30 rounded-lg text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-[#dab38c] block mb-1">End Time</label>
-                    <input
-                      type="time"
-                      value={newSlotEnd}
-                      onChange={(e) => setNewSlotEnd(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/30 rounded-lg text-white"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-[10px] text-[#dab38c] block mb-1">Seating Capacity (Max Guests)</label>
-                  <input
-                    type="number"
-                    value={newCapacity}
-                    onChange={(e) => setNewCapacity(e.target.value)}
-                    className="w-28 px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/30 rounded-lg text-white"
-                  />
-                </div>
-              </div>
+              {/* Multi-Slot & Recurring Schedule Builder */}
+              <ScheduleSlotBuilder
+                state={newScheduleState}
+                onChange={setNewScheduleState}
+                defaultTimePreset="lunch"
+              />
 
               <div className="flex items-center justify-end gap-2 pt-2">
                 <button
@@ -1310,6 +1414,84 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                   className="w-full px-3 py-2 bg-[#1f0b07] border border-[#dab38c]/30 rounded-xl text-white outline-none focus:border-[#e3a157]"
                 />
               </div>
+
+              {/* Host Heritage Story */}
+              <HostBioInput
+                value={editCookBio}
+                onChange={setEditCookBio}
+                roleLabel="Cook & Custodian"
+              />
+
+              {/* What's Included Builder */}
+              <TagsBuilder
+                label="What's Included in This Feast Pass"
+                sublabel="Dishes, beverages & inclusions displayed on frontend"
+                icon="included"
+                items={editIncludedItems}
+                onChange={setEditIncludedItems}
+                presetSuggestions={[
+                  "5-Course Traditional Seafood Thali",
+                  "Unlimited Steamed Rice & Bhakris",
+                  "Fresh Catch Surmai / Pomfret Fry",
+                  "Mud Crab Masala Coastal Gravy",
+                  "Chilled Kokum Sol Kadhi Refills",
+                  "Ukdiche Modak Sweet Finale",
+                ]}
+              />
+
+              {/* Things to Carry Builder */}
+              <TagsBuilder
+                label="Essential Guidelines & Things to Bring"
+                sublabel="Guest instructions & checklist"
+                icon="carry"
+                items={editThingsToCarry}
+                onChange={setEditThingsToCarry}
+                presetSuggestions={[
+                  "Appetite for bold authentic coastal spices",
+                  "Casual comfortable attire for courtyard seating",
+                  "Personal water bottle if preferred",
+                ]}
+              />
+
+              {/* Experience Itinerary & Course Timeline Builder */}
+              <ItineraryBuilder
+                itinerary={editItinerary}
+                onChange={setEditItinerary}
+                pillar="food"
+              />
+
+              {/* Quick Recurring Weekend Generator for Existing Feast */}
+              {editingFeast && (
+                <div className="p-3 bg-[#1f0b07] rounded-xl border border-[#dab38c]/20 flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <div className="text-[11px] font-bold text-[#e3a157]">
+                      Need More Customer Booking Dates?
+                    </div>
+                    <div className="text-[10px] text-[#dab38c]/70">
+                      Generate the next 4 upcoming weekends of seating slots instantly
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      addRecurringWeekendSlots(
+                        editingFeast.id,
+                        4,
+                        12,
+                        "12:30",
+                        "15:00",
+                        ["saturday", "sunday"],
+                      );
+                      toast.success(
+                        `Generated 8 upcoming weekend slots for "${editingFeast.title}"!`,
+                      );
+                    }}
+                    className="px-3 py-1.5 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-[11px] rounded-lg cursor-pointer"
+                  >
+                    + Generate 4 Weeks (8 Slots)
+                  </button>
+                </div>
+              )}
 
               <div>
                 <label className="font-semibold text-[#dab38c] block mb-1">Short Description</label>

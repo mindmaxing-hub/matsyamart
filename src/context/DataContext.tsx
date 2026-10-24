@@ -86,13 +86,19 @@ interface DataContextType {
   addSlot: (
     slot: Omit<ExperienceSlot, "id" | "booked_count" | "is_cancelled" | "revision_number">,
   ) => void;
+  addBatchSlots: (
+    slots: Omit<ExperienceSlot, "id" | "booked_count" | "is_cancelled" | "revision_number">[],
+  ) => void;
   deleteSlot: (slotId: string) => void;
   updateSessionRevision: (slotId: string, updates: Partial<ExperienceSlot>) => void;
   updateLoyaltyProgram: (config: LoyaltyProgramConfig, status?: LoyaltyStatus) => void;
   addRecurringWeekendSlots: (
     listingId: string,
-    weeksCount: number,
-    capacity: number,
+    weeksCount?: number,
+    capacity?: number,
+    startTime?: string,
+    endTime?: string,
+    days?: ("saturday" | "sunday")[],
   ) => void;
   toggleCancelSlot: (slotId: string) => void;
   addProposal: (
@@ -766,6 +772,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     setSlots((prev) => [...prev, newSlot]);
   };
 
+  const addBatchSlots = (
+    newSlotsData: Omit<ExperienceSlot, "id" | "booked_count" | "is_cancelled" | "revision_number">[],
+  ) => {
+    if (!newSlotsData || newSlotsData.length === 0) return;
+    const createdSlots: ExperienceSlot[] = newSlotsData.map((slotData, idx) => {
+      const id =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : "slot-" + Math.random().toString(36).substring(2, 9) + "-" + idx;
+      const offeringId = (slotData as any).offering_id || (slotData as any).listing_id || "";
+      const listingId = (slotData as any).listing_id || offeringId;
+      return {
+        ...slotData,
+        id,
+        offering_id: offeringId,
+        listing_id: listingId,
+        booked_count: 0,
+        revision_number: 1,
+        is_cancelled: false,
+      };
+    });
+    setSlots((prev) => [...prev, ...createdSlots]);
+  };
+
   const deleteSlot = (slotId: string) => {
     setSlots((prev) => prev.filter((s) => s.id !== slotId));
   };
@@ -774,25 +804,49 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     listingId: string,
     weeksCount: number = 4,
     capacity: number = 14,
+    startTime: string = "06:30",
+    endTime: string = "09:00",
+    days: ("saturday" | "sunday")[] = ["saturday", "sunday"],
   ) => {
     const newSlots: ExperienceSlot[] = [];
     const now = new Date();
 
+    const [startH, startM] = startTime.split(":").map(Number);
+    const [endH, endM] = endTime.split(":").map(Number);
+
+    const dayMap: Record<string, number> = {
+      sunday: 0,
+      saturday: 6,
+    };
+
+    const targetDayOffsets = (days || ["saturday", "sunday"])
+      .map((d) => dayMap[d])
+      .filter((d) => d !== undefined);
+
+    if (targetDayOffsets.length === 0) {
+      targetDayOffsets.push(6, 0);
+    }
+
     for (let w = 0; w < weeksCount; w++) {
-      for (const dayOffset of [6, 0]) {
-        // Saturday & Sunday
+      for (const dayOffset of targetDayOffsets) {
         const date = new Date(now);
-        date.setDate(
-          now.getDate() + ((dayOffset + 7 - now.getDay()) % 7) + w * 7,
-        );
+        let diff = (dayOffset - now.getDay() + 7) % 7;
+        if (diff === 0 && w === 0) {
+          const testStart = new Date(now);
+          testStart.setHours(startH ?? 6, startM ?? 30, 0, 0);
+          if (now.getTime() >= testStart.getTime()) {
+            diff = 7;
+          }
+        }
+        date.setDate(now.getDate() + diff + w * 7);
 
         const start = new Date(date);
-        start.setHours(6, 30, 0, 0);
+        start.setHours(startH ?? 6, startM ?? 30, 0, 0);
         const end = new Date(date);
-        end.setHours(9, 0, 0, 0);
+        end.setHours(endH ?? 9, endM ?? 0, 0, 0);
 
         newSlots.push({
-          id: `slot-rec-${listingId}-${w}-${dayOffset}`,
+          id: `slot-rec-${listingId}-${w}-${dayOffset}-${Date.now().toString().slice(-4)}`,
           offering_id: listingId,
           listing_id: listingId,
           slot_start: start.toISOString(),
@@ -1173,6 +1227,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         updatePlace,
         deletePlace,
         addSlot,
+        addBatchSlots,
         deleteSlot,
         updateSessionRevision,
         updateLoyaltyProgram,

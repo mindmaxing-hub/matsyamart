@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Order, Listing, ExperienceSlot, OrderItem, PinVisibilityType } from "../../types";
+import { Order, Listing, ExperienceSlot, OrderItem, PinVisibilityType, ItineraryItem } from "../../types";
 import { useData } from "../../context/DataContext";
 import { formatINR, formatDate, formatTime } from "../../lib/utils";
 import { MobilePass } from "./MobilePass";
@@ -12,6 +12,13 @@ import {
 import { buildGoogleMapsUrl } from "../../lib/services/places";
 import { SharedCoordinateInput } from "./SharedCoordinateInput";
 import { SessionsAndVenuesManager } from "./SessionsAndVenuesManager";
+import {
+  ScheduleSlotBuilder,
+  ScheduleSlotBuilderState,
+  ItineraryBuilder,
+  TagsBuilder,
+  HostBioInput,
+} from "./RichExperienceFields";
 import {
   Palette,
   MapPin,
@@ -45,7 +52,15 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
   listings,
   slots,
 }) => {
-  const { updateAttendeeCheckIn, addListing, updateListing, deleteListing, addSlot } = useData();
+  const {
+    updateAttendeeCheckIn,
+    addListing,
+    updateListing,
+    deleteListing,
+    addSlot,
+    addRecurringWeekendSlots,
+    addBatchSlots,
+  } = useData();
 
   const [activeSubTab, setActiveSubTab] = useState<"sessions" | "instructors" | "roster">("sessions");
   const [selectedTicketOrder, setSelectedTicketOrder] = useState<{
@@ -60,6 +75,7 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
   const [newTitle, setNewTitle] = useState("");
   const [newInstructorName, setNewInstructorName] = useState("Kashinath Nakhawa");
   const [newInstructorPhone, setNewInstructorPhone] = useState("+91 98192 33410");
+  const [newInstructorBio, setNewInstructorBio] = useState("Master net-weaving artisan and maritime elder with 35 years preserving coastal craft.");
   const [newPrice, setNewPrice] = useState("1500");
   const [newDuration, setNewDuration] = useState("180");
   const [newLocationName, setNewLocationName] = useState("Sassoon Dock Heritage Shed, Colaba");
@@ -69,22 +85,64 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
   const [newPinVisibility, setNewPinVisibility] = useState<PinVisibilityType>("public");
   const [newMapsUrl, setNewMapsUrl] = useState("https://www.google.com/maps/search/?api=1&query=18.9142,72.8277");
   const [newSummary, setNewSummary] = useState("Hands-on traditional net-weaving masterclass using indigenous shuttle tools and natural fiber knotting techniques.");
-  const [newMaterials, setNewMaterials] = useState("Braided nylon cord, Brass shuttle needle, Mesh gauge sticks, Take-home net planter");
   const [newImage, setNewImage] = useState("https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1200&q=80");
-  const [newSlotDate, setNewSlotDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1); // Tomorrow
-    return d.toISOString().split("T")[0];
+
+  const [newScheduleState, setNewScheduleState] = useState<ScheduleSlotBuilderState>({
+    mode: "recurring",
+    recurringDays: ["saturday", "sunday"],
+    recurringWeeks: 4,
+    recurringStartTime: "16:00",
+    recurringEndTime: "18:30",
+    recurringCapacity: 10,
+    customSlots: [],
+    singleDate: (() => {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      return d.toISOString().split("T")[0] || "";
+    })(),
+    singleStartTime: "16:00",
+    singleEndTime: "18:30",
+    singleCapacity: 10,
   });
-  const [newSlotStart, setNewSlotStart] = useState("14:00");
-  const [newSlotEnd, setNewSlotEnd] = useState("17:00");
-  const [newCapacity, setNewCapacity] = useState("10");
+
+  const [newItinerary, setNewItinerary] = useState<ItineraryItem[]>([
+    {
+      time: "04:00 PM",
+      title: "Artisanal Materials & Marine Heritage Intro",
+      description: "Examine natural hemp fibers, coir cords, and indigenous shuttle needles used across coastal Mumbai.",
+    },
+    {
+      time: "04:30 PM",
+      title: "Hands-on Weaving & Mesh Knotting",
+      description: "Step-by-step masterclass with a master craftsman learning classic diamond knot geometries.",
+    },
+    {
+      time: "05:30 PM",
+      title: "Finishing Your Take-Home Artifact & Q&A",
+      description: "Complete your woven souvenir, test load tension, and hear oral histories of maritime sustainability.",
+    },
+  ]);
+
+  const [newIncludedItems, setNewIncludedItems] = useState<string[]>([
+    "Complete Artisanal Weaving Toolkit",
+    "Braided Hemp & Cotton Twines",
+    "Handmade Brass Shuttle Needle",
+    "Take-Home Finished Coastal Net Planter",
+    "Hot Chai & Koli Coastal Refreshments",
+  ]);
+
+  const [newThingsToCarry, setNewThingsToCarry] = useState<string[]>([
+    "Curiosity and willingness to work with your hands",
+    "Reading glasses if you require magnification for fine thread work",
+    "Casual attire that can handle natural fiber dust",
+  ]);
 
   // Edit Workshop Modal State
   const [editingWorkshop, setEditingWorkshop] = useState<Listing | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editInstructorName, setEditInstructorName] = useState("");
   const [editInstructorPhone, setEditInstructorPhone] = useState("");
+  const [editInstructorBio, setEditInstructorBio] = useState("");
   const [editPrice, setEditPrice] = useState("");
   const [editDuration, setEditDuration] = useState("");
   const [editLocationName, setEditLocationName] = useState("");
@@ -93,15 +151,18 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
   const [editLng, setEditLng] = useState<number>(72.8277);
   const [editPinVisibility, setEditPinVisibility] = useState<PinVisibilityType>("public");
   const [editMapsUrl, setEditMapsUrl] = useState("");
-  const [editMaterials, setEditMaterials] = useState("");
   const [editSummary, setEditSummary] = useState("");
   const [editImage, setEditImage] = useState("");
+  const [editItinerary, setEditItinerary] = useState<ItineraryItem[]>([]);
+  const [editIncludedItems, setEditIncludedItems] = useState<string[]>([]);
+  const [editThingsToCarry, setEditThingsToCarry] = useState<string[]>([]);
 
   const handleOpenEditWorkshop = (workshop: Listing) => {
     setEditingWorkshop(workshop);
     setEditTitle(workshop.title || "");
     setEditInstructorName(workshop.host_name || "");
     setEditInstructorPhone(workshop.host_phone || "");
+    setEditInstructorBio(workshop.host_bio || "");
     setEditPrice(String(workshop.price_inr || 1500));
     setEditDuration(String(workshop.duration_minutes || 180));
     setEditLocationName(workshop.location_name || "");
@@ -112,9 +173,11 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
     setEditLng(lng);
     setEditPinVisibility("public");
     setEditMapsUrl(workshop.meeting_point_maps_url || buildGoogleMapsUrl(lat, lng));
-    setEditMaterials(workshop.included_items ? workshop.included_items.join(", ") : "");
     setEditSummary(workshop.short_summary || "");
     setEditImage(workshop.images?.[0] || "");
+    setEditItinerary(workshop.itinerary ? [...workshop.itinerary] : []);
+    setEditIncludedItems(workshop.included_items ? [...workshop.included_items] : []);
+    setEditThingsToCarry(workshop.things_to_carry ? [...workshop.things_to_carry] : []);
   };
 
   const handleSaveEditWorkshop = (e: React.FormEvent) => {
@@ -125,11 +188,6 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
       return;
     }
 
-    const materialsArray = editMaterials
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-
     const mapsUrl = buildGoogleMapsUrl(editLat, editLng);
 
     updateListing(editingWorkshop.id, {
@@ -137,7 +195,7 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
       price_inr: Number(editPrice) || editingWorkshop.price_inr,
       images: editImage ? [editImage.trim()] : editingWorkshop.images,
       short_summary: editSummary.trim(),
-      full_description: `${editSummary.trim()}\n\nMaterials Provided:\n${materialsArray.map((m) => `• ${m}`).join("\n")}`,
+      full_description: `${editSummary.trim()}\n\nMaterials Provided:\n${editIncludedItems.map((m) => `• ${m}`).join("\n")}`,
       location_name: editLocationName.trim(),
       secret_meeting_point: editSecretNotes.trim(),
       latitude: editLat,
@@ -146,7 +204,10 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
       duration_minutes: Number(editDuration) || editingWorkshop.duration_minutes,
       host_name: editInstructorName.trim() || editingWorkshop.host_name,
       host_phone: editInstructorPhone.trim() || editingWorkshop.host_phone,
-      included_items: materialsArray.length > 0 ? materialsArray : editingWorkshop.included_items,
+      host_bio: editInstructorBio.trim() || editingWorkshop.host_bio,
+      included_items: editIncludedItems,
+      things_to_carry: editThingsToCarry,
+      itinerary: editItinerary,
     });
 
     toast.success("Workshop updated successfully!");
@@ -165,11 +226,6 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
-    const materialsArray = newMaterials
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-
     const mapsUrl = buildGoogleMapsUrl(newLat, newLng);
 
     const created = addListing({
@@ -181,7 +237,7 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
       currency: "INR",
       images: [newImage.trim()],
       short_summary: newSummary.trim(),
-      full_description: `${newSummary.trim()}\n\nMaterials Provided:\n${materialsArray.map((m) => `• ${m}`).join("\n")}`,
+      full_description: `${newSummary.trim()}\n\nMaterials Provided:\n${newIncludedItems.map((m) => `• ${m}`).join("\n")}`,
       location_name: newLocationName.trim(),
       secret_meeting_point: newSecretNotes.trim(),
       latitude: newLat,
@@ -190,25 +246,47 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
       duration_minutes: Number(newDuration) || 180,
       host_name: newInstructorName.trim() || "Kashinath Nakhawa",
       host_phone: newInstructorPhone.trim() || "+91 98192 33410",
-      host_bio: "Master net-weaving artisan and maritime elder with 35 years preserving coastal craft.",
-      included_items: materialsArray,
+      host_bio: newInstructorBio.trim() || "Master net-weaving artisan and maritime elder with 35 years preserving coastal craft.",
+      included_items: newIncludedItems,
+      things_to_carry: newThingsToCarry,
+      itinerary: newItinerary,
       is_active: true,
       is_featured: true,
     });
 
-    if (newSlotDate && newSlotStart && newSlotEnd) {
-      const startDateTime = new Date(`${newSlotDate}T${newSlotStart}:00`);
-      const endDateTime = new Date(`${newSlotDate}T${newSlotEnd}:00`);
-
+    let slotsCreatedCount = 0;
+    if (newScheduleState.mode === "recurring") {
+      addRecurringWeekendSlots(
+        created.id,
+        newScheduleState.recurringWeeks,
+        newScheduleState.recurringCapacity,
+        newScheduleState.recurringStartTime,
+        newScheduleState.recurringEndTime,
+        newScheduleState.recurringDays,
+      );
+      slotsCreatedCount = newScheduleState.recurringWeeks * newScheduleState.recurringDays.length;
+    } else if (newScheduleState.mode === "custom" && newScheduleState.customSlots.length > 0) {
+      const customBatch = newScheduleState.customSlots.map((s) => ({
+        listing_id: created.id,
+        offering_id: created.id,
+        slot_start: new Date(`${s.date}T${s.startTime}:00`).toISOString(),
+        slot_end: new Date(`${s.date}T${s.endTime}:00`).toISOString(),
+        capacity: Number(s.capacity) || 10,
+      }));
+      addBatchSlots(customBatch);
+      slotsCreatedCount = customBatch.length;
+    } else if (newScheduleState.singleDate && newScheduleState.singleStartTime && newScheduleState.singleEndTime) {
       addSlot({
         listing_id: created.id,
-        slot_start: startDateTime.toISOString(),
-        slot_end: endDateTime.toISOString(),
-        capacity: Number(newCapacity) || 10,
+        offering_id: created.id,
+        slot_start: new Date(`${newScheduleState.singleDate}T${newScheduleState.singleStartTime}:00`).toISOString(),
+        slot_end: new Date(`${newScheduleState.singleDate}T${newScheduleState.singleEndTime}:00`).toISOString(),
+        capacity: Number(newScheduleState.singleCapacity) || 10,
       });
+      slotsCreatedCount = 1;
     }
 
-    toast.success(`Created workshop masterclass "${newTitle}"!`);
+    toast.success(`Created workshop masterclass "${newTitle}" with ${slotsCreatedCount} calendar slots!`);
     setIsAddWorkshopOpen(false);
     setNewTitle("");
   };
@@ -499,17 +577,49 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
                 }}
               />
 
-              <div>
-                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
-                  Included Toolkits &amp; Materials (comma separated)
-                </label>
-                <input
-                  type="text"
-                  value={newMaterials}
-                  onChange={(e) => setNewMaterials(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
-                />
-              </div>
+              {/* Instructor Heritage Story */}
+              <HostBioInput
+                value={newInstructorBio}
+                onChange={setNewInstructorBio}
+                roleLabel="Master Artisan & Instructor"
+              />
+
+              {/* What's Included / Materials Provided */}
+              <TagsBuilder
+                label="Included Toolkits &amp; Materials"
+                sublabel="Materials provided for each student bench"
+                icon="included"
+                items={newIncludedItems}
+                onChange={setNewIncludedItems}
+                presetSuggestions={[
+                  "Complete Artisanal Weaving Toolkit",
+                  "Braided Hemp & Cotton Twines",
+                  "Handmade Brass Shuttle Needle",
+                  "Take-Home Finished Coastal Net Planter",
+                  "Hot Chai & Koli Coastal Refreshments",
+                ]}
+              />
+
+              {/* Things to Carry / What to Bring */}
+              <TagsBuilder
+                label="What to Bring &amp; Preparation Guidelines"
+                sublabel="Student checklist for workshop session"
+                icon="carry"
+                items={newThingsToCarry}
+                onChange={setNewThingsToCarry}
+                presetSuggestions={[
+                  "Curiosity and willingness to work with your hands",
+                  "Reading glasses if you require magnification for fine thread work",
+                  "Casual attire that can handle natural fiber dust",
+                ]}
+              />
+
+              {/* Workshop Stages & Hands-on Timeline Builder */}
+              <ItineraryBuilder
+                itinerary={newItinerary}
+                onChange={setNewItinerary}
+                pillar="workshops"
+              />
 
               <div>
                 <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
@@ -529,52 +639,12 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
                 label="Workshop Cover Photo"
               />
 
-              {/* Initial Session Slot */}
-              <div className="p-3 bg-[#35160e]/90 border border-[#dab38c]/25 rounded-2xl space-y-2">
-                <div className="flex items-center gap-1.5 text-[#e3a157] font-bold text-[11px] uppercase tracking-wider">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>Initial Masterclass Slot &amp; Bench Capacity</span>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div>
-                    <label className="block text-[10px] text-[#dab38c]/70 font-bold mb-0.5">Date</label>
-                    <input
-                      type="date"
-                      value={newSlotDate}
-                      onChange={(e) => setNewSlotDate(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/25 rounded-lg text-xs text-[#f5edeb] outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-[#dab38c]/70 font-bold mb-0.5">Start Time</label>
-                    <input
-                      type="time"
-                      value={newSlotStart}
-                      onChange={(e) => setNewSlotStart(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/25 rounded-lg text-xs text-[#f5edeb] outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-[#dab38c]/70 font-bold mb-0.5">End Time</label>
-                    <input
-                      type="time"
-                      value={newSlotEnd}
-                      onChange={(e) => setNewSlotEnd(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/25 rounded-lg text-xs text-[#f5edeb] outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-[#dab38c]/70 font-bold mb-0.5">Capacity</label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={newCapacity}
-                      onChange={(e) => setNewCapacity(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-[#29100b] border border-[#dab38c]/25 rounded-lg text-xs text-[#f5edeb] outline-none font-mono"
-                    />
-                  </div>
-                </div>
-              </div>
+              {/* Multi-Slot & Recurring Schedule Builder */}
+              <ScheduleSlotBuilder
+                state={newScheduleState}
+                onChange={setNewScheduleState}
+                defaultTimePreset="afternoon"
+              />
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#dab38c]/15">
                 <button
@@ -721,17 +791,82 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
                 }}
               />
 
-              <div>
-                <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
-                  Included Toolkits &amp; Materials (comma separated)
-                </label>
-                <input
-                  type="text"
-                  value={editMaterials}
-                  onChange={(e) => setEditMaterials(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#35160e] border border-[#dab38c]/30 rounded-xl text-xs text-[#f5edeb] focus:border-[#e3a157] outline-none"
-                />
-              </div>
+              {/* Instructor Heritage Story */}
+              <HostBioInput
+                value={editInstructorBio}
+                onChange={setEditInstructorBio}
+                roleLabel="Master Artisan & Instructor"
+              />
+
+              {/* What's Included / Materials Provided */}
+              <TagsBuilder
+                label="Included Toolkits &amp; Materials"
+                sublabel="Materials provided for each student bench"
+                icon="included"
+                items={editIncludedItems}
+                onChange={setEditIncludedItems}
+                presetSuggestions={[
+                  "Complete Artisanal Weaving Toolkit",
+                  "Braided Hemp & Cotton Twines",
+                  "Handmade Brass Shuttle Needle",
+                  "Take-Home Finished Coastal Net Planter",
+                  "Hot Chai & Koli Coastal Refreshments",
+                ]}
+              />
+
+              {/* Things to Carry / What to Bring */}
+              <TagsBuilder
+                label="What to Bring &amp; Preparation Guidelines"
+                sublabel="Student checklist for workshop session"
+                icon="carry"
+                items={editThingsToCarry}
+                onChange={setEditThingsToCarry}
+                presetSuggestions={[
+                  "Curiosity and willingness to work with your hands",
+                  "Reading glasses if you require magnification for fine thread work",
+                  "Casual attire that can handle natural fiber dust",
+                ]}
+              />
+
+              {/* Workshop Stages & Hands-on Timeline Builder */}
+              <ItineraryBuilder
+                itinerary={editItinerary}
+                onChange={setEditItinerary}
+                pillar="workshops"
+              />
+
+              {/* Quick Recurring Weekend Generator for Existing Workshop */}
+              {editingWorkshop && (
+                <div className="p-3 bg-[#1f0b07] rounded-xl border border-[#dab38c]/20 flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <div className="text-[11px] font-bold text-[#e3a157]">
+                      Need More Session Dates?
+                    </div>
+                    <div className="text-[10px] text-[#dab38c]/70">
+                      Generate the next 4 upcoming weekends of afternoon masterclass slots instantly
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      addRecurringWeekendSlots(
+                        editingWorkshop.id,
+                        4,
+                        10,
+                        "16:00",
+                        "18:30",
+                        ["saturday", "sunday"],
+                      );
+                      toast.success(
+                        `Generated 8 upcoming weekend session slots for "${editingWorkshop.title}"!`,
+                      );
+                    }}
+                    className="px-3 py-1.5 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-[11px] rounded-lg cursor-pointer"
+                  >
+                    + Generate 4 Weeks (8 Slots)
+                  </button>
+                </div>
+              )}
 
               <div>
                 <label className="block text-[11px] font-bold text-[#dab38c] uppercase mb-1">
