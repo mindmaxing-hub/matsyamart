@@ -3,6 +3,7 @@ import { Order, OrderItem, Listing, ExperienceSlot } from "../../types";
 import { generateQrDataUrl } from "../../lib/qr";
 import { buildGoogleMapsUrl } from "../../lib/services/places";
 import { encodePassPayload } from "../../lib/passPayload";
+import { resolvePassCategory, PASS_THEMES } from "../../lib/passThemes";
 import {
   Printer,
   X,
@@ -60,6 +61,9 @@ export const MobilePass: React.FC<MobilePassProps> = ({
   const listing: Listing | undefined = item?.listing;
   const slot: ExperienceSlot | undefined = item?.slot;
 
+  const themeCategory = resolvePassCategory(listing);
+  const theme = PASS_THEMES[themeCategory];
+
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [copied, setCopied] = useState(false);
 
@@ -70,9 +74,9 @@ export const MobilePass: React.FC<MobilePassProps> = ({
     : `${origin}/order/confirmation/${order.order_ref}`;
 
   useEffect(() => {
-    // Generate high contrast scannable QR
-    generateQrDataUrl(verificationUrl).then((url) => setQrDataUrl(url));
-  }, [verificationUrl]);
+    // Generate high contrast scannable QR matching category tone
+    generateQrDataUrl(verificationUrl, theme.qrDarkColor).then((url) => setQrDataUrl(url));
+  }, [verificationUrl, theme.qrDarkColor]);
 
   const handlePrint = () => {
     window.print();
@@ -205,16 +209,16 @@ export const MobilePass: React.FC<MobilePassProps> = ({
           </div>
         </div>
 
-        {/* 9:16 VERTICAL OFFICIAL PASS CARD (Exact User Mockup Layout) */}
+        {/* 9:16 VERTICAL OFFICIAL PASS CARD (Exact Category Design) */}
         <div
           id="printable-mobile-ticket"
-          className="w-full max-w-[380px] rounded-[32px] overflow-hidden bg-[#2b120c] border border-[#dab38c]/25 shadow-[0_25px_70px_rgba(0,0,0,0.85)] select-none text-[#f5edeb] transition-all"
+          className={`w-full max-w-[380px] rounded-[32px] overflow-hidden ${theme.bgClass} border ${theme.borderClass} shadow-[0_25px_70px_rgba(0,0,0,0.85)] select-none text-[#ffffff] transition-all`}
         >
-          {/* 1. TOP AERIAL COASTAL BANNER WITH MATSYAMART LOGO */}
-          <div className="relative w-full aspect-[576/275] bg-[#1a0805] overflow-hidden border-b border-[#dab38c]/20">
+          {/* 1. TOP AERIAL COASTAL BANNER WITH MATSYAMART LOGO & CATEGORY PILL */}
+          <div className="relative w-full aspect-[576/275] bg-[#1a0805] overflow-hidden border-b border-white/10">
             <img
-              src="/pass-header-beach.png"
-              alt="MatsyaMart Coastal Banner"
+              src={theme.headerImage}
+              alt={`MatsyaMart ${theme.categoryLabel} Coastal Pass`}
               className="w-full h-full object-cover object-center"
               loading="eager"
               width={576}
@@ -230,7 +234,9 @@ export const MobilePass: React.FC<MobilePassProps> = ({
             </h2>
 
             {/* Experience Title */}
-            <div className="font-bold text-base sm:text-lg text-[#e3a157] max-w-[280px] mx-auto leading-snug">
+            <div
+              className={`font-bold text-base sm:text-lg ${theme.titleColor} max-w-[280px] mx-auto leading-snug`}
+            >
               {listing?.title || "Sassoon Docks Dawn Heritage Walk & Coastal Seafood Feast"}
             </div>
 
@@ -254,20 +260,24 @@ export const MobilePass: React.FC<MobilePassProps> = ({
             </div>
 
             {/* Details Summary */}
-            <div className="space-y-1.5 text-xs sm:text-sm text-[#f5edeb] font-medium tracking-wide">
+            <div className="space-y-1.5 text-xs sm:text-sm text-[#ffffff] font-medium tracking-wide">
               <div>Date - {formattedPassDate}</div>
               <div>Admit - {admitCount} Person{admitCount > 1 ? "s" : ""}</div>
               <div>Amount Paid - INR {amountPaid}</div>
             </div>
 
             {/* Location & Directions Row */}
-            <div className="grid grid-cols-12 gap-3 items-center pt-4 border-t border-[#dab38c]/15 text-left">
+            <div
+              className={`grid grid-cols-12 gap-3 items-center pt-4 border-t ${theme.dividerColor} text-left`}
+            >
               {/* Left Column: Reporting Time & Address */}
               <div className="col-span-8 space-y-1 pr-1">
-                <div className="text-xs sm:text-sm font-semibold text-[#f5edeb]">
+                <div className="text-xs sm:text-sm font-semibold text-[#ffffff]">
                   Reporting Time - {reportingTimeStr}
                 </div>
-                <div className="text-[11px] sm:text-xs text-[#dab38c] leading-relaxed">
+                <div
+                  className={`text-[11px] sm:text-xs ${theme.subtextColor} leading-relaxed`}
+                >
                   at {meetingAddress}
                 </div>
               </div>
@@ -288,7 +298,9 @@ export const MobilePass: React.FC<MobilePassProps> = ({
                     width={56}
                     height={44}
                   />
-                  <span className="text-[11px] font-bold text-[#f5edeb] group-hover:text-[#e3a157] underline underline-offset-2 transition-colors">
+                  <span
+                    className={`text-[11px] font-bold underline underline-offset-2 transition-colors ${theme.directionsLinkColor}`}
+                  >
                     Click for Directions
                   </span>
                 </a>
@@ -303,7 +315,7 @@ export const MobilePass: React.FC<MobilePassProps> = ({
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block text-xs sm:text-sm font-bold text-[#e3a157] hover:text-[#dab38c] transition-colors"
+                className={`inline-block text-xs sm:text-sm font-bold transition-colors ${theme.hostPhoneColor}`}
               >
                 Host Support WhatsApp: {displayHostPhone}
               </a>

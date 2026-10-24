@@ -110,9 +110,9 @@ describe("Cross-Device Pass Payload (encode/decode)", () => {
     expect(decoded?.total_amount_inr).toBe(2400);
     expect(decoded?.emergency_contact).toBe("+91 98201 99887");
     expect(decoded?.items.length).toBe(1);
-    expect(decoded?.items[0].listing?.type).toBe("experience");
-    expect(decoded?.items[0].listing?.pillar).toBe("walks");
-    expect(decoded?.items[0].slot?.slot_start).toBe("2026-10-25T06:30:00.000Z");
+    expect(decoded?.items[0]?.listing?.type).toBe("experience");
+    expect(decoded?.items[0]?.listing?.pillar).toBe("walks");
+    expect(decoded?.items[0]?.slot?.slot_start).toBe("2026-10-25T06:30:00.000Z");
   });
 
   it("encodes and decodes a physical goods order preserving shipping address", () => {
@@ -125,9 +125,9 @@ describe("Cross-Device Pass Payload (encode/decode)", () => {
     expect(decoded?.customer_name).toBe("Sneha Patil");
     expect(decoded?.shipping_address?.pincode).toBe("400018");
     expect(decoded?.shipping_address?.city).toBe("Mumbai");
-    expect(decoded?.items[0].listing?.type).toBe("product");
-    expect(decoded?.items[0].listing?.weight_grams).toBe(500);
-    expect(decoded?.items[0].listing?.artisan_collective).toBe(
+    expect(decoded?.items[0]?.listing?.type).toBe("product");
+    expect(decoded?.items[0]?.listing?.weight_grams).toBe(500);
+    expect(decoded?.items[0]?.listing?.artisan_collective).toBe(
       "Madh Island Artisanal Collective",
     );
   });
