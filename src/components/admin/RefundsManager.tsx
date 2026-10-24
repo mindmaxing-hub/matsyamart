@@ -18,6 +18,8 @@ import {
 import { Order, RefundTicket } from "../../types";
 import { formatINR, formatDate } from "../../lib/utils";
 import { calculateRefundLoyaltyClawback } from "../../lib/services/loyalty";
+import { useData } from "../../context/DataContext";
+import { toast } from "sonner";
 
 interface RefundsManagerProps {
   orders: Order[];
@@ -85,6 +87,7 @@ const SEED_REFUND_TICKETS: RefundTicket[] = [
 ];
 
 export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
+  const { processOrderRefund, slots } = useData();
   const [tickets, setTickets] = useState<RefundTicket[]>(() => {
     try {
       const saved = localStorage.getItem("matsyamart_refund_tickets_v1");
@@ -160,6 +163,7 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
     const updated = tickets.map((t) => {
       if (t.id === selectedTicket.id) {
         if (actionType === "refund") {
+          processOrderRefund(selectedTicket.order_ref, selectedTicket.amount_paid_inr);
           return {
             ...t,
             status: "refunded" as const,
@@ -542,6 +546,88 @@ export const RefundsManager: React.FC<RefundsManagerProps> = ({ orders }) => {
                   </tr>
                 );
               })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Direct Order Refund Console & Capacity Recovery */}
+      <div className="admin-card p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-display font-semibold text-lg text-[var(--admin-fg)]">
+              Confirmed Experience Bookings (Capacity Recovery Console)
+            </h3>
+            <p className="text-xs text-[var(--admin-muted)]">
+              Process full refunds for booked spots and immediately restore slot capacity.
+            </p>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-[var(--admin-border)] bg-[rgba(245,237,235,0.45)]">
+                <th className="py-2.5 px-3 font-bold text-[11px] text-[var(--admin-muted)] uppercase">Order Ref</th>
+                <th className="py-2.5 px-3 font-bold text-[11px] text-[var(--admin-muted)] uppercase">Customer</th>
+                <th className="py-2.5 px-3 font-bold text-[11px] text-[var(--admin-muted)] uppercase">Experience / Slot</th>
+                <th className="py-2.5 px-3 font-bold text-[11px] text-[var(--admin-muted)] uppercase text-center">Seats</th>
+                <th className="py-2.5 px-3 font-bold text-[11px] text-[var(--admin-muted)] uppercase text-right">Amount</th>
+                <th className="py-2.5 px-3 font-bold text-[11px] text-[var(--admin-muted)] uppercase text-center">Status</th>
+                <th className="py-2.5 px-3 font-bold text-[11px] text-[var(--admin-muted)] uppercase text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--admin-border-soft)]">
+              {orders
+                .filter((o) => o.items.some((i) => i.slot_id))
+                .map((order) => {
+                  const totalSeats = order.items.reduce((s, i) => s + (i.slot_id ? i.quantity : 0), 0);
+                  const firstItem = order.items.find((i) => i.slot_id);
+                  const matchingSlot = slots.find((s) => s.id === firstItem?.slot_id);
+                  const isRefunded = order.status === "refunded";
+
+                  return (
+                    <tr key={order.id} className="hover:bg-[rgba(227,161,87,0.03)] transition-colors">
+                      <td className="py-2.5 px-3 font-mono font-bold text-[var(--admin-fg)]">{order.order_ref}</td>
+                      <td className="py-2.5 px-3">
+                        <div className="font-semibold text-[var(--admin-fg)]">{order.customer_name}</div>
+                        <div className="text-[11px] text-[var(--admin-faint)]">{order.customer_phone}</div>
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <div className="font-medium text-[var(--admin-fg)]">{firstItem?.listing?.title || "Coastal Experience"}</div>
+                        {matchingSlot && (
+                          <div className="text-[11px] text-[var(--admin-faint)]">
+                            Slot Capacity: <strong className="text-[var(--admin-fg)]">{matchingSlot.booked_count} / {matchingSlot.capacity}</strong> spots booked
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-3 text-center font-bold text-[var(--admin-fg)]">{totalSeats}</td>
+                      <td className="py-2.5 px-3 text-right font-bold text-[var(--admin-fg)]">{formatINR(order.total_amount_inr)}</td>
+                      <td className="py-2.5 px-3 text-center">
+                        <span className={`admin-pill text-[9.5px] ${isRefunded ? "admin-pill-roast" : "admin-pill-line"}`}>
+                          {order.status.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 text-right">
+                        {isRefunded ? (
+                          <span className="text-xs text-[var(--admin-muted)] font-medium">Refunded ✓</span>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              const res = processOrderRefund(order.id, order.total_amount_inr);
+                              if (res.success) {
+                                toast.success(`Processed full refund for ${order.order_ref}. Restored ${res.restoredSeats} spots!`);
+                              }
+                            }}
+                            className="admin-btn text-[11px] py-1 px-2.5 font-bold text-rose-600 hover:text-rose-800 bg-rose-50 border border-rose-200 hover:bg-rose-100 cursor-pointer"
+                          >
+                            Process Full Refund
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>

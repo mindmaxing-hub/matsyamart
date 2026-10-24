@@ -138,6 +138,14 @@ interface DataContextType {
     attendeeIndex: number,
     checkedIn: boolean,
   ) => void;
+  processOrderRefund: (
+    orderRefOrId: string,
+    refundAmount?: number,
+  ) => {
+    success: boolean;
+    message: string;
+    restoredSeats: number;
+  };
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -1364,6 +1372,71 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
+  const processOrderRefund = (
+    orderRefOrId: string,
+    refundAmount?: number,
+  ) => {
+    const clean = orderRefOrId.trim().toUpperCase();
+    const targetOrder = orders.find(
+      (o) => o.id === orderRefOrId || o.order_ref.toUpperCase() === clean,
+    );
+
+    if (!targetOrder) {
+      return {
+        success: false,
+        message: `Order ${orderRefOrId} not found`,
+        restoredSeats: 0,
+      };
+    }
+
+    // Calculate total seats to restore across experience items
+    let restoredSeats = 0;
+    const slotSeatRestorations: Record<string, number> = {};
+
+    targetOrder.items.forEach((item) => {
+      if (item.slot_id) {
+        restoredSeats += item.quantity;
+        slotSeatRestorations[item.slot_id] =
+          (slotSeatRestorations[item.slot_id] || 0) + item.quantity;
+      }
+    });
+
+    // 1. Mark order refunded
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === targetOrder.id
+          ? {
+              ...o,
+              status: "refunded" as const,
+              fulfillment_status: "refunded" as any,
+            }
+          : o,
+      ),
+    );
+
+    // 2. Atomically recover slot capacity
+    if (Object.keys(slotSeatRestorations).length > 0) {
+      setSlots((prev) =>
+        prev.map((slot) => {
+          const delta = slotSeatRestorations[slot.id];
+          if (delta) {
+            return {
+              ...slot,
+              booked_count: Math.max(0, slot.booked_count - delta),
+            };
+          }
+          return slot;
+        }),
+      );
+    }
+
+    return {
+      success: true,
+      message: `Refund processed. Restored ${restoredSeats} seats to schedule.`,
+      restoredSeats,
+    };
+  };
+
   // Derived Low-Stock Alerts for Goods Inventory
   const lowStockAlerts: StockAlert[] = listings
     .filter((l) => l.type === "product" && typeof l.stock_count === "number")
@@ -1520,6 +1593,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         toggleCouponStatus,
         validateCoupon,
         updateAttendeeCheckIn,
+        processOrderRefund,
       }}
     >
       {children}

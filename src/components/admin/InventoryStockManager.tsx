@@ -134,6 +134,16 @@ export const InventoryStockManager: React.FC<InventoryStockManagerProps> = ({
     saveBatches(updated);
   };
 
+  const handleSetThresholdDirect = (batchId: string, threshold: number) => {
+    const val = Math.max(0, isNaN(threshold) ? 0 : threshold);
+    const updated = batches.map((b) =>
+      b.id === batchId ? { ...b, min_threshold: val } : b,
+    );
+    saveBatches(updated);
+    setNotification(`Updated low stock threshold to ${val} units.`);
+    setTimeout(() => setNotification(""), 3000);
+  };
+
   // Metrics
   const totalStockUnits = batches.reduce((sum, b) => sum + b.stock_units, 0);
   const lowStockCount = batches.filter(
@@ -402,17 +412,35 @@ export const InventoryStockManager: React.FC<InventoryStockManagerProps> = ({
                       {batch.best_before_date}
                     </td>
 
-                    {/* Stock Units Editable */}
+                    {/* Stock Units & Threshold Editable */}
                     <td className="py-3.5 px-4 align-middle text-center">
-                      <input
-                        type="number"
-                        min="0"
-                        value={batch.stock_units}
-                        onChange={(e) =>
-                          handleSetStockDirect(batch.id, Number(e.target.value))
-                        }
-                        className="w-16 text-center font-bold text-[var(--admin-fg)] bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-full py-1 px-1.5 outline-none focus:border-[var(--admin-accent-strong)] text-xs font-mono"
-                      />
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="flex items-center gap-1">
+                          <span className="text-[10px] text-[var(--admin-faint)]">Stock:</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={batch.stock_units}
+                            onChange={(e) =>
+                              handleSetStockDirect(batch.id, Number(e.target.value))
+                            }
+                            className="w-14 text-center font-bold text-[var(--admin-fg)] bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-md py-1 px-1 outline-none focus:border-[var(--admin-accent-strong)] text-xs font-mono"
+                          />
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-[10px] text-[var(--admin-faint)]">Alert &le;:</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={batch.min_threshold}
+                            onChange={(e) =>
+                              handleSetThresholdDirect(batch.id, Number(e.target.value))
+                            }
+                            className="w-14 text-center text-[var(--admin-muted)] bg-[var(--admin-surface)] border border-[var(--admin-border-soft)] rounded-md py-0.5 px-1 outline-none focus:border-[var(--admin-accent-strong)] text-[11px] font-mono"
+                            title="Low stock threshold alert"
+                          />
+                        </div>
+                      </div>
                     </td>
 
                     {/* Status Pill */}

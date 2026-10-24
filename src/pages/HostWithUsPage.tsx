@@ -3,6 +3,7 @@ import { Link } from "../components/ui/Link";
 import { useData } from "../context/DataContext";
 import { ListingType } from "../types";
 import { CheckCircle2, ArrowRight, Send } from "lucide-react";
+import { toast } from "sonner";
 
 export const HostWithUsPage: React.FC = () => {
   const { addProposal } = useData();
@@ -34,6 +35,7 @@ export const HostWithUsPage: React.FC = () => {
       sample_photos: [],
     });
 
+    toast.success("Proposal submitted successfully");
     setIsSubmitted(true);
   };
 

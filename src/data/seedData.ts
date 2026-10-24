@@ -2,6 +2,24 @@ import { Category, Listing, ExperienceSlot, Partner, Place } from "../types";
 
 export const SEED_PARTNERS: Partner[] = [
   {
+    id: "part-coordinator-00",
+    name: "Capt. Dilip Koli",
+    entity_name: "MatsyaMart Master Harbor & Gate Coordinator",
+    phone: "+91 99204 77158",
+    bio: "Chief coastal gate coordinator and harbor safety officer managing guest manifests and admissions.",
+    portrait_url: "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600&auto=format&fit=crop",
+    is_verified: true,
+  },
+  {
+    id: "part-coordinator-liaison",
+    name: "MatsyaMart Host Liaison",
+    entity_name: "Community Operations & Safety Desk",
+    phone: "+91 76665 11511",
+    bio: "Central community coordinator supporting local fishermen and home-dining hosts.",
+    portrait_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop",
+    is_verified: true,
+  },
+  {
     id: "part-anusaya-01",
     name: "Anusaya Tai Koli",
     entity_name: "Versova Koli Mahila Dining Collective",
