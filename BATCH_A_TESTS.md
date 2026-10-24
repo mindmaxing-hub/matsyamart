@@ -1,17 +1,16 @@
 # MatsyaMart QA — Batch A: Catalog, Discovery & Cart Mechanics
 
-**Target:** Public Consumer Experience  
-**Platform:** Desktop Browser (`http://localhost:3000/`) & Mobile Viewport  
+**Target:** Public Consumer Experience on Live Production  
+**Platform:** Desktop Browser (`https://matsyamart.com/`) & Mobile Viewport  
 **Governing Ledger:** [`MATSYAMART_QA_MASTER.md`](MATSYAMART_QA_MASTER.md)  
-**Status:** Ready for Physical Manual Testing  
+**Status:** Ready for Physical Manual Testing on Production  
 
 ---
 
 ## 🛠️ Prerequisites
 
-1. Ensure the app is running: `npm run dev` in `matsyamart`.
-2. Open `http://localhost:3000/` in Chrome or Safari.
-3. Open Cart Drawer by clicking the cart icon in navbar to ensure it starts empty (or clear cart if items exist).
+1. Open **`https://matsyamart.com/`** in Chrome, Safari, or mobile browser.
+2. Open Cart Drawer by clicking the cart icon in navbar to ensure it starts empty (or clear cart if items exist).
 
 ---
 
@@ -20,7 +19,7 @@
 ### 1. M-A01 — Category Pillar Filtering
 > **Concept:** Clicking the category filter pills (`All`, `Walks`, `Food`, `Workshops`, `Goods`) must immediately filter the catalog grid without layout shift or page reloads.
 - **Manual Actions:**
-  1. Navigate to `http://localhost:3000/`.
+  1. Navigate to `https://matsyamart.com/`.
   2. Click the **"Food"** pill filter.
   3. Verify only dining/thali offerings appear (e.g. *Versova Koli Seafood Thali Feast*).
   4. Click the **"Goods"** pill filter.

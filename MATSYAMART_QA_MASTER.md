@@ -1,9 +1,9 @@
 # MatsyaMart QA Master — Living Checklist & Continuation Ledger
 
-**Target Environment:** Local (`http://localhost:3000` / `npm run dev`) or Production (`https://matsyamart.in`)  
+**Target Environment:** Production Live (`https://matsyamart.com`)  
 **Architecture:** TanStack Start (SSR) + Nitro + Vite + React + Tailwind + Supabase Fallback  
 **Last Updated:** 24 October 2026  
-**Status:** In Progress (Batch-Wise Manual QA)
+**Status:** In Progress (Batch-Wise Manual QA on Production)
 
 ---
 
@@ -11,12 +11,12 @@
 
 | Batch | Domain Focus | Total Tests | Status | Unresolved Defects |
 | :--- | :--- | :---: | :---: | :---: |
-| **A** | **Catalog, Discovery & Cart Mechanics** | 6 | 🟡 Pending User Run | 0 |
+| **A** | **Catalog, Discovery & Cart Mechanics** | 6 | 🟡 Live on `matsyamart.com` | 0 |
 | **B** | **Checkout Engine & Payment Edge Cases** | 6 | ⚪ Queued | 0 |
 | **C** | **Category Passes & Delivery Tracker** | 6 | ⚪ Queued | 0 |
 | **D** | **Cross-Device QR & Host Gate Scanner** | 6 | ⚪ Queued | 0 |
 | **E** | **Admin Operations CRM & Vendor Proposals** | 6 | ⚪ Queued | 0 |
-| **AUTO**| **Parallel Automated QA Harness (`vitest`)** | 25+ | 🟢 Passing (52/52 Tests) | 0 |
+| **AUTO**| **Parallel Automated QA Harness (`vitest`)** | 25+ | 🟢 Passing (62/62 Tests) | 0 |
 
 ---
 
@@ -32,13 +32,10 @@
 
 ## 🛠️ Global Prerequisites for Manual Testing
 
-1. **Start Dev Server:**
-   ```bash
-   cd matsyamart
-   npm run dev
-   ```
+1. **Target Site:**
+   Open **[https://matsyamart.com](https://matsyamart.com)** directly on your desktop or phone browser.
 2. **Recommended Browsers:**
-   - Desktop: Google Chrome / Safari (`http://localhost:3000` or production URL)
-   - Mobile: Safari (iOS) / Chrome (Android) for camera QR scanning
+   - Desktop: Google Chrome / Safari / Edge (`https://matsyamart.com`)
+   - Mobile Phone: Native Camera + Safari (iOS) / Chrome (Android) for cross-device QR scanning
 3. **Data State Reset (Optional):**
-   - If you ever want a fresh clean slate, run `localStorage.clear()` in developer tools console and refresh. The app will immediately re-seed authentic listings, categories, slots, and places.
+   - If you ever want to reset your local cart or test passes to a fresh state, open console or clear site data for `matsyamart.com`. Listings, categories, and slots will instantly re-seed from the production edge.

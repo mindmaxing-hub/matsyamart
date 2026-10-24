@@ -1,7 +1,7 @@
 # MatsyaMart QA — Batch B: Checkout Engine & Payment Edge Cases
 
-**Target:** Checkout Modal & Transaction Processing  
-**Platform:** Desktop Browser (`http://localhost:3000/`) & Mobile Viewport  
+**Target:** Checkout Modal & Transaction Processing on Production  
+**Platform:** Desktop Browser (`https://matsyamart.com/`) & Mobile Viewport  
 **Governing Ledger:** [`MATSYAMART_QA_MASTER.md`](MATSYAMART_QA_MASTER.md)  
 **Status:** Queued (Ready after Batch A)  
 

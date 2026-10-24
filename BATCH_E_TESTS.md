@@ -1,7 +1,7 @@
 # MatsyaMart QA — Batch E: Admin CRM & Vendor Onboarding
 
-**Target:** Admin Operations Portal (`/admin`) & Community Onboarding (`/host-with-us`)  
-**Platform:** Desktop Browser (`http://localhost:3000/admin`)  
+**Target:** Admin Operations Portal (`https://matsyamart.com/admin`) & Community Onboarding (`https://matsyamart.com/host-with-us`)  
+**Platform:** Desktop Browser (`https://matsyamart.com/admin`)  
 **Governing Ledger:** [`MATSYAMART_QA_MASTER.md`](MATSYAMART_QA_MASTER.md)  
 **Status:** Queued (Ready after Batch D)  
 
@@ -9,7 +9,7 @@
 
 ## 🛠️ Prerequisites
 
-1. Navigate to `http://localhost:3000/admin` on desktop.
+1. Navigate to `https://matsyamart.com/admin` on desktop.
 2. Ensure you have admin access (default local role).
 
 ---
@@ -19,14 +19,14 @@
 ### 1. M-E01 — Community Vendor Proposal Submission & Admin Queue
 > **Concept:** A local fisherman or coastal cook can submit an experience proposal at `/host-with-us`, which appears in the Admin Proposal Queue for review.
 - **Manual Actions:**
-  1. Open a new tab and go to `http://localhost:3000/host-with-us`.
+  1. Open a new tab and go to `https://matsyamart.com/host-with-us`.
   2. Fill the proposal form:
      - Name: `Ramesh Tandel`, Phone: `9820099887`, Category: `Food`.
      - Title: `Versova Crab Masala Tasting Feast`.
      - Description: `Freshly cooked mangrove crab in earthen pots with bhakri.`
      - Target Price: `₹1,500`.
   3. Submit the proposal. Verify confirmation toast: *"Proposal submitted successfully"*.
-  4. Navigate to `http://localhost:3000/admin` and click the **"Proposals"** tab.
+  4. Navigate to `https://matsyamart.com/admin` and click the **"Proposals"** tab.
   5. Locate `Ramesh Tandel`'s proposal.
   6. Click **"Approve"**.
 - **Pass Assertions:**

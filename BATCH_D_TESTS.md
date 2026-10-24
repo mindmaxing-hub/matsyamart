@@ -1,7 +1,7 @@
 # MatsyaMart QA — Batch D: Cross-Device QR & Host Gate Scanner
 
 **Target:** Gate Scanning, Host Authentication & Mobile Cross-Device Flow  
-**Platform:** Mobile Phone Camera + Desktop Browser (`http://localhost:3000/host`)  
+**Platform:** Mobile Phone Camera + Desktop Browser (`https://matsyamart.com/host`)  
 **Governing Ledger:** [`MATSYAMART_QA_MASTER.md`](MATSYAMART_QA_MASTER.md)  
 **Status:** Queued (Ready after Batch C)  
 
@@ -9,9 +9,9 @@
 
 ## 🛠️ Prerequisites
 
-1. Have a confirmed experience pass displayed on a desktop computer screen.
+1. Have a confirmed experience pass displayed on a desktop computer screen on `https://matsyamart.com`.
 2. Have a mobile phone with a camera ready to scan QR codes.
-3. Open `http://localhost:3000/host` on your browser to test the Host Portal.
+3. Open `https://matsyamart.com/host` on your browser to test the Host Portal.
 
 ---
 
@@ -22,7 +22,7 @@
 - **Manual Actions:**
   1. Open a verified experience pass on your desktop screen.
   2. Point your physical mobile phone camera at the QR code on the desktop monitor.
-  3. Tap the detected URL prompt on the phone (e.g. `http://[ip]:3000/order/confirmation/MM-EXP-...?p=...`).
+  3. Tap the detected URL prompt on the phone (e.g. `https://matsyamart.com/order/confirmation/MM-EXP-...?p=...`).
   4. Alternatively, open an Incognito / Private window on desktop and paste the full QR URL containing `?p=...`.
   5. Observe the loaded page.
 - **Pass Assertions:**
@@ -36,7 +36,7 @@
 ### 2. M-D02 — Host Portal Phone SMS OTP Authentication
 > **Concept:** The Host Attendance Portal (`/host`) requires authentication by an authorized partner mobile number; unauthorized numbers are rejected.
 - **Manual Actions:**
-  1. Navigate to `http://localhost:3000/host`.
+  1. Navigate to `https://matsyamart.com/host`.
   2. Enter an unauthorized phone number: `9111111111` and click **"Send Login OTP"**.
      - Verify error: *"This phone number is not bound to an authorized MatsyaMart host account"*.
   3. Enter an authorized host phone number: `9920477158` (or `7666511511`) and click **"Send Login OTP"**.
