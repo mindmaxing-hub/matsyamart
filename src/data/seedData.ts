@@ -162,7 +162,7 @@ export const SEED_LISTINGS: Listing[] = [
     location_name: "Versova Coastal Village, Andheri West, Mumbai",
     secret_meeting_point:
       "Beside the Sacred Banyan Tree at Versova Jetty No. 1 (GPS: 19.1352° N, 72.8124° E). Guide Devendra will welcome you.",
-    meeting_point_maps_url: "https://maps.google.com/?q=19.1352,72.8124",
+    meeting_point_maps_url: "https://www.google.com/maps/search/?api=1&query=19.1352,72.8124",
     duration_minutes: 150,
     included_items: [
       "Guided walk led by community elder & youth historian",
@@ -231,7 +231,7 @@ export const SEED_LISTINGS: Listing[] = [
     location_name: "Airoli Coastal Marine Sanctuary, Thane Creek",
     secret_meeting_point:
       "Marine Biodiversity Interpretation Centre, Jetty Pier 2, Airoli (GPS: 19.1678° N, 72.9934° E). Look for Captain Ramesh in green vest.",
-    meeting_point_maps_url: "https://maps.google.com/?q=19.1678,72.9934",
+    meeting_point_maps_url: "https://www.google.com/maps/search/?api=1&query=19.1678,72.9934",
     duration_minutes: 120,
     included_items: [
       "2-hour boat cruise with experienced tidal boatman",
@@ -300,7 +300,7 @@ export const SEED_LISTINGS: Listing[] = [
     location_name: "Worli Coastal Boatyard, Mumbai",
     secret_meeting_point:
       "Worli Coastal Boat Ramp, foot of Worli Fort steps (GPS: 19.0234° N, 72.8167° E). Guide Nana Patil will welcome you.",
-    meeting_point_maps_url: "https://maps.google.com/?q=19.0234,72.8167",
+    meeting_point_maps_url: "https://www.google.com/maps/search/?api=1&query=19.0234,72.8167",
     duration_minutes: 120,
     included_items: [
       "All workshop materials: traditional bamboo needle, hemp cord & frame",
@@ -359,10 +359,10 @@ export const SEED_LISTINGS: Listing[] = [
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1498654896293-37aacf113fd9?auto=format&fit=crop&w=1200&q=80",
     ],
-    location_name: "Sassoon Docks, Colaba, South Mumbai",
+    location_name: "Historic Sassoon Docks Clock Tower Arch, Colaba, Mumbai",
     secret_meeting_point:
-      "Under the Historic Sassoon Docks Clock Tower Arch, Colaba (GPS: 18.9134° N, 72.8245° E). Ashwini will wear a signature yellow scarf.",
-    meeting_point_maps_url: "https://maps.google.com/?q=18.9134,72.8245",
+      "Historic Sassoon Docks Clock Tower Arch, Off Forbes Street, Colaba, Mumbai, Maharashtra 400005 (GPS: 18.9134° N, 72.8245° E). Ashwini will wear a signature yellow scarf.",
+    meeting_point_maps_url: "https://www.google.com/maps/search/?api=1&query=18.9134,72.8245",
     duration_minutes: 180,
     included_items: [
       "Expert seafood curation masterclass by community fish merchant",
@@ -434,7 +434,7 @@ export const SEED_LISTINGS: Listing[] = [
     location_name: "Madh Gaothan Courtyard, Andheri West / Madh Island, Mumbai",
     secret_meeting_point:
       "Madh Gaothan Community Courtyard, opposite St. Bonaventure Church arch, Madh Island, Mumbai - 400061 (GPS: 19.1316° N, 72.7950° E).",
-    meeting_point_maps_url: "https://maps.google.com/?q=19.1316,72.7950",
+    meeting_point_maps_url: "https://www.google.com/maps/search/?api=1&query=19.1316,72.7950",
     duration_minutes: 180,
     dietary_tags: [
       "Crispy Wild Surmai Rawa Fry",

@@ -340,6 +340,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
         "workshops",
         "queues",
         "manifest",
+        "invoices",
         "spotlight",
         "whatsapp",
         "roles", // Can view staff list and manage coordinator grants only

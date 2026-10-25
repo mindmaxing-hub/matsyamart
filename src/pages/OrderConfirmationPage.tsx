@@ -111,13 +111,49 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
       })();
     }
 
-    // Step 3: Resilient fallback for bare URLs on mobile devices (e.g. MM-EXP-2026-1606)
-    if (orderRef && /^MM-(EXP|PRD)/i.test(orderRef)) {
-      const isExp = orderRef.toUpperCase().startsWith("MM-EXP");
-      const defaultListing = isExp
-        ? listings.find((l) => l.type === "experience") || listings[0]
-        : listings.find((l) => l.type === "product") || listings[0];
+    // Step 3: Resilient fallback for bare URLs on mobile devices (e.g. MM-WK-2026-1606, MM-FD-..., MM-WS-..., MM-GD-...)
+    if (orderRef && /^MM-(EXP|PRD|GD|WK|FD|WS|MIX)/i.test(orderRef)) {
+      const refUpper = orderRef.toUpperCase();
+      const isPureGoods = refUpper.includes("-GD-") || refUpper.includes("-PRD-");
+      const isWalk = refUpper.includes("-WK-");
+      const isWorkshop = refUpper.includes("-WS-");
 
+      let defaultListing: typeof listings[0] | undefined;
+      if (isPureGoods) {
+        defaultListing = listings.find((l) => l.type === "product") || listings[0];
+      } else if (isWalk) {
+        defaultListing =
+          listings.find(
+            (l) =>
+              l.pillar === "walks" ||
+              l.title.toLowerCase().includes("walk") ||
+              l.category_id?.includes("walk"),
+          ) ||
+          listings.find((l) => l.type === "experience") ||
+          listings[0];
+      } else if (isWorkshop) {
+        defaultListing =
+          listings.find(
+            (l) =>
+              l.pillar === "workshops" ||
+              l.title.toLowerCase().includes("workshop") ||
+              l.category_id?.includes("workshop"),
+          ) ||
+          listings.find((l) => l.type === "experience") ||
+          listings[0];
+      } else {
+        defaultListing =
+          listings.find(
+            (l) =>
+              l.pillar === "food" ||
+              l.title.toLowerCase().includes("feast") ||
+              l.category_id?.includes("food"),
+          ) ||
+          listings.find((l) => l.type === "experience") ||
+          listings[0];
+      }
+
+      const isExp = !isPureGoods;
       const fallbackSlot = isExp
         ? slots.find((s) => s.listing_id === defaultListing?.id) || slots[0]
         : undefined;

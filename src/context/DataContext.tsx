@@ -25,7 +25,7 @@ import {
   SEED_PLACES,
   generateSeedSlots,
 } from "../data/seedData";
-import { generateOrderRef } from "../lib/utils";
+import { generateOrderRef, getOrderCategoryPrefix } from "../lib/utils";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
 import { DEFAULT_LOYALTY_CONFIG } from "../lib/services/loyalty";
 
@@ -225,7 +225,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   const CANONICAL_TEST_ORDERS: Order[] = [
     {
       id: "ord-test-food",
-      order_ref: "MM-EXP-FOOD-TEST",
+      order_ref: "MM-FD-2026-1001",
       customer_name: "Kunal Sharma",
       customer_email: "kunal.sharma@example.com",
       customer_phone: "+91 98200 44556",
@@ -234,6 +234,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
       emergency_contact: "Sunita Sharma (+91 98200 44557)",
       razorpay_payment_id: "pay_sim_food_test_01",
       created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+      shipping_address: {
+        addressLine: "14 Sea Face, Shivaji Park, Dadar",
+        city: "Mumbai",
+        state: "Maharashtra",
+        pincode: "400028",
+      },
       items: [
         {
           id: "item-test-food-01",
@@ -252,7 +258,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     },
     {
       id: "ord-test-walk",
-      order_ref: "MM-EXP-WALK-TEST",
+      order_ref: "MM-WK-2026-1002",
       customer_name: "Aryan Panchal",
       customer_email: "aryan@matsyamart.in",
       customer_phone: "+91 99204 77158",
@@ -261,6 +267,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
       emergency_contact: "Harsh Panchal (+91 98200 77159)",
       razorpay_payment_id: "pay_sim_walk_test_01",
       created_at: new Date(Date.now() - 3600000 * 3).toISOString(),
+      shipping_address: {
+        addressLine: "101, Samudra Darshan, Budha Lane 2, Versova",
+        city: "Mumbai",
+        state: "Maharashtra",
+        pincode: "400061",
+      },
       items: [
         {
           id: "item-test-walk-01",
@@ -279,7 +291,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     },
     {
       id: "ord-test-workshop",
-      order_ref: "MM-EXP-WORKSHOP-TEST",
+      order_ref: "MM-WS-2026-1003",
       customer_name: "Rohan Varma",
       customer_email: "rohan.varma@example.com",
       customer_phone: "+91 98199 55443",
@@ -288,6 +300,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
       emergency_contact: "Anita Varma (+91 98199 55444)",
       razorpay_payment_id: "pay_sim_workshop_test_01",
       created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+      shipping_address: {
+        addressLine: "Worli Sea Face Promenade, Apt 4B",
+        city: "Mumbai",
+        state: "Maharashtra",
+        pincode: "400030",
+      },
       items: [
         {
           id: "item-test-workshop-01",
@@ -305,7 +323,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     },
     {
       id: "ord-test-product",
-      order_ref: "MM-PRD-TEST",
+      order_ref: "MM-GD-2026-1004",
       customer_name: "Aryan Panchal",
       customer_email: "mindmaxxxing@gmail.com",
       customer_phone: "+91 73042 90690",
@@ -326,6 +344,44 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         {
           id: "item-test-prd-01",
           order_id: "ord-test-product",
+          listing_id: "prd-mangrove-honey",
+          quantity: 1,
+          unit_price_inr: 550,
+          listing: SEED_LISTINGS.find((l) => l.id === "prd-mangrove-honey"),
+        },
+      ],
+    },
+    {
+      id: "ord-test-interstate",
+      order_ref: "MM-GD-2026-1005",
+      customer_name: "Vikram Mehta",
+      customer_email: "vikram.mehta@example.com",
+      customer_phone: "+91 97129 88331",
+      total_amount_inr: 1450,
+      status: "confirmed",
+      fulfillment_status: "shipped",
+      courier_partner: "BlueDart Express",
+      tracking_awb: "BD-99102941",
+      shipping_address: {
+        addressLine: "702, Shivalik High Street, Vastrapur",
+        city: "Ahmedabad",
+        state: "Gujarat",
+        pincode: "380015",
+      },
+      razorpay_payment_id: "pay_sim_interstate_01",
+      created_at: new Date(Date.now() - 3600000 * 6).toISOString(),
+      items: [
+        {
+          id: "item-test-interstate-01",
+          order_id: "ord-test-interstate",
+          listing_id: "prd-jawla-dry-prawns",
+          quantity: 2,
+          unit_price_inr: 450,
+          listing: SEED_LISTINGS.find((l) => l.id === "prd-jawla-dry-prawns"),
+        },
+        {
+          id: "item-test-interstate-02",
+          order_id: "ord-test-interstate",
           listing_id: "prd-mangrove-honey",
           quantity: 1,
           unit_price_inr: 550,
@@ -791,7 +847,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     const isExperience = input.items.some(
       (i) => i.listing.type === "experience",
     );
-    const orderRef = generateOrderRef(isExperience ? "EXP" : "PRD");
+    const categoryPrefix = getOrderCategoryPrefix(input.items);
+    const orderRef = generateOrderRef(categoryPrefix);
 
     const subtotalAmount = input.items.reduce(
       (sum, item) => sum + item.listing.price_inr * item.quantity,

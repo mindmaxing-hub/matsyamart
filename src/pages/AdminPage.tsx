@@ -18,6 +18,7 @@ import { FoodWorkspace } from "../components/admin/FoodWorkspace";
 import { WalksWorkspace } from "../components/admin/WalksWorkspace";
 import { WorkshopsWorkspace } from "../components/admin/WorkshopsWorkspace";
 import { LoyaltyProgramManager } from "../components/admin/LoyaltyProgramManager";
+import { InvoicesWorkspace } from "../components/admin/InvoicesWorkspace";
 import { Link } from "../components/ui/Link";
 import { BrandLogo } from "../components/site/BrandLogo";
 import { formatINR, formatDate } from "../lib/utils";
@@ -50,6 +51,7 @@ import {
   Bell,
   Utensils,
   Palette,
+  Receipt,
 } from "lucide-react";
 
 type AdminSectionId =
@@ -60,6 +62,7 @@ type AdminSectionId =
   | "workshops"
   | "queues"
   | "manifest"
+  | "invoices"
   | "payouts"
   | "refunds"
   | "spotlight"
@@ -210,6 +213,16 @@ const AdminPageContent: React.FC = () => {
         "Who's coming, <em class='italic text-[#E3A157]'>all checked in.</em>",
       subtitle:
         "Unified ticket roster across trails, dinners, and masterclasses — searchable in one keystroke.",
+    },
+    {
+      id: "invoices",
+      label: "Invoices & Billing",
+      icon: Receipt,
+      kicker: "Statutory Tax & GST · HSN/SAC Records",
+      editorialTitle:
+        "Every invoice, <em class='italic text-[#E3A157]'>audited & printable.</em>",
+      subtitle:
+        "Preview official GST tax invoices for customers, view vendor payout vouchers, and audit CGST/SGST/IGST breakdown.",
     },
     {
       id: "payouts",
@@ -836,6 +849,11 @@ const AdminPageContent: React.FC = () => {
           {/* 4. WORKSHOPS WORKSPACE */}
           {activeSection === "workshops" && (
             <WorkshopsWorkspace orders={orders} listings={listings} slots={slots} />
+          )}
+
+          {/* INVOICES & STATUTORY BILLING WORKSPACE */}
+          {activeSection === "invoices" && (
+            <InvoicesWorkspace orders={orders} listings={listings} />
           )}
 
           {/* 8. HOST & ARTISAN PAYOUTS LEDGER */}

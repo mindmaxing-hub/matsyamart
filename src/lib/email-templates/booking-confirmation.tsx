@@ -55,12 +55,19 @@ export type EmailCategory = "food" | "walk" | "workshop" | "goods";
 
 export function resolveEmailCategory(
   pillar?: string,
-  title?: string
+  title?: string,
+  orderRef?: string,
 ): EmailCategory {
+  const ref = (orderRef || "").toUpperCase();
+  if (ref.includes("-WK-") || ref.includes("WK")) return "walk";
+  if (ref.includes("-FD-") || ref.includes("FD")) return "food";
+  if (ref.includes("-WS-") || ref.includes("WS")) return "workshop";
+  if (ref.includes("-GD-") || ref.includes("GD") || ref.includes("-PRD-")) return "goods";
+
   const p = (pillar || "").toLowerCase();
-  if (p === "food") return "food";
   if (p === "walks" || p === "walk") return "walk";
   if (p === "workshops" || p === "workshop") return "workshop";
+  if (p === "food") return "food";
   if (p === "goods" || p === "products" || p === "product") return "goods";
 
   const t = (title || "").toLowerCase();
@@ -83,8 +90,8 @@ export function resolveEmailCategory(
     return "workshop";
   }
   if (
-    t.includes("thali") ||
     t.includes("feast") ||
+    t.includes("thali") ||
     t.includes("dining") ||
     t.includes("food") ||
     t.includes("crab") ||
@@ -102,7 +109,7 @@ export function resolveEmailCategory(
     return "goods";
   }
 
-  return "food";
+  return "walk";
 }
 
 interface ThemePalette {
@@ -284,8 +291,22 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
   const meetingAddress =
     props?.meetingAddress ||
     "Versova Gaothan Dining Courtyard, Andheri West, Mumbai - 400061";
-  const mapsUrl =
-    props?.mapsUrl || "https://maps.app.goo.gl/TfKpsZPCyisNzSXv6";
+
+  // Normalize Google Maps link to canonical cross-platform search format
+  const rawMapsUrl = props?.mapsUrl;
+  const mapsUrl = rawMapsUrl
+    ? rawMapsUrl.startsWith("https://maps.google.com/?q=")
+      ? rawMapsUrl.replace(
+          "https://maps.google.com/?q=",
+          "https://www.google.com/maps/search/?api=1&query=",
+        )
+      : rawMapsUrl
+    : meetingAddress
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          meetingAddress,
+        )}`
+      : undefined;
+
   const passUrl =
     props?.passUrl ||
     `https://matsyamart.com/order/confirmation/${orderRef}`;
@@ -295,8 +316,8 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
   const invoiceNumber = props?.invoiceNumber || `INV-${orderRef}`;
   const gstin = props?.gstin || "27ABBFK9637R1ZF";
 
-  // Dynamic Category Resolution
-  const category = resolveEmailCategory(props?.pillar, experienceTitle);
+  // Dynamic Category Resolution based on pillar, title, and orderRef
+  const category = resolveEmailCategory(props?.pillar, experienceTitle, orderRef);
   const theme = THEMES[category];
 
   // 18% GST Calculations (inclusive)
@@ -306,8 +327,23 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
   const totalGst =
     props?.gstAmountInr ??
     Math.round((totalAmountInr - taxableValue) * 100) / 100;
-  const cgst = props?.cgstInr ?? Math.round((totalGst / 2) * 100) / 100;
-  const sgst = props?.sgstInr ?? Math.round((totalGst - cgst) * 100) / 100;
+
+  // State-based tax breakdown (Intra-state Maharashtra vs Inter-state IGST)
+  const shipping = props?.shippingAddress;
+  const shippingState = shipping?.state?.trim().toLowerCase();
+  const isInterState = Boolean(
+    shippingState &&
+      shippingState !== "maharashtra" &&
+      shippingState !== "mh" &&
+      shippingState !== "27",
+  );
+  const cgst = isInterState
+    ? 0
+    : props?.cgstInr ?? Math.round((totalGst / 2) * 100) / 100;
+  const sgst = isInterState
+    ? 0
+    : props?.sgstInr ?? Math.round((totalGst - cgst) * 100) / 100;
+  const igst = isInterState ? totalGst : 0;
 
   const itemsList =
     props?.items && props.items.length > 0
@@ -320,8 +356,6 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
             pillar: props?.pillar || "food",
           },
         ];
-
-  const shipping = props?.shippingAddress;
 
   return (
     <Html>
@@ -886,60 +920,92 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
                     ₹{taxableValue.toFixed(2)}
                   </Text>
                 </Section>
-                <Section
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: "4px",
-                  }}
-                >
-                  <Text
+                {isInterState ? (
+                  <Section
                     style={{
-                      fontSize: "11px",
-                      color: "#64748b",
-                      margin: "0",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: "4px",
                     }}
                   >
-                    CGST (9.0%):
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: "11px",
-                      color: "#0f172a",
-                      margin: "0",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    ₹{cgst.toFixed(2)}
-                  </Text>
-                </Section>
-                <Section
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: "4px",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: "11px",
-                      color: "#64748b",
-                      margin: "0",
-                    }}
-                  >
-                    SGST (9.0%):
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: "11px",
-                      color: "#0f172a",
-                      margin: "0",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    ₹{sgst.toFixed(2)}
-                  </Text>
-                </Section>
+                    <Text
+                      style={{
+                        fontSize: "11px",
+                        color: "#64748b",
+                        margin: "0",
+                      }}
+                    >
+                      IGST (18.0%):
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: "11px",
+                        color: "#0f172a",
+                        margin: "0",
+                        fontFamily: "monospace",
+                      }}
+                    >
+                      ₹{igst.toFixed(2)}
+                    </Text>
+                  </Section>
+                ) : (
+                  <>
+                    <Section
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: "11px",
+                          color: "#64748b",
+                          margin: "0",
+                        }}
+                      >
+                        CGST (9.0%):
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: "11px",
+                          color: "#0f172a",
+                          margin: "0",
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        ₹{cgst.toFixed(2)}
+                      </Text>
+                    </Section>
+                    <Section
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: "11px",
+                          color: "#64748b",
+                          margin: "0",
+                        }}
+                      >
+                        SGST (9.0%):
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: "11px",
+                          color: "#0f172a",
+                          margin: "0",
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        ₹{sgst.toFixed(2)}
+                      </Text>
+                    </Section>
+                  </>
+                )}
                 <Section
                   style={{
                     display: "flex",
@@ -1090,8 +1156,7 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
                   margin: "0 0 4px",
                 }}
               >
-                Dispatched from <b>hello@matsyamart.com</b> via
-                notify.matsyamart.com
+                Dispatched from <b>hello@matsyamart.com</b>
               </Text>
               <Text
                 style={{

@@ -4,6 +4,12 @@ import { Order } from "../types";
 import { TEMPLATES } from "../lib/email-templates/registry";
 import { render } from "@react-email/render";
 import * as React from "react";
+import {
+  getOrderCategoryPrefix,
+  generateOrderRef,
+  calculateOrderGstBreakdown,
+  getItemHsnSacCode,
+} from "../lib/utils";
 
 describe("Mobile Pass Rehydration & Email Templates Suite", () => {
   const sampleOrder: Order = {
@@ -171,6 +177,108 @@ describe("Mobile Pass Rehydration & Email Templates Suite", () => {
       expect(html).toContain("New Community Proposal");
       expect(html).toContain("Ramesh Tandel");
       expect(html).toContain("hello@matsyamart.com");
+    });
+
+    it("verifies clean sender identity in email footer without 'via notify'", async () => {
+      const entry = TEMPLATES["booking-confirmation"]!;
+      const element = React.createElement(entry.component, entry.previewData);
+      const html = await render(element);
+
+      expect(html).toContain("Dispatched from");
+      expect(html).toContain("hello@matsyamart.com");
+      expect(html).not.toContain("via notify.matsyamart.com");
+    });
+
+    it("verifies inter-state orders render IGST and suppress CGST/SGST", async () => {
+      const entry = TEMPLATES["booking-confirmation"]!;
+      const element = React.createElement(entry.component, {
+        ...entry.previewData,
+        orderRef: "MM-GD-2026-9901",
+        shippingAddress: {
+          addressLine: "702 Vastrapur",
+          city: "Ahmedabad",
+          state: "Gujarat",
+          pincode: "380015",
+        },
+      });
+      const html = await render(element);
+
+      expect(html).toContain("IGST (18.0%):");
+      expect(html).not.toContain("CGST (9.0%):");
+      expect(html).not.toContain("SGST (9.0%):");
+    });
+  });
+
+  describe("3. Order Reference Prefixes & Statutory GST Utility Suite", () => {
+    it("resolves specific 2-letter prefixes for each category", () => {
+      expect(
+        getOrderCategoryPrefix([
+          { listing: { type: "experience", pillar: "walks", title: "Heritage Walk" } },
+        ]),
+      ).toBe("WK");
+
+      expect(
+        getOrderCategoryPrefix([
+          { listing: { type: "experience", pillar: "food", title: "Koli Crab Feast" } },
+        ]),
+      ).toBe("FD");
+
+      expect(
+        getOrderCategoryPrefix([
+          { listing: { type: "experience", pillar: "workshops", title: "Boat Carpentry Workshop" } },
+        ]),
+      ).toBe("WS");
+
+      expect(
+        getOrderCategoryPrefix([
+          { listing: { type: "product", pillar: "goods", title: "Sun Dried Bombay Duck" } },
+        ]),
+      ).toBe("GD");
+    });
+
+    it("generates order refs matching category format", () => {
+      const wkRef = generateOrderRef("WK");
+      expect(wkRef).toMatch(/^MM-WK-\d{4}-\d{4}$/);
+
+      const fdRef = generateOrderRef("FD");
+      expect(fdRef).toMatch(/^MM-FD-\d{4}-\d{4}$/);
+
+      const wsRef = generateOrderRef("WS");
+      expect(wsRef).toMatch(/^MM-WS-\d{4}-\d{4}$/);
+
+      const gdRef = generateOrderRef("GD");
+      expect(gdRef).toMatch(/^MM-GD-\d{4}-\d{4}$/);
+    });
+
+    it("calculates statutory GST breakdown for Maharashtra (Intra-state)", () => {
+      const breakdown = calculateOrderGstBreakdown(2360, "Maharashtra");
+      expect(breakdown.isInterState).toBe(false);
+      expect(breakdown.taxableValue).toBe(2000);
+      expect(breakdown.totalGst).toBe(360);
+      expect(breakdown.cgst).toBe(180);
+      expect(breakdown.sgst).toBe(180);
+      expect(breakdown.igst).toBe(0);
+      expect(breakdown.supplierGstin).toBe("27ABBFK9637R1ZF");
+      expect(breakdown.officialBillingName).toBe("Kolibaba Seafood Inc.");
+    });
+
+    it("calculates statutory GST breakdown for Inter-state supply", () => {
+      const breakdown = calculateOrderGstBreakdown(2360, "Gujarat");
+      expect(breakdown.isInterState).toBe(true);
+      expect(breakdown.taxableValue).toBe(2000);
+      expect(breakdown.totalGst).toBe(360);
+      expect(breakdown.cgst).toBe(0);
+      expect(breakdown.sgst).toBe(0);
+      expect(breakdown.igst).toBe(360);
+    });
+
+    it("resolves accurate HSN/SAC codes for each offering", () => {
+      expect(getItemHsnSacCode({ type: "experience", pillar: "walks" }).code).toBe("998553");
+      expect(getItemHsnSacCode({ type: "experience", pillar: "food" }).code).toBe("996331");
+      expect(getItemHsnSacCode({ type: "experience", pillar: "workshops" }).code).toBe("999293");
+      expect(getItemHsnSacCode({ type: "product", title: "Mangrove Honey" }).code).toBe("040900");
+      expect(getItemHsnSacCode({ type: "product", title: "Koli Masala Blend" }).code).toBe("091099");
+      expect(getItemHsnSacCode({ type: "product", title: "Jawla Dry Prawns" }).code).toBe("030559");
     });
   });
 });

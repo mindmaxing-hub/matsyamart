@@ -1,6 +1,11 @@
 import React from "react";
 import { Order } from "../../types";
-import { formatINR, formatDate } from "../../lib/utils";
+import {
+  formatINR,
+  formatDate,
+  calculateOrderGstBreakdown,
+  getItemHsnSacCode,
+} from "../../lib/utils";
 import { Printer, X, FileText, CheckCircle2 } from "lucide-react";
 
 interface TaxInvoiceProps {
@@ -16,12 +21,16 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
   const invoiceNumber = `INV-${order.order_ref}`;
   const totalAmount = order.total_amount_inr;
 
-  // 18% GST calculation (inclusive)
-  // Taxable Value = Total / 1.18
-  const taxableValue = Math.round((totalAmount / 1.18) * 100) / 100;
-  const totalGst = Math.round((totalAmount - taxableValue) * 100) / 100;
-  const cgst = Math.round((totalGst / 2) * 100) / 100;
-  const sgst = Math.round((totalGst - cgst) * 100) / 100;
+  // Statutory GST calculation (inclusive) with intra-state vs inter-state rules
+  const {
+    taxableValue,
+    totalGst,
+    cgst,
+    sgst,
+    igst,
+    isInterState,
+    placeOfSupply,
+  } = calculateOrderGstBreakdown(totalAmount, order.shipping_address?.state);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs">
@@ -139,7 +148,7 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
               <div className="text-[11px] text-gray-700 mt-0.5">
                 Phone: {order.customer_phone}<br />
                 Email: {order.customer_email}<br />
-                Place of Supply: Maharashtra (State Code: 27)
+                Place of Supply: {order.shipping_address?.state || "Maharashtra (State Code: 27)"}
               </div>
             </div>
 
@@ -175,8 +184,7 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {order.items.map((item, idx) => {
-                  const isExp = item.listing?.type === "experience";
-                  const hsnCode = isExp ? "998555" : item.listing?.title.toLowerCase().includes("honey") ? "0409" : "0305";
+                  const hsnInfo = getItemHsnSacCode(item.listing);
 
                   return (
                     <tr key={item.id || idx} className="text-black">
@@ -186,11 +194,11 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
                           {item.listing?.title || "MatsyaMart Coastal Item"}
                         </div>
                         <div className="text-[10px] text-gray-500">
-                          {isExp ? "Experiential Coastal Tourism & Feasting" : "Sun-Cured Artisanal Coastal Pantry"}
+                          {hsnInfo.description}
                         </div>
                       </td>
-                      <td className="py-2 px-2 text-center font-mono text-gray-600">
-                        {hsnCode}
+                      <td className="py-2 px-2 text-center font-mono text-gray-600 font-semibold">
+                        {hsnInfo.code}
                       </td>
                       <td className="py-2 px-2 text-center font-mono font-semibold">
                         {item.quantity}
@@ -233,14 +241,23 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
                 <span>Taxable Value:</span>
                 <span className="font-mono">₹{taxableValue.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-gray-600">
-                <span>CGST (9.0%):</span>
-                <span className="font-mono">₹{cgst.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-gray-600">
-                <span>SGST (9.0%):</span>
-                <span className="font-mono">₹{sgst.toFixed(2)}</span>
-              </div>
+              {isInterState ? (
+                <div className="flex justify-between text-gray-600">
+                  <span>IGST (18.0%):</span>
+                  <span className="font-mono">₹{igst.toFixed(2)}</span>
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-between text-gray-600">
+                    <span>CGST (9.0%):</span>
+                    <span className="font-mono">₹{cgst.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>SGST (9.0%):</span>
+                    <span className="font-mono">₹{sgst.toFixed(2)}</span>
+                  </div>
+                </>
+              )}
               {order.discount_amount_inr && order.discount_amount_inr > 0 && (
                 <div className="flex justify-between text-emerald-700 font-semibold">
                   <span>Promo Discount:</span>
