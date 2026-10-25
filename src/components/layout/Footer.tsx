@@ -99,6 +99,13 @@ export const Footer: React.FC = () => {
             </span>
             <span>•</span>
             <a
+              href="mailto:hello@matsyamart.com"
+              className="hover:text-[#e3a157] transition-colors"
+            >
+              hello@matsyamart.com
+            </a>
+            <span>•</span>
+            <a
               href="https://wa.me/917666511511"
               target="_blank"
               rel="noopener noreferrer"

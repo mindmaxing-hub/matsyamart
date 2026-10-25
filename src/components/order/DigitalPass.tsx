@@ -86,7 +86,11 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
   };
 
   const handleShareWhatsApp = () => {
-    const passUrl = typeof window !== "undefined" ? window.location.href : "";
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const payload = encodePassPayload(order);
+    const passUrl = payload
+      ? `${origin}/order/confirmation/${order.order_ref}?p=${payload}`
+      : `${origin}/order/confirmation/${order.order_ref}`;
 
     const text = buildPassMessage({
       guestName: order.customer_name,
@@ -105,7 +109,12 @@ export const DigitalPass: React.FC<DigitalPassProps> = ({ order }) => {
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const payload = encodePassPayload(order);
+    const passUrl = payload
+      ? `${origin}/order/confirmation/${order.order_ref}?p=${payload}`
+      : `${origin}/order/confirmation/${order.order_ref}`;
+    navigator.clipboard.writeText(passUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };

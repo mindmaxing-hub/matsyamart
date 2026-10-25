@@ -10,6 +10,7 @@ export const HostWithUsPage: React.FC = () => {
 
   const [applicantName, setApplicantName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [proposalCategory, setProposalCategory] = useState<
     "goods" | "food" | "walks" | "workshops"
   >("goods");
@@ -28,7 +29,7 @@ export const HostWithUsPage: React.FC = () => {
       applicant_name: applicantName,
       koliwada_or_village: "",
       phone,
-      email: undefined,
+      email: email.trim() || undefined,
       proposal_title: summary.slice(0, 60) || `${proposalCategory} offering`,
       proposal_type: listingType,
       summary: `[Category: ${proposalCategory.toUpperCase()}] ${summary}`,
@@ -122,6 +123,20 @@ export const HostWithUsPage: React.FC = () => {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="e.g. 98201 44512"
+                  className="w-full px-3.5 py-2.5 bg-[#29100b]/70 border border-[#dab38c]/30 rounded-xl text-xs sm:text-sm text-[#f5edeb] placeholder:text-[#dab38c]/40 focus:outline-none focus:border-[#e3a157]"
+                />
+              </div>
+
+              {/* Email Address (Optional) */}
+              <div>
+                <label className="text-xs font-semibold text-[#dab38c] block mb-1.5">
+                  Email Address (Optional — for proposal updates)
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="e.g. ramesh@example.com"
                   className="w-full px-3.5 py-2.5 bg-[#29100b]/70 border border-[#dab38c]/30 rounded-xl text-xs sm:text-sm text-[#f5edeb] placeholder:text-[#dab38c]/40 focus:outline-none focus:border-[#e3a157]"
                 />
               </div>

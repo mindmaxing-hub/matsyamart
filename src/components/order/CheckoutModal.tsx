@@ -4,6 +4,7 @@ import { X, ShieldCheck, Lock, User, MapPin, AlertCircle, Sparkles } from "lucid
 import { Listing, AttendeeDetail, ShippingAddress } from "../../types";
 import { formatINR } from "../../lib/utils";
 import { initiatePayment } from "../../lib/razorpay";
+import { encodePassPayload } from "../../lib/passPayload";
 import { useData } from "../../context/DataContext";
 import { useCart } from "../../context/CartContext";
 
@@ -292,11 +293,20 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               // Ignore network dispatch errors
             }
 
-            // Redirect to digital ticket pass via TanStack router
-            router.navigate({
-              to: "/order/confirmation/$orderRef",
-              params: { orderRef: confirmedOrder.order_ref },
-            });
+            // Redirect to digital ticket pass via TanStack router with self-contained payload token
+            const payload = encodePassPayload(confirmedOrder);
+            if (payload) {
+              router.navigate({
+                to: "/order/confirmation/$orderRef",
+                params: { orderRef: confirmedOrder.order_ref },
+                search: { p: payload },
+              });
+            } else {
+              router.navigate({
+                to: "/order/confirmation/$orderRef",
+                params: { orderRef: confirmedOrder.order_ref },
+              });
+            }
           } catch (err: unknown) {
             console.error("Failed to create order record", err);
             setErrorMessage(
