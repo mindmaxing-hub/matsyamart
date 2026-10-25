@@ -87,24 +87,67 @@ describe("Mobile Pass Rehydration & Email Templates Suite", () => {
       const html = await render(element);
 
       // Pass & Event Verification
-      expect(html).toContain("Confirmed Coastal Pass");
+      expect(html).toContain("Confirmed Coastal Food Feast");
       expect(html).toContain("MM-EXP-2026-0042");
       expect(html).toContain("Aryan Panchal");
       expect(html).toContain("Open Boarding Pass on Mobile");
       expect(html).toContain("https://matsyamart.com/order/confirmation/MM-EXP-2026-0042");
 
+      // Clean single-line text links (no raw base64 token dumped in prose)
+      expect(html).toContain("matsyamart.com/order/confirmation/MM-EXP-2026-0042");
+      expect(html).toContain("matsyamart.com/order/confirmation/MM-EXP-2026-0042?view=invoice");
+      expect(html).not.toContain("?p=eyJy");
+
       // GST Tax Invoice Verification
       expect(html).toContain("OFFICIAL GST TAX INVOICE");
-      expect(html).toContain("Kolibaba Seafood Inc");
-      expect(html).toContain("Bhoomiputra Foundation");
-      expect(html).toContain("27AAACK1234F1Z5");
+      expect(html).toContain("Kolibaba Seafood Inc.");
+      expect(html).toContain("101, Samudra Darshan, Budha Lane 2, Versova, Andheri West");
+      expect(html).toContain("27ABBFK9637R1ZF");
       expect(html).toContain("INV-MM-EXP-2026-0042");
-      expect(html).toContain("Taxable Value");
+      expect(html).toContain("Taxable Value (Subtotal)");
       expect(html).toContain("CGST (9.0%)");
       expect(html).toContain("SGST (9.0%)");
       expect(html).toContain("Total GST (18.0%)");
       expect(html).toContain("View &amp; Print Official Tax Invoice");
       expect(html).toContain("view=invoice");
+
+      // Bhoomiputra Foundation footer placement
+      expect(html).toContain("In strategic partnership with");
+      expect(html).toContain("Bhoomiputra Foundation");
+    });
+
+    it("dynamically themes emails by category: food, walk, workshop", async () => {
+      const entry = TEMPLATES["booking-confirmation"]!;
+
+      // 1. Food Theme (Midnight Navy #1c3554)
+      const foodElem = React.createElement(entry.component, {
+        ...entry.previewData,
+        pillar: "food",
+        experienceTitle: "Versova Koli Crab Feast",
+      });
+      const foodHtml = await render(foodElem);
+      expect(foodHtml).toContain("#1c3554");
+      expect(foodHtml).toContain("Coastal Food Feast");
+
+      // 2. Walk Theme (Seafoam Teal #5f98a0)
+      const walkElem = React.createElement(entry.component, {
+        ...entry.previewData,
+        pillar: "walks",
+        experienceTitle: "Sassoon Docks Dawn Heritage Walk",
+      });
+      const walkHtml = await render(walkElem);
+      expect(walkHtml).toContain("#5f98a0");
+      expect(walkHtml).toContain("Coastal Heritage Walk");
+
+      // 3. Workshop Theme (Espresso Terracotta #2b120c)
+      const workshopElem = React.createElement(entry.component, {
+        ...entry.previewData,
+        pillar: "workshops",
+        experienceTitle: "Traditional Net-Weaving & Boat Carpentry Workshop",
+      });
+      const workshopHtml = await render(workshopElem);
+      expect(workshopHtml).toContain("#2b120c");
+      expect(workshopHtml).toContain("Coastal Craft Workshop");
     });
 
     it("renders host-proposal-received template to valid HTML", async () => {

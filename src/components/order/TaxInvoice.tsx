@@ -24,7 +24,7 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
   const sgst = Math.round((totalGst - cgst) * 100) / 100;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs">
       {/* Strict Print Isolation Stylesheet */}
       <style>{`
         @page {
@@ -107,13 +107,11 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
                 ORIGINAL FOR RECIPIENT · TAX INVOICE
               </div>
               <h1 className="font-display font-bold text-2xl text-black mt-1">
-                Kolibaba Seafood Inc
+                Kolibaba Seafood Inc.
               </h1>
               <div className="text-[11px] text-gray-600 mt-1 leading-relaxed">
-                In strategic partnership with <strong>Bhoomiputra Foundation</strong><br />
-                Versova Jetty No. 1, Gaothan, Andheri West<br />
-                Mumbai, Maharashtra, India – 400061<br />
-                <b>GSTIN:</b> 27AAACK1234F1Z5 (State Code: 27)<br />
+                <b>Registered Address:</b> 101, Samudra Darshan, Budha Lane 2, Versova, Andheri West, Mumbai, MH – 400061<br />
+                <b>GSTIN:</b> 27ABBFK9637R1ZF (State Code: 27 · Maharashtra)<br />
                 <b>Email:</b> hello@matsyamart.com · <b>Support:</b> +91 76665 11511
               </div>
             </div>
@@ -267,13 +265,17 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
             </div>
           </div>
 
-          {/* Bottom Signatory */}
-          <div className="pt-4 border-t border-gray-200 flex justify-between items-end text-[10px] text-gray-600">
-            <div>
-              <span>Terms: Valid digital invoice &amp; admission voucher · Subject to Mumbai jurisdiction</span>
+          {/* Bottom Strategic Partnership & Signatory */}
+          <div className="pt-4 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 text-[10px] text-gray-600">
+            <div className="space-y-1">
+              <div className="font-semibold text-gray-800">
+                In strategic partnership with <strong>Bhoomiputra Foundation</strong>
+              </div>
+              <div>Preserving indigenous Koli maritime culture and fair coastal revenue.</div>
+              <div>Terms: Valid digital invoice &amp; admission voucher · Subject to Mumbai jurisdiction</div>
             </div>
-            <div className="text-right">
-              <div className="font-bold text-black">For Kolibaba Seafood Inc</div>
+            <div className="text-left sm:text-right shrink-0">
+              <div className="font-bold text-black">For Kolibaba Seafood Inc.</div>
               <div className="text-[9px] text-gray-500 mt-5">Authorised Signatory</div>
             </div>
           </div>

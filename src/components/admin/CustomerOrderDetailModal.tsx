@@ -86,17 +86,6 @@ export const CustomerOrderDetailModal: React.FC<
 
   return (
     <>
-      {showInvoice && (
-        <TaxInvoice order={order} onClose={() => setShowInvoice(false)} />
-      )}
-
-      {showCourierLabel && (
-        <CourierLabel
-          order={order}
-          onClose={() => setShowCourierLabel(false)}
-        />
-      )}
-
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-fade-in text-[#f5edeb]">
         <div className="bg-[#29100b] border border-[#dab38c]/30 rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
           {/* Header */}
@@ -502,6 +491,18 @@ export const CustomerOrderDetailModal: React.FC<
           </div>
         </div>
       </div>
+
+      {/* Sub-modals rendered on top of admin detail backdrop */}
+      {showInvoice && (
+        <TaxInvoice order={order} onClose={() => setShowInvoice(false)} />
+      )}
+
+      {showCourierLabel && (
+        <CourierLabel
+          order={order}
+          onClose={() => setShowCourierLabel(false)}
+        />
+      )}
     </>
   );
 };

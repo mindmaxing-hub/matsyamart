@@ -52,6 +52,7 @@ export const Route = createFileRoute("/api/send-booking-confirmation")({
             passUrl,
             invoiceUrl,
             invoiceNumber: invoiceNumber || `INV-${orderRef}`,
+            gstin: body.gstin || "27ABBFK9637R1ZF",
             taxableValueInr,
             gstAmountInr,
             cgstInr,

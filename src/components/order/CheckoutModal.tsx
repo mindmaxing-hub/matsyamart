@@ -324,6 +324,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               passUrl,
               invoiceUrl,
               invoiceNumber: `INV-${confirmedOrder.order_ref}`,
+              gstin: "27ABBFK9637R1ZF",
               shippingAddress: confirmedOrder.shipping_address,
               items: confirmedOrder.items.map((it) => ({
                 title: it.listing?.title || "Coastal Item",
