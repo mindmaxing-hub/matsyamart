@@ -32,6 +32,20 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showInvoice, setShowInvoice] = useState(false);
 
+  // Auto-open official Tax Invoice modal if navigated via email invoice link (?view=invoice)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (
+        searchParams.get("view") === "invoice" ||
+        searchParams.get("invoice") === "true" ||
+        searchParams.get("invoice") === "1"
+      ) {
+        setShowInvoice(true);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     if (contextOrder) {
       setHydratedOrder(contextOrder);
@@ -144,14 +158,15 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
 
   const activeOrder = hydratedOrder || contextOrder;
 
-  // Auto-sync: Silently keep browser address bar hydrated with ?p= payload
+  // Auto-sync: Silently keep browser address bar hydrated with ?p= payload while preserving params
   useEffect(() => {
     if (activeOrder && typeof window !== "undefined") {
       const searchParams = new URLSearchParams(window.location.search);
       if (!searchParams.get("p")) {
         const payload = encodePassPayload(activeOrder);
         if (payload) {
-          const newUrl = `${window.location.pathname}?p=${payload}`;
+          searchParams.set("p", payload);
+          const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
           window.history.replaceState(null, "", newUrl);
         }
       }

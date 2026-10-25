@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as HostRouteImport } from './routes/host'
 import { Route as HostWithUsRouteImport } from './routes/host-with-us'
+import { Route as ApiSendBookingConfirmationRouteImport } from './routes/api/send-booking-confirmation'
 import { Route as ExperienceSlugRouteImport } from './routes/experience.$slug'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as OrderConfirmationOrderRefRouteImport } from './routes/order.confirmation.$orderRef'
@@ -38,6 +39,12 @@ const HostWithUsRoute = HostWithUsRouteImport.update({
   path: '/host-with-us',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSendBookingConfirmationRoute =
+  ApiSendBookingConfirmationRouteImport.update({
+    id: '/api/send-booking-confirmation',
+    path: '/api/send-booking-confirmation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ExperienceSlugRoute = ExperienceSlugRouteImport.update({
   id: '/experience/$slug',
   path: '/experience/$slug',
@@ -66,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/host': typeof HostRoute
   '/host-with-us': typeof HostWithUsRoute
+  '/api/send-booking-confirmation': typeof ApiSendBookingConfirmationRoute
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
@@ -76,6 +84,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/host': typeof HostRoute
   '/host-with-us': typeof HostWithUsRoute
+  '/api/send-booking-confirmation': typeof ApiSendBookingConfirmationRoute
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
@@ -87,6 +96,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/host': typeof HostRoute
   '/host-with-us': typeof HostWithUsRoute
+  '/api/send-booking-confirmation': typeof ApiSendBookingConfirmationRoute
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/host'
     | '/host-with-us'
+    | '/api/send-booking-confirmation'
     | '/experience/$slug'
     | '/product/$slug'
     | '/order/confirmation/$orderRef'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/host'
     | '/host-with-us'
+    | '/api/send-booking-confirmation'
     | '/experience/$slug'
     | '/product/$slug'
     | '/order/confirmation/$orderRef'
@@ -119,6 +131,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/host'
     | '/host-with-us'
+    | '/api/send-booking-confirmation'
     | '/experience/$slug'
     | '/product/$slug'
     | '/order/confirmation/$orderRef'
@@ -130,6 +143,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   HostRoute: typeof HostRoute
   HostWithUsRoute: typeof HostWithUsRoute
+  ApiSendBookingConfirmationRoute: typeof ApiSendBookingConfirmationRoute
   ExperienceSlugRoute: typeof ExperienceSlugRoute
   ProductSlugRoute: typeof ProductSlugRoute
   OrderConfirmationOrderRefRoute: typeof OrderConfirmationOrderRefRoute
@@ -164,6 +178,13 @@ declare module '@tanstack/react-router' {
       path: '/host-with-us'
       fullPath: '/host-with-us'
       preLoaderRoute: typeof HostWithUsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/send-booking-confirmation': {
+      id: '/api/send-booking-confirmation'
+      path: '/api/send-booking-confirmation'
+      fullPath: '/api/send-booking-confirmation'
+      preLoaderRoute: typeof ApiSendBookingConfirmationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/experience/$slug': {
@@ -202,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   HostRoute: HostRoute,
   HostWithUsRoute: HostWithUsRoute,
+  ApiSendBookingConfirmationRoute: ApiSendBookingConfirmationRoute,
   ExperienceSlugRoute: ExperienceSlugRoute,
   ProductSlugRoute: ProductSlugRoute,
   OrderConfirmationOrderRefRoute: OrderConfirmationOrderRefRoute,

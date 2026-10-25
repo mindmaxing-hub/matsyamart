@@ -264,37 +264,102 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             );
             onClose();
 
-            // Asynchronously dispatch confirmation ticket email with QR code
+            // Encode pass payload token
+            const payload = encodePassPayload(confirmedOrder);
+            const origin =
+              typeof window !== "undefined" && window.location.origin
+                ? window.location.origin
+                : "https://matsyamart.com";
+
+            const passUrl = payload
+              ? `${origin}/order/confirmation/${confirmedOrder.order_ref}?p=${payload}`
+              : `${origin}/order/confirmation/${confirmedOrder.order_ref}`;
+
+            const invoiceUrl = payload
+              ? `${origin}/order/confirmation/${confirmedOrder.order_ref}?view=invoice&p=${payload}`
+              : `${origin}/order/confirmation/${confirmedOrder.order_ref}?view=invoice`;
+
+            const primaryItem = confirmedOrder.items[0];
+            const primaryListing = primaryItem?.listing;
+            const primarySlot = primaryItem?.slot;
+
+            const seatsCount = confirmedOrder.items.reduce(
+              (acc, it) =>
+                acc + (it.listing?.type === "experience" ? it.quantity : 0),
+              0,
+            );
+
+            const slotDate = primarySlot?.slot_start
+              ? new Date(primarySlot.slot_start).toLocaleDateString("en-IN", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })
+              : "Scheduled Coastal Admission";
+
+            const slotTime = primarySlot?.slot_start
+              ? new Date(primarySlot.slot_start).toLocaleTimeString("en-IN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "Check pass for timing";
+
+            const emailPayload = {
+              orderRef: confirmedOrder.order_ref,
+              customerName: confirmedOrder.customer_name,
+              customerEmail: confirmedOrder.customer_email,
+              experienceTitle:
+                primaryListing?.title || "MatsyaMart Coastal Order",
+              pillar: primaryListing?.pillar || "food",
+              seatsCount:
+                seatsCount > 0 ? seatsCount : confirmedOrder.items.length,
+              totalAmountInr: confirmedOrder.total_amount_inr,
+              dateFormatted: slotDate,
+              timeFormatted: slotTime,
+              meetingAddress:
+                primaryListing?.secret_meeting_point ||
+                primaryListing?.location_name,
+              mapsUrl: primaryListing?.meeting_point_maps_url,
+              passUrl,
+              invoiceUrl,
+              invoiceNumber: `INV-${confirmedOrder.order_ref}`,
+              shippingAddress: confirmedOrder.shipping_address,
+              items: confirmedOrder.items.map((it) => ({
+                title: it.listing?.title || "Coastal Item",
+                quantity: it.quantity,
+                unitPrice: it.unit_price_inr,
+                pillar: it.listing?.pillar,
+                type: it.listing?.type,
+              })),
+            };
+
+            // Asynchronously dispatch confirmation ticket email with QR pass & Tax Invoice
             try {
-              const supabaseUrl = import.meta.env["VITE_SUPABASE_URL"];
-              if (supabaseUrl) {
-                fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    orderRef: confirmedOrder.order_ref,
-                    customerName: confirmedOrder.customer_name,
-                    customerEmail: confirmedOrder.customer_email,
-                    totalAmountInr: confirmedOrder.total_amount_inr,
-                    couponCode: confirmedOrder.coupon_code,
-                    discountAmountInr: confirmedOrder.discount_amount_inr,
-                    items: confirmedOrder.items.map((it) => ({
-                      title: it.listing?.title || "Coastal Offering",
-                      pillar: it.listing?.pillar,
-                      quantity: it.quantity,
-                      unitPrice: it.unit_price_inr,
-                      meetingPoint: it.listing?.secret_meeting_point,
-                      meetingPointMapsUrl: it.listing?.meeting_point_maps_url,
-                    })),
-                  }),
-                }).catch((e) => console.log("Email dispatch queued", e));
-              }
+              fetch("/api/send-booking-confirmation", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(emailPayload),
+              }).catch((e) => console.log("Email dispatch queued:", e));
             } catch {
               // Ignore network dispatch errors
             }
 
+            // Optional Supabase edge function fallback if configured
+            try {
+              const supabaseUrl = import.meta.env["VITE_SUPABASE_URL"];
+              if (supabaseUrl && !supabaseUrl.includes("your-project-id")) {
+                fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(emailPayload),
+                }).catch(() => {});
+              }
+            } catch {
+              // Ignore fallback errors
+            }
+
             // Redirect to digital ticket pass via TanStack router with self-contained payload token
-            const payload = encodePassPayload(confirmedOrder);
             if (payload) {
               router.navigate({
                 to: "/order/confirmation/$orderRef",

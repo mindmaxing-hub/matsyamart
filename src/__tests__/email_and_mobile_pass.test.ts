@@ -81,16 +81,30 @@ describe("Mobile Pass Rehydration & Email Templates Suite", () => {
       expect(TEMPLATES["admin-new-proposal-alert"]).toBeDefined();
     });
 
-    it("renders booking-confirmation template to valid HTML containing pass link", async () => {
+    it("renders booking-confirmation template to valid HTML containing pass link and GST Tax Invoice", async () => {
       const entry = TEMPLATES["booking-confirmation"]!;
       const element = React.createElement(entry.component, entry.previewData);
       const html = await render(element);
 
+      // Pass & Event Verification
       expect(html).toContain("Confirmed Coastal Pass");
       expect(html).toContain("MM-EXP-2026-0042");
       expect(html).toContain("Aryan Panchal");
-      expect(html).toContain("hello@matsyamart.com");
       expect(html).toContain("Open Boarding Pass on Mobile");
+      expect(html).toContain("https://matsyamart.com/order/confirmation/MM-EXP-2026-0042");
+
+      // GST Tax Invoice Verification
+      expect(html).toContain("OFFICIAL GST TAX INVOICE");
+      expect(html).toContain("Kolibaba Seafood Inc");
+      expect(html).toContain("Bhoomiputra Foundation");
+      expect(html).toContain("27AAACK1234F1Z5");
+      expect(html).toContain("INV-MM-EXP-2026-0042");
+      expect(html).toContain("Taxable Value");
+      expect(html).toContain("CGST (9.0%)");
+      expect(html).toContain("SGST (9.0%)");
+      expect(html).toContain("Total GST (18.0%)");
+      expect(html).toContain("View &amp; Print Official Tax Invoice");
+      expect(html).toContain("view=invoice");
     });
 
     it("renders host-proposal-received template to valid HTML", async () => {
