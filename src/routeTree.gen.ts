@@ -16,6 +16,7 @@ import { Route as HostWithUsRouteImport } from './routes/host-with-us'
 import { Route as ExperienceSlugRouteImport } from './routes/experience.$slug'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as OrderConfirmationOrderRefRouteImport } from './routes/order.confirmation.$orderRef'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -53,6 +54,12 @@ const OrderConfirmationOrderRefRoute =
     path: '/order/confirmation/$orderRef',
     getParentRoute: () => rootRouteImport,
   } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -71,6 +79,7 @@ export interface FileRoutesByTo {
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -81,6 +90,7 @@ export interface FileRoutesById {
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -92,6 +102,7 @@ export interface FileRouteTypes {
     | '/experience/$slug'
     | '/product/$slug'
     | '/order/confirmation/$orderRef'
+    | '/lovable/email/transactional/preview'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -101,6 +112,7 @@ export interface FileRouteTypes {
     | '/experience/$slug'
     | '/product/$slug'
     | '/order/confirmation/$orderRef'
+    | '/lovable/email/transactional/preview'
   id:
     | '__root__'
     | '/'
@@ -110,6 +122,7 @@ export interface FileRouteTypes {
     | '/experience/$slug'
     | '/product/$slug'
     | '/order/confirmation/$orderRef'
+    | '/lovable/email/transactional/preview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -120,6 +133,7 @@ export interface RootRouteChildren {
   ExperienceSlugRoute: typeof ExperienceSlugRoute
   ProductSlugRoute: typeof ProductSlugRoute
   OrderConfirmationOrderRefRoute: typeof OrderConfirmationOrderRefRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -173,6 +187,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrderConfirmationOrderRefRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -184,6 +205,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExperienceSlugRoute: ExperienceSlugRoute,
   ProductSlugRoute: ProductSlugRoute,
   OrderConfirmationOrderRefRoute: OrderConfirmationOrderRefRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
