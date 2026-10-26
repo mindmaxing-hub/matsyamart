@@ -95,6 +95,16 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
           )}
         </div>
 
+        {/* Scarcity & Capacity Urgency Badge */}
+        {listing.urgency_active && listing.urgency_badge && (
+          <div className="absolute top-12 left-3 pointer-events-none z-10">
+            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/95 backdrop-blur-md border border-amber-300/50 text-[9px] font-bold text-[#1f0b07] shadow-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-950 animate-ping" />
+              {listing.urgency_badge}
+            </span>
+          </div>
+        )}
+
         {/* Wishlist Button — top right */}
         <button
           onClick={handleWishlistToggle}

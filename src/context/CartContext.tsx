@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Listing, CartItem, ExperienceSlot } from "../types";
+import { trackAddToCart } from "../lib/metaPixel";
 
 export function getCartLineKey(listingId: string, slotId?: string | undefined): string {
   return slotId ? `${listingId}:${slotId}` : listingId;
@@ -7,7 +8,8 @@ export function getCartLineKey(listingId: string, slotId?: string | undefined): 
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (listing: Listing, quantity?: number, slot?: ExperienceSlot) => void;
+  addItem: (listing: Listing, quantity?: number, slot?: ExperienceSlot | undefined) => void;
+  restoreCartItems: (itemsToRestore: { listing: Listing; quantity: number; slot?: ExperienceSlot | undefined }[]) => void;
   removeItem: (lineKeyOrListingId: string) => void;
   removeItems: (itemsToRemove: { listingId: string; slotId?: string | undefined }[]) => void;
   updateQuantity: (lineKeyOrListingId: string, quantity: number) => void;
@@ -59,6 +61,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       }
       return [...prev, { listing, quantity, slot }];
     });
+    // Track Meta Pixel AddToCart event
+    trackAddToCart({
+      content_id: listing.id,
+      content_name: listing.title,
+      value: listing.price_inr * quantity,
+      quantity,
+    });
+    setIsCartOpen(true);
+  };
+
+  const restoreCartItems = (
+    itemsToRestore: { listing: Listing; quantity: number; slot?: ExperienceSlot | undefined }[],
+  ) => {
+    if (!itemsToRestore || itemsToRestore.length === 0) return;
+    setItems(itemsToRestore);
     setIsCartOpen(true);
   };
 
@@ -116,6 +133,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         items,
         addItem,
+        restoreCartItems,
         removeItem,
         removeItems,
         updateQuantity,

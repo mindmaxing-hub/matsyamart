@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "../components/ui/Link";
 import { useData } from "../context/DataContext";
 import { useWishlist } from "../context/WishlistContext";
 import { SlotBookingSheet } from "../components/experience/SlotBookingSheet";
 import { ItineraryTimeline } from "../components/experience/ItineraryTimeline";
 import { HostProfileCard } from "../components/experience/HostProfileCard";
+import { CoastalConciergeWidget } from "../components/site/CoastalConciergeWidget";
+import { trackViewContent } from "../lib/metaPixel";
 import {
   ArrowLeft,
   MapPin,
@@ -62,6 +64,18 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
   }
 
   const isWishlisted = isInWishlist(listing.id);
+
+  // Track Meta Pixel ViewContent event
+  useEffect(() => {
+    if (listing) {
+      trackViewContent({
+        content_id: listing.id,
+        content_name: listing.title,
+        content_type: (listing.pillar as any) || "experience",
+        value: listing.price_inr,
+      });
+    }
+  }, [listing?.id]);
 
   const getExperienceCategoryBadge = () => {
     if (listing.pillar === "food") {
@@ -141,6 +155,14 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
         <h1 className="font-display font-bold text-2xl sm:text-4xl text-[#f5edeb] leading-tight">
           {listing.title}
         </h1>
+
+        {/* Scarcity & Capacity Urgency Banner */}
+        {listing.urgency_active && listing.urgency_badge && (
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 font-bold text-xs shadow-xs">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+            <span>{listing.urgency_badge}</span>
+          </div>
+        )}
 
         <p className="text-sm sm:text-base text-[#dab38c] max-w-3xl leading-relaxed">
           {listing.short_summary}
@@ -304,6 +326,14 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Floating Coastal WhatsApp Concierge */}
+      <CoastalConciergeWidget
+        listingTitle={listing.title}
+        pillar={listing.pillar}
+        hostName={listing.host_name}
+        hostPhone={listing.host_phone}
+      />
     </div>
   );
 };

@@ -43,6 +43,7 @@ import {
   Eye,
 } from "lucide-react";
 import { toast } from "sonner";
+import { UrgencyBadgeEditor } from "./UrgencyBadgeEditor";
 
 interface WorkshopsWorkspaceProps {
   orders: Order[];
@@ -141,6 +142,9 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
     "Casual attire that can handle natural fiber dust",
   ]);
 
+  const [newUrgencyActive, setNewUrgencyActive] = useState<boolean>(false);
+  const [newUrgencyBadge, setNewUrgencyBadge] = useState<string>("");
+
   // Edit Workshop Modal State
   const [editingWorkshop, setEditingWorkshop] = useState<Listing | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -160,6 +164,8 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
   const [editItinerary, setEditItinerary] = useState<ItineraryItem[]>([]);
   const [editIncludedItems, setEditIncludedItems] = useState<string[]>([]);
   const [editThingsToCarry, setEditThingsToCarry] = useState<string[]>([]);
+  const [editUrgencyActive, setEditUrgencyActive] = useState<boolean>(false);
+  const [editUrgencyBadge, setEditUrgencyBadge] = useState<string>("");
 
   const handleOpenEditWorkshop = (workshop: Listing) => {
     setEditingWorkshop(workshop);
@@ -182,6 +188,8 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
     setEditItinerary(workshop.itinerary ? [...workshop.itinerary] : []);
     setEditIncludedItems(workshop.included_items ? [...workshop.included_items] : []);
     setEditThingsToCarry(workshop.things_to_carry ? [...workshop.things_to_carry] : []);
+    setEditUrgencyActive(Boolean(workshop.urgency_active));
+    setEditUrgencyBadge(workshop.urgency_badge || "");
   };
 
   const handleSaveEditWorkshop = (e: React.FormEvent) => {
@@ -212,6 +220,8 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
       included_items: editIncludedItems,
       things_to_carry: editThingsToCarry,
       itinerary: editItinerary,
+      urgency_active: editUrgencyActive,
+      urgency_badge: editUrgencyBadge.trim() || undefined,
     });
 
     toast.success("Workshop updated successfully!");
@@ -254,6 +264,8 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
       included_items: newIncludedItems,
       things_to_carry: newThingsToCarry,
       itinerary: newItinerary,
+      urgency_active: newUrgencyActive,
+      urgency_badge: newUrgencyBadge.trim() || undefined,
       is_active: true,
       is_featured: true,
     });
@@ -655,6 +667,15 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
                 label="Workshop Cover Photo"
               />
 
+              {/* Scarcity & Capacity Urgency */}
+              <UrgencyBadgeEditor
+                active={newUrgencyActive}
+                onActiveChange={setNewUrgencyActive}
+                badgeText={newUrgencyBadge}
+                onBadgeTextChange={setNewUrgencyBadge}
+                placeholder="e.g. Limited to 8 workbench kits per session!"
+              />
+
               {/* Multi-Slot & Recurring Schedule Builder */}
               <ScheduleSlotBuilder
                 state={newScheduleState}
@@ -900,6 +921,15 @@ export const WorkshopsWorkspace: React.FC<WorkshopsWorkspaceProps> = ({
                 value={editImage}
                 onChange={setEditImage}
                 label="Workshop Cover Photo"
+              />
+
+              {/* Scarcity & Capacity Urgency */}
+              <UrgencyBadgeEditor
+                active={editUrgencyActive}
+                onActiveChange={setEditUrgencyActive}
+                badgeText={editUrgencyBadge}
+                onBadgeTextChange={setEditUrgencyBadge}
+                placeholder="e.g. Limited to 8 workbench kits per session!"
               />
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#dab38c]/15">

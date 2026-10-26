@@ -20,6 +20,8 @@ import { initiatePayment } from "../../lib/razorpay";
 import { encodePassPayload } from "../../lib/passPayload";
 import { useData } from "../../context/DataContext";
 import { useCart } from "../../context/CartContext";
+import { trackInitiateCheckout } from "../../lib/metaPixel";
+import { recordAbandonedCart, updateAbandonedCartStatus } from "../../lib/abandonedCart";
 
 interface CheckoutModalProps {
   items: {
@@ -357,6 +359,67 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     : 0;
   const finalAmount = Math.max(0, subtotalAmount - activeDiscountAmount - loyaltyDiscountINR);
 
+  const cartSessionIdRef = React.useRef(
+    `cart-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+  );
+
+  // Meta Pixel InitiateCheckout tracking
+  useEffect(() => {
+    trackInitiateCheckout({
+      num_items: items.reduce((sum, it) => sum + it.quantity, 0),
+      value: finalAmount,
+      content_ids: items.map((it) => it.listing.id),
+    });
+  }, []);
+
+  // Sync abandoned cart state on phone or details entry
+  useEffect(() => {
+    const cleanPhone = customerPhone.replace(/\D/g, "");
+    if (cleanPhone.length >= 10 || customerName.trim().length > 2) {
+      recordAbandonedCart({
+        id: cartSessionIdRef.current,
+        customerName: customerName.trim() || undefined,
+        customerPhone: cleanPhone || undefined,
+        customerEmail: customerEmail.trim() || undefined,
+        emergencyContact: emergencyContact.trim() || undefined,
+        memberId:
+          isBhoomiMember && bhoomiVerifyStatus === "verified"
+            ? bhoomiMemberId
+            : undefined,
+        memberDiscountApplied:
+          isBhoomiMember && bhoomiVerifyStatus === "verified",
+        items: items.map((i) => {
+          const slot = i.slotId
+            ? slots.find((s) => s.id === i.slotId)
+            : undefined;
+          return {
+            listingId: i.listing.id,
+            title: i.listing.title,
+            pillar: i.listing.pillar || "walks",
+            priceINR: i.listing.price_inr,
+            quantity: i.quantity,
+            slotId: i.slotId,
+            slotDate: slot?.slot_start ? slot.slot_start.split("T")[0] : undefined,
+            slotTime: slot?.slot_start ? slot.slot_start : undefined,
+            venue: i.listing.location_name,
+          };
+        }),
+        totalINR: finalAmount,
+      });
+    }
+  }, [
+    customerPhone,
+    customerName,
+    customerEmail,
+    emergencyContact,
+    isBhoomiMember,
+    bhoomiVerifyStatus,
+    bhoomiMemberId,
+    finalAmount,
+    items,
+    slots,
+  ]);
+
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
     setCouponFeedback(null);
@@ -527,6 +590,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 };
               }),
             });
+
+            // Mark abandoned cart record as recovered
+            updateAbandonedCartStatus(cartSessionIdRef.current, "recovered");
 
             // Remove only the checked-out items; preserve unrelated basket items
             removeItems(

@@ -10,6 +10,7 @@ import {
   buildGoodsTrackingMessage,
 } from "../../lib/whatsapp";
 import { toast } from "sonner";
+import { UrgencyBadgeEditor } from "./UrgencyBadgeEditor";
 import {
   Package,
   Boxes,
@@ -72,6 +73,8 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
   const [newCollective, setNewCollective] = useState("");
   const [newSummary, setNewSummary] = useState("");
   const [newImage, setNewImage] = useState("");
+  const [newUrgencyActive, setNewUrgencyActive] = useState<boolean>(false);
+  const [newUrgencyBadge, setNewUrgencyBadge] = useState<string>("");
 
   // Edit Product Modal State
   const [editingProduct, setEditingProduct] = useState<Listing | null>(null);
@@ -83,6 +86,8 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
   const [editCollective, setEditCollective] = useState("");
   const [editSummary, setEditSummary] = useState("");
   const [editImage, setEditImage] = useState("");
+  const [editUrgencyActive, setEditUrgencyActive] = useState<boolean>(false);
+  const [editUrgencyBadge, setEditUrgencyBadge] = useState<string>("");
 
   // Filter goods orders
   const goodsOrders = useMemo(() => {
@@ -145,6 +150,8 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
         newImage.trim() ||
           "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=800&q=80",
       ],
+      urgency_active: newUrgencyActive,
+      urgency_badge: newUrgencyBadge.trim() || undefined,
       is_active: true,
       is_featured: false,
       host_name: newCollective.trim() || "Koli Collective",
@@ -172,6 +179,8 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
     setEditCollective(product.artisan_collective || product.host_name || "");
     setEditSummary(product.short_summary || "");
     setEditImage(product.images?.[0] || "");
+    setEditUrgencyActive(Boolean(product.urgency_active));
+    setEditUrgencyBadge(product.urgency_badge || "");
   };
 
   const handleSaveEditProduct = (e: React.FormEvent) => {
@@ -193,6 +202,8 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
       short_summary: editSummary.trim(),
       full_description: editSummary.trim() || editingProduct.full_description,
       images: editImage.trim() ? [editImage.trim()] : editingProduct.images,
+      urgency_active: editUrgencyActive,
+      urgency_badge: editUrgencyBadge.trim() || undefined,
     });
 
     toast.success(`Updated "${editTitle.trim()}" successfully!`);
@@ -515,6 +526,15 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
                 helperText="Drag & drop product picture, or browse from device"
               />
 
+              {/* Scarcity & Urgency Badge */}
+              <UrgencyBadgeEditor
+                active={newUrgencyActive}
+                onActiveChange={setNewUrgencyActive}
+                badgeText={newUrgencyBadge}
+                onBadgeTextChange={setNewUrgencyBadge}
+                placeholder="e.g. Fresh dawn catch batch – only 5 jars left!"
+              />
+
               <div className="flex justify-end gap-2 pt-3 border-t border-[#dab38c]/15">
                 <button
                   type="button"
@@ -648,6 +668,15 @@ export const GoodsWorkspace: React.FC<GoodsWorkspaceProps> = ({
                 onChange={setEditImage}
                 label="Product Photo"
                 helperText="Drop replacement image or click to browse"
+              />
+
+              {/* Scarcity & Urgency Badge */}
+              <UrgencyBadgeEditor
+                active={editUrgencyActive}
+                onActiveChange={setEditUrgencyActive}
+                badgeText={editUrgencyBadge}
+                onBadgeTextChange={setEditUrgencyBadge}
+                placeholder="e.g. Fresh dawn catch batch – only 5 jars left!"
               />
 
               <div className="flex justify-end gap-2 pt-3 border-t border-[#dab38c]/15">

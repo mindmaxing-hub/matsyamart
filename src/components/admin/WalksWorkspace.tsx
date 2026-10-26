@@ -42,6 +42,7 @@ import {
   TagsBuilder,
   HostBioInput,
 } from "./RichExperienceFields";
+import { UrgencyBadgeEditor } from "./UrgencyBadgeEditor";
 
 interface WalksWorkspaceProps {
   orders: Order[];
@@ -145,6 +146,9 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
     "Cash for optional direct trawler seafood purchases",
   ]);
 
+  const [newUrgencyActive, setNewUrgencyActive] = useState<boolean>(false);
+  const [newUrgencyBadge, setNewUrgencyBadge] = useState<string>("");
+
   const handleCreateWalk = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) {
@@ -181,6 +185,8 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
       included_items: newIncludedItems,
       things_to_carry: newThingsToCarry,
       itinerary: newItinerary,
+      urgency_active: newUrgencyActive,
+      urgency_badge: newUrgencyBadge.trim() || undefined,
       is_active: true,
       is_featured: true,
     });
@@ -241,6 +247,8 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
   const [editItinerary, setEditItinerary] = useState<ItineraryItem[]>([]);
   const [editIncludedItems, setEditIncludedItems] = useState<string[]>([]);
   const [editThingsToCarry, setEditThingsToCarry] = useState<string[]>([]);
+  const [editUrgencyActive, setEditUrgencyActive] = useState<boolean>(false);
+  const [editUrgencyBadge, setEditUrgencyBadge] = useState<string>("");
 
   const handleOpenEditWalk = (walk: Listing) => {
     setEditingWalk(walk);
@@ -263,6 +271,8 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
     setEditItinerary(walk.itinerary ? [...walk.itinerary] : []);
     setEditIncludedItems(walk.included_items ? [...walk.included_items] : []);
     setEditThingsToCarry(walk.things_to_carry ? [...walk.things_to_carry] : []);
+    setEditUrgencyActive(Boolean(walk.urgency_active));
+    setEditUrgencyBadge(walk.urgency_badge || "");
   };
 
   const handleSaveEditWalk = (e: React.FormEvent) => {
@@ -290,6 +300,8 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
       included_items: editIncludedItems,
       things_to_carry: editThingsToCarry,
       itinerary: editItinerary,
+      urgency_active: editUrgencyActive,
+      urgency_badge: editUrgencyBadge.trim() || undefined,
       short_summary: editSummary.trim(),
       full_description: `${editSummary.trim()}\n\nEssentials Included:\n${editIncludedItems.map((i) => `• ${i}`).join("\n")}`,
       images: editImage.trim() ? [editImage.trim()] : editingWalk.images,
@@ -662,6 +674,15 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
                 helperText="Drop scenic trail picture, or browse from device"
               />
 
+              {/* Scarcity & Urgency Badge */}
+              <UrgencyBadgeEditor
+                active={newUrgencyActive}
+                onActiveChange={setNewUrgencyActive}
+                badgeText={newUrgencyBadge}
+                onBadgeTextChange={setNewUrgencyBadge}
+                placeholder="e.g. Only 3 spots left for this tide!"
+              />
+
               {/* Multi-Slot & Recurring Schedule Builder */}
               <ScheduleSlotBuilder
                 state={newScheduleState}
@@ -908,6 +929,15 @@ export const WalksWorkspace: React.FC<WalksWorkspaceProps> = ({
                 onChange={setEditImage}
                 label="Trail Cover Photo"
                 helperText="Drop replacement trail picture, or browse from device"
+              />
+
+              {/* Scarcity & Urgency Badge */}
+              <UrgencyBadgeEditor
+                active={editUrgencyActive}
+                onActiveChange={setEditUrgencyActive}
+                badgeText={editUrgencyBadge}
+                onBadgeTextChange={setEditUrgencyBadge}
+                placeholder="e.g. Only 3 spots left for this tide!"
               />
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#dab38c]/15">

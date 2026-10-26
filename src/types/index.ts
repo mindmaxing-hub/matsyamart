@@ -54,6 +54,10 @@ export interface Listing {
   meal_type?: "breakfast" | "lunch" | "high_tea" | "dinner" | "snacks" | undefined;
   custom_tags?: string[] | undefined;
   require_emergency_contact?: boolean | undefined;
+  // Scarcity & Capacity Urgency Controls
+  urgency_badge?: string | undefined;
+  urgency_active?: boolean | undefined;
+  custom_capacity_remaining?: number | undefined;
   // Meta
   is_active: boolean;
   is_featured: boolean;

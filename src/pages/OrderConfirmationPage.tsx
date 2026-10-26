@@ -8,6 +8,8 @@ import { decodePassPayload, encodePassPayload } from "../lib/passPayload";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
 import { Order } from "../types";
 import { ArrowLeft, AlertCircle, FileText, Loader2 } from "lucide-react";
+import { trackPurchase } from "../lib/metaPixel";
+import { formatDate, formatTime } from "../lib/utils";
 
 interface OrderConfirmationPageProps {
   orderRef?: string;
@@ -193,6 +195,68 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
   }, [orderRef, contextOrder, addOrHydrateOrder, listings, slots]);
 
   const activeOrder = hydratedOrder || contextOrder;
+
+  // Track Meta Pixel Purchase event once activeOrder is resolved
+  const trackedPurchaseRef = React.useRef(false);
+  useEffect(() => {
+    if (activeOrder && !trackedPurchaseRef.current) {
+      trackedPurchaseRef.current = true;
+      trackPurchase({
+        order_id: activeOrder.order_ref,
+        value: activeOrder.total_amount_inr,
+        currency: "INR",
+        num_items: activeOrder.items?.length || 1,
+        content_ids: (activeOrder.items || [])
+          .map((it) => it.listing?.id)
+          .filter(Boolean) as string[],
+      });
+    }
+  }, [activeOrder]);
+
+  // Automated Fast2SMS WhatsApp Dispatch on Order Confirmation
+  const waDispatchedRef = React.useRef(false);
+  useEffect(() => {
+    if (
+      activeOrder &&
+      activeOrder.customer_phone &&
+      !waDispatchedRef.current &&
+      typeof window !== "undefined"
+    ) {
+      waDispatchedRef.current = true;
+      const passUrl = window.location.href;
+      fetch("/api/whatsapp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: activeOrder.customer_phone,
+          passParams: {
+            guestName: activeOrder.customer_name || "Valued Patron",
+            orderRef: activeOrder.order_ref,
+            items: (activeOrder.items || []).map((it, idx) => ({
+              title: it.listing?.title || "Coastal Reservation",
+              pillar: it.listing?.pillar || "walks",
+              dateStr: it.slot?.slot_start
+                ? formatDate(it.slot.slot_start)
+                : undefined,
+              timeStr: it.slot?.slot_start
+                ? formatTime(it.slot.slot_start)
+                : undefined,
+              venue: it.listing?.location_name,
+              mapsUrl: it.listing?.meeting_point_maps_url,
+              passRef: `${activeOrder.order_ref}-${idx + 1}`,
+              attendeeName:
+                it.attendee_details?.[0]?.fullName || activeOrder.customer_name,
+            })),
+            totalPaidINR: activeOrder.total_amount_inr,
+            digitalPassUrl: passUrl,
+            emergencyPhone: activeOrder.emergency_contact,
+          },
+        }),
+      }).catch((err) => {
+        console.warn("[WhatsApp Auto-Dispatch] Attempt failed gracefully:", err);
+      });
+    }
+  }, [activeOrder]);
 
   // Auto-sync: Silently keep browser address bar hydrated with ?p= payload while preserving params
   useEffect(() => {

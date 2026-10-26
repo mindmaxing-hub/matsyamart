@@ -18,6 +18,7 @@ import { WhatsAppChat } from "../components/site/WhatsAppChat";
 import { DataProvider } from "../context/DataContext";
 import { CartProvider } from "../context/CartContext";
 import { WishlistProvider } from "../context/WishlistContext";
+import { CartRestoreListener } from "../components/cart/CartRestoreListener";
 
 function NotFoundComponent() {
   return (
@@ -120,8 +121,33 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        {/* Meta Pixel Code (ID: 1795293538302324) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1795293538302324');
+fbq('track', 'PageView');`,
+          }}
+        />
       </head>
       <body className="bg-[#29100b] text-[#f5edeb] antialiased min-h-screen selection:bg-[#e3a157] selection:text-[#29100b]">
+        {/* Meta Pixel NoScript Fallback */}
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src="https://www.facebook.com/tr?id=1795293538302324&ev=PageView&noscript=1"
+            alt=""
+          />
+        </noscript>
         {children}
         <Scripts />
       </body>
@@ -150,6 +176,7 @@ function RootComponent() {
         <DataProvider>
           <CartProvider>
             <WishlistProvider>
+              <CartRestoreListener />
               <Outlet />
             </WishlistProvider>
           </CartProvider>
@@ -164,6 +191,7 @@ function RootComponent() {
         <CartProvider>
           <WishlistProvider>
             <div className="min-h-screen flex flex-col bg-[#29100b] text-[#f5edeb]">
+              <CartRestoreListener />
               <Navbar />
               <main className="flex-1">
                 <Outlet />

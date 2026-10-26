@@ -40,6 +40,7 @@ import {
   TagsBuilder,
   HostBioInput,
 } from "./RichExperienceFields";
+import { UrgencyBadgeEditor } from "./UrgencyBadgeEditor";
 
 interface FoodWorkspaceProps {
   orders: Order[];
@@ -151,6 +152,9 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
     "Personal water bottle if preferred",
   ]);
 
+  const [newUrgencyActive, setNewUrgencyActive] = useState<boolean>(false);
+  const [newUrgencyBadge, setNewUrgencyBadge] = useState<string>("");
+
   // Modal 2: Add Venue & Seating Window
   const [isAddVenueOpen, setIsAddVenueOpen] = useState(false);
   const [venueFeastId, setVenueFeastId] = useState("");
@@ -189,6 +193,8 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
   const [editItinerary, setEditItinerary] = useState<ItineraryItem[]>([]);
   const [editIncludedItems, setEditIncludedItems] = useState<string[]>([]);
   const [editThingsToCarry, setEditThingsToCarry] = useState<string[]>([]);
+  const [editUrgencyActive, setEditUrgencyActive] = useState<boolean>(false);
+  const [editUrgencyBadge, setEditUrgencyBadge] = useState<string>("");
 
   // Food experiences
   const foodListings = useMemo(() => {
@@ -440,6 +446,8 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
       included_items: newIncludedItems,
       things_to_carry: newThingsToCarry,
       itinerary: newItinerary,
+      urgency_active: newUrgencyActive,
+      urgency_badge: newUrgencyBadge.trim() || undefined,
       is_active: true,
       is_featured: true,
     });
@@ -533,6 +541,8 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
     setEditItinerary(feast.itinerary ? [...feast.itinerary] : []);
     setEditIncludedItems(feast.included_items ? [...feast.included_items] : []);
     setEditThingsToCarry(feast.things_to_carry ? [...feast.things_to_carry] : []);
+    setEditUrgencyActive(Boolean(feast.urgency_active));
+    setEditUrgencyBadge(feast.urgency_badge || "");
   };
 
   const handleSaveEditFeast = (e: React.FormEvent) => {
@@ -568,6 +578,8 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
       included_items: editIncludedItems,
       things_to_carry: editThingsToCarry,
       itinerary: editItinerary,
+      urgency_active: editUrgencyActive,
+      urgency_badge: editUrgencyBadge.trim() || undefined,
       short_summary: editSummary.trim(),
       full_description: `${editSummary.trim()}\n\nTraditional Courses:\n${coursesArray.map((c) => `• ${c}`).join("\n")}`,
       images: editImage.trim() ? [editImage.trim()] : editingFeast.images,
@@ -1264,6 +1276,15 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                 helperText="Drag & drop appetizing food picture, or browse from device"
               />
 
+              {/* Scarcity & Capacity Urgency */}
+              <UrgencyBadgeEditor
+                active={newUrgencyActive}
+                onActiveChange={setNewUrgencyActive}
+                badgeText={newUrgencyBadge}
+                onBadgeTextChange={setNewUrgencyBadge}
+                placeholder="e.g. Only 4 courtyard feast seats remaining!"
+              />
+
               {/* Multi-Slot & Recurring Schedule Builder */}
               <ScheduleSlotBuilder
                 state={newScheduleState}
@@ -1540,6 +1561,15 @@ export const FoodWorkspace: React.FC<FoodWorkspaceProps> = ({
                 onChange={setEditImage}
                 label="Feast Cover Photo"
                 helperText="Drop replacement feast picture, or browse from device"
+              />
+
+              {/* Scarcity & Capacity Urgency */}
+              <UrgencyBadgeEditor
+                active={editUrgencyActive}
+                onActiveChange={setEditUrgencyActive}
+                badgeText={editUrgencyBadge}
+                onBadgeTextChange={setEditUrgencyBadge}
+                placeholder="e.g. Only 4 courtyard feast seats remaining!"
               />
 
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#dab38c]/20">

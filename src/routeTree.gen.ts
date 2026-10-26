@@ -13,12 +13,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as HostRouteImport } from './routes/host'
 import { Route as HostWithUsRouteImport } from './routes/host-with-us'
+import { Route as TrackRouteImport } from './routes/track'
 import { Route as ApiSendBookingConfirmationRouteImport } from './routes/api/send-booking-confirmation'
 import { Route as ExperienceSlugRouteImport } from './routes/experience.$slug'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as ApiBhoomiputraVerifyMemberRouteImport } from './routes/api/bhoomiputra.verify-member'
 import { Route as ApiOtpSendRouteImport } from './routes/api/otp.send'
 import { Route as ApiOtpVerifyRouteImport } from './routes/api/otp.verify'
+import { Route as ApiWhatsappSendRouteImport } from './routes/api/whatsapp.send'
 import { Route as OrderConfirmationOrderRefRouteImport } from './routes/order.confirmation.$orderRef'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 
@@ -40,6 +42,11 @@ const HostRoute = HostRouteImport.update({
 const HostWithUsRoute = HostWithUsRouteImport.update({
   id: '/host-with-us',
   path: '/host-with-us',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrackRoute = TrackRouteImport.update({
+  id: '/track',
+  path: '/track',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSendBookingConfirmationRoute =
@@ -74,6 +81,11 @@ const ApiOtpVerifyRoute = ApiOtpVerifyRouteImport.update({
   path: '/api/otp/verify',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWhatsappSendRoute = ApiWhatsappSendRouteImport.update({
+  id: '/api/whatsapp/send',
+  path: '/api/whatsapp/send',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrderConfirmationOrderRefRoute =
   OrderConfirmationOrderRefRouteImport.update({
     id: '/order/confirmation/$orderRef',
@@ -92,12 +104,14 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/host': typeof HostRoute
   '/host-with-us': typeof HostWithUsRoute
+  '/track': typeof TrackRoute
   '/api/send-booking-confirmation': typeof ApiSendBookingConfirmationRoute
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/api/bhoomiputra/verify-member': typeof ApiBhoomiputraVerifyMemberRoute
   '/api/otp/send': typeof ApiOtpSendRoute
   '/api/otp/verify': typeof ApiOtpVerifyRoute
+  '/api/whatsapp/send': typeof ApiWhatsappSendRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -106,12 +120,14 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/host': typeof HostRoute
   '/host-with-us': typeof HostWithUsRoute
+  '/track': typeof TrackRoute
   '/api/send-booking-confirmation': typeof ApiSendBookingConfirmationRoute
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/api/bhoomiputra/verify-member': typeof ApiBhoomiputraVerifyMemberRoute
   '/api/otp/send': typeof ApiOtpSendRoute
   '/api/otp/verify': typeof ApiOtpVerifyRoute
+  '/api/whatsapp/send': typeof ApiWhatsappSendRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -121,12 +137,14 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/host': typeof HostRoute
   '/host-with-us': typeof HostWithUsRoute
+  '/track': typeof TrackRoute
   '/api/send-booking-confirmation': typeof ApiSendBookingConfirmationRoute
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/api/bhoomiputra/verify-member': typeof ApiBhoomiputraVerifyMemberRoute
   '/api/otp/send': typeof ApiOtpSendRoute
   '/api/otp/verify': typeof ApiOtpVerifyRoute
+  '/api/whatsapp/send': typeof ApiWhatsappSendRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -137,12 +155,14 @@ export interface FileRouteTypes {
     | '/admin'
     | '/host'
     | '/host-with-us'
+    | '/track'
     | '/api/send-booking-confirmation'
     | '/experience/$slug'
     | '/product/$slug'
     | '/api/bhoomiputra/verify-member'
     | '/api/otp/send'
     | '/api/otp/verify'
+    | '/api/whatsapp/send'
     | '/order/confirmation/$orderRef'
     | '/lovable/email/transactional/preview'
   fileRoutesByTo: FileRoutesByTo
@@ -151,12 +171,14 @@ export interface FileRouteTypes {
     | '/admin'
     | '/host'
     | '/host-with-us'
+    | '/track'
     | '/api/send-booking-confirmation'
     | '/experience/$slug'
     | '/product/$slug'
     | '/api/bhoomiputra/verify-member'
     | '/api/otp/send'
     | '/api/otp/verify'
+    | '/api/whatsapp/send'
     | '/order/confirmation/$orderRef'
     | '/lovable/email/transactional/preview'
   id:
@@ -165,12 +187,14 @@ export interface FileRouteTypes {
     | '/admin'
     | '/host'
     | '/host-with-us'
+    | '/track'
     | '/api/send-booking-confirmation'
     | '/experience/$slug'
     | '/product/$slug'
     | '/api/bhoomiputra/verify-member'
     | '/api/otp/send'
     | '/api/otp/verify'
+    | '/api/whatsapp/send'
     | '/order/confirmation/$orderRef'
     | '/lovable/email/transactional/preview'
   fileRoutesById: FileRoutesById
@@ -180,12 +204,14 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   HostRoute: typeof HostRoute
   HostWithUsRoute: typeof HostWithUsRoute
+  TrackRoute: typeof TrackRoute
   ApiSendBookingConfirmationRoute: typeof ApiSendBookingConfirmationRoute
   ExperienceSlugRoute: typeof ExperienceSlugRoute
   ProductSlugRoute: typeof ProductSlugRoute
   ApiBhoomiputraVerifyMemberRoute: typeof ApiBhoomiputraVerifyMemberRoute
   ApiOtpSendRoute: typeof ApiOtpSendRoute
   ApiOtpVerifyRoute: typeof ApiOtpVerifyRoute
+  ApiWhatsappSendRoute: typeof ApiWhatsappSendRoute
   OrderConfirmationOrderRefRoute: typeof OrderConfirmationOrderRefRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
@@ -218,6 +244,13 @@ declare module '@tanstack/react-router' {
       path: '/host-with-us'
       fullPath: '/host-with-us'
       preLoaderRoute: typeof HostWithUsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/track': {
+      id: '/track'
+      path: '/track'
+      fullPath: '/track'
+      preLoaderRoute: typeof TrackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/send-booking-confirmation': {
@@ -262,6 +295,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiOtpVerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/whatsapp/send': {
+      id: '/api/whatsapp/send'
+      path: '/api/whatsapp/send'
+      fullPath: '/api/whatsapp/send'
+      preLoaderRoute: typeof ApiWhatsappSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/order/confirmation/$orderRef': {
       id: '/order/confirmation/$orderRef'
       path: '/order/confirmation/$orderRef'
@@ -284,12 +324,14 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   HostRoute: HostRoute,
   HostWithUsRoute: HostWithUsRoute,
+  TrackRoute: TrackRoute,
   ApiSendBookingConfirmationRoute: ApiSendBookingConfirmationRoute,
   ExperienceSlugRoute: ExperienceSlugRoute,
   ProductSlugRoute: ProductSlugRoute,
   ApiBhoomiputraVerifyMemberRoute: ApiBhoomiputraVerifyMemberRoute,
   ApiOtpSendRoute: ApiOtpSendRoute,
   ApiOtpVerifyRoute: ApiOtpVerifyRoute,
+  ApiWhatsappSendRoute: ApiWhatsappSendRoute,
   OrderConfirmationOrderRefRoute: OrderConfirmationOrderRefRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }

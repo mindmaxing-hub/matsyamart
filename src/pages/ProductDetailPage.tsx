@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "../components/ui/Link";
 import { useData } from "../context/DataContext";
 import { useCart } from "../context/CartContext";
@@ -16,6 +16,8 @@ import {
 import { formatINR } from "../lib/utils";
 import { getOptimizedImageUrl } from "../lib/images";
 import { CheckoutModal } from "../components/order/CheckoutModal";
+import { trackViewContent } from "../lib/metaPixel";
+import { CoastalConciergeWidget } from "../components/site/CoastalConciergeWidget";
 
 interface ProductDetailPageProps {
   slug?: string;
@@ -58,6 +60,18 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   }
 
   const isWishlisted = isInWishlist(listing.id);
+
+  // Track Meta Pixel ViewContent event
+  useEffect(() => {
+    if (listing) {
+      trackViewContent({
+        content_id: listing.id,
+        content_name: listing.title,
+        content_type: "product",
+        value: listing.price_inr,
+      });
+    }
+  }, [listing?.id]);
 
   const handleAddToCart = () => {
     addItem(listing, quantity);
@@ -166,6 +180,14 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             <h1 className="font-display font-bold text-2xl sm:text-3xl text-[#f5edeb]">
               {listing.title}
             </h1>
+
+            {/* Scarcity & Capacity Urgency Banner */}
+            {listing.urgency_active && listing.urgency_badge && (
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 font-bold text-xs shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                <span>{listing.urgency_badge}</span>
+              </div>
+            )}
 
             <p className="text-xs sm:text-sm text-[#dab38c] leading-relaxed">
               {listing.short_summary}
@@ -293,6 +315,14 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           onClose={() => setIsInstantCheckoutOpen(false)}
         />
       )}
+
+      {/* Floating Coastal WhatsApp Concierge */}
+      <CoastalConciergeWidget
+        listingTitle={listing.title}
+        pillar="goods"
+        hostName={listing.artisan_collective || listing.host_name}
+        hostPhone={listing.host_phone}
+      />
     </div>
   );
 };

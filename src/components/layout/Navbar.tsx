@@ -48,6 +48,12 @@ export const Navbar: React.FC = () => {
           >
             Workshops
           </a>
+          <Link
+            to="/track"
+            className="text-xs font-medium px-3 py-1 rounded-full text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#481f14] transition-colors"
+          >
+            Track Passes
+          </Link>
         </nav>
 
         {/* Right Actions: Wishlist + Cart + Submit Experience Button */}
@@ -138,6 +144,13 @@ export const Navbar: React.FC = () => {
             >
               Workshops
             </a>
+            <Link
+              to="/track"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 text-xs font-semibold text-[#e3a157] bg-[#1f0b07] border border-[#e3a157]/30 rounded-xl text-center hover:bg-[#35160e] transition-colors"
+            >
+              Track Passes &amp; Orders
+            </Link>
           </div>
 
           <Link

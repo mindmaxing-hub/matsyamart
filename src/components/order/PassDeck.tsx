@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Order, OrderItem, Listing, ExperienceSlot, AttendeeDetail } from "../../types";
 import { openWhatsApp, buildPassMessage } from "../../lib/whatsapp";
+import { buildMultiPassWhatsAppMessage } from "../../lib/fast2smsWhatsApp";
 import { generateQrDataUrl } from "../../lib/qr";
 import { buildGoogleMapsUrl } from "../../lib/services/places";
 import { encodePassPayload } from "../../lib/passPayload";
@@ -215,6 +216,35 @@ export const PassDeck: React.FC<PassDeckProps> = ({ order }) => {
     });
 
     const targetPhone = pass.attendee.phone || order.customer_phone;
+    openWhatsApp(targetPhone, text);
+  };
+
+  const handleShareAllWhatsApp = () => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const payload = encodePassPayload(order);
+    const passUrl = payload
+      ? `${origin}/order/confirmation/${order.order_ref}?p=${payload}`
+      : `${origin}/order/confirmation/${order.order_ref}`;
+
+    const text = buildMultiPassWhatsAppMessage({
+      guestName: order.customer_name || "Valued Patron",
+      orderRef: order.order_ref,
+      items: passes.map((p) => ({
+        title: p.listing.title,
+        pillar: (p.listing.pillar || "walks") as "walks" | "workshops" | "food" | "goods",
+        dateStr: p.slot ? formatPassDate(p.slot.slot_start) : undefined,
+        timeStr: p.slot ? formatReportingTime(p.slot.slot_start) : undefined,
+        venue: p.listing.location_name || "Versova / Sassoon Coast",
+        mapsUrl: p.listing.meeting_point_maps_url,
+        passRef: p.ticketRef,
+        attendeeName: p.attendee.fullName,
+      })),
+      totalPaidINR: order.total_amount_inr,
+      digitalPassUrl: passUrl,
+      emergencyPhone: order.emergency_contact,
+    });
+
+    const targetPhone = order.customer_phone;
     openWhatsApp(targetPhone, text);
   };
 
@@ -555,13 +585,31 @@ export const PassDeck: React.FC<PassDeckProps> = ({ order }) => {
           </span>
         </button>
 
-        <button
-          onClick={() => handleShareWhatsApp(currentPass)}
-          className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md transition-colors cursor-pointer"
-        >
-          <Share2 className="w-3.5 h-3.5" />
-          <span>Share Pass to WhatsApp</span>
-        </button>
+        {passes.length > 1 ? (
+          <>
+            <button
+              onClick={handleShareAllWhatsApp}
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md transition-colors cursor-pointer"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span>Send All {passes.length} Passes to WhatsApp</span>
+            </button>
+            <button
+              onClick={() => handleShareWhatsApp(currentPass)}
+              className="px-3.5 py-2 rounded-xl border border-emerald-500/40 bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-300 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+            >
+              <span>Share Pass {activePassIndex + 1} Only</span>
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => handleShareWhatsApp(currentPass)}
+            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md transition-colors cursor-pointer"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            <span>Send Pass to WhatsApp</span>
+          </button>
+        )}
 
         <button
           onClick={() => handleCopyLink(currentPass)}
