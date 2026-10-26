@@ -17,6 +17,8 @@ import {
   LoyaltyProgramConfig,
   LoyaltyStatus,
   LoyaltyMembership,
+  BhoomiputraDiscountConfig,
+  EmergencyContactPolicy,
 } from "../types";
 import {
   SEED_CATEGORIES,
@@ -45,6 +47,8 @@ interface CreateOrderInput {
   razorpayOrderId?: string | undefined;
   couponCode?: string | undefined;
   discountAmount?: number | undefined;
+  isBhoomiputraMember?: boolean | undefined;
+  bhoomiputraMemberId?: string | undefined;
   pointsRedeemed?: number | undefined;
   pointsDiscountAmount?: number | undefined;
 }
@@ -146,6 +150,11 @@ interface DataContextType {
     message: string;
     restoredSeats: number;
   };
+  bhoomiputraConfig: BhoomiputraDiscountConfig;
+  updateBhoomiputraConfig: (updates: Partial<BhoomiputraDiscountConfig>) => void;
+  emergencyContactPolicy: EmergencyContactPolicy;
+  setEmergencyContactPolicy: (policy: EmergencyContactPolicy) => void;
+  isEmergencyContactRequired: (items: Array<{ listing?: Listing | undefined }>) => boolean;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -159,6 +168,16 @@ const STORAGE_COUPONS = "matsyamart_coupons_v1";
 const STORAGE_PARTNERS = "matsyamart_partners_v2";
 const STORAGE_PLACES = "matsyamart_places_v2";
 const STORAGE_LOYALTY = "matsyamart_loyalty_v2";
+const STORAGE_BHOOMI_CONFIG = "matsyamart_bhoomi_config_v1";
+const STORAGE_SAFETY_POLICY = "matsyamart_safety_policy_v1";
+
+export const DEFAULT_BHOOMI_CONFIG: BhoomiputraDiscountConfig = {
+  is_enabled: true,
+  discount_percent: 15,
+  applicable_pillars: ["food", "walks", "workshops"],
+  min_order_inr: 0,
+  code_alias: "BHOOMIPUTRA",
+};
 
 const SEED_COUPONS: Coupon[] = [
   {
@@ -667,6 +686,48 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.setItem(STORAGE_LOYALTY, JSON.stringify(loyaltyProgram));
   }, [loyaltyProgram]);
 
+  const [bhoomiputraConfig, setBhoomiputraConfig] = useState<BhoomiputraDiscountConfig>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_BHOOMI_CONFIG);
+      return saved ? JSON.parse(saved) : DEFAULT_BHOOMI_CONFIG;
+    } catch {
+      return DEFAULT_BHOOMI_CONFIG;
+    }
+  });
+
+  const [emergencyContactPolicy, setEmergencyContactPolicyState] = useState<EmergencyContactPolicy>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_SAFETY_POLICY);
+      return saved === "mandatory" || saved === "optional" ? saved : "optional";
+    } catch {
+      return "optional";
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_BHOOMI_CONFIG, JSON.stringify(bhoomiputraConfig));
+  }, [bhoomiputraConfig]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_SAFETY_POLICY, emergencyContactPolicy);
+  }, [emergencyContactPolicy]);
+
+  const updateBhoomiputraConfig = useCallback((updates: Partial<BhoomiputraDiscountConfig>) => {
+    setBhoomiputraConfig((prev) => ({ ...prev, ...updates }));
+  }, []);
+
+  const setEmergencyContactPolicy = useCallback((policy: EmergencyContactPolicy) => {
+    setEmergencyContactPolicyState(policy);
+  }, []);
+
+  const isEmergencyContactRequired = useCallback(
+    (items: Array<{ listing?: Listing | undefined }>) => {
+      if (emergencyContactPolicy === "mandatory") return true;
+      return items.some((item) => item.listing?.require_emergency_contact === true);
+    },
+    [emergencyContactPolicy],
+  );
+
   // Optionally fetch from Supabase if configured
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) return;
@@ -890,6 +951,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
       total_amount_inr: finalTotalAmount,
       coupon_code: input.couponCode || undefined,
       discount_amount_inr: discountAmount > 0 ? discountAmount : undefined,
+      is_bhoomiputra_member: input.isBhoomiputraMember,
+      bhoomiputra_member_id: input.bhoomiputraMemberId,
       loyalty_points_redeemed: input.pointsRedeemed,
       loyalty_discount_inr: input.pointsDiscountAmount,
       razorpay_order_id: input.razorpayOrderId,
@@ -1651,6 +1714,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         validateCoupon,
         updateAttendeeCheckIn,
         processOrderRefund,
+        bhoomiputraConfig,
+        updateBhoomiputraConfig,
+        emergencyContactPolicy,
+        setEmergencyContactPolicy,
+        isEmergencyContactRequired,
       }}
     >
       {children}

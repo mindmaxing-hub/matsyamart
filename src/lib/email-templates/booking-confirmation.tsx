@@ -20,6 +20,7 @@ export interface BookingItemSummary {
   unitPrice: number;
   pillar?: string;
   type?: "experience" | "product";
+  attendees?: string[];
 }
 
 export interface BookingConfirmationEmailProps {
@@ -357,6 +358,31 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
           },
         ];
 
+  // Synthesize discrete ticket passes for multi-seat bookings
+  interface EmailPassTicket {
+    ticketNumber: number;
+    title: string;
+    attendeeName: string;
+  }
+
+  const passTickets: EmailPassTicket[] = [];
+  let ticketCounter = 1;
+  itemsList.forEach((it) => {
+    if (it.type !== "product") {
+      const count = Math.max(1, it.quantity);
+      for (let sIdx = 0; sIdx < count; sIdx++) {
+        const attendeeName =
+          it.attendees?.[sIdx] ||
+          (sIdx === 0 ? customerName : `Guest ${sIdx + 1} (${customerName})`);
+        passTickets.push({
+          ticketNumber: ticketCounter++,
+          title: it.title,
+          attendeeName,
+        });
+      }
+    }
+  });
+
   return (
     <Html>
       <Head />
@@ -367,7 +393,7 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
         style={{
           backgroundColor: theme.mainBg,
           fontFamily:
-            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+            "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif",
           padding: "32px 16px",
         }}
       >
@@ -657,6 +683,68 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
                   margin: "20px 0",
                 }}
               />
+
+              {/* Pass Roster for Multi-Ticket Orders */}
+              {passTickets.length > 1 && (
+                <Section style={{ marginBottom: "16px" }}>
+                  <Text
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: "700",
+                      color: theme.sectionTitleColor,
+                      textTransform: "uppercase" as const,
+                      letterSpacing: "0.1em",
+                      margin: "0 0 12px",
+                    }}
+                  >
+                    {`ADMISSION PASS ROSTER (${passTickets.length} TICKETS)`}
+                  </Text>
+                  {passTickets.map((ticket) => (
+                    <Section
+                      key={ticket.ticketNumber}
+                      style={{
+                        backgroundColor: theme.venueBg,
+                        border: theme.venueBorder,
+                        borderRadius: "14px",
+                        padding: "12px 16px",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: "10px",
+                          fontFamily: "monospace",
+                          fontWeight: "700",
+                          color: theme.labelColor,
+                          textTransform: "uppercase" as const,
+                          margin: "0 0 4px",
+                        }}
+                      >
+                        {`TICKET #${ticket.ticketNumber} · ${ticket.title}`}
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: "13px",
+                          fontWeight: "700",
+                          color: theme.valueColor,
+                          margin: "0 0 2px",
+                        }}
+                      >
+                        {`Guest: ${ticket.attendeeName}`}
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: "11px",
+                          color: theme.labelColor,
+                          margin: "0",
+                        }}
+                      >
+                        Date: {dateFormatted} · Time: {timeFormatted}
+                      </Text>
+                    </Section>
+                  ))}
+                </Section>
+              )}
 
               {/* Mobile Boarding Pass CTA */}
               <Section

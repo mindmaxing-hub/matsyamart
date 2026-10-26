@@ -1,4 +1,17 @@
-import { Order, OrderItem, Listing, ShippingAddress, PillarType } from "../types";
+import {
+  Order,
+  OrderItem,
+  Listing,
+  ShippingAddress,
+  PillarType,
+  AttendeeDetail,
+} from "../types";
+
+interface CompactAttendee {
+  n: string;
+  p?: string | undefined;
+  e?: string | undefined;
+}
 
 interface CompactItem {
   id?: string | undefined;
@@ -17,6 +30,7 @@ interface CompactItem {
   hostPhone?: string | undefined;
   slotStart?: string | undefined;
   slotEnd?: string | undefined;
+  att?: CompactAttendee[] | undefined;
 }
 
 interface CompactPayload {
@@ -69,6 +83,11 @@ export function encodePassPayload(order: Order): string {
         hostPhone: it.listing?.host_phone,
         slotStart: it.slot?.slot_start,
         slotEnd: it.slot?.slot_end,
+        att: it.attendee_details?.map((a) => ({
+          n: a.fullName,
+          p: a.phone || undefined,
+          e: a.email || undefined,
+        })),
       })),
     };
 
@@ -149,6 +168,19 @@ export function decodePassPayload(token: string): Order | null {
           }
         : undefined;
 
+      const attendee_details: AttendeeDetail[] =
+        ci.att && ci.att.length > 0
+          ? ci.att.map((a) => ({
+              fullName: a.n,
+              phone: a.p || compact.phone,
+              email: a.e || compact.email,
+            }))
+          : Array.from({ length: ci.qty }).map((_, sIdx) => ({
+              fullName: sIdx === 0 ? compact.name : `Guest ${sIdx + 1}`,
+              phone: compact.phone,
+              email: compact.email,
+            }));
+
       return {
         id: ci.id || `item-${compact.ref}-${idx}`,
         order_id: `ord-${compact.ref}`,
@@ -157,13 +189,7 @@ export function decodePassPayload(token: string): Order | null {
         unit_price_inr: ci.price,
         listing: mockListing,
         slot: mockSlot,
-        attendee_details: [
-          {
-            fullName: compact.name,
-            phone: compact.phone,
-            email: compact.email,
-          },
-        ],
+        attendee_details,
       };
     });
 

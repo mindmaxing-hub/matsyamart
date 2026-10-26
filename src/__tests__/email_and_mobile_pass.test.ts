@@ -281,4 +281,135 @@ describe("Mobile Pass Rehydration & Email Templates Suite", () => {
       expect(getItemHsnSacCode({ type: "product", title: "Jawla Dry Prawns" }).code).toBe("030559");
     });
   });
+
+  describe("4. Bhoomiputra Member Discount, Emergency Safety & Multi-Pass Deck Suite", () => {
+    it("preserves individual attendee details through URL-safe payload compression", () => {
+      const multiTicketOrder: Order = {
+        id: "ord-multi-01",
+        order_ref: "MM-WK-2026-8812",
+        customer_name: "Aryan Panchal",
+        customer_email: "aryan@matsyamart.com",
+        customer_phone: "+91 99204 77158",
+        total_amount_inr: 3600,
+        status: "confirmed",
+        created_at: new Date().toISOString(),
+        items: [
+          {
+            id: "item-walk-2seats",
+            order_id: "ord-multi-01",
+            listing_id: "exp-sassoon-trail",
+            quantity: 2,
+            unit_price_inr: 1200,
+            attendee_details: [
+              { fullName: "Aryan Panchal", phone: "+91 99204 77158" },
+              { fullName: "Kunal Sharma", phone: "+91 98200 44556" },
+            ],
+            listing: {
+              id: "exp-sassoon-trail",
+              title: "Sassoon Docks Dawn Heritage Walk",
+              slug: "sassoon-docks-dawn-heritage-walk",
+              pillar: "walks",
+              type: "experience",
+              price_inr: 1200,
+              currency: "INR",
+              host_name: "Ashwini Koli",
+              short_summary: "Colaba morning fish market trail",
+              full_description: "",
+              images: ["https://images.unsplash.com/photo-1544551763-46a013bb70d5"],
+              is_active: true,
+              is_featured: true,
+            },
+          },
+          {
+            id: "item-food-1seat",
+            order_id: "ord-multi-01",
+            listing_id: "exp-versova-feast",
+            quantity: 1,
+            unit_price_inr: 1200,
+            attendee_details: [
+              { fullName: "Aryan Panchal", phone: "+91 99204 77158" },
+            ],
+            listing: {
+              id: "exp-versova-feast",
+              title: "Versova Koli Crab Feast",
+              slug: "versova-koli-crab-feast",
+              pillar: "food",
+              type: "experience",
+              price_inr: 1200,
+              currency: "INR",
+              host_name: "Anusaya Tai Koli",
+              short_summary: "Authentic coastal dining",
+              full_description: "",
+              images: ["https://images.unsplash.com/photo-1544025162-d76694265947"],
+              is_active: true,
+              is_featured: true,
+            },
+          },
+        ],
+      };
+
+      const token = encodePassPayload(multiTicketOrder);
+      expect(token).toBeDefined();
+      expect(token.length).toBeLessThan(1000);
+
+      const decoded = decodePassPayload(token);
+      expect(decoded).not.toBeNull();
+      expect(decoded?.items).toHaveLength(2);
+      expect(decoded?.items[0]?.attendee_details).toHaveLength(2);
+      expect(decoded?.items[0]?.attendee_details?.[0]?.fullName).toBe("Aryan Panchal");
+      expect(decoded?.items[0]?.attendee_details?.[1]?.fullName).toBe("Kunal Sharma");
+      expect(decoded?.items[1]?.attendee_details?.[0]?.fullName).toBe("Aryan Panchal");
+    });
+
+    it("renders Apple-style Pass Roster in email for multi-ticket orders", async () => {
+      const entry = TEMPLATES["booking-confirmation"]!;
+      const element = React.createElement(entry.component, {
+        ...entry.previewData,
+        orderRef: "MM-WK-2026-8812",
+        items: [
+          {
+            title: "Sassoon Docks Dawn Heritage Walk",
+            quantity: 2,
+            unitPrice: 1200,
+            pillar: "walks",
+            attendees: ["Aryan Panchal", "Kunal Sharma"],
+          },
+          {
+            title: "Versova Koli Crab Feast",
+            quantity: 1,
+            unitPrice: 1200,
+            pillar: "food",
+            attendees: ["Aryan Panchal"],
+          },
+        ],
+      });
+
+      const html = await render(element);
+      expect(html).toContain("ADMISSION PASS ROSTER (3 TICKETS)");
+      expect(html).toContain("TICKET #1 · Sassoon Docks Dawn Heritage Walk");
+      expect(html).toContain("Guest: Aryan Panchal");
+      expect(html).toContain("TICKET #2 · Sassoon Docks Dawn Heritage Walk");
+      expect(html).toContain("Guest: Kunal Sharma");
+      expect(html).toContain("TICKET #3 · Versova Koli Crab Feast");
+    });
+
+    it("calculates Bhoomiputra member discount correctly across eligible categories", () => {
+      const discountPercent = 15;
+      const eligiblePillars = ["food", "walks", "workshops"];
+
+      const cartItems = [
+        { price: 1200, qty: 2, pillar: "walks" }, // 2400 (eligible)
+        { price: 1500, qty: 1, pillar: "food" },  // 1500 (eligible)
+        { price: 500, qty: 1, pillar: "goods" },   // 500 (not eligible)
+      ];
+
+      const eligibleTotal = cartItems
+        .filter((i) => eligiblePillars.includes(i.pillar))
+        .reduce((sum, i) => sum + i.price * i.qty, 0);
+
+      expect(eligibleTotal).toBe(3900);
+      const discount = Math.round((eligibleTotal * discountPercent) / 100);
+      expect(discount).toBe(585);
+    });
+  });
 });

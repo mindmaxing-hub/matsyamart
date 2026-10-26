@@ -53,6 +53,7 @@ export interface Listing {
   materials_provided?: string[] | undefined;
   meal_type?: "breakfast" | "lunch" | "high_tea" | "dinner" | "snacks" | undefined;
   custom_tags?: string[] | undefined;
+  require_emergency_contact?: boolean | undefined;
   // Meta
   is_active: boolean;
   is_featured: boolean;
@@ -364,6 +365,8 @@ export interface Order {
   total_amount_inr: number;
   coupon_code?: string | undefined;
   discount_amount_inr?: number | undefined;
+  is_bhoomiputra_member?: boolean | undefined;
+  bhoomiputra_member_id?: string | undefined;
   loyalty_points_redeemed?: number | undefined;
   loyalty_discount_inr?: number | undefined;
   razorpay_order_id?: string | undefined;
@@ -431,6 +434,16 @@ export interface Coupon {
   is_active: boolean;
   created_at: string;
 }
+
+export interface BhoomiputraDiscountConfig {
+  is_enabled: boolean;
+  discount_percent: number;
+  applicable_pillars: PillarType[];
+  min_order_inr: number;
+  code_alias: string;
+}
+
+export type EmergencyContactPolicy = "mandatory" | "optional";
 
 export type RoleLevel = "owner" | "admin" | "manager" | "coordinator" | "host";
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "../components/ui/Link";
 import { useData } from "../context/DataContext";
-import { DigitalPass } from "../components/order/DigitalPass";
+import { PassDeck } from "../components/order/PassDeck";
 import { GoodsOrderTracker } from "../components/order/GoodsOrderTracker";
 import { TaxInvoice } from "../components/order/TaxInvoice";
 import { decodePassPayload, encodePassPayload } from "../lib/passPayload";
@@ -292,19 +292,19 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
         />
       )}
 
-      {/* Case 2: Pure Experience Booking (Walks, Food, Workshops) -> Verified Boarding Pass */}
-      {hasExperiences && !hasGoods && <DigitalPass order={activeOrder} />}
+      {/* Case 2: Pure Experience Booking (Walks, Food, Workshops) -> Verified Boarding Pass Deck */}
+      {hasExperiences && !hasGoods && <PassDeck order={activeOrder} />}
 
-      {/* Case 3: Mixed Order (Both Experience & Physical Goods) -> Boarding Pass + Delivery Portal */}
+      {/* Case 3: Mixed Order (Both Experience & Physical Goods) -> Boarding Pass Deck + Delivery Portal */}
       {isMixed && (
         <div className="space-y-12">
           <div>
             <div className="mb-4 text-center">
               <span className="px-3 py-1 rounded-full bg-[#35160e] text-[#e3a157] border border-[#dab38c]/30 text-xs font-bold uppercase tracking-wider">
-                Part 1 · Event Admission Boarding Pass
+                Part 1 · Event Admission Pass Deck
               </span>
             </div>
-            <DigitalPass order={activeOrder} />
+            <PassDeck order={activeOrder} />
           </div>
 
           <div className="border-t border-[#dab38c]/20 pt-8">

@@ -14,10 +14,49 @@ import {
   X,
   Percent,
   Coins,
+  ShieldCheck,
+  ShieldAlert,
+  Save,
+  Check,
 } from "lucide-react";
 
 export const CouponManager: React.FC = () => {
-  const { coupons, addCoupon, deleteCoupon, toggleCouponStatus } = useData();
+  const {
+    coupons,
+    addCoupon,
+    deleteCoupon,
+    toggleCouponStatus,
+    bhoomiputraConfig,
+    updateBhoomiputraConfig,
+    emergencyContactPolicy,
+    setEmergencyContactPolicy,
+  } = useData();
+
+  // Local state for Bhoomiputra discount editor
+  const [bhoomiEnabled, setBhoomiEnabled] = useState(bhoomiputraConfig.is_enabled);
+  const [bhoomiPercent, setBhoomiPercent] = useState(bhoomiputraConfig.discount_percent);
+  const [bhoomiMinOrder, setBhoomiMinOrder] = useState(bhoomiputraConfig.min_order_inr);
+  const [bhoomiPillars, setBhoomiPillars] = useState<PillarType[]>(bhoomiputraConfig.applicable_pillars);
+  const [bhoomiAlias, setBhoomiAlias] = useState(bhoomiputraConfig.code_alias);
+  const [bhoomiSavedFeedback, setBhoomiSavedFeedback] = useState(false);
+
+  const handleSaveBhoomiConfig = () => {
+    updateBhoomiputraConfig({
+      is_enabled: bhoomiEnabled,
+      discount_percent: Number(bhoomiPercent) || 15,
+      min_order_inr: Number(bhoomiMinOrder) || 0,
+      applicable_pillars: bhoomiPillars,
+      code_alias: bhoomiAlias.trim().toUpperCase() || "BHOOMIPUTRA",
+    });
+    setBhoomiSavedFeedback(true);
+    setTimeout(() => setBhoomiSavedFeedback(false), 2500);
+  };
+
+  const handleToggleBhoomiPillar = (pillar: PillarType) => {
+    setBhoomiPillars((prev) =>
+      prev.includes(pillar) ? prev.filter((p) => p !== pillar) : [...prev, pillar],
+    );
+  };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [code, setCode] = useState("");
@@ -133,16 +172,183 @@ export const CouponManager: React.FC = () => {
         <div className="p-4 rounded-2xl bg-[#35160e]/85 border border-[#dab38c]/20 backdrop-blur-md flex items-center justify-between">
           <div>
             <div className="text-[11px] font-semibold text-[#dab38c] uppercase tracking-wider">
-              Bhoomiputra Member Code
+              Bhoomiputra Member Status
             </div>
             <div className="text-sm font-bold font-mono text-emerald-400 mt-1 flex items-center gap-1.5">
-              <span>BHOOMI2025</span>
+              <span>{bhoomiputraConfig.discount_percent}% OFF</span>
               <span className="text-[10px] bg-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-300 font-sans font-normal">
-                15% (Experiences)
+                {bhoomiputraConfig.is_enabled ? "Active" : "Disabled"}
               </span>
             </div>
           </div>
           <Sparkles className="w-5 h-5 text-[#e3a157]" />
+        </div>
+      </div>
+
+      {/* DEDICATED BHOOMIPUTRA FOUNDATION MEMBER DISCOUNT CONFIGURATION */}
+      <div className="p-5 sm:p-6 rounded-2xl bg-[#2b120c] border border-[#dab38c]/35 shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#dab38c]/20 pb-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                Foundation Privilege
+              </span>
+              <h3 className="font-display font-bold text-base sm:text-lg text-[#f5edeb]">
+                Bhoomiputra Foundation Member Discount Hub
+              </h3>
+            </div>
+            <p className="text-xs text-[#dab38c] mt-0.5">
+              Set the official discount rate and eligible categories for verified Koli community members.
+              Surfaced directly at checkout as an interactive member card.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setBhoomiEnabled(!bhoomiEnabled)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                bhoomiEnabled
+                  ? "bg-emerald-600/30 text-emerald-300 border-emerald-500/50"
+                  : "bg-stone-800 text-stone-400 border-stone-700"
+              }`}
+            >
+              {bhoomiEnabled ? "✓ Discount Active" : "✕ Discount Disabled"}
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveBhoomiConfig}
+              className="px-4 py-1.5 rounded-xl bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow"
+            >
+              {bhoomiSavedFeedback ? (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Saved!</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Save Settings</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-1">
+          {/* Discount Percentage */}
+          <div>
+            <label className="text-[11px] font-semibold text-[#dab38c] block mb-1">
+              Member Discount %
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="1"
+                max="100"
+                value={bhoomiPercent}
+                onChange={(e) => setBhoomiPercent(Math.max(1, Math.min(100, Number(e.target.value))))}
+                className="w-full px-3 py-2 rounded-xl bg-[#1c0b07] border border-[#dab38c]/30 text-sm font-bold text-white focus:outline-none focus:border-[#e3a157]"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-stone-400 font-bold">%</span>
+            </div>
+          </div>
+
+          {/* Minimum Order INR */}
+          <div>
+            <label className="text-[11px] font-semibold text-[#dab38c] block mb-1">
+              Min Order (₹)
+            </label>
+            <input
+              type="number"
+              min="0"
+              step="50"
+              value={bhoomiMinOrder}
+              onChange={(e) => setBhoomiMinOrder(Math.max(0, Number(e.target.value)))}
+              className="w-full px-3 py-2 rounded-xl bg-[#1c0b07] border border-[#dab38c]/30 text-sm font-mono text-white focus:outline-none focus:border-[#e3a157]"
+            />
+          </div>
+
+          {/* Code Alias */}
+          <div>
+            <label className="text-[11px] font-semibold text-[#dab38c] block mb-1">
+              Auto Code / Alias
+            </label>
+            <input
+              type="text"
+              value={bhoomiAlias}
+              onChange={(e) => setBhoomiAlias(e.target.value.toUpperCase())}
+              className="w-full px-3 py-2 rounded-xl bg-[#1c0b07] border border-[#dab38c]/30 text-sm font-mono text-white uppercase focus:outline-none focus:border-[#e3a157]"
+              placeholder="BHOOMIPUTRA"
+            />
+          </div>
+
+          {/* Applicable Pillars */}
+          <div>
+            <label className="text-[11px] font-semibold text-[#dab38c] block mb-1">
+              Applicable Pillars
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {(["food", "walks", "workshops", "goods"] as PillarType[]).map((p) => {
+                const isSelected = bhoomiPillars.includes(p);
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => handleToggleBhoomiPillar(p)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold capitalize transition-all cursor-pointer border ${
+                      isSelected
+                        ? "bg-[#e3a157] text-[#29100b] border-[#e3a157]"
+                        : "bg-[#1c0b07] text-[#dab38c]/60 border-[#dab38c]/20 hover:text-white"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MARITIME SAFETY & EMERGENCY CONTACT GLOBAL POLICY */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-[#1f0b07] border border-[#dab38c]/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="space-y-1 max-w-xl">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-[#e3a157]" />
+            <h4 className="font-display font-bold text-sm text-[#f5edeb]">
+              Maritime Safety &amp; Emergency Contact Policy
+            </h4>
+          </div>
+          <p className="text-xs text-[#dab38c]/80 leading-relaxed">
+            Configure whether emergency contact details are mandatory or optional for experience bookings.
+            Individual boat &amp; tidal trail listings can also override this to remain strictly mandatory.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => setEmergencyContactPolicy("optional")}
+            className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+              emergencyContactPolicy === "optional"
+                ? "bg-[#35160e] text-[#f5edeb] border-[#dab38c] shadow"
+                : "bg-transparent text-[#dab38c]/60 border-[#dab38c]/20 hover:text-white"
+            }`}
+          >
+            Optional by Default
+          </button>
+          <button
+            type="button"
+            onClick={() => setEmergencyContactPolicy("mandatory")}
+            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+              emergencyContactPolicy === "mandatory"
+                ? "bg-rose-950/80 text-rose-300 border-rose-500 shadow"
+                : "bg-transparent text-[#dab38c]/60 border-[#dab38c]/20 hover:text-white"
+            }`}
+          >
+            Mandatory for All
+          </button>
         </div>
       </div>
 

@@ -22,10 +22,19 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   onClose,
 }) => {
   const router = useRouter();
-  const { createOrder, slots, validateCoupon, loyaltyProgram, getMembershipByPhone } = useData();
+  const {
+    createOrder,
+    slots,
+    validateCoupon,
+    loyaltyProgram,
+    getMembershipByPhone,
+    bhoomiputraConfig,
+    isEmergencyContactRequired,
+  } = useData();
   const { removeItems, clearCart } = useCart();
 
   const isExperience = items.some((i) => i.listing.type === "experience");
+  const emergencyRequired = isExperience && isEmergencyContactRequired(items);
   const hasPhysicalProduct = items.some((i) => i.listing.type === "product");
   const isPureGoods = hasPhysicalProduct && !isExperience;
   const isMixedCart = hasPhysicalProduct && isExperience;
@@ -35,6 +44,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [emergencyContact, setEmergencyContact] = useState("");
+
+  // Bhoomiputra Member Discount State
+  const [isBhoomiMember, setIsBhoomiMember] = useState(false);
+  const [bhoomiMemberId, setBhoomiMemberId] = useState("");
 
   // Dynamic Phone-Keyed Loyalty Membership (Westside-style)
   const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false);
@@ -110,11 +123,30 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     0,
   );
 
-  const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  // Bhoomiputra Member Discount calculation
+  const bhoomiEligibleItems = items.filter((i) =>
+    i.listing.pillar
+      ? bhoomiputraConfig.applicable_pillars.includes(i.listing.pillar)
+      : false,
+  );
+  const bhoomiEligibleTotal = bhoomiEligibleItems.reduce(
+    (sum, item) => sum + item.listing.price_inr * item.quantity,
+    0,
+  );
+  const bhoomiDiscountAmount =
+    isBhoomiMember &&
+    bhoomiputraConfig.is_enabled &&
+    bhoomiEligibleTotal >= bhoomiputraConfig.min_order_inr
+      ? Math.round((bhoomiEligibleTotal * bhoomiputraConfig.discount_percent) / 100)
+      : 0;
+
+  const promoDiscountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  const activeDiscountAmount = isBhoomiMember ? bhoomiDiscountAmount : promoDiscountAmount;
+
   const loyaltyDiscountINR = useLoyaltyPoints
     ? Math.min(Math.floor(subtotalAmount * 0.5), pointsCashValue)
     : 0;
-  const finalAmount = Math.max(0, subtotalAmount - discountAmount - loyaltyDiscountINR);
+  const finalAmount = Math.max(0, subtotalAmount - activeDiscountAmount - loyaltyDiscountINR);
 
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
@@ -203,6 +235,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       return;
     }
 
+    if (emergencyRequired && !emergencyContact.trim()) {
+      setErrorMessage(
+        "Maritime Safety Contact is mandatory for this booking. Please enter emergency contact name & phone number.",
+      );
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -228,8 +267,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               shippingAddress: hasPhysicalProduct ? shippingAddress : undefined,
               razorpayPaymentId: rzpResult.razorpay_payment_id,
               razorpayOrderId: rzpResult.razorpay_order_id,
-              couponCode: appliedCoupon?.code,
-              discountAmount: discountAmount > 0 ? discountAmount : undefined,
+              couponCode: isBhoomiMember ? bhoomiputraConfig.code_alias : appliedCoupon?.code,
+              discountAmount: activeDiscountAmount > 0 ? activeDiscountAmount : undefined,
+              isBhoomiputraMember: isBhoomiMember,
+              bhoomiputraMemberId: isBhoomiMember ? (bhoomiMemberId.trim() || "BPF-MEMBER-VERIFIED") : undefined,
               pointsRedeemed: useLoyaltyPoints ? availableLoyaltyPoints : undefined,
               pointsDiscountAmount: loyaltyDiscountINR > 0 ? loyaltyDiscountINR : undefined,
               items: items.map((i, idx) => {
@@ -454,56 +495,101 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               </div>
             ))}
 
-            {/* Promo Code Input & Status */}
-            <div className="pt-2 border-t border-[#dab38c]/15 space-y-2">
-              {appliedCoupon ? (
-                <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300">
-                  <div className="flex items-center gap-1.5 font-mono">
-                    <span className="font-bold text-emerald-400">{appliedCoupon.code}</span>
-                    <span className="text-[11px] text-emerald-300/80 font-sans">
-                      (Saved {formatINR(appliedCoupon.discountAmount)})
+            {/* Bhoomiputra Member Privilege Card */}
+            {bhoomiputraConfig.is_enabled && (
+              <div className="p-3 rounded-xl bg-[#140604] border border-[#dab38c]/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={isBhoomiMember}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setIsBhoomiMember(checked);
+                        if (checked && appliedCoupon) {
+                          setAppliedCoupon(null);
+                        }
+                      }}
+                      className="w-4 h-4 accent-[#e3a157] rounded cursor-pointer"
+                    />
+                    <span className="text-xs font-bold text-[#f5edeb]">
+                      I am a Bhoomiputra Foundation Member
                     </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleRemoveCoupon}
-                    className="text-[11px] text-emerald-400 hover:text-emerald-200 underline cursor-pointer"
-                  >
-                    Remove
-                  </button>
+                  </label>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#e3a157]/20 text-[#e3a157] border border-[#e3a157]/40">
+                    {bhoomiputraConfig.discount_percent}% Member Off
+                  </span>
                 </div>
-              ) : (
-                <div>
-                  <div className="flex gap-2">
+
+                {isBhoomiMember && (
+                  <div className="space-y-1.5 pt-1.5 border-t border-[#dab38c]/15">
                     <input
                       type="text"
-                      placeholder="Promo code (e.g. BHOOMI2025)"
-                      value={couponCodeInput}
-                      onChange={(e) => setCouponCodeInput(e.target.value.toUpperCase())}
-                      className="flex-1 px-3 py-1.5 rounded-xl bg-[#29100b] border border-[#dab38c]/30 text-xs font-mono text-[#f5edeb] placeholder:text-[#dab38c]/40 focus:outline-none focus:border-[#e3a157]"
+                      placeholder="Enter Bhoomiputra Member ID or Phone (e.g. BPF-77158)"
+                      value={bhoomiMemberId}
+                      onChange={(e) => setBhoomiMemberId(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded-xl bg-[#29100b] border border-[#dab38c]/30 text-xs font-mono text-[#f5edeb] placeholder:text-[#dab38c]/40 focus:outline-none focus:border-[#e3a157]"
                     />
+                    <div className="text-[11px] text-emerald-400 font-medium">
+                      ✓ Bhoomiputra {bhoomiputraConfig.discount_percent}% privilege applied (-{formatINR(bhoomiDiscountAmount)})
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Promo Code Input & Status (Disabled if Bhoomiputra member active) */}
+            {!isBhoomiMember && (
+              <div className="pt-2 border-t border-[#dab38c]/15 space-y-2">
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300">
+                    <div className="flex items-center gap-1.5 font-mono">
+                      <span className="font-bold text-emerald-400">{appliedCoupon.code}</span>
+                      <span className="text-[11px] text-emerald-300/80 font-sans">
+                        (Saved {formatINR(appliedCoupon.discountAmount)})
+                      </span>
+                    </div>
                     <button
                       type="button"
-                      onClick={handleApplyCoupon}
-                      className="px-3 py-1.5 rounded-xl bg-[#35160e] hover:bg-[#481f14] border border-[#dab38c]/30 text-[#e3a157] font-semibold text-xs cursor-pointer transition-colors"
+                      onClick={handleRemoveCoupon}
+                      className="text-[11px] text-emerald-400 hover:text-emerald-200 underline cursor-pointer"
                     >
-                      Apply
+                      Remove
                     </button>
                   </div>
-                  {couponFeedback && (
-                    <div
-                      className={`text-[11px] mt-1.5 ${
-                        couponFeedback.type === "success"
-                          ? "text-emerald-400"
-                          : "text-rose-400"
-                      }`}
-                    >
-                      {couponFeedback.message}
+                ) : (
+                  <div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Promo code (e.g. BHOOMI2025)"
+                        value={couponCodeInput}
+                        onChange={(e) => setCouponCodeInput(e.target.value.toUpperCase())}
+                        className="flex-1 px-3 py-1.5 rounded-xl bg-[#29100b] border border-[#dab38c]/30 text-xs font-mono text-[#f5edeb] placeholder:text-[#dab38c]/40 focus:outline-none focus:border-[#e3a157]"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyCoupon}
+                        className="px-3 py-1.5 rounded-xl bg-[#35160e] hover:bg-[#481f14] border border-[#dab38c]/30 text-[#e3a157] font-semibold text-xs cursor-pointer transition-colors"
+                      >
+                        Apply
+                      </button>
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
+                    {couponFeedback && (
+                      <div
+                        className={`text-[11px] mt-1.5 ${
+                          couponFeedback.type === "success"
+                            ? "text-emerald-400"
+                            : "text-rose-400"
+                        }`}
+                      >
+                        {couponFeedback.message}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* MatsyaPoints Loyalty Redemption */}
             <div className="p-2.5 rounded-xl bg-[#140604] border border-[#dab38c]/20 flex items-center justify-between text-xs">
@@ -538,16 +624,22 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
             {/* Price Calculations */}
             <div className="pt-2 border-t border-[#dab38c]/20 space-y-1">
-              {(appliedCoupon || useLoyaltyPoints) && (
+              {(isBhoomiMember || appliedCoupon || useLoyaltyPoints) && (
                 <div className="flex justify-between items-center text-[#dab38c]">
                   <span>Subtotal</span>
                   <span>{formatINR(subtotalAmount)}</span>
                 </div>
               )}
-              {appliedCoupon && (
+              {isBhoomiMember && bhoomiDiscountAmount > 0 && (
                 <div className="flex justify-between items-center text-emerald-400 font-semibold">
-                  <span>Discount ({appliedCoupon.code})</span>
-                  <span>-{formatINR(discountAmount)}</span>
+                  <span>Bhoomiputra Member Discount ({bhoomiputraConfig.discount_percent}%)</span>
+                  <span>-{formatINR(bhoomiDiscountAmount)}</span>
+                </div>
+              )}
+              {!isBhoomiMember && appliedCoupon && (
+                <div className="flex justify-between items-center text-emerald-400 font-semibold">
+                  <span>Promo Discount ({appliedCoupon.code})</span>
+                  <span>-{formatINR(promoDiscountAmount)}</span>
                 </div>
               )}
               {useLoyaltyPoints && loyaltyDiscountINR > 0 && (
@@ -633,18 +725,36 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <div className="space-y-3 pt-2 border-t border-[#dab38c]/20">
               <h4 className="text-xs font-bold uppercase tracking-wider text-[#f5edeb] flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#e3a157]" />
-                <span>Maritime Safety & Emergency Contact <span className="text-[#dab38c]/70 font-normal text-[11px] normal-case">(Optional)</span></span>
+                <span>
+                  Maritime Safety &amp; Emergency Contact{" "}
+                  {emergencyRequired ? (
+                    <span className="text-rose-400 font-bold text-[11px] normal-case bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/30">
+                      * Required for Harbor Manifest
+                    </span>
+                  ) : (
+                    <span className="text-[#dab38c]/70 font-normal text-[11px] normal-case">
+                      (Optional)
+                    </span>
+                  )}
+                </span>
               </h4>
               <div>
                 <label className="text-xs font-medium text-[#dab38c] block mb-1">
-                  Emergency Contact Name & Phone (Optional for boat/harbor manifests)
+                  {emergencyRequired
+                    ? "Emergency Contact Name & Phone * (Mandatory for coastal safety)"
+                    : "Emergency Contact Name & Phone (Optional for boat/harbor manifests)"}
                 </label>
                 <input
                   type="text"
+                  required={emergencyRequired}
                   placeholder="e.g. Sunita Sharma (+91 98201 99887)"
                   value={emergencyContact}
                   onChange={(e) => setEmergencyContact(e.target.value)}
-                  className="w-full text-xs p-3 rounded-xl bg-[#1f0b07] text-[#f5edeb] placeholder:text-[#dab38c]/40 border border-[#dab38c]/30 focus:border-[#e3a157] outline-none"
+                  className={`w-full text-xs p-3 rounded-xl bg-[#1f0b07] text-[#f5edeb] placeholder:text-[#dab38c]/40 border ${
+                    emergencyRequired && !emergencyContact.trim()
+                      ? "border-rose-500/50 focus:border-rose-500"
+                      : "border-[#dab38c]/30 focus:border-[#e3a157]"
+                  } outline-none`}
                 />
               </div>
 
