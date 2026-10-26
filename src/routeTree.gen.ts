@@ -16,6 +16,7 @@ import { Route as HostWithUsRouteImport } from './routes/host-with-us'
 import { Route as ApiSendBookingConfirmationRouteImport } from './routes/api/send-booking-confirmation'
 import { Route as ExperienceSlugRouteImport } from './routes/experience.$slug'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
+import { Route as ApiBhoomiputraVerifyMemberRouteImport } from './routes/api/bhoomiputra.verify-member'
 import { Route as OrderConfirmationOrderRefRouteImport } from './routes/order.confirmation.$orderRef'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 
@@ -55,6 +56,12 @@ const ProductSlugRoute = ProductSlugRouteImport.update({
   path: '/product/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBhoomiputraVerifyMemberRoute =
+  ApiBhoomiputraVerifyMemberRouteImport.update({
+    id: '/api/bhoomiputra/verify-member',
+    path: '/api/bhoomiputra/verify-member',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const OrderConfirmationOrderRefRoute =
   OrderConfirmationOrderRefRouteImport.update({
     id: '/order/confirmation/$orderRef',
@@ -76,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/api/send-booking-confirmation': typeof ApiSendBookingConfirmationRoute
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/api/bhoomiputra/verify-member': typeof ApiBhoomiputraVerifyMemberRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesByTo {
   '/api/send-booking-confirmation': typeof ApiSendBookingConfirmationRoute
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/api/bhoomiputra/verify-member': typeof ApiBhoomiputraVerifyMemberRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -99,6 +108,7 @@ export interface FileRoutesById {
   '/api/send-booking-confirmation': typeof ApiSendBookingConfirmationRoute
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/api/bhoomiputra/verify-member': typeof ApiBhoomiputraVerifyMemberRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -112,6 +122,7 @@ export interface FileRouteTypes {
     | '/api/send-booking-confirmation'
     | '/experience/$slug'
     | '/product/$slug'
+    | '/api/bhoomiputra/verify-member'
     | '/order/confirmation/$orderRef'
     | '/lovable/email/transactional/preview'
   fileRoutesByTo: FileRoutesByTo
@@ -123,6 +134,7 @@ export interface FileRouteTypes {
     | '/api/send-booking-confirmation'
     | '/experience/$slug'
     | '/product/$slug'
+    | '/api/bhoomiputra/verify-member'
     | '/order/confirmation/$orderRef'
     | '/lovable/email/transactional/preview'
   id:
@@ -134,6 +146,7 @@ export interface FileRouteTypes {
     | '/api/send-booking-confirmation'
     | '/experience/$slug'
     | '/product/$slug'
+    | '/api/bhoomiputra/verify-member'
     | '/order/confirmation/$orderRef'
     | '/lovable/email/transactional/preview'
   fileRoutesById: FileRoutesById
@@ -146,6 +159,7 @@ export interface RootRouteChildren {
   ApiSendBookingConfirmationRoute: typeof ApiSendBookingConfirmationRoute
   ExperienceSlugRoute: typeof ExperienceSlugRoute
   ProductSlugRoute: typeof ProductSlugRoute
+  ApiBhoomiputraVerifyMemberRoute: typeof ApiBhoomiputraVerifyMemberRoute
   OrderConfirmationOrderRefRoute: typeof OrderConfirmationOrderRefRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
@@ -201,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/bhoomiputra/verify-member': {
+      id: '/api/bhoomiputra/verify-member'
+      path: '/api/bhoomiputra/verify-member'
+      fullPath: '/api/bhoomiputra/verify-member'
+      preLoaderRoute: typeof ApiBhoomiputraVerifyMemberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/order/confirmation/$orderRef': {
       id: '/order/confirmation/$orderRef'
       path: '/order/confirmation/$orderRef'
@@ -226,6 +247,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSendBookingConfirmationRoute: ApiSendBookingConfirmationRoute,
   ExperienceSlugRoute: ExperienceSlugRoute,
   ProductSlugRoute: ProductSlugRoute,
+  ApiBhoomiputraVerifyMemberRoute: ApiBhoomiputraVerifyMemberRoute,
   OrderConfirmationOrderRefRoute: OrderConfirmationOrderRefRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }

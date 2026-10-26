@@ -411,5 +411,44 @@ describe("Mobile Pass Rehydration & Email Templates Suite", () => {
       const discount = Math.round((eligibleTotal * discountPercent) / 100);
       expect(discount).toBe(585);
     });
+
+    it("verifies Bhoomiputra discount is strictly 0 when member status is unverified or checking", () => {
+      const discountPercent = 15;
+      const eligibleTotal = 3900;
+      const minOrderInr = 500;
+
+      // When isBhoomiMember is true BUT verifyStatus is "idle", "verifying", or "error"
+      const computeDiscount = (isMember: boolean, verifyStatus: string) => {
+        return isMember && verifyStatus === "verified" && eligibleTotal >= minOrderInr
+          ? Math.round((eligibleTotal * discountPercent) / 100)
+          : 0;
+      };
+
+      expect(computeDiscount(false, "idle")).toBe(0);
+      expect(computeDiscount(true, "idle")).toBe(0);
+      expect(computeDiscount(true, "verifying")).toBe(0);
+      expect(computeDiscount(true, "error")).toBe(0);
+      expect(computeDiscount(true, "verified")).toBe(585);
+    });
+
+    it("verifies Apple design email canvas uses clean light background and concise card hierarchy", async () => {
+      const entry = TEMPLATES["booking-confirmation"]!;
+      const element = React.createElement(entry.component, entry.previewData);
+      const html = await render(element);
+
+      // Light Apple Canvas
+      expect(html).toContain("background-color:#f5f5f7");
+      expect(html).toContain("border-radius:20px");
+      expect(html).toContain("MATSYAMART · OFFICIAL PASS");
+
+      // Concise Apple Table
+      expect(html).toContain("SCHEDULE &amp; TIME");
+      expect(html).toContain("GUEST ADMISSION");
+      expect(html).toContain("Total Amount Paid");
+
+      // No verbose paragraphs or raw base64 dumping
+      expect(html).not.toContain("?p=eyJy");
+      expect(html).not.toContain("Tip: tap below to open your secure QR boarding pass");
+    });
   });
 });

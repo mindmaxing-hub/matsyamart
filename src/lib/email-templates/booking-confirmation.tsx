@@ -114,166 +114,52 @@ export function resolveEmailCategory(
 }
 
 interface ThemePalette {
-  mainBg: string;
-  cardBg: string;
-  headerBg: string;
-  cardBorder: string;
   badgeBg: string;
   badgeBorder: string;
   badgeColor: string;
   badgeText: string;
-  titleColor: string;
-  refColor: string;
-  sectionTitleColor: string;
-  labelColor: string;
-  valueColor: string;
-  dividerBorder: string;
-  venueBg: string;
-  venueBorder: string;
-  venueColor: string;
-  mapsBtnBg: string;
-  mapsBtnColor: string;
-  mapsBtnBorder: string;
-  passBoxBg: string;
-  passBoxBorder: string;
-  passBoxHeading: string;
-  passBoxSub: string;
-  passBtnBg: string;
-  passBtnColor: string;
-  inlineLinkColor: string;
-  footerBg: string;
-  footerText: string;
-  footerSubText: string;
+  accentColor: string;
+  ctaBg: string;
+  ctaColor: string;
 }
 
+// Apple design system theme accents: light canvas with category-true accents
 const THEMES: Record<EmailCategory, ThemePalette> = {
   food: {
-    mainBg: "#0e1a29",
-    cardBg: "#1c3554",
-    headerBg: "#152942",
-    cardBorder: "1px solid rgba(64, 104, 130, 0.4)",
-    badgeBg: "#152942",
-    badgeBorder: "1px solid rgba(227, 161, 87, 0.4)",
-    badgeColor: "#e3a157",
+    badgeBg: "#fffbeb",
+    badgeBorder: "1px solid #fde047",
+    badgeColor: "#1c3554",
     badgeText: "🐟 Confirmed Coastal Food Feast & Tax Invoice",
-    titleColor: "#f8fafc",
-    refColor: "#94a3b8",
-    sectionTitleColor: "#e3a157",
-    labelColor: "#94a3b8",
-    valueColor: "#f8fafc",
-    dividerBorder: "1px solid rgba(64, 104, 130, 0.35)",
-    venueBg: "#152942",
-    venueBorder: "1px solid rgba(64, 104, 130, 0.5)",
-    venueColor: "#f1f5f9",
-    mapsBtnBg: "#152942",
-    mapsBtnColor: "#cbd5e1",
-    mapsBtnBorder: "1px solid rgba(64, 104, 130, 0.5)",
-    passBoxBg: "#152942",
-    passBoxBorder: "1px solid rgba(227, 161, 87, 0.35)",
-    passBoxHeading: "#e3a157",
-    passBoxSub: "#cbd5e1",
-    passBtnBg: "#e3a157",
-    passBtnColor: "#152942",
-    inlineLinkColor: "#e3a157",
-    footerBg: "#0e1a29",
-    footerText: "#94a3b8",
-    footerSubText: "rgba(148, 163, 184, 0.7)",
+    accentColor: "#1c3554", // Midnight Navy
+    ctaBg: "#1c3554",
+    ctaColor: "#ffffff",
   },
   walk: {
-    mainBg: "#2e5258",
-    cardBg: "#5f98a0",
-    headerBg: "#4d828a",
-    cardBorder: "1px solid rgba(255, 255, 255, 0.3)",
-    badgeBg: "#3e6d74",
-    badgeBorder: "1px solid rgba(255, 255, 255, 0.45)",
-    badgeColor: "#ffffff",
+    badgeBg: "#f0fdfa",
+    badgeBorder: "1px solid #99f6e4",
+    badgeColor: "#5f98a0",
     badgeText: "🌊 Confirmed Coastal Heritage Walk & Tax Invoice",
-    titleColor: "#102030", // High contrast deep marine navy
-    refColor: "#1b2b49",
-    sectionTitleColor: "#102030",
-    labelColor: "#e6fffa",
-    valueColor: "#ffffff",
-    dividerBorder: "1px solid rgba(255, 255, 255, 0.25)",
-    venueBg: "#4d828a",
-    venueBorder: "1px solid rgba(255, 255, 255, 0.35)",
-    venueColor: "#ffffff",
-    mapsBtnBg: "#3e6d74",
-    mapsBtnColor: "#ffffff",
-    mapsBtnBorder: "1px solid rgba(255, 255, 255, 0.4)",
-    passBoxBg: "#4d828a",
-    passBoxBorder: "1px solid rgba(255, 255, 255, 0.4)",
-    passBoxHeading: "#ffffff",
-    passBoxSub: "#f0fdfa",
-    passBtnBg: "#102030",
-    passBtnColor: "#ffffff",
-    inlineLinkColor: "#102030",
-    footerBg: "#2e5258",
-    footerText: "#e6fffa",
-    footerSubText: "rgba(230, 255, 250, 0.7)",
+    accentColor: "#5f98a0", // Seafoam Teal
+    ctaBg: "#111827",
+    ctaColor: "#ffffff",
   },
   workshop: {
-    mainBg: "#170906",
-    cardBg: "#2b120c",
-    headerBg: "#220e09",
-    cardBorder: "1px solid rgba(218, 179, 140, 0.25)",
-    badgeBg: "#35160e",
-    badgeBorder: "1px solid rgba(227, 161, 87, 0.4)",
-    badgeColor: "#e3a157",
+    badgeBg: "#fff7ed",
+    badgeBorder: "1px solid #fed7aa",
+    badgeColor: "#2b120c",
     badgeText: "🪵 Confirmed Coastal Craft Workshop & Tax Invoice",
-    titleColor: "#f5edeb",
-    refColor: "#dab38c",
-    sectionTitleColor: "#e3a157",
-    labelColor: "#dab38c",
-    valueColor: "#f5edeb",
-    dividerBorder: "1px solid rgba(218, 179, 140, 0.2)",
-    venueBg: "#220e09",
-    venueBorder: "1px solid rgba(218, 179, 140, 0.25)",
-    venueColor: "#f5edeb",
-    mapsBtnBg: "#35160e",
-    mapsBtnColor: "#dab38c",
-    mapsBtnBorder: "1px solid rgba(218, 179, 140, 0.3)",
-    passBoxBg: "#220e09",
-    passBoxBorder: "1px solid rgba(227, 161, 87, 0.3)",
-    passBoxHeading: "#e3a157",
-    passBoxSub: "#dab38c",
-    passBtnBg: "#e3a157",
-    passBtnColor: "#2b120c",
-    inlineLinkColor: "#e3a157",
-    footerBg: "#170906",
-    footerText: "#dab38c",
-    footerSubText: "rgba(218, 179, 140, 0.6)",
+    accentColor: "#2b120c", // Espresso Terracotta
+    ctaBg: "#2b120c",
+    ctaColor: "#ffffff",
   },
   goods: {
-    mainBg: "#140604",
-    cardBg: "#1f0b07",
-    headerBg: "#29100b",
-    cardBorder: "1px solid rgba(16, 185, 129, 0.3)",
-    badgeBg: "#143825",
-    badgeBorder: "1px solid rgba(52, 211, 153, 0.4)",
-    badgeColor: "#34d399",
+    badgeBg: "#ecfdf5",
+    badgeBorder: "1px solid #a7f3d0",
+    badgeColor: "#10b981",
     badgeText: "📦 Confirmed Artisanal Coastal Goods & Tax Invoice",
-    titleColor: "#f5edeb",
-    refColor: "#dab38c",
-    sectionTitleColor: "#34d399",
-    labelColor: "#dab38c",
-    valueColor: "#f5edeb",
-    dividerBorder: "1px solid rgba(218, 179, 140, 0.2)",
-    venueBg: "#29100b",
-    venueBorder: "1px solid rgba(218, 179, 140, 0.2)",
-    venueColor: "#f5edeb",
-    mapsBtnBg: "#143825",
-    mapsBtnColor: "#34d399",
-    mapsBtnBorder: "1px solid rgba(52, 211, 153, 0.4)",
-    passBoxBg: "#29100b",
-    passBoxBorder: "1px solid rgba(52, 211, 153, 0.3)",
-    passBoxHeading: "#34d399",
-    passBoxSub: "#dab38c",
-    passBtnBg: "#10b981",
-    passBtnColor: "#06281b",
-    inlineLinkColor: "#34d399",
-    footerBg: "#140604",
-    footerText: "#dab38c",
-    footerSubText: "rgba(218, 179, 140, 0.6)",
+    accentColor: "#10b981", // Emerald
+    ctaBg: "#111827",
+    ctaColor: "#ffffff",
   },
 };
 
@@ -291,9 +177,9 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
   const timeFormatted = props?.timeFormatted || "1:00 PM IST";
   const meetingAddress =
     props?.meetingAddress ||
-    "Versova Gaothan Dining Courtyard, Andheri West, Mumbai - 400061";
+    "Versova Gaothan Dining Courtyard, Andheri West, Mumbai – 400061";
 
-  // Normalize Google Maps link to canonical cross-platform search format
+  // Google Maps link
   const rawMapsUrl = props?.mapsUrl;
   const mapsUrl = rawMapsUrl
     ? rawMapsUrl.startsWith("https://maps.google.com/?q=")
@@ -317,11 +203,10 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
   const invoiceNumber = props?.invoiceNumber || `INV-${orderRef}`;
   const gstin = props?.gstin || "27ABBFK9637R1ZF";
 
-  // Dynamic Category Resolution based on pillar, title, and orderRef
   const category = resolveEmailCategory(props?.pillar, experienceTitle, orderRef);
   const theme = THEMES[category];
 
-  // 18% GST Calculations (inclusive)
+  // GST calculations
   const taxableValue =
     props?.taxableValueInr ??
     Math.round((totalAmountInr / 1.18) * 100) / 100;
@@ -329,7 +214,6 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
     props?.gstAmountInr ??
     Math.round((totalAmountInr - taxableValue) * 100) / 100;
 
-  // State-based tax breakdown (Intra-state Maharashtra vs Inter-state IGST)
   const shipping = props?.shippingAddress;
   const shippingState = shipping?.state?.trim().toLowerCase();
   const isInterState = Boolean(
@@ -358,7 +242,6 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
           },
         ];
 
-  // Synthesize discrete ticket passes for multi-seat bookings
   interface EmailPassTicket {
     ticketNumber: number;
     title: string;
@@ -391,221 +274,276 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
       </Preview>
       <Body
         style={{
-          backgroundColor: theme.mainBg,
+          backgroundColor: "#f5f5f7",
           fontFamily:
             "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif",
-          padding: "32px 16px",
+          margin: "0",
+          padding: "36px 12px",
+          color: "#1d1d1f",
+          WebkitFontSmoothing: "antialiased",
         }}
       >
-        <Container style={{ maxWidth: "580px", margin: "0 auto" }}>
-          {/* Main Card Wrapper */}
+        <Container
+          style={{
+            maxWidth: "600px",
+            margin: "0 auto",
+            backgroundColor: "#ffffff",
+            borderRadius: "20px",
+            border: "1px solid #e5e5ea",
+            overflow: "hidden",
+            boxShadow: "0 4px 24px rgba(0, 0, 0, 0.04)",
+          }}
+        >
+          {/* Minimalist Apple Brand Header */}
           <Section
             style={{
-              backgroundColor: theme.cardBg,
-              border: theme.cardBorder,
-              borderRadius: "24px",
-              overflow: "hidden",
-              boxShadow: "0 20px 40px rgba(0, 0, 0, 0.6)",
+              padding: "28px 32px 18px",
+              borderBottom: "1px solid #f0f0f2",
             }}
           >
-            {/* Header */}
-            <Section
-              style={{
-                padding: "32px 24px 24px",
-                textAlign: "center" as const,
-                backgroundColor: theme.headerBg,
-                borderBottom: "1px dashed rgba(255, 255, 255, 0.15)",
-              }}
-            >
-              <Text
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <tbody>
+                <tr>
+                  <td style={{ verticalAlign: "middle" }}>
+                    <Text
+                      style={{
+                        margin: 0,
+                        fontSize: "12px",
+                        fontWeight: "700",
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        color: "#86868b",
+                      }}
+                    >
+                      MATSYAMART · OFFICIAL PASS
+                    </Text>
+                  </td>
+                  <td style={{ textAlign: "right", verticalAlign: "middle" }}>
+                    <Text
+                      style={{
+                        margin: 0,
+                        fontSize: "12px",
+                        fontFamily: "ui-monospace, 'SF Mono', monospace",
+                        color: "#86868b",
+                      }}
+                    >
+                      {orderRef}
+                    </Text>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </Section>
+
+          {/* Hero Experience Section */}
+          <Section style={{ padding: "32px 32px 24px" }}>
+            <div style={{ marginBottom: "12px" }}>
+              <span
                 style={{
                   display: "inline-block",
-                  padding: "4px 14px",
-                  backgroundColor: theme.badgeBg,
-                  border: theme.badgeBorder,
+                  padding: "4px 12px",
                   borderRadius: "999px",
                   fontSize: "11px",
-                  fontWeight: "700",
+                  fontWeight: "600",
+                  letterSpacing: "0.04em",
+                  backgroundColor: theme.badgeBg,
+                  border: theme.badgeBorder,
                   color: theme.badgeColor,
-                  textTransform: "uppercase" as const,
-                  letterSpacing: "0.08em",
-                  margin: "0 0 12px",
                 }}
               >
                 {theme.badgeText}
-              </Text>
-              <Heading
-                as="h1"
-                style={{
-                  fontSize: "22px",
-                  fontWeight: "700",
-                  color: theme.titleColor,
-                  margin: "0 0 8px",
-                  lineHeight: "1.25",
-                }}
-              >
-                {experienceTitle}
-              </Heading>
-              <Text
-                style={{
-                  fontFamily: "monospace",
-                  fontSize: "13px",
-                  color: theme.refColor,
-                  letterSpacing: "0.1em",
-                  margin: "0",
-                }}
-              >
-                PASS REF: {orderRef}
-              </Text>
-            </Section>
+              </span>
+            </div>
 
-            {/* Content Details */}
-            <Section style={{ padding: "24px 28px" }}>
-              {/* Guest & Attendance */}
-              <Text
-                style={{
-                  fontSize: "11px",
-                  fontWeight: "700",
-                  color: theme.sectionTitleColor,
-                  textTransform: "uppercase" as const,
-                  letterSpacing: "0.1em",
-                  margin: "0 0 12px",
-                }}
-              >
-                GUEST &amp; ATTENDANCE
-              </Text>
-              <Section style={{ marginBottom: "8px" }}>
-                <Text
-                  style={{
-                    fontSize: "12px",
-                    color: theme.labelColor,
-                    margin: "0 0 2px",
-                  }}
-                >
-                  Guest Name:
-                </Text>
-                <Text
-                  style={{
-                    fontSize: "14px",
-                    color: theme.valueColor,
-                    margin: "0 0 8px",
-                  }}
-                >
-                  <b>{customerName}</b>
-                </Text>
-              </Section>
-              <Section style={{ marginBottom: "8px" }}>
-                <Text
-                  style={{
-                    fontSize: "12px",
-                    color: theme.labelColor,
-                    margin: "0 0 2px",
-                  }}
-                >
-                  Registered Email:
-                </Text>
-                <Text
-                  style={{
-                    fontSize: "14px",
-                    color: theme.valueColor,
-                    margin: "0 0 8px",
-                  }}
-                >
-                  <b>{customerEmail}</b>
-                </Text>
-              </Section>
-              <Section style={{ marginBottom: "8px" }}>
-                <Text
-                  style={{
-                    fontSize: "12px",
-                    color: theme.labelColor,
-                    margin: "0 0 2px",
-                  }}
-                >
-                  Reserved Seats:
-                </Text>
-                <Text
-                  style={{
-                    fontSize: "14px",
-                    color: theme.valueColor,
-                    margin: "0 0 8px",
-                  }}
-                >
-                  {seatsCount} Guest(s)
-                </Text>
-              </Section>
-              <Section style={{ marginBottom: "8px" }}>
-                <Text
-                  style={{
-                    fontSize: "12px",
-                    color: theme.labelColor,
-                    margin: "0 0 2px",
-                  }}
-                >
-                  Scheduled Date:
-                </Text>
-                <Text
-                  style={{
-                    fontSize: "14px",
-                    color: theme.valueColor,
-                    margin: "0 0 8px",
-                  }}
-                >
-                  <b>{dateFormatted}</b>
-                </Text>
-              </Section>
-              <Section style={{ marginBottom: "8px" }}>
-                <Text
-                  style={{
-                    fontSize: "12px",
-                    color: theme.labelColor,
-                    margin: "0 0 2px",
-                  }}
-                >
-                  Reporting Time:
-                </Text>
-                <Text
-                  style={{
-                    fontSize: "14px",
-                    color: theme.valueColor,
-                    margin: "0 0 8px",
-                  }}
-                >
-                  <b>{timeFormatted}</b>
-                </Text>
-              </Section>
+            <Heading
+              as="h1"
+              style={{
+                fontSize: "24px",
+                fontWeight: "700",
+                lineHeight: "1.25",
+                color: "#1d1d1f",
+                margin: "0 0 8px",
+                letterSpacing: "-0.015em",
+              }}
+            >
+              {experienceTitle}
+            </Heading>
 
-              {/* Physical Delivery Address (if present) */}
-              {shipping && shipping.addressLine && (
-                <>
-                  <Hr
-                    style={{
-                      borderTop: theme.dividerBorder,
-                      margin: "20px 0",
-                    }}
-                  />
+            <Text
+              style={{
+                margin: "0",
+                fontSize: "14px",
+                color: "#6e6e73",
+                lineHeight: "1.4",
+              }}
+            >
+              Reserved for <b>{customerName}</b> ({customerEmail})
+            </Text>
+          </Section>
+
+          {/* Apple Wallet-Style Boarding Pass Card */}
+          <Section style={{ padding: "0 32px 28px" }}>
+            <div
+              style={{
+                backgroundColor: "#fbfbfd",
+                borderRadius: "16px",
+                border: "1px solid #e5e5ea",
+                padding: "24px",
+              }}
+            >
+              <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                <tbody>
+                  <tr>
+                    <td style={{ width: "50%", verticalAlign: "top", paddingRight: "12px" }}>
+                      <Text
+                        style={{
+                          margin: "0 0 4px",
+                          fontSize: "11px",
+                          fontWeight: "600",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                          color: "#86868b",
+                        }}
+                      >
+                        SCHEDULE &amp; TIME
+                      </Text>
+                      <Text
+                        style={{
+                          margin: 0,
+                          fontSize: "14px",
+                          fontWeight: "600",
+                          color: "#1d1d1f",
+                          lineHeight: "1.35",
+                        }}
+                      >
+                        {dateFormatted}
+                      </Text>
+                      <Text
+                        style={{
+                          margin: "2px 0 0",
+                          fontSize: "13px",
+                          color: "#6e6e73",
+                        }}
+                      >
+                        Reporting: {timeFormatted}
+                      </Text>
+                    </td>
+
+                    <td style={{ width: "50%", verticalAlign: "top", paddingLeft: "12px" }}>
+                      <Text
+                        style={{
+                          margin: "0 0 4px",
+                          fontSize: "11px",
+                          fontWeight: "600",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                          color: "#86868b",
+                        }}
+                      >
+                        GUEST ADMISSION
+                      </Text>
+                      <Text
+                        style={{
+                          margin: 0,
+                          fontSize: "14px",
+                          fontWeight: "600",
+                          color: "#1d1d1f",
+                          lineHeight: "1.35",
+                        }}
+                      >
+                        {customerName}
+                      </Text>
+                      <Text
+                        style={{
+                          margin: "2px 0 0",
+                          fontSize: "13px",
+                          color: "#6e6e73",
+                        }}
+                      >
+                        {seatsCount} Reserved {seatsCount === 1 ? "Seat" : "Seats"}
+                      </Text>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* Rendezvous Point */}
+              {meetingAddress && (
+                <div
+                  style={{
+                    padding: "12px 14px",
+                    borderRadius: "10px",
+                    backgroundColor: "#ffffff",
+                    border: "1px solid #e5e5ea",
+                    marginBottom: "20px",
+                  }}
+                >
                   <Text
                     style={{
-                      fontSize: "11px",
+                      margin: "0 0 2px",
+                      fontSize: "10px",
                       fontWeight: "700",
-                      color: theme.sectionTitleColor,
-                      textTransform: "uppercase" as const,
-                      letterSpacing: "0.1em",
-                      margin: "0 0 12px",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      color: "#86868b",
                     }}
                   >
-                    DELIVERY SHIPPING ADDRESS
+                    RENDEZVOUS &amp; GPS MEETING PIN
                   </Text>
                   <Text
                     style={{
+                      margin: "0 0 4px",
                       fontSize: "13px",
-                      color: theme.venueColor,
-                      backgroundColor: theme.venueBg,
-                      padding: "12px 16px",
-                      borderRadius: "12px",
-                      border: theme.venueBorder,
-                      margin: "0",
-                      lineHeight: "1.5",
+                      color: "#1d1d1f",
+                      lineHeight: "1.4",
+                    }}
+                  >
+                    {meetingAddress}
+                  </Text>
+                  {mapsUrl && (
+                    <Link
+                      href={mapsUrl}
+                      style={{
+                        fontSize: "12px",
+                        color: "#0066cc",
+                        textDecoration: "none",
+                        fontWeight: "500",
+                      }}
+                    >
+                      📍 Open Meeting Point in Google Maps →
+                    </Link>
+                  )}
+                </div>
+              )}
+
+              {/* Delivery Address (Physical Products) */}
+              {shipping && shipping.addressLine && (
+                <div
+                  style={{
+                    padding: "12px 14px",
+                    borderRadius: "10px",
+                    backgroundColor: "#ffffff",
+                    border: "1px solid #e5e5ea",
+                    marginBottom: "20px",
+                  }}
+                >
+                  <Text
+                    style={{
+                      margin: "0 0 2px",
+                      fontSize: "10px",
+                      fontWeight: "700",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      color: "#86868b",
+                    }}
+                  >
+                    DELIVERY ADDRESS
+                  </Text>
+                  <Text
+                    style={{
+                      margin: 0,
+                      fontSize: "13px",
+                      color: "#1d1d1f",
                     }}
                   >
                     {shipping.addressLine}
@@ -613,670 +551,257 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
                     {shipping.state ? `, ${shipping.state}` : ""}
                     {shipping.pincode ? ` – ${shipping.pincode}` : ""}
                   </Text>
-                </>
+                </div>
               )}
 
-              {/* Rendezvous Point */}
-              {meetingAddress && (
-                <>
-                  <Hr
-                    style={{
-                      borderTop: theme.dividerBorder,
-                      margin: "20px 0",
-                    }}
-                  />
-                  <Text
-                    style={{
-                      fontSize: "11px",
-                      fontWeight: "700",
-                      color: theme.sectionTitleColor,
-                      textTransform: "uppercase" as const,
-                      letterSpacing: "0.1em",
-                      margin: "0 0 12px",
-                    }}
-                  >
-                    RENDEZVOUS &amp; GPS MEETING PIN
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: "13px",
-                      color: theme.venueColor,
-                      backgroundColor: theme.venueBg,
-                      padding: "12px 16px",
-                      borderRadius: "12px",
-                      border: theme.venueBorder,
-                      margin: "0",
-                      lineHeight: "1.5",
-                    }}
-                  >
-                    {meetingAddress}
-                  </Text>
-
-                  {mapsUrl && (
-                    <Section
-                      style={{ textAlign: "center", margin: "14px 0 20px" }}
-                    >
-                      <Button
-                        href={mapsUrl}
-                        style={{
-                          backgroundColor: theme.mapsBtnBg,
-                          color: theme.mapsBtnColor,
-                          border: theme.mapsBtnBorder,
-                          fontWeight: "600",
-                          fontSize: "12px",
-                          padding: "10px 20px",
-                          borderRadius: "999px",
-                          textDecoration: "none",
-                          display: "inline-block",
-                        }}
-                      >
-                        📍 Open Meeting Point in Google Maps
-                      </Button>
-                    </Section>
-                  )}
-                </>
-              )}
-
-              <Hr
-                style={{
-                  borderTop: theme.dividerBorder,
-                  margin: "20px 0",
-                }}
-              />
-
-              {/* Pass Roster for Multi-Ticket Orders */}
+              {/* Multi-Ticket Attendee Roster (Clean Compact Grid) */}
               {passTickets.length > 1 && (
-                <Section style={{ marginBottom: "16px" }}>
+                <div style={{ marginBottom: "20px" }}>
                   <Text
                     style={{
+                      margin: "0 0 8px",
                       fontSize: "11px",
                       fontWeight: "700",
-                      color: theme.sectionTitleColor,
-                      textTransform: "uppercase" as const,
-                      letterSpacing: "0.1em",
-                      margin: "0 0 12px",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em",
+                      color: "#86868b",
                     }}
                   >
                     {`ADMISSION PASS ROSTER (${passTickets.length} TICKETS)`}
                   </Text>
-                  {passTickets.map((ticket) => (
-                    <Section
-                      key={ticket.ticketNumber}
-                      style={{
-                        backgroundColor: theme.venueBg,
-                        border: theme.venueBorder,
-                        borderRadius: "14px",
-                        padding: "12px 16px",
-                        marginBottom: "8px",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontSize: "10px",
-                          fontFamily: "monospace",
-                          fontWeight: "700",
-                          color: theme.labelColor,
-                          textTransform: "uppercase" as const,
-                          margin: "0 0 4px",
-                        }}
-                      >
-                        {`TICKET #${ticket.ticketNumber} · ${ticket.title}`}
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: "13px",
-                          fontWeight: "700",
-                          color: theme.valueColor,
-                          margin: "0 0 2px",
-                        }}
-                      >
-                        {`Guest: ${ticket.attendeeName}`}
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: "11px",
-                          color: theme.labelColor,
-                          margin: "0",
-                        }}
-                      >
-                        Date: {dateFormatted} · Time: {timeFormatted}
-                      </Text>
-                    </Section>
-                  ))}
-                </Section>
+                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <tbody>
+                      {passTickets.map((t) => (
+                        <tr
+                          key={t.ticketNumber}
+                          style={{
+                            borderBottom: "1px solid #f0f0f2",
+                          }}
+                        >
+                          <td style={{ padding: "8px 0" }}>
+                            <div style={{ fontSize: "12px", fontWeight: "600", color: "#1d1d1f" }}>
+                              {`TICKET #${t.ticketNumber} · ${t.title}`}
+                            </div>
+                            <div style={{ fontSize: "12px", color: "#6e6e73", marginTop: "2px" }}>
+                              {`Guest: ${t.attendeeName}`}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
 
-              {/* Mobile Boarding Pass CTA */}
-              <Section
-                style={{
-                  backgroundColor: theme.passBoxBg,
-                  borderRadius: "16px",
-                  padding: "20px",
-                  textAlign: "center" as const,
-                  border: theme.passBoxBorder,
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: "15px",
-                    fontWeight: "700",
-                    color: theme.passBoxHeading,
-                    margin: "0 0 6px",
-                  }}
-                >
-                  📲 Digital Boarding Pass Ready
-                </Text>
-                <Text
-                  style={{
-                    fontSize: "12px",
-                    color: theme.passBoxSub,
-                    margin: "0 0 16px",
-                    lineHeight: "1.4",
-                  }}
-                >
-                  Tap below to open your secure QR boarding pass on any mobile
-                  browser. Keep it handy at the check-in gate.
-                </Text>
+              {/* Primary Boarding Pass CTA (Apple Pill Button) */}
+              <div style={{ textAlign: "center", paddingTop: "4px" }}>
                 <Button
                   href={passUrl}
                   style={{
-                    backgroundColor: theme.passBtnBg,
-                    color: theme.passBtnColor,
-                    fontWeight: "700",
+                    display: "inline-block",
+                    backgroundColor: theme.ctaBg,
+                    color: theme.ctaColor,
                     fontSize: "13px",
-                    padding: "12px 24px",
+                    fontWeight: "600",
+                    padding: "12px 28px",
                     borderRadius: "999px",
                     textDecoration: "none",
-                    display: "inline-block",
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
                   }}
                 >
                   🎫 Open Boarding Pass on Mobile
                 </Button>
-                {/* Clean, single-line fallback link without raw base64 dumping */}
-                <Text
-                  style={{
-                    fontSize: "11px",
-                    color: theme.labelColor,
-                    marginTop: "12px",
-                    marginBottom: "0",
-                  }}
-                >
-                  Direct link:{" "}
-                  <Link
-                    href={passUrl}
-                    style={{
-                      color: theme.inlineLinkColor,
-                      textDecoration: "underline",
-                      fontWeight: "600",
-                    }}
-                  >
-                    matsyamart.com/order/confirmation/{orderRef}
-                  </Link>
-                </Text>
-              </Section>
+              </div>
+            </div>
+          </Section>
 
-              <Hr
-                style={{
-                  borderTop: theme.dividerBorder,
-                  margin: "20px 0",
-                }}
-              />
-
-              {/* Official GST Tax Invoice Card */}
+          {/* Clean Apple-Style Receipt & Official Tax Invoice */}
+          <Section
+            style={{
+              padding: "24px 32px 32px",
+              backgroundColor: "#ffffff",
+              borderTop: "1px solid #f0f0f2",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
               <Text
                 style={{
+                  margin: 0,
                   fontSize: "11px",
                   fontWeight: "700",
-                  color: theme.sectionTitleColor,
-                  textTransform: "uppercase" as const,
-                  letterSpacing: "0.1em",
-                  margin: "0 0 12px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  color: "#86868b",
                 }}
               >
                 OFFICIAL GST TAX INVOICE &amp; RECEIPT
               </Text>
-              <Section
-                style={{
-                  backgroundColor: "#ffffff",
-                  borderRadius: "16px",
-                  padding: "22px 20px",
-                  border: "1px solid rgba(0, 0, 0, 0.15)",
-                  color: "#000000",
-                }}
-              >
-                {/* Official Supplier Details */}
-                <Section style={{ marginBottom: "12px" }}>
-                  <Text
-                    style={{
-                      fontSize: "15px",
-                      fontWeight: "700",
-                      color: "#000000",
-                      margin: "0 0 4px",
-                    }}
-                  >
-                    Kolibaba Seafood Inc.
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: "11px",
-                      color: "#475569",
-                      lineHeight: "1.5",
-                      margin: "0",
-                    }}
-                  >
-                    <b>Registered Address:</b> 101, Samudra Darshan, Budha Lane
-                    2, Versova, Andheri West, Mumbai – 400061
-                    <br />
-                    <b>GSTIN:</b> {gstin} (State Code: 27 · Maharashtra)
-                    <br />
-                    <b>Email:</b> hello@matsyamart.com · <b>Support:</b> +91
-                    76665 11511
-                  </Text>
-                </Section>
+            </div>
 
-                {/* Invoice Meta Grid */}
-                <Section
-                  style={{
-                    backgroundColor: "#f8fafc",
-                    padding: "10px 14px",
-                    borderRadius: "8px",
-                    border: "1px solid #e2e8f0",
-                    marginBottom: "12px",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: "11px",
-                      color: "#0f172a",
-                      margin: "2px 0",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    <b>Invoice No:</b> {invoiceNumber}
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: "11px",
-                      color: "#0f172a",
-                      margin: "2px 0",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    <b>Order Ref:</b> {orderRef}
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: "11px",
-                      color: "#0f172a",
-                      margin: "2px 0",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    <b>Payment:</b> ONLINE (RAZORPAY) · PAID
-                  </Text>
-                </Section>
-
-                <Hr
-                  style={{
-                    borderTop: "1px dashed #cbd5e1",
-                    margin: "12px 0",
-                  }}
-                />
-
-                {/* Itemized Table */}
-                <Section style={{ margin: "10px 0" }}>
-                  <Text
-                    style={{
-                      fontSize: "10px",
-                      fontWeight: "700",
-                      color: "#64748b",
-                      letterSpacing: "0.08em",
-                      textTransform: "uppercase" as const,
-                      margin: "0 0 8px",
-                    }}
-                  >
-                    ITEMIZED BREAKDOWN
-                  </Text>
-                  {itemsList.map((item, idx) => (
-                    <Section
-                      key={idx}
+            <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}>
+              <tbody>
+                {itemsList.map((item, idx) => (
+                  <tr key={idx} style={{ borderBottom: "1px solid #f5f5f7" }}>
+                    <td style={{ padding: "10px 0", fontSize: "14px", color: "#1d1d1f" }}>
+                      {item.title} <span style={{ color: "#86868b" }}>× {item.quantity}</span>
+                    </td>
+                    <td
                       style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        marginBottom: "6px",
+                        padding: "10px 0",
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        color: "#1d1d1f",
+                        textAlign: "right",
                       }}
                     >
-                      <Text
-                        style={{
-                          fontSize: "12px",
-                          color: "#1e293b",
-                          margin: "0",
-                        }}
-                      >
-                        {item.title} (x{item.quantity})
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          color: "#0f172a",
-                          margin: "0",
-                          fontFamily: "monospace",
-                        }}
-                      >
-                        ₹
-                        {(item.unitPrice * item.quantity).toLocaleString(
-                          "en-IN"
-                        )}
-                      </Text>
-                    </Section>
-                  ))}
-                </Section>
+                      ₹{(item.unitPrice * item.quantity).toLocaleString("en-IN")}
+                    </td>
+                  </tr>
+                ))}
 
-                <Hr
-                  style={{
-                    borderTop: "1px dashed #cbd5e1",
-                    margin: "12px 0",
-                  }}
-                />
-
-                {/* Tax Breakdown */}
-                <Section
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: "4px",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: "11px",
-                      color: "#64748b",
-                      margin: "0",
-                    }}
-                  >
+                {/* Tax Breakdown Rows */}
+                <tr>
+                  <td style={{ padding: "6px 0", fontSize: "12px", color: "#86868b" }}>
                     Taxable Value (Subtotal):
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: "11px",
-                      color: "#0f172a",
-                      margin: "0",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    ₹{taxableValue.toFixed(2)}
-                  </Text>
-                </Section>
+                  </td>
+                  <td style={{ padding: "6px 0", fontSize: "12px", color: "#6e6e73", textAlign: "right" }}>
+                    ₹{taxableValue.toLocaleString("en-IN")}
+                  </td>
+                </tr>
+
                 {isInterState ? (
-                  <Section
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: "11px",
-                        color: "#64748b",
-                        margin: "0",
-                      }}
-                    >
+                  <tr>
+                    <td style={{ padding: "4px 0", fontSize: "12px", color: "#86868b" }}>
                       IGST (18.0%):
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: "11px",
-                        color: "#0f172a",
-                        margin: "0",
-                        fontFamily: "monospace",
-                      }}
-                    >
-                      ₹{igst.toFixed(2)}
-                    </Text>
-                  </Section>
+                    </td>
+                    <td style={{ padding: "4px 0", fontSize: "12px", color: "#6e6e73", textAlign: "right" }}>
+                      ₹{igst.toLocaleString("en-IN")}
+                    </td>
+                  </tr>
                 ) : (
                   <>
-                    <Section
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontSize: "11px",
-                          color: "#64748b",
-                          margin: "0",
-                        }}
-                      >
+                    <tr>
+                      <td style={{ padding: "4px 0", fontSize: "12px", color: "#86868b" }}>
                         CGST (9.0%):
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: "11px",
-                          color: "#0f172a",
-                          margin: "0",
-                          fontFamily: "monospace",
-                        }}
-                      >
-                        ₹{cgst.toFixed(2)}
-                      </Text>
-                    </Section>
-                    <Section
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontSize: "11px",
-                          color: "#64748b",
-                          margin: "0",
-                        }}
-                      >
+                      </td>
+                      <td style={{ padding: "4px 0", fontSize: "12px", color: "#6e6e73", textAlign: "right" }}>
+                        ₹{cgst.toLocaleString("en-IN")}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: "4px 0", fontSize: "12px", color: "#86868b" }}>
                         SGST (9.0%):
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: "11px",
-                          color: "#0f172a",
-                          margin: "0",
-                          fontFamily: "monospace",
-                        }}
-                      >
-                        ₹{sgst.toFixed(2)}
-                      </Text>
-                    </Section>
+                      </td>
+                      <td style={{ padding: "4px 0", fontSize: "12px", color: "#6e6e73", textAlign: "right" }}>
+                        ₹{sgst.toLocaleString("en-IN")}
+                      </td>
+                    </tr>
                   </>
                 )}
-                <Section
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: "4px",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: "11px",
-                      color: "#64748b",
-                      margin: "0",
-                    }}
-                  >
+
+                <tr>
+                  <td style={{ padding: "4px 0 10px", fontSize: "12px", color: "#86868b" }}>
                     Total GST (18.0%):
-                  </Text>
-                  <Text
+                  </td>
+                  <td style={{ padding: "4px 0 10px", fontSize: "12px", color: "#6e6e73", textAlign: "right" }}>
+                    ₹{totalGst.toLocaleString("en-IN")}
+                  </td>
+                </tr>
+
+                {/* Total Net Paid */}
+                <tr style={{ borderTop: "2px solid #1d1d1f" }}>
+                  <td style={{ padding: "12px 0 4px", fontSize: "15px", fontWeight: "700", color: "#1d1d1f" }}>
+                    Total Amount Paid
+                  </td>
+                  <td
                     style={{
-                      fontSize: "11px",
-                      color: "#0f172a",
-                      margin: "0",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    ₹{totalGst.toFixed(2)}
-                  </Text>
-                </Section>
-                <Section
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginTop: "10px",
-                    paddingTop: "10px",
-                    borderTop: "2px solid #0f172a",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: "13px",
+                      padding: "12px 0 4px",
+                      fontSize: "17px",
                       fontWeight: "700",
-                      color: "#0f172a",
-                      margin: "0",
-                    }}
-                  >
-                    NET AMOUNT PAID:
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: "700",
-                      color: "#0f172a",
-                      margin: "0",
-                      fontFamily: "monospace",
+                      color: "#1d1d1f",
+                      textAlign: "right",
                     }}
                   >
                     ₹{totalAmountInr.toLocaleString("en-IN")}
-                  </Text>
-                </Section>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
 
-                {/* Strategic Partnership Footer in Tax Invoice */}
-                <Section
-                  style={{
-                    marginTop: "16px",
-                    paddingTop: "12px",
-                    borderTop: "1px solid #e2e8f0",
-                    textAlign: "center" as const,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: "10px",
-                      color: "#64748b",
-                      margin: "0 0 2px",
-                      lineHeight: "1.4",
-                    }}
-                  >
-                    In strategic partnership with{" "}
-                    <b>Bhoomiputra Foundation</b> · Preserving indigenous Koli
-                    culture
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: "9px",
-                      color: "#94a3b8",
-                      margin: "0",
-                    }}
-                  >
-                    Valid digital invoice &amp; admission voucher · Subject to
-                    Mumbai jurisdiction
-                  </Text>
-                </Section>
+            {/* Official Tax Invoice Action Button */}
+            <div style={{ textAlign: "center", margin: "16px 0 12px" }}>
+              <Button
+                href={invoiceUrl}
+                style={{
+                  display: "inline-block",
+                  padding: "10px 20px",
+                  borderRadius: "999px",
+                  border: "1px solid #d2d2d7",
+                  backgroundColor: "#ffffff",
+                  color: "#1d1d1f",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  textDecoration: "none",
+                }}
+              >
+                📄 View &amp; Print Official Tax Invoice (PDF)
+              </Button>
+            </div>
 
-                {/* Invoice Button CTA */}
-                <Section style={{ textAlign: "center", marginTop: "18px" }}>
-                  <Button
-                    href={invoiceUrl}
-                    style={{
-                      backgroundColor: "#0f172a",
-                      color: "#ffffff",
-                      fontWeight: "700",
-                      fontSize: "12px",
-                      padding: "11px 22px",
-                      borderRadius: "999px",
-                      textDecoration: "none",
-                      display: "inline-block",
-                    }}
-                  >
-                    🧾 View &amp; Print Official Tax Invoice (PDF)
-                  </Button>
-                  {/* Clean, single-line fallback link */}
-                  <Text
-                    style={{
-                      fontSize: "11px",
-                      color: "#64748b",
-                      marginTop: "10px",
-                      marginBottom: "0",
-                    }}
-                  >
-                    Direct link:{" "}
-                    <Link
-                      href={invoiceUrl}
-                      style={{
-                        color: "#0f172a",
-                        textDecoration: "underline",
-                        fontWeight: "600",
-                      }}
-                    >
-                      matsyamart.com/order/confirmation/{orderRef}?view=invoice
-                    </Link>
-                  </Text>
-                </Section>
-              </Section>
-            </Section>
-
-            {/* Email Global Footer */}
-            <Section
+            {/* Official Legal Entity & GSTIN Snippet */}
+            <div
               style={{
-                padding: "20px 24px",
-                textAlign: "center" as const,
-                backgroundColor: theme.footerBg,
-                borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+                paddingTop: "12px",
+                borderTop: "1px dashed #e5e5ea",
+                fontSize: "11px",
+                color: "#86868b",
+                lineHeight: "1.5",
+                textAlign: "center",
               }}
             >
-              <Text
-                style={{
-                  fontSize: "11px",
-                  color: theme.footerText,
-                  margin: "0 0 4px",
-                }}
-              >
-                Dispatched from <b>hello@matsyamart.com</b>
-              </Text>
-              <Text
-                style={{
-                  fontSize: "10px",
-                  color: theme.footerSubText,
-                  margin: "0 0 2px",
-                }}
-              >
-                Kolibaba Seafood Inc. · In strategic partnership with
-                Bhoomiputra Foundation
-              </Text>
-              <Text
-                style={{
-                  fontSize: "10px",
-                  color: theme.footerSubText,
-                  margin: "0 0 2px",
-                }}
-              >
-                101, Samudra Darshan, Budha Lane 2, Versova, Andheri West,
-                Mumbai – 400061
-              </Text>
-              <Text
-                style={{
-                  fontSize: "10px",
-                  color: theme.footerSubText,
-                  margin: "0",
-                }}
-              >
-                Support: hello@matsyamart.com · +91 76665 11511 / +91 99204
-                77158
-              </Text>
-            </Section>
+              <b>Kolibaba Seafood Inc.</b> · 101, Samudra Darshan, Budha Lane 2, Versova, Andheri West, Mumbai – 400061
+              <br />
+              <b>GSTIN:</b> {gstin} (State Code 27) · <b>Invoice No:</b> {invoiceNumber}
+            </div>
+          </Section>
+
+          {/* Minimalist Apple Footer */}
+          <Section
+            style={{
+              padding: "24px 32px 32px",
+              backgroundColor: "#fbfbfd",
+              borderTop: "1px solid #f0f0f2",
+              textAlign: "center",
+            }}
+          >
+            <Text
+              style={{
+                margin: "0 0 6px",
+                fontSize: "11px",
+                fontWeight: "600",
+                color: "#6e6e73",
+              }}
+            >
+              In strategic partnership with Bhoomiputra Foundation
+            </Text>
+            <Text
+              style={{
+                margin: "0 0 10px",
+                fontSize: "11px",
+                color: "#86868b",
+              }}
+            >
+              Dispatched from hello@matsyamart.com · Support: +91 76665 11511
+            </Text>
+            <Text
+              style={{
+                margin: 0,
+                fontSize: "10px",
+                color: "#a1a1a6",
+              }}
+            >
+              You received this confirmation because you completed a booking on MatsyaMart.
+            </Text>
           </Section>
         </Container>
       </Body>
@@ -1300,7 +825,7 @@ export const template: TemplateEntry = {
     dateFormatted: "Sunday, 12 December 2026",
     timeFormatted: "1:00 PM IST",
     meetingAddress:
-      "Versova Gaothan Dining Courtyard, Andheri West, Mumbai - 400061",
+      "Versova Gaothan Dining Courtyard, Andheri West, Mumbai – 400061",
     mapsUrl: "https://maps.app.goo.gl/TfKpsZPCyisNzSXv6",
     passUrl: "https://matsyamart.com/order/confirmation/MM-EXP-2026-0042",
     invoiceUrl:
