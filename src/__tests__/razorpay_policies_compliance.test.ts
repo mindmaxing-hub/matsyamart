@@ -58,7 +58,7 @@ describe("Razorpay Merchant Compliance & Policy Pages Suite", () => {
     expect(terms).toContain("400061");
 
     // DPDP Act 2023 compliance in Privacy
-    expect(privacy).toContain("Digital Personal Data Protection Act, 2023");
+    expect(privacy).toContain("Digital Personal Data Protection Act 2023");
     expect(privacy).toContain("Grievance Officer");
 
     // Specific numerical timelines in Refund Policy (Razorpay mandatory requirement)

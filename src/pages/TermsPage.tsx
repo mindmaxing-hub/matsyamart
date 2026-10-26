@@ -27,7 +27,7 @@ export const TermsPage: React.FC = () => {
               1. Platform Overview &amp; Acceptance of Terms
             </h2>
             <p>
-              Welcome to <strong>MatsyaMart</strong> (<a href="https://matsyamart.com" className="text-[#e3a157] underline">matsyamart.com</a>). MatsyaMart is a direct-to-community coastal e-commerce and experiential booking platform operated by <strong>Kolibaba Seafood Inc.</strong> in strategic partnership with <strong>Bhoomiputra Foundation</strong> (Registered Public Charitable Trust No. F-72299).
+              Welcome to <strong>MatsyaMart</strong> (<a href="https://matsyamart.com" className="text-[#e3a157] underline">matsyamart.com</a>). MatsyaMart is a direct-to-community coastal e-commerce and experiential booking platform operated by <strong>Kolibaba Seafood Inc.</strong> (having its registered office at 101, Samudra Darshan, Budha Lane 2, Versova, Andheri West, Mumbai, Maharashtra - 400061; GSTIN: 27ABBFK9637R1ZF) in strategic partnership with <strong>Bhoomiputra Foundation</strong> (Registered Public Charitable Trust No. F-72299).
             </p>
             <p>
               By accessing, browsing, registering, or making any purchase on MatsyaMart, you agree to be legally bound by these Terms and Conditions, our Privacy Policy, Cancellation &amp; Refund Policy, and Shipping &amp; Delivery Policy. If you do not agree with any part of these terms, please refrain from using our services.
