@@ -56,11 +56,6 @@ export const Route = createFileRoute("/api/otp/send")({
             phone: cleanPhone,
             message: smsResult.message,
             provider: smsResult.provider,
-            // Include devOtp in development / non-production or when website verification pending
-            devOtp:
-              smsResult.provider === "fast2sms-simulated"
-                ? sessionResult.otp
-                : undefined,
           });
         } catch (err: unknown) {
           console.error("[OTP Send Route Error]", err);

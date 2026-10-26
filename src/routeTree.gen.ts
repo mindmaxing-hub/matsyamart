@@ -11,8 +11,18 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as CancellationAndRefundRouteImport } from './routes/cancellation-and-refund'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ContactUsRouteImport } from './routes/contact-us'
 import { Route as HostRouteImport } from './routes/host'
 import { Route as HostWithUsRouteImport } from './routes/host-with-us'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
+import { Route as ShippingAndDeliveryRouteImport } from './routes/shipping-and-delivery'
+import { Route as ShippingPolicyRouteImport } from './routes/shipping-policy'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-conditions'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as ApiSendBookingConfirmationRouteImport } from './routes/api/send-booking-confirmation'
 import { Route as ExperienceSlugRouteImport } from './routes/experience.$slug'
@@ -34,6 +44,21 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CancellationAndRefundRoute = CancellationAndRefundRouteImport.update({
+  id: '/cancellation-and-refund',
+  path: '/cancellation-and-refund',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactUsRoute = ContactUsRouteImport.update({
+  id: '/contact-us',
+  path: '/contact-us',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HostRoute = HostRouteImport.update({
   id: '/host',
   path: '/host',
@@ -42,6 +67,41 @@ const HostRoute = HostRouteImport.update({
 const HostWithUsRoute = HostWithUsRouteImport.update({
   id: '/host-with-us',
   path: '/host-with-us',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundPolicyRoute = RefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShippingAndDeliveryRoute = ShippingAndDeliveryRouteImport.update({
+  id: '/shipping-and-delivery',
+  path: '/shipping-and-delivery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShippingPolicyRoute = ShippingPolicyRouteImport.update({
+  id: '/shipping-policy',
+  path: '/shipping-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsAndConditionsRoute = TermsAndConditionsRouteImport.update({
+  id: '/terms-and-conditions',
+  path: '/terms-and-conditions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrackRoute = TrackRouteImport.update({
@@ -102,8 +162,18 @@ const LovableEmailTransactionalPreviewRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/cancellation-and-refund': typeof CancellationAndRefundRoute
+  '/contact': typeof ContactRoute
+  '/contact-us': typeof ContactUsRoute
   '/host': typeof HostRoute
   '/host-with-us': typeof HostWithUsRoute
+  '/privacy': typeof PrivacyRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/refund-policy': typeof RefundPolicyRoute
+  '/shipping-and-delivery': typeof ShippingAndDeliveryRoute
+  '/shipping-policy': typeof ShippingPolicyRoute
+  '/terms': typeof TermsRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/track': typeof TrackRoute
   '/api/send-booking-confirmation': typeof ApiSendBookingConfirmationRoute
   '/experience/$slug': typeof ExperienceSlugRoute
@@ -118,8 +188,18 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/cancellation-and-refund': typeof CancellationAndRefundRoute
+  '/contact': typeof ContactRoute
+  '/contact-us': typeof ContactUsRoute
   '/host': typeof HostRoute
   '/host-with-us': typeof HostWithUsRoute
+  '/privacy': typeof PrivacyRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/refund-policy': typeof RefundPolicyRoute
+  '/shipping-and-delivery': typeof ShippingAndDeliveryRoute
+  '/shipping-policy': typeof ShippingPolicyRoute
+  '/terms': typeof TermsRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/track': typeof TrackRoute
   '/api/send-booking-confirmation': typeof ApiSendBookingConfirmationRoute
   '/experience/$slug': typeof ExperienceSlugRoute
@@ -135,8 +215,18 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/cancellation-and-refund': typeof CancellationAndRefundRoute
+  '/contact': typeof ContactRoute
+  '/contact-us': typeof ContactUsRoute
   '/host': typeof HostRoute
   '/host-with-us': typeof HostWithUsRoute
+  '/privacy': typeof PrivacyRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/refund-policy': typeof RefundPolicyRoute
+  '/shipping-and-delivery': typeof ShippingAndDeliveryRoute
+  '/shipping-policy': typeof ShippingPolicyRoute
+  '/terms': typeof TermsRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/track': typeof TrackRoute
   '/api/send-booking-confirmation': typeof ApiSendBookingConfirmationRoute
   '/experience/$slug': typeof ExperienceSlugRoute
@@ -153,8 +243,18 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/cancellation-and-refund'
+    | '/contact'
+    | '/contact-us'
     | '/host'
     | '/host-with-us'
+    | '/privacy'
+    | '/privacy-policy'
+    | '/refund-policy'
+    | '/shipping-and-delivery'
+    | '/shipping-policy'
+    | '/terms'
+    | '/terms-and-conditions'
     | '/track'
     | '/api/send-booking-confirmation'
     | '/experience/$slug'
@@ -169,8 +269,18 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/cancellation-and-refund'
+    | '/contact'
+    | '/contact-us'
     | '/host'
     | '/host-with-us'
+    | '/privacy'
+    | '/privacy-policy'
+    | '/refund-policy'
+    | '/shipping-and-delivery'
+    | '/shipping-policy'
+    | '/terms'
+    | '/terms-and-conditions'
     | '/track'
     | '/api/send-booking-confirmation'
     | '/experience/$slug'
@@ -185,8 +295,18 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/cancellation-and-refund'
+    | '/contact'
+    | '/contact-us'
     | '/host'
     | '/host-with-us'
+    | '/privacy'
+    | '/privacy-policy'
+    | '/refund-policy'
+    | '/shipping-and-delivery'
+    | '/shipping-policy'
+    | '/terms'
+    | '/terms-and-conditions'
     | '/track'
     | '/api/send-booking-confirmation'
     | '/experience/$slug'
@@ -202,8 +322,18 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  CancellationAndRefundRoute: typeof CancellationAndRefundRoute
+  ContactRoute: typeof ContactRoute
+  ContactUsRoute: typeof ContactUsRoute
   HostRoute: typeof HostRoute
   HostWithUsRoute: typeof HostWithUsRoute
+  PrivacyRoute: typeof PrivacyRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
+  RefundPolicyRoute: typeof RefundPolicyRoute
+  ShippingAndDeliveryRoute: typeof ShippingAndDeliveryRoute
+  ShippingPolicyRoute: typeof ShippingPolicyRoute
+  TermsRoute: typeof TermsRoute
+  TermsAndConditionsRoute: typeof TermsAndConditionsRoute
   TrackRoute: typeof TrackRoute
   ApiSendBookingConfirmationRoute: typeof ApiSendBookingConfirmationRoute
   ExperienceSlugRoute: typeof ExperienceSlugRoute
@@ -232,6 +362,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cancellation-and-refund': {
+      id: '/cancellation-and-refund'
+      path: '/cancellation-and-refund'
+      fullPath: '/cancellation-and-refund'
+      preLoaderRoute: typeof CancellationAndRefundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact-us': {
+      id: '/contact-us'
+      path: '/contact-us'
+      fullPath: '/contact-us'
+      preLoaderRoute: typeof ContactUsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/host': {
       id: '/host'
       path: '/host'
@@ -244,6 +395,55 @@ declare module '@tanstack/react-router' {
       path: '/host-with-us'
       fullPath: '/host-with-us'
       preLoaderRoute: typeof HostWithUsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund-policy': {
+      id: '/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/refund-policy'
+      preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shipping-and-delivery': {
+      id: '/shipping-and-delivery'
+      path: '/shipping-and-delivery'
+      fullPath: '/shipping-and-delivery'
+      preLoaderRoute: typeof ShippingAndDeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shipping-policy': {
+      id: '/shipping-policy'
+      path: '/shipping-policy'
+      fullPath: '/shipping-policy'
+      preLoaderRoute: typeof ShippingPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms-and-conditions': {
+      id: '/terms-and-conditions'
+      path: '/terms-and-conditions'
+      fullPath: '/terms-and-conditions'
+      preLoaderRoute: typeof TermsAndConditionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/track': {
@@ -322,8 +522,18 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  CancellationAndRefundRoute: CancellationAndRefundRoute,
+  ContactRoute: ContactRoute,
+  ContactUsRoute: ContactUsRoute,
   HostRoute: HostRoute,
   HostWithUsRoute: HostWithUsRoute,
+  PrivacyRoute: PrivacyRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
+  RefundPolicyRoute: RefundPolicyRoute,
+  ShippingAndDeliveryRoute: ShippingAndDeliveryRoute,
+  ShippingPolicyRoute: ShippingPolicyRoute,
+  TermsRoute: TermsRoute,
+  TermsAndConditionsRoute: TermsAndConditionsRoute,
   TrackRoute: TrackRoute,
   ApiSendBookingConfirmationRoute: ApiSendBookingConfirmationRoute,
   ExperienceSlugRoute: ExperienceSlugRoute,

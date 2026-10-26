@@ -55,7 +55,7 @@ export const Route = createFileRoute("/api/otp/verify")({
             success: true,
             verified: true,
             phone: cleanPhone,
-            message: "Mobile phone verified successfully via Fast2SMS OTP.",
+            message: "Mobile phone verified successfully.",
           });
         } catch (err: unknown) {
           console.error("[OTP Verify Route Error]", err);

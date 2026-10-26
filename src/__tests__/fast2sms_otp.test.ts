@@ -103,10 +103,14 @@ describe("Fast2SMS OTP Verification Gateway Suite", () => {
     });
 
     it("handles Fast2SMS network dispatch or sandbox mode gracefully without crashing", async () => {
-      const result = await sendFast2SmsOtp("9920477158", "543210");
+      const testCode = "543210";
+      const result = await sendFast2SmsOtp("9920477158", testCode);
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.message).toContain("9920477158");
+      // Zero-Leak Security Invariant: The raw OTP code must NEVER be exposed in the returned message!
+      expect(result.message).not.toContain(testCode);
+      expect(result.message).not.toContain("Note: Code is");
     });
   });
 });

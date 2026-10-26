@@ -119,47 +119,72 @@ interface ThemePalette {
   badgeColor: string;
   badgeText: string;
   accentColor: string;
+  cardBg: string;
+  cardBorder: string;
+  accentGradient: string;
   ctaBg: string;
   ctaColor: string;
+  accentBadgeBg: string;
+  pinLinkColor: string;
 }
 
-// Apple design system theme accents: light canvas with category-true accents
+// Apple design system theme accents: light canvas with vibrant, category-true coastal accents
 const THEMES: Record<EmailCategory, ThemePalette> = {
   food: {
-    badgeBg: "#fffbeb",
-    badgeBorder: "1px solid #fde047",
-    badgeColor: "#1c3554",
+    badgeBg: "#fff7ed",
+    badgeBorder: "1px solid #fdba74",
+    badgeColor: "#b93815",
     badgeText: "🐟 Confirmed Coastal Food Feast & Tax Invoice",
-    accentColor: "#1c3554", // Midnight Navy
-    ctaBg: "#1c3554",
+    accentColor: "#b93815", // Warm Coastal Terracotta
+    cardBg: "#fffbf6",
+    cardBorder: "#fed7aa",
+    accentGradient: "linear-gradient(90deg, #b93815 0%, #e3a157 100%)",
+    ctaBg: "#b93815",
     ctaColor: "#ffffff",
+    accentBadgeBg: "#ffedd5",
+    pinLinkColor: "#b93815",
   },
   walk: {
     badgeBg: "#f0fdfa",
     badgeBorder: "1px solid #99f6e4",
-    badgeColor: "#5f98a0",
+    badgeColor: "#0e4a60",
     badgeText: "🌊 Confirmed Coastal Heritage Walk & Tax Invoice",
-    accentColor: "#5f98a0", // Seafoam Teal
-    ctaBg: "#111827",
+    accentColor: "#0e4a60", // Deep Maritime Ocean
+    cardBg: "#f4fbfb",
+    cardBorder: "#99f6e4",
+    accentGradient: "linear-gradient(90deg, #0e4a60 0%, #14b8a6 100%)",
+    ctaBg: "#0e4a60",
     ctaColor: "#ffffff",
+    accentBadgeBg: "#ccfbf1",
+    pinLinkColor: "#0e4a60",
   },
   workshop: {
-    badgeBg: "#fff7ed",
-    badgeBorder: "1px solid #fed7aa",
-    badgeColor: "#2b120c",
+    badgeBg: "#faf5ff",
+    badgeBorder: "1px solid #e9d5ff",
+    badgeColor: "#432874",
     badgeText: "🪵 Confirmed Coastal Craft Workshop & Tax Invoice",
-    accentColor: "#2b120c", // Espresso Terracotta
-    ctaBg: "#2b120c",
+    accentColor: "#432874", // Craft Indigo/Violet
+    cardBg: "#faf7fe",
+    cardBorder: "#e9d5ff",
+    accentGradient: "linear-gradient(90deg, #432874 0%, #8b5cf6 100%)",
+    ctaBg: "#432874",
     ctaColor: "#ffffff",
+    accentBadgeBg: "#f3e8ff",
+    pinLinkColor: "#432874",
   },
   goods: {
     badgeBg: "#ecfdf5",
     badgeBorder: "1px solid #a7f3d0",
-    badgeColor: "#10b981",
+    badgeColor: "#065f46",
     badgeText: "📦 Confirmed Artisanal Coastal Goods & Tax Invoice",
-    accentColor: "#10b981", // Emerald
-    ctaBg: "#111827",
+    accentColor: "#059669", // Coastal Forest Emerald
+    cardBg: "#f5fbf7",
+    cardBorder: "#a7f3d0",
+    accentGradient: "linear-gradient(90deg, #059669 0%, #34d399 100%)",
+    ctaBg: "#059669",
     ctaColor: "#ffffff",
+    accentBadgeBg: "#d1fae5",
+    pinLinkColor: "#059669",
   },
 };
 
@@ -294,10 +319,13 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
             boxShadow: "0 4px 24px rgba(0, 0, 0, 0.04)",
           }}
         >
+          {/* Category Signature Top Accent Stripe */}
+          <div style={{ height: "5px", background: theme.accentGradient }} />
+
           {/* Minimalist Apple Brand Header */}
           <Section
             style={{
-              padding: "28px 32px 18px",
+              padding: "24px 32px 18px",
               borderBottom: "1px solid #f0f0f2",
             }}
           >
@@ -312,7 +340,7 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
                         fontWeight: "700",
                         letterSpacing: "0.14em",
                         textTransform: "uppercase",
-                        color: "#86868b",
+                        color: theme.accentColor,
                       }}
                     >
                       MATSYAMART · OFFICIAL PASS
@@ -341,7 +369,7 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
               <span
                 style={{
                   display: "inline-block",
-                  padding: "4px 12px",
+                  padding: "5px 14px",
                   borderRadius: "999px",
                   fontSize: "11px",
                   fontWeight: "600",
@@ -381,14 +409,16 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
             </Text>
           </Section>
 
-          {/* Apple Wallet-Style Boarding Pass Card */}
+          {/* Apple Wallet-Style Boarding Pass Card with Category Theming */}
           <Section style={{ padding: "0 32px 28px" }}>
             <div
               style={{
-                backgroundColor: "#fbfbfd",
+                backgroundColor: theme.cardBg,
                 borderRadius: "16px",
-                border: "1px solid #e5e5ea",
+                border: `1px solid ${theme.cardBorder}`,
+                borderTop: `3px solid ${theme.accentColor}`,
                 padding: "24px",
+                boxShadow: "0 2px 12px rgba(0, 0, 0, 0.03)",
               }}
             >
               <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
@@ -467,14 +497,15 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
                 </tbody>
               </table>
 
-              {/* Rendezvous Point */}
+              {/* Rendezvous Point with Category Theming */}
               {meetingAddress && (
                 <div
                   style={{
-                    padding: "12px 14px",
-                    borderRadius: "10px",
+                    padding: "14px 16px",
+                    borderRadius: "12px",
                     backgroundColor: "#ffffff",
-                    border: "1px solid #e5e5ea",
+                    border: `1px solid ${theme.cardBorder}`,
+                    borderLeft: `4px solid ${theme.accentColor}`,
                     marginBottom: "20px",
                   }}
                 >
@@ -485,14 +516,14 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
                       fontWeight: "700",
                       textTransform: "uppercase",
                       letterSpacing: "0.08em",
-                      color: "#86868b",
+                      color: theme.accentColor,
                     }}
                   >
                     RENDEZVOUS &amp; GPS MEETING PIN
                   </Text>
                   <Text
                     style={{
-                      margin: "0 0 4px",
+                      margin: "0 0 6px",
                       fontSize: "13px",
                       color: "#1d1d1f",
                       lineHeight: "1.4",
@@ -505,9 +536,9 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
                       href={mapsUrl}
                       style={{
                         fontSize: "12px",
-                        color: "#0066cc",
+                        color: theme.pinLinkColor,
                         textDecoration: "none",
-                        fontWeight: "500",
+                        fontWeight: "600",
                       }}
                     >
                       📍 Open Meeting Point in Google Maps →
@@ -520,10 +551,11 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
               {shipping && shipping.addressLine && (
                 <div
                   style={{
-                    padding: "12px 14px",
-                    borderRadius: "10px",
+                    padding: "14px 16px",
+                    borderRadius: "12px",
                     backgroundColor: "#ffffff",
-                    border: "1px solid #e5e5ea",
+                    border: `1px solid ${theme.cardBorder}`,
+                    borderLeft: `4px solid ${theme.accentColor}`,
                     marginBottom: "20px",
                   }}
                 >
@@ -534,7 +566,7 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
                       fontWeight: "700",
                       textTransform: "uppercase",
                       letterSpacing: "0.08em",
-                      color: "#86868b",
+                      color: theme.accentColor,
                     }}
                   >
                     DELIVERY ADDRESS
@@ -554,7 +586,7 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
                 </div>
               )}
 
-              {/* Multi-Ticket Attendee Roster (Clean Compact Grid) */}
+              {/* Multi-Ticket Attendee Roster (Clean Category Cards) */}
               {passTickets.length > 1 && (
                 <div style={{ marginBottom: "20px" }}>
                   <Text
@@ -564,37 +596,38 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
                       fontWeight: "700",
                       textTransform: "uppercase",
                       letterSpacing: "0.06em",
-                      color: "#86868b",
+                      color: theme.accentColor,
                     }}
                   >
                     {`ADMISSION PASS ROSTER (${passTickets.length} TICKETS)`}
                   </Text>
-                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                    <tbody>
-                      {passTickets.map((t) => (
-                        <tr
-                          key={t.ticketNumber}
-                          style={{
-                            borderBottom: "1px solid #f0f0f2",
-                          }}
-                        >
-                          <td style={{ padding: "8px 0" }}>
-                            <div style={{ fontSize: "12px", fontWeight: "600", color: "#1d1d1f" }}>
-                              {`TICKET #${t.ticketNumber} · ${t.title}`}
-                            </div>
-                            <div style={{ fontSize: "12px", color: "#6e6e73", marginTop: "2px" }}>
-                              {`Guest: ${t.attendeeName}`}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <div>
+                    {passTickets.map((t) => (
+                      <div
+                        key={t.ticketNumber}
+                        style={{
+                          padding: "10px 14px",
+                          borderRadius: "10px",
+                          backgroundColor: "#ffffff",
+                          border: `1px solid ${theme.cardBorder}`,
+                          borderLeft: `3px solid ${theme.accentColor}`,
+                          marginBottom: "8px",
+                        }}
+                      >
+                        <div style={{ fontSize: "12px", fontWeight: "700", color: "#1d1d1f" }}>
+                          {`TICKET #${t.ticketNumber} · ${t.title}`}
+                        </div>
+                        <div style={{ fontSize: "12px", color: "#6e6e73", marginTop: "2px" }}>
+                          {`Guest: ${t.attendeeName}`}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              {/* Primary Boarding Pass CTA (Apple Pill Button) */}
-              <div style={{ textAlign: "center", paddingTop: "4px" }}>
+              {/* Primary Boarding Pass CTA (Category Pill Button) */}
+              <div style={{ textAlign: "center", paddingTop: "6px" }}>
                 <Button
                   href={passUrl}
                   style={{
@@ -602,11 +635,11 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
                     backgroundColor: theme.ctaBg,
                     color: theme.ctaColor,
                     fontSize: "13px",
-                    fontWeight: "600",
-                    padding: "12px 28px",
+                    fontWeight: "700",
+                    padding: "13px 32px",
                     borderRadius: "999px",
                     textDecoration: "none",
-                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+                    boxShadow: "0 3px 12px rgba(0, 0, 0, 0.12)",
                   }}
                 >
                   🎫 Open Boarding Pass on Mobile

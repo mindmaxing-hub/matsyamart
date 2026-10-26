@@ -119,7 +119,7 @@ export const TrackOrdersPage: React.FC = () => {
           Track Orders &amp; Access Digital Passes
         </h1>
         <p className="text-xs sm:text-sm text-[#dab38c] max-w-xl mx-auto leading-relaxed">
-          Verify your mobile number via Fast2SMS SMS OTP to instantly lookup your 9:16 mobile admission passes, GST tax invoices, and real-time courier tracking.
+          Verify your mobile number via SMS OTP to instantly lookup your 9:16 mobile admission passes, GST tax invoices, and real-time courier tracking.
         </p>
       </div>
 
@@ -135,7 +135,7 @@ export const TrackOrdersPage: React.FC = () => {
                 Mobile OTP Verification
               </h3>
               <p className="text-[11px] text-[#dab38c]/70">
-                Powered by Fast2SMS Secured Gateway
+                Secured Mobile Gateway
               </p>
             </div>
           </div>
@@ -174,7 +174,7 @@ export const TrackOrdersPage: React.FC = () => {
                 ) : (
                   <>
                     <Smartphone className="w-4 h-4" />
-                    <span>Send SMS OTP via Fast2SMS</span>
+                    <span>Send SMS OTP</span>
                   </>
                 )}
               </button>

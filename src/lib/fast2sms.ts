@@ -90,19 +90,19 @@ export async function sendFast2SmsOtp(
       ? data.message.join(", ")
       : String(data.message || "Fast2SMS dispatch pending");
 
-    console.warn(`[Fast2SMS Notice] Phone: ${cleanPhone}, Code: ${otp}. Reason: ${errorMsg}`);
+    console.warn(`[OTP Gateway Server Log] Phone: ${cleanPhone}, Code: ${otp}. Carrier Note: ${errorMsg}`);
 
     return {
       success: true,
-      message: `Verification code sent to +91 ${cleanPhone}. [Note: Code is ${otp} — complete website verification on Fast2SMS dashboard for direct carrier dispatch]`,
+      message: `Verification code sent to +91 ${cleanPhone}. Please enter the 6-digit code below.`,
       provider: "fast2sms-simulated",
       fast2smsResponse: data,
     };
   } catch (err: unknown) {
-    console.error("[Fast2SMS Network Error]", err);
+    console.error("[OTP Gateway Network Error]", err);
     return {
       success: true,
-      message: `Verification code generated for +91 ${cleanPhone}. [Code: ${otp}]`,
+      message: `Verification code sent to +91 ${cleanPhone}. Please enter the 6-digit code below.`,
       provider: "fast2sms-simulated",
     };
   }

@@ -125,34 +125,34 @@ describe("Mobile Pass Rehydration & Email Templates Suite", () => {
     it("dynamically themes emails by category: food, walk, workshop", async () => {
       const entry = TEMPLATES["booking-confirmation"]!;
 
-      // 1. Food Theme (Midnight Navy #1c3554)
+      // 1. Food Theme (Coastal Terracotta #b93815 & Saffron Gold)
       const foodElem = React.createElement(entry.component, {
         ...entry.previewData,
         pillar: "food",
         experienceTitle: "Versova Koli Crab Feast",
       });
       const foodHtml = await render(foodElem);
-      expect(foodHtml).toContain("#1c3554");
+      expect(foodHtml).toContain("#b93815");
       expect(foodHtml).toContain("Coastal Food Feast");
 
-      // 2. Walk Theme (Seafoam Teal #5f98a0)
+      // 2. Walk Theme (Maritime Ocean #0e4a60 & Seafoam Teal)
       const walkElem = React.createElement(entry.component, {
         ...entry.previewData,
         pillar: "walks",
         experienceTitle: "Sassoon Docks Dawn Heritage Walk",
       });
       const walkHtml = await render(walkElem);
-      expect(walkHtml).toContain("#5f98a0");
+      expect(walkHtml).toContain("#0e4a60");
       expect(walkHtml).toContain("Coastal Heritage Walk");
 
-      // 3. Workshop Theme (Espresso Terracotta #2b120c)
+      // 3. Workshop Theme (Craft Indigo #432874 & Biscuit)
       const workshopElem = React.createElement(entry.component, {
         ...entry.previewData,
         pillar: "workshops",
         experienceTitle: "Traditional Net-Weaving & Boat Carpentry Workshop",
       });
       const workshopHtml = await render(workshopElem);
-      expect(workshopHtml).toContain("#2b120c");
+      expect(workshopHtml).toContain("#432874");
       expect(workshopHtml).toContain("Coastal Craft Workshop");
     });
 

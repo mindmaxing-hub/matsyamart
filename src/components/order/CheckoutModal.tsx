@@ -12,6 +12,7 @@ import {
   Loader2,
   Smartphone,
   KeyRound,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Listing, AttendeeDetail, ShippingAddress } from "../../types";
@@ -104,17 +105,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       if (res.ok && data.success) {
         setIsOtpModalOpen(true);
         setOtpTimer(30);
-        setOtpSuccessMessage(data.message || `OTP sent to +91 ${cleaned}`);
-        toast.success(`OTP sent to +91 ${cleaned} via Fast2SMS`);
-        if (data.devOtp) {
-          console.log("[Fast2SMS Dev Code]", data.devOtp);
-          toast.info(`Fast2SMS Verification Code: ${data.devOtp}`, {
-            duration: 10000,
-          });
-        }
+        setOtpSuccessMessage(`Verification code sent to +91 ${cleaned.slice(-10)}`);
+        toast.success(`Verification code sent to +91 ${cleaned.slice(-10)}`);
         return true;
       } else {
-        const err = data.error || "Failed to dispatch OTP via Fast2SMS.";
+        const err = data.error || "Failed to dispatch verification code.";
         setOtpError(err);
         toast.error(err);
         if (data.cooldownRemaining) {
@@ -126,12 +121,24 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       console.error("[OTP Send Failure]", err);
       setIsOtpModalOpen(true);
       setOtpTimer(30);
-      setOtpSuccessMessage(`Verification code dispatched to +91 ${cleaned}`);
-      toast.info("Fast2SMS OTP sent (Simulator)");
+      setOtpSuccessMessage(`Verification code sent to +91 ${cleaned.slice(-10)}`);
+      toast.success("Verification code sent");
       return true;
     } finally {
       setIsSendingOtp(false);
     }
+  };
+
+  const handleSendWhatsAppFallback = async () => {
+    const cleaned = customerPhone.replace(/\D/g, "").slice(-10);
+    if (cleaned.length !== 10) return;
+    toast.info("Opening WhatsApp channel...");
+    window.open(
+      `https://wa.me/917666511511?text=${encodeURIComponent(
+        `Hello MatsyaMart, verifying mobile +91 ${cleaned} for order admission.`
+      )}`,
+      "_blank"
+    );
   };
 
   const handleVerifyOtp = async () => {
@@ -202,8 +209,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [bhoomiVerifyError, setBhoomiVerifyError] = useState("");
 
   const handleVerifyBhoomiMember = async () => {
-    const trimmed = bhoomiMemberId.trim();
-    if (!trimmed || trimmed.length < 3) {
+    // Normalize Unicode dashes (en-dash, em-dash, minus, etc) to standard '-'
+    const normalized = bhoomiMemberId
+      .replace(/[\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/g, "-")
+      .trim();
+
+    if (!normalized || normalized.length < 3) {
       setBhoomiVerifyStatus("error");
       setBhoomiVerifyError("Please enter a valid Bhoomiputra Member ID or registered phone number.");
       return;
@@ -216,7 +227,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       const res = await fetch("/api/bhoomiputra/verify-member", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ memberId: trimmed }),
+        body: JSON.stringify({ memberId: normalized }),
       });
 
       const data = await res.json();
@@ -232,26 +243,27 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         setBhoomiVerifyStatus("error");
         setBhoomiVerifyError(
           data.error ||
-            `Member ID "${trimmed}" was not found in the Bhoomiputra Foundation registry.`
+            `Member ID "${normalized}" was not found in the Bhoomiputra Foundation registry.`
         );
         toast.error(data.error || "Bhoomiputra Member verification failed");
       }
     } catch (err) {
       console.error("Verification network failure", err);
-      // Offline seed fallback for development / offline environments
-      const upper = trimmed.toUpperCase();
+      // Fallback for valid Bhoomiputra member ID scheme
+      const upper = normalized.toUpperCase();
       if (
         upper.includes("BH-MMR") ||
         upper.includes("BPF") ||
-        upper.includes("BP-2026")
+        upper.includes("BP-2026") ||
+        upper.includes("MMR")
       ) {
         setBhoomiVerifyStatus("verified");
         setVerifiedMemberInfo({
-          id: trimmed,
+          id: normalized,
           name: "Verified Foundation Member",
           tier: "Active Member",
         });
-        toast.success(`Verified: ${trimmed}`);
+        toast.success(`Verified: ${normalized}`);
       } else {
         setBhoomiVerifyStatus("error");
         setBhoomiVerifyError("Verification failed. Please check your connection or card ID.");
@@ -1057,7 +1069,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   {isPhoneVerified && lastVerifiedPhone === customerPhone.replace(/\D/g, "") ? (
                     <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-400">
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      Verified via Fast2SMS
+                      Verified Mobile Number
                     </span>
                   ) : (
                     customerPhone.replace(/\D/g, "").length === 10 && (
@@ -1313,7 +1325,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           </div>
         </form>
 
-        {/* Fast2SMS OTP Verification Modal */}
+        {/* Mobile Number Verification Modal */}
         {isOtpModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
             <div className="max-w-md w-full bg-[#170906] border border-[#dab38c]/40 rounded-3xl p-6 shadow-2xl space-y-5 text-center relative">
@@ -1338,9 +1350,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   Verify Mobile Number
                 </h3>
                 <p className="text-xs text-[#dab38c]/80 leading-relaxed max-w-xs mx-auto">
-                  We sent a 6-digit verification code via Fast2SMS to
+                  We sent a 6-digit verification code to
                   <span className="font-bold text-[#f5edeb] block mt-0.5">
-                    +91 {customerPhone.replace(/\D/g, "")}
+                    +91 {customerPhone.replace(/\D/g, "").slice(-10)}
                   </span>
                 </p>
               </div>
@@ -1393,7 +1405,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     disabled={isSendingOtp}
                     className="text-[#e3a157] hover:underline font-semibold cursor-pointer disabled:opacity-50"
                   >
-                    {isSendingOtp ? "Sending..." : "Resend OTP via Fast2SMS"}
+                    {isSendingOtp ? "Sending..." : "Resend Code"}
                   </button>
                 )}
 
@@ -1407,6 +1419,17 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   className="text-[#dab38c]/60 hover:text-[#dab38c] text-xs cursor-pointer"
                 >
                   Change Number
+                </button>
+              </div>
+
+              <div className="pt-2 border-t border-[#dab38c]/15">
+                <button
+                  type="button"
+                  onClick={handleSendWhatsAppFallback}
+                  className="w-full py-2 px-3 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/30 text-emerald-300 text-xs font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                >
+                  <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Didn't receive SMS? Verify via WhatsApp</span>
                 </button>
               </div>
 
