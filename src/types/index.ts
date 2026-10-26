@@ -362,6 +362,7 @@ export interface Order {
   customer_name: string;
   customer_email: string;
   customer_phone: string;
+  phone_verified?: boolean | undefined;
   total_amount_inr: number;
   coupon_code?: string | undefined;
   discount_amount_inr?: number | undefined;

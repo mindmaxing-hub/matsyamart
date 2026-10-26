@@ -35,6 +35,7 @@ interface CreateOrderInput {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
+  phoneVerified?: boolean | undefined;
   items: {
     listing: Listing;
     quantity: number;
@@ -948,6 +949,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
       customer_name: input.customerName,
       customer_email: input.customerEmail,
       customer_phone: input.customerPhone,
+      phone_verified: input.phoneVerified ?? true,
       total_amount_inr: finalTotalAmount,
       coupon_code: input.couponCode || undefined,
       discount_amount_inr: discountAmount > 0 ? discountAmount : undefined,

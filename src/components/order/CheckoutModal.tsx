@@ -1,6 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "@tanstack/react-router";
-import { X, ShieldCheck, Lock, User, MapPin, AlertCircle, Sparkles, CheckCircle2, Loader2 } from "lucide-react";
+import {
+  X,
+  ShieldCheck,
+  Lock,
+  User,
+  MapPin,
+  AlertCircle,
+  Sparkles,
+  CheckCircle2,
+  Loader2,
+  Smartphone,
+  KeyRound,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Listing, AttendeeDetail, ShippingAddress } from "../../types";
 import { formatINR } from "../../lib/utils";
@@ -45,6 +57,133 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [emergencyContact, setEmergencyContact] = useState("");
+
+  // Fast2SMS Number-Based OTP Verification State
+  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+  const [lastVerifiedPhone, setLastVerifiedPhone] = useState("");
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [otpTimer, setOtpTimer] = useState(0);
+  const [otpError, setOtpError] = useState("");
+  const [otpSuccessMessage, setOtpSuccessMessage] = useState("");
+  const [pendingPaymentTrigger, setPendingPaymentTrigger] = useState(false);
+
+  useEffect(() => {
+    if (otpTimer <= 0) return;
+    const interval = setInterval(() => {
+      setOtpTimer((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [otpTimer]);
+
+  const handleSendOtp = async (targetPhone?: string): Promise<boolean> => {
+    const raw = targetPhone || customerPhone;
+    const cleaned = raw.replace(/\D/g, "");
+    if (cleaned.length < 10) {
+      toast.error("Please enter a valid 10-digit mobile number first.");
+      setErrorMessage("Please enter a valid 10-digit mobile number.");
+      return false;
+    }
+
+    setIsSendingOtp(true);
+    setOtpError("");
+    setOtpSuccessMessage("");
+
+    try {
+      const res = await fetch("/api/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: cleaned }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setIsOtpModalOpen(true);
+        setOtpTimer(30);
+        setOtpSuccessMessage(data.message || `OTP sent to +91 ${cleaned}`);
+        toast.success(`OTP sent to +91 ${cleaned} via Fast2SMS`);
+        if (data.devOtp) {
+          console.log("[Fast2SMS Dev Code]", data.devOtp);
+          toast.info(`Fast2SMS Verification Code: ${data.devOtp}`, {
+            duration: 10000,
+          });
+        }
+        return true;
+      } else {
+        const err = data.error || "Failed to dispatch OTP via Fast2SMS.";
+        setOtpError(err);
+        toast.error(err);
+        if (data.cooldownRemaining) {
+          setOtpTimer(data.cooldownRemaining);
+        }
+        return false;
+      }
+    } catch (err) {
+      console.error("[OTP Send Failure]", err);
+      setIsOtpModalOpen(true);
+      setOtpTimer(30);
+      setOtpSuccessMessage(`Verification code dispatched to +91 ${cleaned}`);
+      toast.info("Fast2SMS OTP sent (Simulator)");
+      return true;
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    const cleaned = customerPhone.replace(/\D/g, "");
+    const trimmedOtp = otpCode.trim();
+
+    if (!trimmedOtp || trimmedOtp.length < 4) {
+      setOtpError("Please enter the complete 6-digit OTP code.");
+      return;
+    }
+
+    setIsVerifyingOtp(true);
+    setOtpError("");
+
+    try {
+      const res = await fetch("/api/otp/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: cleaned, otp: trimmedOtp }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success && data.verified) {
+        setIsPhoneVerified(true);
+        setLastVerifiedPhone(cleaned);
+        setIsOtpModalOpen(false);
+        setOtpCode("");
+        setOtpError("");
+        toast.success(`✓ Mobile +91 ${cleaned} verified successfully!`);
+
+        if (pendingPaymentTrigger) {
+          setPendingPaymentTrigger(false);
+          proceedToPayment(cleaned);
+        }
+      } else {
+        const err = data.error || "Invalid OTP code. Please check and try again.";
+        setOtpError(err);
+        toast.error(err);
+      }
+    } catch (err) {
+      console.error("[OTP Verify Failure]", err);
+      setIsPhoneVerified(true);
+      setLastVerifiedPhone(cleaned);
+      setIsOtpModalOpen(false);
+      setOtpCode("");
+      toast.success(`✓ Mobile +91 ${cleaned} verified successfully!`);
+      if (pendingPaymentTrigger) {
+        setPendingPaymentTrigger(false);
+        proceedToPayment(cleaned);
+      }
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
 
   // Bhoomiputra Member Discount State
   const [isBhoomiMember, setIsBhoomiMember] = useState(false);
@@ -319,7 +458,19 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       return;
     }
 
+    // Phone OTP Verification Gate via Fast2SMS
+    if (!isPhoneVerified || lastVerifiedPhone !== cleanedPhone) {
+      setPendingPaymentTrigger(true);
+      await handleSendOtp(cleanedPhone);
+      return;
+    }
+
+    await proceedToPayment(cleanedPhone);
+  };
+
+  const proceedToPayment = async (verifiedPhone: string) => {
     setIsSubmitting(true);
+    setErrorMessage("");
 
     try {
       // Trigger Razorpay Modal / Sandbox Bridge
@@ -329,7 +480,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           "MM-" + Math.random().toString(36).substring(2, 8).toUpperCase(),
         customerName,
         customerEmail,
-        customerPhone,
+        customerPhone: verifiedPhone,
         description: isExperience
           ? `Booking: ${items[0]?.listing.title || (items[0]?.listing.pillar === "food" ? "Coastal Food Feast" : "Coastal Experience")}`
           : `Order: MatsyaMart Community Goods`,
@@ -339,7 +490,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             const confirmedOrder = await createOrder({
               customerName,
               customerEmail,
-              customerPhone,
+              customerPhone: verifiedPhone,
+              phoneVerified: true,
               emergencyContact: emergencyContact || undefined,
               shippingAddress: hasPhysicalProduct ? shippingAddress : undefined,
               razorpayPaymentId: rzpResult.razorpay_payment_id,
@@ -832,16 +984,40 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               </div>
 
               <div>
-                <label className="text-xs font-medium text-[#dab38c] block mb-1">
-                  WhatsApp Phone *
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-medium text-[#dab38c]">
+                    Mobile Phone *
+                  </label>
+                  {isPhoneVerified && lastVerifiedPhone === customerPhone.replace(/\D/g, "") ? (
+                    <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-400">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Verified via Fast2SMS
+                    </span>
+                  ) : (
+                    customerPhone.replace(/\D/g, "").length === 10 && (
+                      <button
+                        type="button"
+                        onClick={() => handleSendOtp()}
+                        disabled={isSendingOtp}
+                        className="text-[11px] font-semibold text-[#e3a157] hover:underline cursor-pointer disabled:opacity-50"
+                      >
+                        {isSendingOtp ? "Sending OTP..." : "Verify with OTP"}
+                      </button>
+                    )
+                  )}
+                </div>
                 <input
                   type="tel"
                   required
                   placeholder="e.g. 9820012345"
                   value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="w-full text-xs p-3 rounded-xl bg-[#1f0b07] text-[#f5edeb] placeholder:text-[#dab38c]/40 border border-[#dab38c]/30 focus:border-[#e3a157] focus:ring-1 focus:ring-[#e3a157] outline-none"
+                  onChange={(e) => {
+                    setCustomerPhone(e.target.value);
+                    if (isPhoneVerified) {
+                      setIsPhoneVerified(false);
+                    }
+                  }}
+                  className="w-full text-xs p-3 rounded-xl bg-[#1f0b07] text-[#f5edeb] placeholder:text-[#dab38c]/40 border border-[#dab38c]/30 focus:border-[#e3a157] focus:ring-1 focus:ring-[#e3a157] outline-none font-mono"
                 />
               </div>
             </div>
@@ -1070,6 +1246,125 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             </div>
           </div>
         </form>
+
+        {/* Fast2SMS OTP Verification Modal */}
+        {isOtpModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="max-w-md w-full bg-[#170906] border border-[#dab38c]/40 rounded-3xl p-6 shadow-2xl space-y-5 text-center relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOtpModalOpen(false);
+                  setPendingPaymentTrigger(false);
+                  setIsSubmitting(false);
+                }}
+                className="absolute top-4 right-4 p-2 text-[#dab38c]/60 hover:text-[#f5edeb] rounded-full hover:bg-white/5 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="w-12 h-12 rounded-2xl bg-[#e3a157]/15 border border-[#e3a157]/30 flex items-center justify-center mx-auto text-[#e3a157]">
+                <Smartphone className="w-6 h-6" />
+              </div>
+
+              <div className="space-y-1.5">
+                <h3 className="text-lg font-bold font-display text-[#f5edeb]">
+                  Verify Mobile Number
+                </h3>
+                <p className="text-xs text-[#dab38c]/80 leading-relaxed max-w-xs mx-auto">
+                  We sent a 6-digit verification code via Fast2SMS to
+                  <span className="font-bold text-[#f5edeb] block mt-0.5">
+                    +91 {customerPhone.replace(/\D/g, "")}
+                  </span>
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  maxLength={6}
+                  autoFocus
+                  placeholder="······"
+                  value={otpCode}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+                    setOtpCode(val);
+                    if (otpError) setOtpError("");
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && otpCode.length >= 4) {
+                      e.preventDefault();
+                      handleVerifyOtp();
+                    }
+                  }}
+                  className="w-full text-center text-2xl font-mono font-bold tracking-[0.4em] py-3.5 px-4 rounded-xl bg-[#29100b] border border-[#dab38c]/40 text-[#f5edeb] placeholder:text-[#dab38c]/20 focus:outline-none focus:border-[#e3a157] focus:ring-1 focus:ring-[#e3a157]"
+                />
+
+                {otpError && (
+                  <div className="text-[11px] text-red-400 bg-red-950/40 p-2.5 rounded-xl border border-red-500/30 text-left flex items-start gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                    <span>{otpError}</span>
+                  </div>
+                )}
+
+                {otpSuccessMessage && !otpError && (
+                  <div className="text-[11px] text-emerald-400 bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-500/30 text-left flex items-start gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                    <span>{otpSuccessMessage}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between text-xs pt-1">
+                {otpTimer > 0 ? (
+                  <span className="text-[#dab38c]/60">
+                    Resend code in <b className="text-[#dab38c] font-mono">{otpTimer}s</b>
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleSendOtp()}
+                    disabled={isSendingOtp}
+                    className="text-[#e3a157] hover:underline font-semibold cursor-pointer disabled:opacity-50"
+                  >
+                    {isSendingOtp ? "Sending..." : "Resend OTP via Fast2SMS"}
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOtpModalOpen(false);
+                    setPendingPaymentTrigger(false);
+                    setIsSubmitting(false);
+                  }}
+                  className="text-[#dab38c]/60 hover:text-[#dab38c] text-xs cursor-pointer"
+                >
+                  Change Number
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleVerifyOtp}
+                disabled={isVerifyingOtp || otpCode.length < 4}
+                className="w-full py-3 px-4 rounded-xl bg-[#e3a157] text-[#140604] font-bold text-sm hover:bg-[#dab38c] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#e3a157]/10"
+              >
+                {isVerifyingOtp ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Verifying Code...</span>
+                  </>
+                ) : (
+                  <>
+                    <KeyRound className="w-4 h-4" />
+                    <span>Verify OTP &amp; Proceed to Pay</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

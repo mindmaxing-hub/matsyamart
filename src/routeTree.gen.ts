@@ -17,6 +17,8 @@ import { Route as ApiSendBookingConfirmationRouteImport } from './routes/api/sen
 import { Route as ExperienceSlugRouteImport } from './routes/experience.$slug'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as ApiBhoomiputraVerifyMemberRouteImport } from './routes/api/bhoomiputra.verify-member'
+import { Route as ApiOtpSendRouteImport } from './routes/api/otp.send'
+import { Route as ApiOtpVerifyRouteImport } from './routes/api/otp.verify'
 import { Route as OrderConfirmationOrderRefRouteImport } from './routes/order.confirmation.$orderRef'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 
@@ -62,6 +64,16 @@ const ApiBhoomiputraVerifyMemberRoute =
     path: '/api/bhoomiputra/verify-member',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiOtpSendRoute = ApiOtpSendRouteImport.update({
+  id: '/api/otp/send',
+  path: '/api/otp/send',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOtpVerifyRoute = ApiOtpVerifyRouteImport.update({
+  id: '/api/otp/verify',
+  path: '/api/otp/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrderConfirmationOrderRefRoute =
   OrderConfirmationOrderRefRouteImport.update({
     id: '/order/confirmation/$orderRef',
@@ -84,6 +96,8 @@ export interface FileRoutesByFullPath {
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/api/bhoomiputra/verify-member': typeof ApiBhoomiputraVerifyMemberRoute
+  '/api/otp/send': typeof ApiOtpSendRoute
+  '/api/otp/verify': typeof ApiOtpVerifyRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -96,6 +110,8 @@ export interface FileRoutesByTo {
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/api/bhoomiputra/verify-member': typeof ApiBhoomiputraVerifyMemberRoute
+  '/api/otp/send': typeof ApiOtpSendRoute
+  '/api/otp/verify': typeof ApiOtpVerifyRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -109,6 +125,8 @@ export interface FileRoutesById {
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/api/bhoomiputra/verify-member': typeof ApiBhoomiputraVerifyMemberRoute
+  '/api/otp/send': typeof ApiOtpSendRoute
+  '/api/otp/verify': typeof ApiOtpVerifyRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -123,6 +141,8 @@ export interface FileRouteTypes {
     | '/experience/$slug'
     | '/product/$slug'
     | '/api/bhoomiputra/verify-member'
+    | '/api/otp/send'
+    | '/api/otp/verify'
     | '/order/confirmation/$orderRef'
     | '/lovable/email/transactional/preview'
   fileRoutesByTo: FileRoutesByTo
@@ -135,6 +155,8 @@ export interface FileRouteTypes {
     | '/experience/$slug'
     | '/product/$slug'
     | '/api/bhoomiputra/verify-member'
+    | '/api/otp/send'
+    | '/api/otp/verify'
     | '/order/confirmation/$orderRef'
     | '/lovable/email/transactional/preview'
   id:
@@ -147,6 +169,8 @@ export interface FileRouteTypes {
     | '/experience/$slug'
     | '/product/$slug'
     | '/api/bhoomiputra/verify-member'
+    | '/api/otp/send'
+    | '/api/otp/verify'
     | '/order/confirmation/$orderRef'
     | '/lovable/email/transactional/preview'
   fileRoutesById: FileRoutesById
@@ -160,6 +184,8 @@ export interface RootRouteChildren {
   ExperienceSlugRoute: typeof ExperienceSlugRoute
   ProductSlugRoute: typeof ProductSlugRoute
   ApiBhoomiputraVerifyMemberRoute: typeof ApiBhoomiputraVerifyMemberRoute
+  ApiOtpSendRoute: typeof ApiOtpSendRoute
+  ApiOtpVerifyRoute: typeof ApiOtpVerifyRoute
   OrderConfirmationOrderRefRoute: typeof OrderConfirmationOrderRefRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
@@ -222,6 +248,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBhoomiputraVerifyMemberRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/otp/send': {
+      id: '/api/otp/send'
+      path: '/api/otp/send'
+      fullPath: '/api/otp/send'
+      preLoaderRoute: typeof ApiOtpSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/otp/verify': {
+      id: '/api/otp/verify'
+      path: '/api/otp/verify'
+      fullPath: '/api/otp/verify'
+      preLoaderRoute: typeof ApiOtpVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/order/confirmation/$orderRef': {
       id: '/order/confirmation/$orderRef'
       path: '/order/confirmation/$orderRef'
@@ -248,6 +288,8 @@ const rootRouteChildren: RootRouteChildren = {
   ExperienceSlugRoute: ExperienceSlugRoute,
   ProductSlugRoute: ProductSlugRoute,
   ApiBhoomiputraVerifyMemberRoute: ApiBhoomiputraVerifyMemberRoute,
+  ApiOtpSendRoute: ApiOtpSendRoute,
+  ApiOtpVerifyRoute: ApiOtpVerifyRoute,
   OrderConfirmationOrderRefRoute: OrderConfirmationOrderRefRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }

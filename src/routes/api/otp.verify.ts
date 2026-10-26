@@ -1,0 +1,73 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { cleanIndianMobile, verifyOtpSession } from "@/lib/fast2sms";
+
+export const Route = createFileRoute("/api/otp/verify")({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        try {
+          let phoneInput = "";
+          let otpInput = "";
+
+          try {
+            const body = await request.json();
+            phoneInput = String(body?.phone || "").trim();
+            otpInput = String(body?.otp || "").trim();
+          } catch {
+            return Response.json(
+              { success: false, error: "Invalid JSON payload" },
+              { status: 400 },
+            );
+          }
+
+          const cleanPhone = cleanIndianMobile(phoneInput);
+          if (cleanPhone.length !== 10) {
+            return Response.json(
+              {
+                success: false,
+                error: "Please enter a valid 10-digit mobile number.",
+              },
+              { status: 400 },
+            );
+          }
+
+          if (!otpInput) {
+            return Response.json(
+              { success: false, error: "Please enter the 6-digit OTP code." },
+              { status: 400 },
+            );
+          }
+
+          const verifyResult = verifyOtpSession(cleanPhone, otpInput);
+
+          if (!verifyResult.valid) {
+            return Response.json(
+              {
+                success: false,
+                verified: false,
+                error: verifyResult.error || "Invalid OTP code",
+              },
+              { status: 400 },
+            );
+          }
+
+          return Response.json({
+            success: true,
+            verified: true,
+            phone: cleanPhone,
+            message: "Mobile phone verified successfully via Fast2SMS OTP.",
+          });
+        } catch (err: unknown) {
+          console.error("[OTP Verify Route Error]", err);
+          return Response.json(
+            {
+              success: false,
+              error: "Internal server error while verifying OTP",
+            },
+            { status: 500 },
+          );
+        }
+      },
+    },
+  },
+});
