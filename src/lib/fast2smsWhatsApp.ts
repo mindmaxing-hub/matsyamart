@@ -18,7 +18,7 @@ export const FAST2SMS_PAYMENT_TEMPLATE_ID = "39898"; // Template 'payment_comple
 export const FAST2SMS_OTP_TEMPLATE_ID =
   (typeof process !== "undefined" &&
     (process.env?.["FAST2SMS_OTP_TEMPLATE_ID"] || process.env?.["VITE_FAST2SMS_OTP_TEMPLATE_ID"])) ||
-  "";
+  "39898";
 
 /**
  * Normalizes any Indian/international phone into clean digits.
