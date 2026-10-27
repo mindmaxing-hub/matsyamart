@@ -146,6 +146,23 @@ export const Route = createFileRoute("/api/bhoomiputra/verify-member")({
             });
           }
 
+          // Case where member card is recognized but customer has not entered mobile number yet
+          if (eligibility.requiresPhone && eligibility.member) {
+            return Response.json(
+              {
+                valid: false,
+                requiresPhone: true,
+                theftAlert: false,
+                memberId: eligibility.member.id,
+                memberName: eligibility.member.name,
+                error:
+                  eligibility.reason ||
+                  "Please enter your 10-digit mobile number in Contact Information below to verify card ownership.",
+              },
+              { status: 400 },
+            );
+          }
+
           // If member was found but phone did NOT match -> THEFT ALERT
           if (eligibility.member) {
             const registeredMasked = maskPhone(eligibility.member.phones[0]);
