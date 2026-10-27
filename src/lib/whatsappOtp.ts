@@ -134,19 +134,19 @@ export async function sendWhatsAppOtp(
   const patronChatLink = `https://wa.me/${normalizedPhone}?text=${encodeURIComponent(otpMessage)}`;
 
   try {
-    // Attempt 1: Fast2SMS WhatsApp session dispatch
-    const res = await fetch("https://www.fast2sms.com/dev/whatsapp-session", {
+    // Attempt 1: Fast2SMS WhatsApp session dispatch (phone_number_id & to in query params, body: { type, text })
+    const sessionUrl = `https://www.fast2sms.com/dev/whatsapp-session?phone_number_id=${encodeURIComponent(FAST2SMS_PHONE_NUMBER_ID)}&to=${encodeURIComponent(normalizedPhone)}`;
+    const res = await fetch(sessionUrl, {
       method: "POST",
       headers: {
         authorization: FAST2SMS_API_KEY,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        phone_number_id: FAST2SMS_PHONE_NUMBER_ID,
-        to: normalizedPhone,
+        type: "text",
         text: otpMessage,
       }),
-      signal: AbortSignal.timeout(5000),
+      signal: typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(5000) : null,
     });
 
     const data = (await res.json().catch(() => ({}))) as {

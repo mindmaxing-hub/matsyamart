@@ -112,6 +112,23 @@ describe("Fast2SMS WhatsApp Universal Dispatch Engine Suite", () => {
     expect(result.success).toBe(true);
     expect(result.waLink).toContain("https://wa.me/919820144512");
     expect(result.messageId).toBe("test-msg-123");
+
+    // Strictly verify URL query params and body according to Fast2SMS API documentation
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining("phone_number_id=1442308258960303&to=919820144512"),
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          authorization: "test-api-key",
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify({
+          type: "text",
+          text: "Test message",
+        }),
+      }),
+    );
+
     fetchSpy.mockRestore();
   });
 });

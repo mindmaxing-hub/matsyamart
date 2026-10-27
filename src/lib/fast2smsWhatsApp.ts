@@ -162,9 +162,10 @@ export async function sendFast2SMSWhatsApp(
     };
   }
 
-  // Attempt 1: Fast2SMS WhatsApp Session endpoint
+  // Attempt 1: Fast2SMS WhatsApp Session endpoint (phone_number_id & to in query params, body: { type, text })
   try {
-    const sessionRes = await fetch("https://www.fast2sms.com/dev/whatsapp-session", {
+    const sessionUrl = `https://www.fast2sms.com/dev/whatsapp-session?phone_number_id=${encodeURIComponent(phoneId)}&to=${encodeURIComponent(normalizedPhone)}`;
+    const sessionRes = await fetch(sessionUrl, {
       method: "POST",
       headers: {
         authorization: apiKey,
@@ -172,8 +173,7 @@ export async function sendFast2SMSWhatsApp(
       },
       signal: typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(4000) : null,
       body: JSON.stringify({
-        phone_number_id: phoneId,
-        to: normalizedPhone,
+        type: "text",
         text: messageText,
       }),
     });
