@@ -8,7 +8,10 @@ export const FAST2SMS_API_KEY =
   (typeof process !== "undefined" && process.env?.["FAST2SMS_API_KEY"]) ||
   "oR4byDS7ZRxOMArq9rCOHqf6IYJD8fhprfSHWD8bCjVBVNNw1bs2SMM15o7M1W2l3sA6RgnHoBVWuXOe";
 
-export const FAST2SMS_SENDER_PHONE_ID = "7666511511";
+export const FAST2SMS_WABA_ID = "1749937716073750";
+export const FAST2SMS_PHONE_NUMBER_ID = "1442308258960303"; // Meta Cloud API Phone Number ID verified on Fast2SMS
+export const FAST2SMS_SENDER_PHONE_NUMBER = "7666511511"; // Official 10-digit WhatsApp number (+91 76665 11511)
+export const FAST2SMS_SENDER_PHONE_ID = FAST2SMS_PHONE_NUMBER_ID; // Backward-compatibility alias for API calls
 export const FAST2SMS_SENDER_DISPLAY = "+91 76665 11511";
 export const FAST2SMS_PAYMENT_TEMPLATE_ID = "39898"; // Template 'payment_completed'
 
@@ -177,9 +180,15 @@ export async function sendFast2SMSWhatsApp(
 
     const sessionData = await sessionRes.json().catch(() => ({}));
     if (sessionRes.ok && (sessionData.status_code === 200 || sessionData.return === true)) {
+      const msgId =
+        sessionData.message_id ||
+        (Array.isArray(sessionData.request_id)
+          ? sessionData.request_id[0]
+          : sessionData.request_id) ||
+        `f2s-sess-${Date.now()}`;
       return {
         success: true,
-        messageId: sessionData.message_id || `f2s-sess-${Date.now()}`,
+        messageId: String(msgId),
         statusCode: 200,
         mode: "whatsapp_session",
         waLink: directWaLink,

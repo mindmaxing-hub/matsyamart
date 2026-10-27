@@ -6,7 +6,8 @@
 
 import {
   FAST2SMS_API_KEY,
-  FAST2SMS_SENDER_PHONE_ID,
+  FAST2SMS_PHONE_NUMBER_ID,
+  FAST2SMS_SENDER_PHONE_NUMBER,
   FAST2SMS_SENDER_DISPLAY,
   normalizeWhatsAppNumber,
   to10DigitIndianNumber,
@@ -125,7 +126,7 @@ export async function sendWhatsAppOtp(
   const otpMessage = buildWhatsAppOtpMessage(otp, cleanPhone);
 
   // Direct 1-Click WhatsApp verification link
-  const directWaLink = `https://wa.me/91${FAST2SMS_SENDER_PHONE_ID}?text=${encodeURIComponent(
+  const directWaLink = `https://wa.me/91${FAST2SMS_SENDER_PHONE_NUMBER}?text=${encodeURIComponent(
     `Verify MatsyaMart Patron +91${cleanPhone} (Ref: ${otp})`
   )}`;
 
@@ -141,8 +142,7 @@ export async function sendWhatsAppOtp(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        display_number: FAST2SMS_SENDER_PHONE_ID,
-        phone_number_id: FAST2SMS_SENDER_PHONE_ID,
+        phone_number_id: FAST2SMS_PHONE_NUMBER_ID,
         to: normalizedPhone,
         text: otpMessage,
       }),

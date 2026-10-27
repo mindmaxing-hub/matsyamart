@@ -2,6 +2,8 @@ import { describe, it, expect, vi } from "vitest";
 import {
   FAST2SMS_SENDER_DISPLAY,
   FAST2SMS_SENDER_PHONE_ID,
+  FAST2SMS_PHONE_NUMBER_ID,
+  FAST2SMS_SENDER_PHONE_NUMBER,
   FAST2SMS_PAYMENT_TEMPLATE_ID,
   normalizeWhatsAppNumber,
   to10DigitIndianNumber,
@@ -13,7 +15,9 @@ import {
 describe("Fast2SMS WhatsApp Universal Dispatch Engine Suite", () => {
   it("verifies official Fast2SMS sender attributes", () => {
     expect(FAST2SMS_SENDER_DISPLAY).toBe("+91 76665 11511");
-    expect(FAST2SMS_SENDER_PHONE_ID).toBe("7666511511");
+    expect(FAST2SMS_PHONE_NUMBER_ID).toBe("1442308258960303");
+    expect(FAST2SMS_SENDER_PHONE_ID).toBe("1442308258960303");
+    expect(FAST2SMS_SENDER_PHONE_NUMBER).toBe("7666511511");
     expect(FAST2SMS_PAYMENT_TEMPLATE_ID).toBe("39898");
   });
 

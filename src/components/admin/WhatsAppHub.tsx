@@ -4,6 +4,8 @@ import { formatINR, formatDate, formatTime } from "../../lib/utils";
 import {
   FAST2SMS_SENDER_DISPLAY,
   FAST2SMS_SENDER_PHONE_ID,
+  FAST2SMS_PHONE_NUMBER_ID,
+  FAST2SMS_WABA_ID,
   FAST2SMS_PAYMENT_TEMPLATE_ID,
   buildMultiPassWhatsAppMessage,
   buildAbandonedCartWhatsAppMessage,
@@ -235,7 +237,7 @@ export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) =>
               </span>
             </div>
             <p className="text-xs text-[#dab38c]">
-              Official Sender: <span className="font-mono font-bold text-[#e3a157]">{FAST2SMS_SENDER_DISPLAY}</span> · Template ID: <span className="font-mono text-[#dab38c]/80">{FAST2SMS_PAYMENT_TEMPLATE_ID} (payment_completed)</span>
+              Official Sender: <span className="font-mono font-bold text-[#e3a157]">{FAST2SMS_SENDER_DISPLAY}</span> · Meta Phone ID: <span className="font-mono font-bold text-emerald-400">{FAST2SMS_PHONE_NUMBER_ID}</span> · WABA ID: <span className="font-mono text-[#dab38c]/80">{FAST2SMS_WABA_ID}</span> · Template: <span className="font-mono text-[#dab38c]/80">{FAST2SMS_PAYMENT_TEMPLATE_ID} (payment_completed)</span>
             </p>
           </div>
         </div>
@@ -572,7 +574,7 @@ export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) =>
               </p>
             </div>
             <div className="text-[11px] font-mono text-[#C67F2A] bg-[rgba(41,16,11,0.05)] px-3 py-1.5 rounded-xl border border-[rgba(41,16,11,0.1)]">
-              Default Template ID: <b>39898 (payment_completed)</b>
+              Sender: <b>+91 76665 11511</b> · Meta Phone ID: <b>1442308258960303</b> · Template ID: <b>39898 (payment_completed)</b>
             </div>
           </div>
 

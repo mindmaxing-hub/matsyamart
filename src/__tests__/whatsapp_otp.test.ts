@@ -8,7 +8,11 @@ import {
   clearAllWhatsAppOtpSessions,
   sendWhatsAppOtp,
 } from "../lib/whatsappOtp";
-import { FAST2SMS_SENDER_PHONE_ID } from "../lib/fast2smsWhatsApp";
+import {
+  FAST2SMS_SENDER_PHONE_ID,
+  FAST2SMS_PHONE_NUMBER_ID,
+  FAST2SMS_SENDER_PHONE_NUMBER,
+} from "../lib/fast2smsWhatsApp";
 
 describe("MatsyaMart WhatsApp-First OTP & Verification Engine Suite", () => {
   beforeEach(() => {
@@ -120,7 +124,8 @@ describe("MatsyaMart WhatsApp-First OTP & Verification Engine Suite", () => {
       expect(dispatch.success).toBe(true);
       expect(dispatch.message).toContain("+91 9820012345");
       expect(dispatch.waLink).toContain("wa.me/919820012345");
-      expect(FAST2SMS_SENDER_PHONE_ID).toBe("7666511511");
+      expect(FAST2SMS_PHONE_NUMBER_ID).toBe("1442308258960303");
+      expect(FAST2SMS_SENDER_PHONE_NUMBER).toBe("7666511511");
     }, 15000);
   });
 });
