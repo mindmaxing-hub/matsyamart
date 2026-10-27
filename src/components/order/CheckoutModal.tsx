@@ -116,6 +116,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         toast.error(err);
         if (data.cooldownRemaining) {
           setOtpTimer(data.cooldownRemaining);
+          setIsOtpModalOpen(true);
+          setOtpSuccessMessage("A verification code was recently dispatched to your mobile. Please enter it below.");
+        } else if (res.status === 429) {
+          setIsOtpModalOpen(true);
+          setOtpTimer(30);
+          setOtpSuccessMessage("A verification code was recently dispatched to your mobile. Please enter it below.");
         }
         return false;
       }
@@ -203,60 +209,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     settlement?: string;
   } | null>(null);
   const [bhoomiVerifyError, setBhoomiVerifyError] = useState("");
-  const [delegationToken, setDelegationToken] = useState<string | null>(null);
-  const [isDelegationMode, setIsDelegationMode] = useState(false);
-  const [delegationCode, setDelegationCode] = useState("");
-  const [delegationMaskedPhone, setDelegationMaskedPhone] = useState("");
-  const [isSendingDelegationOtp, setIsSendingDelegationOtp] = useState(false);
-  const [isVerifyingDelegationOtp, setIsVerifyingDelegationOtp] = useState(false);
-  const [theftWarningInfo, setTheftWarningInfo] = useState<{
-    memberId: string;
-    memberName: string;
-    maskedPhone: string;
-  } | null>(null);
-
-  // Phone-First Bhoomiputra Member Discovery
-  const autoDetectedPhoneRef = React.useRef<string>("");
-
-  useEffect(() => {
-    const clean = customerPhone.replace(/\D/g, "");
-    if (clean.length !== 10) {
-      return;
-    }
-    if (autoDetectedPhoneRef.current === clean) {
-      return;
-    }
-
-    let active = true;
-    const checkPhone = async () => {
-      try {
-        const res = await fetch("/api/bhoomiputra/verify-member", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone: clean }),
-        });
-        const data = await res.json();
-        if (active && res.ok && data.valid && data.member) {
-          autoDetectedPhoneRef.current = clean;
-          setIsBhoomiMember(true);
-          setBhoomiMemberId(data.member.id);
-          setBhoomiVerifyStatus("verified");
-          setVerifiedMemberInfo(data.member);
-          setBhoomiVerifyError("");
-          setTheftWarningInfo(null);
-          toast.success(`Welcome, ${data.member.name}! Bhoomiputra 15% Member Discount unlocked.`);
-        }
-      } catch {
-        // silent on background check
-      }
-    };
-
-    const timer = setTimeout(checkPhone, 350);
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
-  }, [customerPhone]);
 
   const handleVerifyBhoomiMember = async () => {
     // Normalize Unicode dashes (en-dash, em-dash, minus, etc) to standard '-'
@@ -272,7 +224,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
     setBhoomiVerifyStatus("verifying");
     setBhoomiVerifyError("");
-    setTheftWarningInfo(null);
 
     const cleanedPhone = customerPhone.replace(/\D/g, "");
 
@@ -283,7 +234,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         body: JSON.stringify({
           memberId: normalized,
           customerPhone: cleanedPhone,
-          delegationToken: delegationToken || undefined,
         }),
       });
 
@@ -292,31 +242,19 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         setBhoomiVerifyStatus("verified");
         setVerifiedMemberInfo(data.member);
         setBhoomiVerifyError("");
-        setTheftWarningInfo(null);
-        setIsDelegationMode(false);
         toast.success(`Verified: ${data.member.name} (${data.member.id})`);
       } else if (data.requiresPhone) {
         setBhoomiVerifyStatus("error");
-        setTheftWarningInfo(null);
         setBhoomiVerifyError(
           data.error ||
-            "Member card found! Please enter your 10-digit mobile number in Contact Information below to verify card ownership.",
+            "Please enter your 10-digit mobile number in Contact Information below to verify card ownership.",
         );
-        toast.info("Member card recognized! Please enter your mobile number below to link your 15% privilege.");
-      } else if (data.theftAlert) {
-        setBhoomiVerifyStatus("error");
-        setTheftWarningInfo({
-          memberId: data.memberId,
-          memberName: data.memberName,
-          maskedPhone: data.maskedPhone,
-        });
-        setBhoomiVerifyError(data.error);
-        toast.error("Membership belongs to a different mobile number");
+        toast.info("Please enter your mobile number below to verify card ownership.");
       } else {
         setBhoomiVerifyStatus("error");
         setBhoomiVerifyError(
           data.error ||
-            `Member ID "${normalized}" was not found in the Bhoomiputra Foundation registry.`,
+            `Member ID "${normalized}" does not match this mobile number or is not found in the Bhoomiputra Foundation registry.`,
         );
         toast.error(data.error || "Bhoomiputra Member verification failed");
       }
@@ -324,69 +262,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       console.error("Verification network failure", err);
       setBhoomiVerifyStatus("error");
       setBhoomiVerifyError("Verification failed. Please check network connection.");
-    }
-  };
-
-  const handleSendDelegationOtp = async () => {
-    if (!theftWarningInfo) return;
-    setIsSendingDelegationOtp(true);
-    try {
-      const res = await fetch("/api/bhoomiputra/delegation-otp/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          memberId: theftWarningInfo.memberId,
-          requesterPhone: customerPhone.replace(/\D/g, ""),
-        }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setIsDelegationMode(true);
-        setDelegationMaskedPhone(data.maskedPhone || theftWarningInfo.maskedPhone);
-        toast.success(
-          `4-digit code dispatched to ${theftWarningInfo.memberName}'s WhatsApp (${data.maskedPhone})!`,
-        );
-      } else {
-        toast.error(data.error || "Failed to dispatch authorization code");
-      }
-    } catch {
-      toast.error("Network error sending authorization code");
-    } finally {
-      setIsSendingDelegationOtp(false);
-    }
-  };
-
-  const handleVerifyDelegationOtp = async () => {
-    if (!theftWarningInfo || !delegationCode.trim()) return;
-    setIsVerifyingDelegationOtp(true);
-    try {
-      const res = await fetch("/api/bhoomiputra/delegation-otp/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          memberId: theftWarningInfo.memberId,
-          requesterPhone: customerPhone.replace(/\D/g, ""),
-          code: delegationCode.trim(),
-        }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success && data.delegationToken) {
-        setDelegationToken(data.delegationToken);
-        setBhoomiVerifyStatus("verified");
-        setVerifiedMemberInfo(data.member);
-        setBhoomiVerifyError("");
-        setTheftWarningInfo(null);
-        setIsDelegationMode(false);
-        toast.success(
-          `✓ Member Authorized: ${data.member.name} (15% discount unlocked)`,
-        );
-      } else {
-        toast.error(data.error || "Invalid delegation code");
-      }
-    } catch {
-      toast.error("Verification error");
-    } finally {
-      setIsVerifyingDelegationOtp(false);
     }
   };
 
@@ -723,7 +598,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           isBhoomiMember && bhoomiVerifyStatus === "verified"
             ? verifiedMemberInfo?.id || bhoomiMemberId.trim().toUpperCase()
             : undefined,
-        delegationToken: delegationToken || undefined,
+        delegationToken: undefined,
         verificationToken: activeToken || undefined,
         quote: authoritativeQuote,
         quoteSignature: quoteSignature,
@@ -1072,72 +947,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                             )}
                           </button>
                         </div>
-                        {theftWarningInfo ? (
-                          <div className="p-3 rounded-xl bg-amber-950/60 border border-amber-500/40 space-y-2 text-xs">
-                            <div className="flex items-start gap-2">
-                              <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                              <div>
-                                <div className="font-bold text-amber-300">
-                                  Ownership Verification Required
-                                </div>
-                                <p className="text-[11px] text-[#F5EDEB]/90 mt-0.5 leading-relaxed">
-                                  Member ID <strong>{theftWarningInfo.memberId}</strong> belongs to{" "}
-                                  <strong>{theftWarningInfo.memberName}</strong> ({theftWarningInfo.maskedPhone}).
-                                  To protect members against discount theft, we must confirm authorization.
-                                </p>
-                              </div>
-                            </div>
-
-                            {!isDelegationMode ? (
-                              <button
-                                type="button"
-                                onClick={handleSendDelegationOtp}
-                                disabled={isSendingDelegationOtp}
-                                className="w-full py-2 px-3 rounded-lg bg-[#e3a157] hover:bg-[#dab38c] text-[#140604] font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                              >
-                                {isSendingDelegationOtp ? (
-                                  <>
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                    <span>Dispatching Code...</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <MessageSquare className="w-3.5 h-3.5" />
-                                    <span>Send 4-Digit Code to {theftWarningInfo.memberName}'s WhatsApp</span>
-                                  </>
-                                )}
-                              </button>
-                            ) : (
-                              <div className="space-y-2 pt-1 border-t border-amber-500/20">
-                                <div className="text-[11px] text-amber-300">
-                                  Enter 4-digit code sent to <strong>{delegationMaskedPhone || theftWarningInfo.maskedPhone}</strong>:
-                                </div>
-                                <div className="flex gap-2">
-                                  <input
-                                    type="text"
-                                    maxLength={4}
-                                    placeholder="4-digit code"
-                                    value={delegationCode}
-                                    onChange={(e) => setDelegationCode(e.target.value.replace(/\D/g, ""))}
-                                    className="w-28 px-3 py-1.5 rounded-lg bg-[#1f0b07] border border-[#dab38c]/40 text-center font-mono font-bold text-sm text-[#f5edeb] tracking-widest focus:outline-none focus:border-[#e3a157]"
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={handleVerifyDelegationOtp}
-                                    disabled={isVerifyingDelegationOtp || delegationCode.length < 4}
-                                    className="flex-1 py-1.5 px-3 rounded-lg bg-[#e3a157] hover:bg-[#dab38c] text-[#140604] font-bold text-xs transition-colors cursor-pointer disabled:opacity-50"
-                                  >
-                                    {isVerifyingDelegationOtp ? "Verifying..." : "Authorize Discount"}
-                                  </button>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ) : bhoomiVerifyError ? (
+                        {bhoomiVerifyError && (
                           <div className="text-[11px] text-amber-300 bg-amber-950/40 p-2 rounded-lg border border-amber-500/30">
                             {bhoomiVerifyError}
                           </div>
-                        ) : null}
+                        )}
                         <p className="text-[10px] text-[#dab38c]/60 leading-tight">
                           Enter your Bhoomiputra identity card number or registered mobile to verify membership.
                         </p>

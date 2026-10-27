@@ -398,10 +398,11 @@ export async function verifyMemberDiscountEligibility(params: {
   }
 
   // Check 3: Mismatch -> Theft Block
+  // Zero-disclosure privacy invariant: Do not leak registered phone number in reason
   return {
     eligible: false,
     discountPercent: 0,
-    reason: `Membership ${member.id} belongs to ${maskPhone(member.phones[0])}. Unauthorized access blocked.`,
+    reason: "This Member ID does not match the mobile number entered at checkout. Unauthorized access blocked.",
     member,
   };
 }

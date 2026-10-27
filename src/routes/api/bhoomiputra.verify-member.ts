@@ -170,14 +170,13 @@ export const Route = createFileRoute("/api/bhoomiputra/verify-member")({
           }
 
           // Case where member card is recognized but customer has not entered mobile number yet
+          // Zero-disclosure privacy invariant: Do not leak member name or ID details to unverified requesters
           if (eligibility.requiresPhone && eligibility.member) {
             return Response.json(
               {
                 valid: false,
                 requiresPhone: true,
                 theftAlert: false,
-                memberId: eligibility.member.id,
-                memberName: eligibility.member.name,
                 error:
                   eligibility.reason ||
                   "Please enter your 10-digit mobile number in Contact Information below to verify card ownership.",
@@ -186,17 +185,14 @@ export const Route = createFileRoute("/api/bhoomiputra/verify-member")({
             );
           }
 
-          // If member was found but phone did NOT match -> THEFT ALERT
+          // If member was found but phone did NOT match -> Phone mismatch block
+          // Zero-disclosure privacy invariant: Never leak member name or phone to a non-matching requester
           if (eligibility.member) {
-            const registeredMasked = maskPhone(eligibility.member.phones[0]);
             return Response.json(
               {
                 valid: false,
-                theftAlert: true,
-                memberId: eligibility.member.id,
-                memberName: eligibility.member.name,
-                maskedPhone: registeredMasked,
-                error: `This Bhoomiputra Membership (${eligibility.member.id}) belongs to ${eligibility.member.name} and is registered to ${registeredMasked}. To protect members against unauthorized discount theft, please checkout with your registered WhatsApp number or request a 1-time Authorization Code from the member.`,
+                theftAlert: false,
+                error: "This Member ID does not match the mobile number entered at checkout. Please check your card number or enter your registered mobile number below.",
               },
               { status: 403 },
             );

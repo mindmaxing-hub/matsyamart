@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   findBhoomiputraMember,
   sendDelegationOtp,
@@ -12,6 +12,27 @@ import fs from "fs";
 import path from "path";
 
 describe("Bhoomiputra Membership Anti-Theft Security Suite", () => {
+  const originalFetch = globalThis.fetch;
+
+  beforeEach(() => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: any, ...args: any[]) => {
+        if (typeof url === "string" && url.includes("fast2sms")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({ return: true, status_code: 200, request_id: "mock_req_123" }),
+          };
+        }
+        return originalFetch(url, ...args);
+      }),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
   it("normalizes phone numbers to clean 10 digits", () => {
     expect(clean10DigitPhone("+91 73042 90690")).toBe("7304290690");
     expect(clean10DigitPhone("09920477158")).toBe("9920477158");
@@ -54,7 +75,8 @@ describe("Bhoomiputra Membership Anti-Theft Security Suite", () => {
     });
     expect(result.eligible).toBe(false);
     expect(result.discountPercent).toBe(0);
-    expect(result.reason).toContain("belongs to +91 ••••••");
+    expect(result.reason).toContain("does not match the mobile number");
+    expect(result.reason).not.toContain("belongs to +91");
   });
 
   it("NEVER leaks or auto-substitutes a member when an invalid or wrong card ID (e.g. BH-MMR-074) is entered with a registered phone", async () => {
@@ -71,7 +93,8 @@ describe("Bhoomiputra Membership Anti-Theft Security Suite", () => {
     // Member must be the actual card owner (Krushal S.), NEVER substituted with Aryan Panchal
     expect(result.member?.id).toBe("BH-MMR-074");
     expect(result.member?.name).not.toBe("Aryan Panchal");
-    expect(result.reason).toContain("belongs to +91 ••••••");
+    expect(result.reason).toContain("does not match the mobile number");
+    expect(result.reason).not.toContain("belongs to +91");
 
     // An unregistered/made-up card must return no member at all
     const nonExistent = await verifyMemberDiscountEligibility({
