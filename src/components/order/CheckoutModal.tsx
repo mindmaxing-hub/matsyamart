@@ -75,6 +75,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [otpSuccessMessage, setOtpSuccessMessage] = useState("");
   const [isTooManyAttempts, setIsTooManyAttempts] = useState(false);
   const [pendingPaymentTrigger, setPendingPaymentTrigger] = useState(false);
+  const [otpChallengeToken, setOtpChallengeToken] = useState<string>("");
 
   useEffect(() => {
     if (otpTimer <= 0) return;
@@ -110,6 +111,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       if (res.ok && data.success) {
         setIsTooManyAttempts(false);
         setOtpTimer(30);
+        if (data.challengeToken) {
+          setOtpChallengeToken(data.challengeToken);
+        }
         setOtpSuccessMessage(data.message || `Verification code sent to your WhatsApp (+91 ${cleaned.slice(-10)})`);
         toast.success(data.message || `Verification code sent (+91 ${cleaned.slice(-10)})`);
         return true;
@@ -171,7 +175,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       const res = await fetch("/api/whatsapp/otp/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: cleaned, otp: trimmedOtp }),
+        body: JSON.stringify({
+          phone: cleaned,
+          otp: trimmedOtp,
+          challengeToken: otpChallengeToken || undefined,
+        }),
       });
 
       const data = await res.json();
@@ -250,7 +258,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         setBhoomiVerifyStatus("verified");
         setVerifiedMemberInfo(data.member);
         setBhoomiVerifyError("");
-        toast.success(`Verified: ${data.member.name} (${data.member.id})`);
+        if (appliedCoupon) {
+          setAppliedCoupon(null);
+          setCouponCodeInput("");
+          setCouponFeedback(null);
+          toast.info("Switched to Bhoomiputra Member Privilege (15% OFF). Promo coupon removed (offers cannot be clubbed).");
+        } else {
+          toast.success(`Verified: ${data.member.name} (${data.member.id})`);
+        }
       } else if (data.requiresPhone) {
         setBhoomiVerifyStatus("error");
         setBhoomiVerifyError(
@@ -440,6 +455,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     e.preventDefault();
     setCouponFeedback(null);
 
+    // Strict Non-Clubbing Policy: Promo coupons cannot be clubbed with Bhoomiputra Member Privilege
+    if (isBhoomiMember && bhoomiVerifyStatus === "verified") {
+      setCouponFeedback({
+        type: "error",
+        message: "Promo coupons cannot be clubbed with Bhoomiputra Member Privilege. Please disable Bhoomiputra Membership to use this coupon.",
+      });
+      return;
+    }
+
     if (!couponCodeInput.trim()) {
       setCouponFeedback({
         type: "error",
@@ -455,6 +479,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         message: result.error || "Invalid promo code.",
       });
       return;
+    }
+
+    // If Bhoomiputra checkbox was selected, clear it
+    if (isBhoomiMember) {
+      setIsBhoomiMember(false);
+      setBhoomiVerifyStatus("idle");
+      setVerifiedMemberInfo(null);
+      setBhoomiVerifyError("");
+      toast.info("Applied promo coupon. Bhoomiputra Member selection disabled (offers cannot be clubbed).");
     }
 
     setAppliedCoupon({
@@ -566,7 +599,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               quantity: i.quantity,
               slotId: i.slotId,
             })),
-            couponCode: appliedCoupon?.code,
+            couponCode:
+              isBhoomiMember && bhoomiVerifyStatus === "verified"
+                ? undefined
+                : appliedCoupon?.code,
             bhoomiMemberId:
               isBhoomiMember && bhoomiVerifyStatus === "verified"
                 ? verifiedMemberInfo?.id || bhoomiMemberId.trim()
@@ -621,7 +657,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               shippingAddress: hasPhysicalProduct ? shippingAddress : undefined,
               razorpayPaymentId: rzpResult.razorpay_payment_id,
               razorpayOrderId: rzpResult.razorpay_order_id,
-              couponCode: isBhoomiMember ? bhoomiputraConfig.code_alias : appliedCoupon?.code,
+              couponCode:
+                isBhoomiMember && bhoomiVerifyStatus === "verified"
+                  ? bhoomiputraConfig.code_alias
+                  : appliedCoupon?.code,
               discountAmount: activeDiscountAmount > 0 ? activeDiscountAmount : undefined,
               isBhoomiputraMember: isBhoomiMember && bhoomiVerifyStatus === "verified",
               bhoomiputraMemberId:
@@ -972,7 +1011,28 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
             {/* Promo Code Input & Status */}
             <div className="pt-2 border-t border-[#dab38c]/15 space-y-2">
-              {appliedCoupon ? (
+              {isBhoomiMember && bhoomiVerifyStatus === "verified" ? (
+                <div className="p-2.5 rounded-xl bg-[#29100b]/60 border border-[#dab38c]/20 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2 text-[#dab38c]">
+                    <Sparkles className="w-3.5 h-3.5 text-[#e3a157] shrink-0" />
+                    <span className="text-[11px] leading-tight">
+                      Bhoomiputra Member Privilege active ({bhoomiputraConfig.discount_percent}% OFF). Promo coupons cannot be clubbed with membership privileges.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsBhoomiMember(false);
+                      setBhoomiVerifyStatus("idle");
+                      setVerifiedMemberInfo(null);
+                      setBhoomiVerifyError("");
+                    }}
+                    className="text-[10px] text-[#e3a157] hover:underline cursor-pointer ml-2 shrink-0 font-medium"
+                  >
+                    Use Coupon Instead
+                  </button>
+                </div>
+              ) : appliedCoupon ? (
                 <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300">
                   <div className="flex items-center gap-1.5 font-mono">
                     <span className="font-bold text-emerald-400">{appliedCoupon.code}</span>

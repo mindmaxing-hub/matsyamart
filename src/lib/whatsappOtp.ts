@@ -13,6 +13,10 @@ import {
   normalizeWhatsAppNumber,
   to10DigitIndianNumber,
 } from "./fast2smsWhatsApp";
+import {
+  signWhatsAppOtpChallenge,
+  verifyWhatsAppOtpChallenge,
+} from "./serverAuthToken";
 
 export interface WhatsAppOtpSession {
   phone: string;
@@ -69,6 +73,7 @@ export function buildWhatsAppOtpMessage(otp: string, phone: string): string {
 export function createWhatsAppOtpSession(phone: string): {
   success: boolean;
   otp?: string;
+  challengeToken?: string;
   cooldownRemaining?: number;
   tooManyAttempts?: boolean;
   error?: string;
@@ -122,6 +127,7 @@ export function createWhatsAppOtpSession(phone: string): {
   }
 
   const otp = generateWhatsAppOtp();
+  const challengeToken = signWhatsAppOtpChallenge(cleanPhone, otp, OTP_EXPIRY_MS);
   const session: WhatsAppOtpSession = {
     phone: cleanPhone,
     otp,
@@ -137,6 +143,7 @@ export function createWhatsAppOtpSession(phone: string): {
   return {
     success: true,
     otp,
+    challengeToken,
   };
 }
 
@@ -171,46 +178,52 @@ export async function sendWhatsAppOtp(
     };
   }
 
-  // Attempt 1: Fast2SMS WhatsApp Template API (when template is configured)
-  if (FAST2SMS_OTP_TEMPLATE_ID) {
-    try {
-      const templateQuery = new URLSearchParams({
-        message_id: FAST2SMS_OTP_TEMPLATE_ID,
-        phone_number_id: FAST2SMS_PHONE_NUMBER_ID,
-        numbers: cleanPhone,
-        variables_values: otp,
-      });
-      const templateUrl = `https://www.fast2sms.com/dev/whatsapp?${templateQuery.toString()}`;
-      console.log(`[Fast2SMS WhatsApp Template Outbound Attempt] Phone: +91 ${cleanPhone}, TemplateID: ${FAST2SMS_OTP_TEMPLATE_ID}`);
-      const tplRes = await fetch(templateUrl, {
-        method: "GET",
-        headers: {
-          authorization: FAST2SMS_API_KEY,
-        },
-        signal: typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(5000) : null,
-      });
+  // Attempt 1: Fast2SMS WhatsApp Template API (Approved Template 39898 for guaranteed delivery)
+  const templateId = FAST2SMS_OTP_TEMPLATE_ID || "39898";
+  if (templateId) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const templateQuery = new URLSearchParams({
+          message_id: templateId,
+          phone_number_id: FAST2SMS_PHONE_NUMBER_ID,
+          numbers: cleanPhone,
+          variables_values: otp,
+        });
+        const templateUrl = `https://www.fast2sms.com/dev/whatsapp?${templateQuery.toString()}`;
+        console.log(`[Fast2SMS WhatsApp Template Outbound Attempt ${attempt}] Phone: +91 ${cleanPhone}, TemplateID: ${templateId}`);
+        const tplRes = await fetch(templateUrl, {
+          method: "GET",
+          headers: {
+            authorization: FAST2SMS_API_KEY,
+          },
+          signal: typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(8000) : null,
+        });
 
-      const tplData = (await tplRes.json().catch(() => ({}))) as {
-        return?: boolean;
-        status_code?: number;
-        message?: string | string[];
-        request_id?: string;
-      };
-
-      console.log(`[Fast2SMS WhatsApp Template Response] Status: ${tplRes.status}`, tplData);
-
-      if (tplData.return === true || tplData.status_code === 200) {
-        return {
-          success: true,
-          status: "accepted",
-          provider: "whatsapp-fast2sms",
-          message: `Verification code dispatched to WhatsApp (+91 ${cleanPhone}).`,
-          requestId: tplData.request_id,
+        const tplData = (await tplRes.json().catch(() => ({}))) as {
+          return?: boolean;
+          status_code?: number;
+          message?: string | string[];
+          request_id?: string;
         };
+
+        console.log(`[Fast2SMS WhatsApp Template Response] Status: ${tplRes.status}`, tplData);
+
+        if (tplData.return === true || tplData.status_code === 200) {
+          return {
+            success: true,
+            status: "accepted",
+            provider: "whatsapp-fast2sms",
+            message: `Verification code dispatched to WhatsApp (+91 ${cleanPhone}).`,
+            requestId: tplData.request_id,
+          };
+        }
+        console.warn(`[Fast2SMS WhatsApp Template Rejected attempt ${attempt}]`, tplData);
+      } catch (err: unknown) {
+        console.warn(`[Fast2SMS WhatsApp Template Error attempt ${attempt}] Phone: ${cleanPhone}:`, err);
       }
-      console.warn(`[Fast2SMS WhatsApp Template Rejected]`, tplData);
-    } catch (err: unknown) {
-      console.warn(`[Fast2SMS WhatsApp Template Error] Phone: ${cleanPhone}:`, err);
+      if (attempt === 1) {
+        await new Promise((r) => setTimeout(r, 600));
+      }
     }
   }
 
@@ -272,17 +285,35 @@ export async function sendWhatsAppOtp(
 }
 
 /**
- * Validates submitted OTP against stored WhatsApp session
+ * Validates submitted OTP against stored WhatsApp session or stateless HMAC challenge token.
  */
 export function verifyWhatsAppOtpSession(
   phone: string,
   userOtp: string,
+  challengeToken?: string,
 ): {
   valid: boolean;
   error?: string;
   remainingAttempts?: number;
 } {
   const cleanPhone = cleanIndianMobile(phone);
+
+  // 1. Try stateless cryptographic HMAC challenge verification first (for serverless isolate resilience)
+  if (challengeToken) {
+    const statelessResult = verifyWhatsAppOtpChallenge(cleanPhone, userOtp, challengeToken);
+    if (statelessResult.valid) {
+      // Consume in-memory session if present
+      whatsappOtpStore.delete(cleanPhone);
+      return { valid: true };
+    }
+    // If challenge token was supplied and failed, and no in-memory session exists, return error
+    const inMemorySession = whatsappOtpStore.get(cleanPhone);
+    if (!inMemorySession) {
+      return statelessResult;
+    }
+  }
+
+  // 2. Fall back to in-memory session verification
   const session = whatsappOtpStore.get(cleanPhone);
 
   if (!session) {

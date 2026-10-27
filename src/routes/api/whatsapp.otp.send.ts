@@ -66,6 +66,7 @@ export const Route = createFileRoute("/api/whatsapp/otp/send")({
             success: true,
             status: waResult.status,
             phone: cleanPhone,
+            challengeToken: sessionResult.challengeToken,
             message: waResult.message,
             provider: waResult.provider,
           });

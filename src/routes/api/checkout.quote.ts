@@ -163,11 +163,21 @@ export const Route = createFileRoute("/api/checkout/quote")({
             }
           }
 
-          // 3. Discount Exclusivity
-          // If Bhoomiputra discount is applied and > 0, use it. If 0 (e.g. goods) or not selected, preserve coupon discount.
+          // 3. Strict Discount Non-Clubbing Policy
+          // Bhoomiputra Member Privilege and Promo Coupons CANNOT be clubbed together.
+          // If Bhoomiputra is verified and applied, promo coupons are explicitly invalidated.
           let activeDiscountAmount = 0;
+          let finalCouponValid = couponValid;
+          let finalPromoDiscountAmount = promoDiscountAmount;
+          let couponDeclineReason: string | undefined = undefined;
+
           if (bhoomiVerified && bhoomiDiscountAmount > 0) {
             activeDiscountAmount = bhoomiDiscountAmount;
+            if (couponCode) {
+              finalCouponValid = false;
+              finalPromoDiscountAmount = 0;
+              couponDeclineReason = "Coupon codes cannot be clubbed with Bhoomiputra Membership privilege.";
+            }
           } else if (couponValid && promoDiscountAmount > 0) {
             activeDiscountAmount = promoDiscountAmount;
           }
@@ -200,7 +210,7 @@ export const Route = createFileRoute("/api/checkout/quote")({
               quoteId,
               subtotalAmount,
               activeDiscountAmount,
-              promoDiscountAmount: couponValid ? promoDiscountAmount : 0,
+              promoDiscountAmount: finalCouponValid ? finalPromoDiscountAmount : 0,
               bhoomiDiscountAmount,
               pointsDiscountAmount,
               finalAmount,
@@ -214,10 +224,11 @@ export const Route = createFileRoute("/api/checkout/quote")({
                 message: bhoomiMessage,
               },
               coupon: {
-                applied: couponValid,
+                applied: finalCouponValid,
                 code: couponCode,
-                discountAmount: promoDiscountAmount,
-                description: couponDescription,
+                discountAmount: finalCouponValid ? finalPromoDiscountAmount : 0,
+                description: finalCouponValid ? couponDescription : undefined,
+                error: couponDeclineReason,
               },
             },
           });

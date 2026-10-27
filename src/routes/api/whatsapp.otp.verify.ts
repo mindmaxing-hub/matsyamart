@@ -12,11 +12,13 @@ export const Route = createFileRoute("/api/whatsapp/otp/verify")({
         try {
           let phoneInput = "";
           let otpInput = "";
+          let challengeToken = "";
 
           try {
             const body = await request.json();
             phoneInput = String(body?.phone || "").trim();
             otpInput = String(body?.otp || "").trim();
+            challengeToken = String(body?.challengeToken || "").trim();
           } catch {
             return Response.json(
               { success: false, error: "Invalid JSON payload" },
@@ -45,7 +47,11 @@ export const Route = createFileRoute("/api/whatsapp/otp/verify")({
             );
           }
 
-          const verifyResult = verifyWhatsAppOtpSession(cleanPhone, otpInput);
+          const verifyResult = verifyWhatsAppOtpSession(
+            cleanPhone,
+            otpInput,
+            challengeToken || undefined,
+          );
 
           if (!verifyResult.valid) {
             return Response.json(
