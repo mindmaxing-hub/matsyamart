@@ -321,29 +321,29 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
   return (
     <div className="space-y-6">
       {/* Top Banner & Statutory Tax Identity Card */}
-      <div className="bg-gradient-to-r from-[#152942] via-[#1c3554] to-[#152942] border border-[#dab38c]/30 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
+      <div className="bg-gradient-to-br from-[#29100B] via-[#35160E] to-[#1F0B07] border border-[#DAB38C]/30 rounded-3xl p-6 text-[#F5EDEB] shadow-xl relative overflow-hidden">
         <div className="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
-          <Receipt className="w-64 h-64 text-[#e3a157]" />
+          <Receipt className="w-64 h-64 text-[#E3A157]" />
         </div>
 
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2 max-w-2xl">
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-[#e3a157]/20 text-[#e3a157] border border-[#e3a157]/40">
+              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-[#3D1811] text-[#E3A157] border border-[#DAB38C]/25">
                 GSTIN: 27ABBFK9637R1ZF · MAHARASHTRA (STATE 27)
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 Statutory Active
               </span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-display font-bold text-white tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-display font-bold text-[#F5EDEB] tracking-tight">
               Invoices &amp; Statutory Billing
             </h2>
-            <p className="text-xs sm:text-sm text-[#cbd5e1] leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#DAB38C]/90 leading-relaxed">
               Official tax invoices issued by{" "}
-              <strong className="text-white">Kolibaba Seafood Inc.</strong> in strategic
+              <strong className="text-[#F5EDEB]">Kolibaba Seafood Inc.</strong> in strategic
               partnership with{" "}
-              <strong className="text-[#e3a157]">Bhoomiputra Foundation</strong>.
+              <strong className="text-[#E3A157]">Bhoomiputra Foundation</strong>.
               Audit all customer tax invoices (B2C) with state-based GST breakdowns and
               vendor host payout remittance vouchers.
             </p>
@@ -352,7 +352,7 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <button
               onClick={handleExportGstr1}
-              className="px-4 py-2.5 bg-[#e3a157] hover:bg-[#dab38c] text-[#152942] font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+              className="px-4 py-2.5 bg-[#E3A157] hover:bg-[#DAB38C] text-[#29100B] font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer"
             >
               <FileSpreadsheet className="w-4 h-4" />
               <span>Export GSTR-1 CSV</span>
@@ -361,86 +361,86 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
         </div>
       </div>
 
-      {/* KPI Cards Row */}
+      {/* KPI Cards Row (Editorial Parchment with Warm Roast Typography) */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-        <div className="bg-[#152942]/60 border border-white/10 rounded-2xl p-4">
-          <div className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-wider">
+        <div className="bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)] rounded-2xl p-4">
+          <div className="text-[11px] font-bold tracking-[0.06em] text-[rgba(41,16,11,0.64)] uppercase">
             Gross Invoiced
           </div>
-          <div className="text-lg sm:text-xl font-bold font-mono text-[#f8fafc] mt-1">
+          <div className="font-display text-xl sm:text-2xl font-bold text-[#29100B] mt-1">
             {formatINR(metrics.grossInvoiced)}
           </div>
-          <div className="text-[10px] text-[#cbd5e1] mt-1">
+          <div className="text-[11px] text-[rgba(41,16,11,0.48)] font-medium mt-1">
             {metrics.totalInvoices} tax invoices
           </div>
         </div>
 
-        <div className="bg-[#152942]/60 border border-white/10 rounded-2xl p-4">
-          <div className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-wider">
+        <div className="bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)] rounded-2xl p-4">
+          <div className="text-[11px] font-bold tracking-[0.06em] text-[rgba(41,16,11,0.64)] uppercase">
             Taxable Base
           </div>
-          <div className="text-lg sm:text-xl font-bold font-mono text-[#e3a157] mt-1">
+          <div className="font-display text-xl sm:text-2xl font-bold text-[#C67F2A] mt-1">
             ₹{metrics.taxableTotal.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
           </div>
-          <div className="text-[10px] text-[#94a3b8] mt-1">Exclusive of GST</div>
+          <div className="text-[11px] text-[rgba(41,16,11,0.48)] font-medium mt-1">Exclusive of GST</div>
         </div>
 
-        <div className="bg-[#152942]/60 border border-white/10 rounded-2xl p-4">
-          <div className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-wider">
+        <div className="bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)] rounded-2xl p-4">
+          <div className="text-[11px] font-bold tracking-[0.06em] text-[rgba(41,16,11,0.64)] uppercase">
             CGST (9.0%)
           </div>
-          <div className="text-lg sm:text-xl font-bold font-mono text-[#f8fafc] mt-1">
+          <div className="font-display text-xl sm:text-2xl font-bold text-[#29100B] mt-1">
             ₹{metrics.cgstTotal.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
           </div>
-          <div className="text-[10px] text-[#cbd5e1] mt-1">Intra-State Central</div>
+          <div className="text-[11px] text-[rgba(41,16,11,0.48)] font-medium mt-1">Intra-State Central</div>
         </div>
 
-        <div className="bg-[#152942]/60 border border-white/10 rounded-2xl p-4">
-          <div className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-wider">
+        <div className="bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)] rounded-2xl p-4">
+          <div className="text-[11px] font-bold tracking-[0.06em] text-[rgba(41,16,11,0.64)] uppercase">
             SGST (9.0%)
           </div>
-          <div className="text-lg sm:text-xl font-bold font-mono text-[#f8fafc] mt-1">
+          <div className="font-display text-xl sm:text-2xl font-bold text-[#29100B] mt-1">
             ₹{metrics.sgstTotal.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
           </div>
-          <div className="text-[10px] text-[#cbd5e1] mt-1">Intra-State MH</div>
+          <div className="text-[11px] text-[rgba(41,16,11,0.48)] font-medium mt-1">Intra-State MH</div>
         </div>
 
-        <div className="bg-[#152942]/60 border border-white/10 rounded-2xl p-4">
-          <div className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-wider">
+        <div className="bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)] rounded-2xl p-4">
+          <div className="text-[11px] font-bold tracking-[0.06em] text-[rgba(41,16,11,0.64)] uppercase">
             IGST (18.0%)
           </div>
-          <div className="text-lg sm:text-xl font-bold font-mono text-cyan-300 mt-1">
+          <div className="font-display text-xl sm:text-2xl font-bold text-sky-800 mt-1">
             ₹{metrics.igstTotal.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
           </div>
-          <div className="text-[10px] text-[#cbd5e1] mt-1">
+          <div className="text-[11px] text-[rgba(41,16,11,0.48)] font-medium mt-1">
             {metrics.interCount} Inter-State Orders
           </div>
         </div>
 
-        <div className="bg-[#152942]/60 border border-white/10 rounded-2xl p-4">
-          <div className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-wider">
+        <div className="bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)] rounded-2xl p-4">
+          <div className="text-[11px] font-bold tracking-[0.06em] text-[rgba(41,16,11,0.64)] uppercase">
             Total GST Tax
           </div>
-          <div className="text-lg sm:text-xl font-bold font-mono text-emerald-400 mt-1">
+          <div className="font-display text-xl sm:text-2xl font-bold text-emerald-700 mt-1">
             ₹{metrics.totalGst.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
           </div>
-          <div className="text-[10px] text-emerald-300 mt-1">100% Reconciled</div>
+          <div className="text-[11px] text-emerald-700 font-bold mt-1">100% Reconciled</div>
         </div>
       </div>
 
       {/* Tabs Header */}
-      <div className="flex border-b border-white/10 gap-4">
+      <div className="flex border-b border-[rgba(41,16,11,0.12)] gap-4">
         <button
           onClick={() => setActiveTab("customer_invoices")}
           className={`pb-3 text-sm font-semibold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
             activeTab === "customer_invoices"
-              ? "border-[#e3a157] text-[#e3a157]"
-              : "border-transparent text-gray-400 hover:text-white"
+              ? "border-[#C67F2A] text-[#29100B] font-bold"
+              : "border-transparent text-[rgba(41,16,11,0.54)] hover:text-[#29100B]"
           }`}
         >
-          <Receipt className="w-4 h-4" />
+          <Receipt className="w-4 h-4 text-[#C67F2A]" />
           <span>Customer Tax Invoices (B2C &amp; B2B)</span>
-          <span className="px-2 py-0.5 rounded-full text-xs bg-white/10 text-white">
+          <span className="px-2 py-0.5 rounded-full text-xs bg-[rgba(41,16,11,0.06)] text-[#29100B] font-bold">
             {filteredOrders.length}
           </span>
         </button>
@@ -449,13 +449,13 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
           onClick={() => setActiveTab("vendor_vouchers")}
           className={`pb-3 text-sm font-semibold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
             activeTab === "vendor_vouchers"
-              ? "border-[#e3a157] text-[#e3a157]"
-              : "border-transparent text-gray-400 hover:text-white"
+              ? "border-[#C67F2A] text-[#29100B] font-bold"
+              : "border-transparent text-[rgba(41,16,11,0.54)] hover:text-[#29100B]"
           }`}
         >
-          <Users className="w-4 h-4" />
+          <Users className="w-4 h-4 text-[#C67F2A]" />
           <span>Vendor &amp; Host Payout Vouchers</span>
-          <span className="px-2 py-0.5 rounded-full text-xs bg-white/10 text-white">
+          <span className="px-2 py-0.5 rounded-full text-xs bg-[rgba(41,16,11,0.06)] text-[#29100B] font-bold">
             {SEED_HOST_PAYOUTS.length}
           </span>
         </button>
@@ -465,21 +465,21 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
       {activeTab === "customer_invoices" && (
         <div className="space-y-4">
           {/* Search & Filters Bar */}
-          <div className="bg-[#152942]/40 border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)] rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
             {/* Search Input */}
             <div className="relative w-full md:w-80">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-[rgba(41,16,11,0.44)] absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search invoice, order ref, customer..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#0e1a29] border border-white/15 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-gray-400 focus:outline-none focus:border-[#e3a157]"
+                className="w-full bg-[#F5EDEB]/70 border border-[rgba(41,16,11,0.12)] rounded-xl pl-10 pr-4 py-2 text-xs text-[#29100B] placeholder-[rgba(41,16,11,0.4)] focus:outline-none focus:border-[#C67F2A]"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[rgba(41,16,11,0.4)] hover:text-[#29100B]"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -489,13 +489,13 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
             {/* Filter Pills */}
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end">
               {/* Category Pills */}
-              <div className="flex items-center gap-1 bg-[#0e1a29] p-1 rounded-xl border border-white/10">
+              <div className="flex items-center gap-1 bg-[#F5EDEB] p-1 rounded-xl border border-[rgba(41,16,11,0.08)]">
                 <button
                   onClick={() => setSelectedCategory("ALL")}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                     selectedCategory === "ALL"
-                      ? "bg-[#e3a157] text-[#152942] font-bold"
-                      : "text-gray-400 hover:text-white"
+                      ? "bg-[#29100B] text-[#E3A157] font-bold shadow-xs"
+                      : "text-[rgba(41,16,11,0.64)] hover:text-[#29100B]"
                   }`}
                 >
                   All
@@ -504,8 +504,8 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
                   onClick={() => setSelectedCategory("WK")}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                     selectedCategory === "WK"
-                      ? "bg-[#5f98a0] text-[#102030] font-bold"
-                      : "text-gray-400 hover:text-white"
+                      ? "bg-[#29100B] text-[#5f98a0] font-bold shadow-xs"
+                      : "text-[rgba(41,16,11,0.64)] hover:text-[#29100B]"
                   }`}
                 >
                   Walks (WK)
@@ -514,8 +514,8 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
                   onClick={() => setSelectedCategory("FD")}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                     selectedCategory === "FD"
-                      ? "bg-[#e3a157] text-[#152942] font-bold"
-                      : "text-gray-400 hover:text-white"
+                      ? "bg-[#29100B] text-[#E3A157] font-bold shadow-xs"
+                      : "text-[rgba(41,16,11,0.64)] hover:text-[#29100B]"
                   }`}
                 >
                   Food (FD)
@@ -524,8 +524,8 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
                   onClick={() => setSelectedCategory("WS")}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                     selectedCategory === "WS"
-                      ? "bg-[#dab38c] text-[#2b120c] font-bold"
-                      : "text-gray-400 hover:text-white"
+                      ? "bg-[#29100B] text-[#DAB38C] font-bold shadow-xs"
+                      : "text-[rgba(41,16,11,0.64)] hover:text-[#29100B]"
                   }`}
                 >
                   Workshops (WS)
@@ -534,8 +534,8 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
                   onClick={() => setSelectedCategory("GD")}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                     selectedCategory === "GD"
-                      ? "bg-emerald-500 text-black font-bold"
-                      : "text-gray-400 hover:text-white"
+                      ? "bg-[#29100B] text-emerald-400 font-bold shadow-xs"
+                      : "text-[rgba(41,16,11,0.64)] hover:text-[#29100B]"
                   }`}
                 >
                   Goods (GD)
@@ -543,13 +543,13 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
               </div>
 
               {/* Tax Regime Filter */}
-              <div className="flex items-center gap-1 bg-[#0e1a29] p-1 rounded-xl border border-white/10">
+              <div className="flex items-center gap-1 bg-[#F5EDEB] p-1 rounded-xl border border-[rgba(41,16,11,0.08)]">
                 <button
                   onClick={() => setSelectedTaxRegime("ALL")}
                   className={`px-2 py-1 rounded-lg text-xs font-medium transition-all ${
                     selectedTaxRegime === "ALL"
-                      ? "bg-white/20 text-white font-bold"
-                      : "text-gray-400 hover:text-white"
+                      ? "bg-[#29100B] text-[#E3A157] font-bold shadow-xs"
+                      : "text-[rgba(41,16,11,0.64)] hover:text-[#29100B]"
                   }`}
                 >
                   All States
@@ -558,8 +558,8 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
                   onClick={() => setSelectedTaxRegime("INTRA_STATE")}
                   className={`px-2 py-1 rounded-lg text-xs font-medium transition-all ${
                     selectedTaxRegime === "INTRA_STATE"
-                      ? "bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40"
-                      : "text-gray-400 hover:text-white"
+                      ? "bg-emerald-100 text-emerald-800 font-bold border border-emerald-300"
+                      : "text-[rgba(41,16,11,0.64)] hover:text-[#29100B]"
                   }`}
                 >
                   MH (CGST+SGST)
@@ -568,8 +568,8 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
                   onClick={() => setSelectedTaxRegime("INTER_STATE")}
                   className={`px-2 py-1 rounded-lg text-xs font-medium transition-all ${
                     selectedTaxRegime === "INTER_STATE"
-                      ? "bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40"
-                      : "text-gray-400 hover:text-white"
+                      ? "bg-sky-100 text-sky-800 font-bold border border-sky-300"
+                      : "text-[rgba(41,16,11,0.64)] hover:text-[#29100B]"
                   }`}
                 >
                   Inter-State (IGST)
@@ -579,26 +579,26 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
           </div>
 
           {/* Invoices Table */}
-          <div className="bg-[#152942]/30 border border-white/10 rounded-2xl overflow-hidden shadow-xl">
+          <div className="bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] rounded-2xl overflow-hidden shadow-md">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-white/10 bg-[#0e1a29]/80 text-[#94a3b8] uppercase tracking-wider text-[11px]">
-                    <th className="py-3 px-4">Invoice &amp; Ref</th>
-                    <th className="py-3 px-4">Category</th>
-                    <th className="py-3 px-4">Customer Details</th>
-                    <th className="py-3 px-4">Place of Supply</th>
-                    <th className="py-3 px-4 text-center">HSN / SAC</th>
-                    <th className="py-3 px-4 text-right">Taxable</th>
-                    <th className="py-3 px-4 text-right">Taxes (GST)</th>
-                    <th className="py-3 px-4 text-right">Total (INR)</th>
-                    <th className="py-3 px-4 text-center">Actions</th>
+                  <tr className="border-b border-[rgba(41,16,11,0.12)] bg-[#29100B] text-[#F5EDEB] uppercase tracking-wider text-[11px]">
+                    <th className="py-3 px-4 font-bold">Invoice &amp; Ref</th>
+                    <th className="py-3 px-4 font-bold">Category</th>
+                    <th className="py-3 px-4 font-bold">Customer Details</th>
+                    <th className="py-3 px-4 font-bold">Place of Supply</th>
+                    <th className="py-3 px-4 text-center font-bold">HSN / SAC</th>
+                    <th className="py-3 px-4 text-right font-bold">Taxable</th>
+                    <th className="py-3 px-4 text-right font-bold">Taxes (GST)</th>
+                    <th className="py-3 px-4 text-right font-bold">Total (INR)</th>
+                    <th className="py-3 px-4 text-center font-bold">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5 text-[#cbd5e1]">
+                <tbody className="divide-y divide-[rgba(41,16,11,0.06)] text-[#29100B]">
                   {filteredOrders.length === 0 ? (
                     <tr>
-                      <td colSpan={9} className="py-12 text-center text-gray-400">
+                      <td colSpan={9} className="py-12 text-center text-[rgba(41,16,11,0.48)]">
                         No tax invoices found matching your filter criteria.
                       </td>
                     </tr>
@@ -616,17 +616,17 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
                       return (
                         <tr
                           key={order.id}
-                          className="hover:bg-white/[0.03] transition-colors"
+                          className="hover:bg-[#F5EDEB]/60 transition-colors"
                         >
                           {/* Invoice & Order Ref */}
                           <td className="py-3.5 px-4">
-                            <div className="font-mono font-bold text-white text-xs">
+                            <div className="font-mono font-bold text-[#29100B] text-xs">
                               {invoiceNo}
                             </div>
-                            <div className="font-mono text-[11px] text-[#94a3b8]">
+                            <div className="font-mono text-[11px] text-[#C67F2A] font-semibold">
                               {order.order_ref}
                             </div>
-                            <div className="text-[10px] text-[#64748b]">
+                            <div className="text-[10px] text-[rgba(41,16,11,0.48)]">
                               {formatDate(order.created_at)}
                             </div>
                           </td>
@@ -636,30 +636,30 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
 
                           {/* Customer Details */}
                           <td className="py-3.5 px-4">
-                            <div className="font-semibold text-white">
+                            <div className="font-semibold text-[#29100B]">
                               {order.customer_name}
                             </div>
-                            <div className="text-[11px] text-gray-400">
+                            <div className="text-[11px] text-[rgba(41,16,11,0.64)]">
                               {order.customer_email}
                             </div>
-                            <div className="text-[10px] font-mono text-gray-500">
+                            <div className="text-[10px] font-mono text-[rgba(41,16,11,0.48)]">
                               {order.customer_phone}
                             </div>
                           </td>
 
                           {/* Place of Supply */}
                           <td className="py-3.5 px-4">
-                            <div className="text-xs font-medium text-white flex items-center gap-1">
-                              <MapPin className="w-3 h-3 text-[#e3a157]" />
+                            <div className="text-xs font-medium text-[#29100B] flex items-center gap-1">
+                              <MapPin className="w-3 h-3 text-[#C67F2A]" />
                               <span>{order.shipping_address?.state || "Maharashtra"}</span>
                             </div>
-                            <div className="text-[10px] text-gray-400">
+                            <div className="text-[10px]">
                               {gst.isInterState ? (
-                                <span className="text-cyan-300 font-semibold">
+                                <span className="text-sky-700 font-semibold">
                                   Inter-State Supply (18% IGST)
                                 </span>
                               ) : (
-                                <span className="text-emerald-300">
+                                <span className="text-emerald-700 font-medium">
                                   State Code 27 · Intra-State
                                 </span>
                               )}
@@ -668,16 +668,16 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
 
                           {/* HSN/SAC */}
                           <td className="py-3.5 px-4 text-center font-mono">
-                            <span className="px-2 py-0.5 rounded bg-white/10 text-white text-[11px] font-semibold">
+                            <span className="px-2 py-0.5 rounded bg-[rgba(41,16,11,0.06)] text-[#29100B] text-[11px] font-semibold border border-[rgba(41,16,11,0.1)]">
                               {hsnInfo.code}
                             </span>
-                            <div className="text-[10px] text-gray-400 truncate max-w-[120px] mx-auto mt-0.5">
+                            <div className="text-[10px] text-[rgba(41,16,11,0.48)] truncate max-w-[120px] mx-auto mt-0.5">
                               {hsnInfo.category}
                             </div>
                           </td>
 
                           {/* Taxable Amount */}
-                          <td className="py-3.5 px-4 text-right font-mono text-gray-300">
+                          <td className="py-3.5 px-4 text-right font-mono text-[rgba(41,16,11,0.8)] font-medium">
                             ₹{gst.taxableValue.toFixed(2)}
                           </td>
 
@@ -685,12 +685,12 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
                           <td className="py-3.5 px-4 text-right font-mono">
                             {gst.isInterState ? (
                               <div>
-                                <span className="text-cyan-300 font-semibold">
+                                <span className="text-sky-700 font-semibold">
                                   IGST: ₹{gst.igst.toFixed(2)}
                                 </span>
                               </div>
                             ) : (
-                              <div className="text-[11px] text-gray-300 leading-tight">
+                              <div className="text-[11px] text-[rgba(41,16,11,0.64)] leading-tight">
                                 <div>C: ₹{gst.cgst.toFixed(2)}</div>
                                 <div>S: ₹{gst.sgst.toFixed(2)}</div>
                               </div>
@@ -698,7 +698,7 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
                           </td>
 
                           {/* Total INR */}
-                          <td className="py-3.5 px-4 text-right font-mono font-bold text-white text-sm">
+                          <td className="py-3.5 px-4 text-right font-mono font-bold text-[#29100B] text-sm">
                             {formatINR(order.total_amount_inr)}
                           </td>
 
@@ -708,9 +708,9 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
                               <button
                                 onClick={() => setPreviewOrder(order)}
                                 title="Preview Official Tax Invoice"
-                                className="px-2.5 py-1 rounded-lg bg-[#e3a157]/20 hover:bg-[#e3a157] text-[#e3a157] hover:text-[#152942] font-semibold text-xs border border-[#e3a157]/40 transition-all flex items-center gap-1 cursor-pointer"
+                                className="px-2.5 py-1 rounded-lg bg-[#E3A157]/20 hover:bg-[#E3A157] text-[#29100B] font-semibold text-xs border border-[#E3A157]/50 transition-all flex items-center gap-1 cursor-pointer"
                               >
-                                <Eye className="w-3.5 h-3.5" />
+                                <Eye className="w-3.5 h-3.5 text-[#C67F2A]" />
                                 <span>Preview</span>
                               </button>
                               <a
@@ -718,7 +718,7 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
                                 target="_blank"
                                 rel="noreferrer"
                                 title="Open Live Invoice URL"
-                                className="p-1 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                                className="p-1 rounded-lg hover:bg-[rgba(41,16,11,0.08)] text-[rgba(41,16,11,0.5)] hover:text-[#29100B] transition-colors"
                               >
                                 <ExternalLink className="w-3.5 h-3.5" />
                               </a>
@@ -738,92 +738,92 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
       {/* TAB 2: VENDOR & HOST PAYOUT VOUCHERS */}
       {activeTab === "vendor_vouchers" && (
         <div className="space-y-4">
-          <div className="bg-[#152942]/40 border border-white/10 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-[0_1px_2px_rgba(41,16,11,0.05),0_8px_28px_-12px_rgba(41,16,11,0.14)] rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h3 className="text-base font-bold text-white">
+              <h3 className="text-base font-bold text-[#29100B]">
                 Community Host &amp; Artisan Payout Vouchers
               </h3>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-[rgba(41,16,11,0.64)] mt-0.5">
                 Statutory payment vouchers for indigenous Koli fishermen guides, home-cooks, and bachat gats.
               </p>
             </div>
-            <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-medium">
+            <div className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
               Zero Platform Deductions on Guide Retainers
             </div>
           </div>
 
-          <div className="bg-[#152942]/30 border border-white/10 rounded-2xl overflow-hidden shadow-xl">
+          <div className="bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] rounded-2xl overflow-hidden shadow-md">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-white/10 bg-[#0e1a29]/80 text-[#94a3b8] uppercase tracking-wider text-[11px]">
-                    <th className="py-3 px-4">Voucher Ref</th>
-                    <th className="py-3 px-4">Partner Name &amp; Role</th>
-                    <th className="py-3 px-4">Koliwada / Village</th>
-                    <th className="py-3 px-4">Bank / UPI Destination</th>
-                    <th className="py-3 px-4 text-right">Total Earned</th>
-                    <th className="py-3 px-4 text-right">Total Paid</th>
-                    <th className="py-3 px-4 text-right">Pending Balance</th>
-                    <th className="py-3 px-4 text-center">Status</th>
-                    <th className="py-3 px-4 text-center">Voucher</th>
+                  <tr className="border-b border-[rgba(41,16,11,0.12)] bg-[#29100B] text-[#F5EDEB] uppercase tracking-wider text-[11px]">
+                    <th className="py-3 px-4 font-bold">Voucher Ref</th>
+                    <th className="py-3 px-4 font-bold">Partner Name &amp; Role</th>
+                    <th className="py-3 px-4 font-bold">Koliwada / Village</th>
+                    <th className="py-3 px-4 font-bold">Bank / UPI Destination</th>
+                    <th className="py-3 px-4 text-right font-bold">Total Earned</th>
+                    <th className="py-3 px-4 text-right font-bold">Total Paid</th>
+                    <th className="py-3 px-4 text-right font-bold">Pending Balance</th>
+                    <th className="py-3 px-4 text-center font-bold">Status</th>
+                    <th className="py-3 px-4 text-center font-bold">Voucher</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5 text-[#cbd5e1]">
+                <tbody className="divide-y divide-[rgba(41,16,11,0.06)] text-[#29100B]">
                   {SEED_HOST_PAYOUTS.map((payout) => (
                     <tr
                       key={payout.id}
-                      className="hover:bg-white/[0.03] transition-colors"
+                      className="hover:bg-[#F5EDEB]/60 transition-colors"
                     >
-                      <td className="py-3.5 px-4 font-mono font-bold text-white">
+                      <td className="py-3.5 px-4 font-mono font-bold text-[#29100B]">
                         VCHR-{payout.id.toUpperCase()}
-                        <div className="text-[10px] text-gray-500 font-mono">
+                        <div className="text-[10px] text-[rgba(41,16,11,0.48)] font-mono">
                           UTR: {payout.utr_reference || "N/A"}
                         </div>
                       </td>
 
                       <td className="py-3.5 px-4">
-                        <div className="font-bold text-white">
+                        <div className="font-bold text-[#29100B]">
                           {payout.partner_name}
                         </div>
-                        <div className="text-[11px] text-gray-400 capitalize">
+                        <div className="text-[11px] text-[rgba(41,16,11,0.64)] capitalize">
                           {payout.role_type.replace("_", " ")}
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4 text-white">
+                      <td className="py-3.5 px-4 text-[#29100B] font-medium">
                         {payout.koliwada}
                       </td>
 
                       <td className="py-3.5 px-4 font-mono text-[11px]">
-                        <div className="text-white">{payout.bank_account_mask}</div>
-                        <div className="text-gray-400 text-[10px]">{payout.upi_id}</div>
+                        <div className="text-[#29100B] font-semibold">{payout.bank_account_mask}</div>
+                        <div className="text-[rgba(41,16,11,0.54)] text-[10px]">{payout.upi_id}</div>
                       </td>
 
-                      <td className="py-3.5 px-4 text-right font-mono font-semibold text-white">
+                      <td className="py-3.5 px-4 text-right font-mono font-semibold text-[#29100B]">
                         {formatINR(payout.total_earned_inr)}
                       </td>
 
-                      <td className="py-3.5 px-4 text-right font-mono text-emerald-400 font-semibold">
+                      <td className="py-3.5 px-4 text-right font-mono text-emerald-700 font-bold">
                         {formatINR(payout.total_paid_inr)}
                       </td>
 
                       <td className="py-3.5 px-4 text-right font-mono">
                         {payout.pending_balance_inr > 0 ? (
-                          <span className="text-amber-400 font-bold">
+                          <span className="text-amber-700 font-bold">
                             {formatINR(payout.pending_balance_inr)}
                           </span>
                         ) : (
-                          <span className="text-gray-500">₹0</span>
+                          <span className="text-[rgba(41,16,11,0.4)]">₹0</span>
                         )}
                       </td>
 
                       <td className="py-3.5 px-4 text-center">
                         {payout.status === "disbursed" ? (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                             Disbursed
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
                             Pending Settlement
                           </span>
                         )}
@@ -832,7 +832,7 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
                       <td className="py-3.5 px-4 text-center">
                         <button
                           onClick={() => setPreviewPayout(payout)}
-                          className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium text-xs transition-colors cursor-pointer"
+                          className="px-2.5 py-1 rounded-lg bg-[#29100B]/5 hover:bg-[#29100B] text-[#29100B] hover:text-[#F5EDEB] font-medium text-xs transition-colors cursor-pointer border border-[rgba(41,16,11,0.12)]"
                         >
                           View Voucher
                         </button>
@@ -857,65 +857,65 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
       {/* MODAL 2: VENDOR REMITTANCE VOUCHER PREVIEW MODAL */}
       {previewPayout && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs">
-          <div className="bg-[#152942] border border-[#dab38c]/30 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative text-white">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+          <div className="bg-[#29100B] border border-[#DAB38C]/30 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative text-[#F5EDEB]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#DAB38C]/20">
               <div className="flex items-center gap-2">
-                <Receipt className="w-5 h-5 text-[#e3a157]" />
-                <h3 className="font-display font-bold text-base text-white">
+                <Receipt className="w-5 h-5 text-[#E3A157]" />
+                <h3 className="font-display font-bold text-base text-[#F5EDEB]">
                   Vendor Remittance Voucher · {previewPayout.partner_name}
                 </h3>
               </div>
               <button
                 onClick={() => setPreviewPayout(null)}
-                className="p-1 rounded-full hover:bg-white/10 text-gray-400 hover:text-white"
+                className="p-1 rounded-full hover:bg-white/10 text-[#DAB38C] hover:text-[#F5EDEB] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="bg-white text-black p-6 rounded-2xl space-y-4 text-xs font-sans">
-              <div className="flex justify-between items-start border-b pb-3 border-black">
+            <div className="bg-[#FFFDFB] text-[#29100B] p-6 rounded-2xl space-y-4 text-xs font-sans shadow-inner">
+              <div className="flex justify-between items-start border-b pb-3 border-[rgba(41,16,11,0.14)]">
                 <div>
-                  <div className="font-bold text-lg font-display">Kolibaba Seafood Inc.</div>
-                  <div className="text-[10px] text-gray-600">
+                  <div className="font-bold text-lg font-display text-[#29100B]">Kolibaba Seafood Inc.</div>
+                  <div className="text-[10px] text-[rgba(41,16,11,0.64)]">
                     Community Host Settlement Voucher · Bhoomiputra Partnership
                   </div>
                 </div>
-                <div className="text-right font-mono text-[11px]">
+                <div className="text-right font-mono text-[11px] text-[#29100B]">
                   <div><b>Voucher:</b> VCHR-{previewPayout.id.toUpperCase()}</div>
                   <div><b>Date:</b> {formatDate(previewPayout.last_payout_date || new Date().toISOString())}</div>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <div className="text-[10px] font-bold text-gray-500 uppercase">Beneficiary Partner</div>
-                <div className="font-bold text-sm">{previewPayout.partner_name}</div>
-                <div className="text-gray-600 text-[11px]">
+                <div className="text-[10px] font-bold text-[rgba(41,16,11,0.48)] uppercase">Beneficiary Partner</div>
+                <div className="font-bold text-sm text-[#29100B]">{previewPayout.partner_name}</div>
+                <div className="text-[rgba(41,16,11,0.64)] text-[11px]">
                   Role: <span className="capitalize">{previewPayout.role_type.replace("_", " ")}</span> · {previewPayout.koliwada}
                 </div>
-                <div className="font-mono text-[11px] pt-1">
+                <div className="font-mono text-[11px] pt-1 text-[rgba(41,16,11,0.8)]">
                   Bank Account: {previewPayout.bank_account_mask}<br />
                   UPI VPA: {previewPayout.upi_id}<br />
                   UTR Reference: {previewPayout.utr_reference || "CMS_PENDING"}
                 </div>
               </div>
 
-              <div className="border-t border-b border-gray-200 py-3 space-y-2">
-                <div className="flex justify-between text-gray-700">
+              <div className="border-t border-b border-[rgba(41,16,11,0.12)] py-3 space-y-2">
+                <div className="flex justify-between text-[rgba(41,16,11,0.8)]">
                   <span>Gross Maritime Earnings:</span>
                   <span className="font-mono font-semibold">{formatINR(previewPayout.total_earned_inr)}</span>
                 </div>
-                <div className="flex justify-between text-emerald-700 font-semibold">
+                <div className="flex justify-between text-emerald-800 font-semibold">
                   <span>Disbursed to Bank/UPI:</span>
                   <span className="font-mono">-{formatINR(previewPayout.total_paid_inr)}</span>
                 </div>
-                <div className="flex justify-between text-black font-bold pt-1 border-t border-gray-200">
+                <div className="flex justify-between text-[#29100B] font-bold pt-1 border-t border-[rgba(41,16,11,0.12)]">
                   <span>Pending Remittance:</span>
                   <span className="font-mono text-sm">{formatINR(previewPayout.pending_balance_inr)}</span>
                 </div>
               </div>
 
-              <div className="text-[10px] text-gray-500 leading-tight">
+              <div className="text-[10px] text-[rgba(41,16,11,0.54)] leading-tight">
                 This document certifies the community host settlement split executed under the
                 Bhoomiputra Foundation maritime welfare pact. Zero commission deductions applied.
               </div>
@@ -924,7 +924,7 @@ export const InvoicesWorkspace: React.FC<InvoicesWorkspaceProps> = ({
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => window.print()}
-                className="px-4 py-2 bg-[#e3a157] text-[#152942] font-bold text-xs rounded-xl shadow cursor-pointer flex items-center gap-1.5"
+                className="px-4 py-2 bg-[#E3A157] hover:bg-[#DAB38C] text-[#29100B] font-bold text-xs rounded-xl shadow cursor-pointer flex items-center gap-1.5 transition-colors"
               >
                 <Printer className="w-4 h-4" />
                 <span>Print Voucher</span>

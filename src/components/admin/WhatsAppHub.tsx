@@ -45,7 +45,7 @@ interface WhatsAppHubProps {
 }
 
 export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) => {
-  const [activeTab, setActiveTab] = useState<"abandoned" | "dispatches" | "compose">("abandoned");
+  const [activeTab, setActiveTab] = useState<"abandoned" | "dispatches" | "compose" | "templates">("abandoned");
   const [abandonedCarts, setAbandonedCarts] = useState<AbandonedCartRecord[]>([]);
   const [cartFilter, setCartFilter] = useState<"all" | "abandoned" | "contacted" | "recovered">("all");
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -276,6 +276,18 @@ export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) =>
           >
             <Send className="w-3.5 h-3.5" />
             <span>Direct Composer</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("templates")}
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "templates"
+                ? "bg-[#e3a157] text-[#29100b] shadow-xs"
+                : "text-[#dab38c] hover:text-[#f5edeb]"
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Templates (4)</span>
           </button>
         </div>
       </div>
@@ -541,6 +553,184 @@ export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) =>
               <span>{isSendingDirect ? "Dispatching..." : "Send via Fast2SMS WhatsApp"}</span>
             </button>
           </form>
+        </div>
+      )}
+
+      {/* TAB 4: FAST2SMS WHATSAPP TEMPLATES & META APPROVAL REGISTRY */}
+      {activeTab === "templates" && (
+        <div className="space-y-4">
+          <div className="p-4 rounded-2xl bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-sm text-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <h3 className="text-base font-bold text-[#29100B] flex items-center gap-2">
+                <span>Fast2SMS &amp; Meta WhatsApp Templates</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  Pre-Configured + wa.me Fallback Active
+                </span>
+              </h3>
+              <p className="text-xs text-[rgba(41,16,11,0.64)] mt-0.5">
+                Official message templates registered for Fast2SMS WhatsApp Business API (+91 76665 11511).
+              </p>
+            </div>
+            <div className="text-[11px] font-mono text-[#C67F2A] bg-[rgba(41,16,11,0.05)] px-3 py-1.5 rounded-xl border border-[rgba(41,16,11,0.1)]">
+              Default Template ID: <b>39898 (payment_completed)</b>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Template 1 */}
+            <div className="p-5 rounded-2xl bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#29100B] text-[#E3A157]">
+                  matsyamart_order_pass_v1
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                  Category: Utility
+                </span>
+              </div>
+              <h4 className="font-bold text-sm text-[#29100B]">
+                Order Confirmation &amp; 9:16 Mobile Pass Dispatch
+              </h4>
+              <p className="text-xs text-[rgba(41,16,11,0.64)]">
+                Dispatched immediately after payment with guest name, order ref, amount, and digital boarding pass URL.
+              </p>
+              <div className="p-3 rounded-xl bg-[#F5EDEB]/70 border border-[rgba(41,16,11,0.1)] text-[11px] font-mono text-[#29100B] whitespace-pre-line leading-relaxed">
+{`Namaste {{1}}, your coastal reservation with MatsyaMart is confirmed!
+
+Order Reference: {{2}}
+Total Paid: INR {{3}}
+
+Your digital boarding passes & tax invoice receipt:
+{{4}}
+
+Kolibaba Seafood Inc · Bhoomiputra Foundation`}
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-[rgba(41,16,11,0.6)] pt-1 border-t border-[rgba(41,16,11,0.06)]">
+                <span>Variables: Name, Ref, Amount, PassURL</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText("Namaste {{1}}, your coastal reservation with MatsyaMart is confirmed!\n\nOrder Reference: {{2}}\nTotal Paid: INR {{3}}\n\nYour digital boarding passes & tax invoice receipt:\n{{4}}\n\nKolibaba Seafood Inc · Bhoomiputra Foundation");
+                    toast.success("Template text copied!");
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-[rgba(41,16,11,0.06)] hover:bg-[#29100B] hover:text-[#F5EDEB] text-[#29100B] font-bold text-[10px] transition-colors cursor-pointer"
+                >
+                  Copy Template
+                </button>
+              </div>
+            </div>
+
+            {/* Template 2 */}
+            <div className="p-5 rounded-2xl bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#29100B] text-[#E3A157]">
+                  matsyamart_auth_otp_v1
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-sky-800 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
+                  Category: Authentication
+                </span>
+              </div>
+              <h4 className="font-bold text-sm text-[#29100B]">
+                WhatsApp OTP Login &amp; Mobile Verification
+              </h4>
+              <p className="text-xs text-[rgba(41,16,11,0.64)]">
+                Dispatches a secure 6-digit numeric verification code for guest checkout without requiring DLT SMS registration.
+              </p>
+              <div className="p-3 rounded-xl bg-[#F5EDEB]/70 border border-[rgba(41,16,11,0.1)] text-[11px] font-mono text-[#29100B] whitespace-pre-line leading-relaxed">
+{`{{1}} is your MatsyaMart verification code. For your security, do not share this code with anyone. Valid for 10 minutes.`}
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-[rgba(41,16,11,0.6)] pt-1 border-t border-[rgba(41,16,11,0.06)]">
+                <span>Button: Copy Code ({"{{1}}"})</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText("{{1}} is your MatsyaMart verification code. For your security, do not share this code with anyone. Valid for 10 minutes.");
+                    toast.success("Template text copied!");
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-[rgba(41,16,11,0.06)] hover:bg-[#29100B] hover:text-[#F5EDEB] text-[#29100B] font-bold text-[10px] transition-colors cursor-pointer"
+                >
+                  Copy Template
+                </button>
+              </div>
+            </div>
+
+            {/* Template 3 */}
+            <div className="p-5 rounded-2xl bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#29100B] text-[#E3A157]">
+                  bhoomiputra_member_auth_v1
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-800 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                  Category: Authentication
+                </span>
+              </div>
+              <h4 className="font-bold text-sm text-[#29100B]">
+                Bhoomiputra Member Delegation Authorization
+              </h4>
+              <p className="text-xs text-[rgba(41,16,11,0.64)]">
+                Dispatched to the registered member's WhatsApp when someone enters their Member ID to prevent unauthorized discount theft.
+              </p>
+              <div className="p-3 rounded-xl bg-[#F5EDEB]/70 border border-[rgba(41,16,11,0.1)] text-[11px] font-mono text-[#29100B] whitespace-pre-line leading-relaxed">
+{`Bhoomiputra Security Alert: Your Member ID {{1}} was entered for an order at MatsyaMart by +91 {{2}}.
+
+To authorize the 15% discount for this purchase, share code: {{3}}
+
+If you did not authorize this, do not share this code.`}
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-[rgba(41,16,11,0.6)] pt-1 border-t border-[rgba(41,16,11,0.06)]">
+                <span>Variables: MemberID, RequesterPhone, 4DigitCode</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText("Bhoomiputra Security Alert: Your Member ID {{1}} was entered for an order at MatsyaMart by +91 {{2}}.\n\nTo authorize the 15% discount for this purchase, share code: {{3}}\n\nIf you did not authorize this, do not share this code.");
+                    toast.success("Template text copied!");
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-[rgba(41,16,11,0.06)] hover:bg-[#29100B] hover:text-[#F5EDEB] text-[#29100B] font-bold text-[10px] transition-colors cursor-pointer"
+                >
+                  Copy Template
+                </button>
+              </div>
+            </div>
+
+            {/* Template 4 */}
+            <div className="p-5 rounded-2xl bg-[#FFFDFB] border border-[rgba(41,16,11,0.08)] shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#29100B] text-[#E3A157]">
+                  matsyamart_cart_recovery_v1
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                  Category: Marketing
+                </span>
+              </div>
+              <h4 className="font-bold text-sm text-[#29100B]">
+                Dawn Catch &amp; Abandoned Cart Recovery
+              </h4>
+              <p className="text-xs text-[rgba(41,16,11,0.64)]">
+                Personalized 1-click WhatsApp restoral reminder for patrons who abandoned items with upcoming harbor tides.
+              </p>
+              <div className="p-3 rounded-xl bg-[#F5EDEB]/70 border border-[rgba(41,16,11,0.1)] text-[11px] font-mono text-[#29100B] whitespace-pre-line leading-relaxed">
+{`Namaste {{1}}! We noticed you left some authentic Koli items in your basket:
+
+Items: {{2}}
+Basket Total: INR {{3}}
+
+Dawn catches and harbor seats fill quickly with the tide. Tap below to restore your exact dates & complete in 1 click:
+{{4}}`}
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-[rgba(41,16,11,0.6)] pt-1 border-t border-[rgba(41,16,11,0.06)]">
+                <span>Variables: CustomerName, Items, Total, RestoreURL</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText("Namaste {{1}}! We noticed you left some authentic Koli items in your basket:\n\nItems: {{2}}\nBasket Total: INR {{3}}\n\nDawn catches and harbor seats fill quickly with the tide. Tap below to restore your exact dates & complete in 1 click:\n{{4}}");
+                    toast.success("Template text copied!");
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-[rgba(41,16,11,0.06)] hover:bg-[#29100B] hover:text-[#F5EDEB] text-[#29100B] font-bold text-[10px] transition-colors cursor-pointer"
+                >
+                  Copy Template
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1,5 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { supabase } from "../../lib/supabase";
+import {
+  findBhoomiputraMember,
+  verifyMemberDiscountEligibility,
+  maskPhone,
+  clean10DigitPhone,
+} from "../../lib/bhoomiputraSecurity";
 
 // In-memory sliding window rate limiter
 interface RateLimitRecord {
@@ -8,7 +13,7 @@ interface RateLimitRecord {
 }
 const rateLimitMap = new Map<string, RateLimitRecord>();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
-const MAX_REQUESTS_PER_WINDOW = 30; // 30 attempts per minute per IP
+const MAX_REQUESTS_PER_WINDOW = 40; // 40 attempts per minute per IP
 
 function checkRateLimit(clientIp: string): boolean {
   const now = Date.now();
@@ -28,8 +33,7 @@ function checkRateLimit(clientIp: string): boolean {
 }
 
 /**
- * Normalizes input string by replacing all Unicode dashes (en-dash \u2013,
- * em-dash \u2014, figure dash, minus \u2212, fullwidth hyphen) with standard ASCII '-'
+ * Normalizes input string by replacing all Unicode dashes with standard ASCII '-'
  */
 export function normalizeMemberId(raw: string): {
   normalized: string;
@@ -46,9 +50,8 @@ export function normalizeMemberId(raw: string): {
   const cleanUpper = normalized.toUpperCase();
   const cleanDigits = normalized.replace(/\D/g, "");
 
-  // Match Bhoomiputra pattern: BH-MMR-XXX or MMR-XXX or pure sequence number (not a 10-digit phone)
   let sequenceNum: number | null = null;
-  if (cleanDigits.length < 10) {
+  if (cleanDigits.length < 10 && cleanDigits.length > 0) {
     const match = cleanUpper.match(/(?:BH-?MMR-?|MMR-?)?(\d+)/i);
     if (match && match[1]) {
       sequenceNum = parseInt(match[1], 10);
@@ -74,7 +77,7 @@ export const Route = createFileRoute("/api/bhoomiputra/verify-member")({
     handlers: {
       POST: async ({ request }) => {
         try {
-          // 1. Client IP detection for rate limiting
+          // 1. Client IP rate limiting
           const clientIp =
             request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
             request.headers.get("cf-connecting-ip") ||
@@ -92,11 +95,10 @@ export const Route = createFileRoute("/api/bhoomiputra/verify-member")({
             );
           }
 
-          // 2. Parse & sanitize input
-          let memberIdInput = "";
+          // 2. Parse payload
+          let body: any = {};
           try {
-            const body = await request.json();
-            memberIdInput = String(body?.memberId || "").trim();
+            body = await request.json();
           } catch {
             return Response.json(
               { valid: false, error: "Invalid JSON payload" },
@@ -104,7 +106,39 @@ export const Route = createFileRoute("/api/bhoomiputra/verify-member")({
             );
           }
 
-          if (!memberIdInput || memberIdInput.length < 3) {
+          const rawMemberId = String(body?.memberId || "").trim();
+          const customerPhone = clean10DigitPhone(body?.customerPhone || body?.phone);
+          const delegationToken = String(body?.delegationToken || "").trim();
+
+          // CASE 1: Seamless Phone Auto-Discovery (Zero-friction auto-recognition)
+          // If customer provided their phone and no member ID, check if this phone is registered
+          if (!rawMemberId && customerPhone) {
+            const member = await findBhoomiputraMember({ phone: customerPhone });
+            if (member && member.status === "active") {
+              return Response.json({
+                valid: true,
+                autoDetected: true,
+                discount_percent: 15,
+                member: {
+                  id: member.id,
+                  name: member.name,
+                  tier: member.tier,
+                  settlement: member.settlement,
+                  phone: `+91 ${customerPhone}`,
+                  verifiedAt: new Date().toISOString(),
+                },
+                message: `🎉 Welcome back Bhoomiputra Member ${member.name} (${member.id})! Your 15% patron privilege is automatically applied.`,
+              });
+            }
+            return Response.json({
+              valid: false,
+              autoDetected: false,
+              message: "Phone number is not registered with Bhoomiputra Foundation",
+            });
+          }
+
+          // If neither memberId nor phone is provided
+          if (!rawMemberId || rawMemberId.length < 3) {
             return Response.json(
               {
                 valid: false,
@@ -115,171 +149,53 @@ export const Route = createFileRoute("/api/bhoomiputra/verify-member")({
             );
           }
 
-          const {
-            cleanUpper,
-            cleanDigits,
-            sequenceNum,
-            canonicalId,
-          } = normalizeMemberId(memberIdInput);
+          const { canonicalId } = normalizeMemberId(rawMemberId);
 
-          // 3. Check Bhoomiputra Foundation Live Shared API Endpoint if available
-          const bhoomiApiUrl =
-            (typeof process !== "undefined" && process.env?.["BHOOMIPUTRA_API_URL"]) ||
-            "https://bhoomiputra.org";
+          // CASE 2: Member ID Verification with Strict Phone / Delegation Binding
+          const eligibility = await verifyMemberDiscountEligibility({
+            memberId: canonicalId,
+            customerPhone,
+            delegationToken,
+          });
 
-          try {
-            const remoteRes = await fetch(`${bhoomiApiUrl}/api/public/verify-member`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ memberId: canonicalId, phone: cleanDigits }),
-              signal: AbortSignal.timeout(3000),
-            }).catch(() => null);
-
-            if (remoteRes && remoteRes.ok) {
-              const remoteData = await remoteRes.json();
-              if (remoteData?.valid) {
-                return Response.json(remoteData);
-              }
-            }
-          } catch (e) {
-            // Silently fall through to direct Supabase / algorithmic verification
-            console.debug("[Bhoomiputra Public API Check Note]", e);
-          }
-
-          // 4. Check Live Supabase Database if available
-          if (supabase) {
-            try {
-              // Check members table
-              let memberQuery = supabase
-                .from("members")
-                .select("id, member_id, full_name, phone, region, status")
-                .limit(1);
-
-              if (cleanDigits.length >= 10) {
-                const last10 = cleanDigits.slice(-10);
-                memberQuery = memberQuery.or(
-                  `phone.ilike.%${last10}%,member_id.ilike.%${canonicalId}%,member_id.ilike.%${cleanUpper}%`,
-                );
-              } else {
-                memberQuery = memberQuery.or(
-                  `member_id.ilike.%${canonicalId}%,member_id.ilike.%${cleanUpper}%`,
-                );
-              }
-
-              const { data: memberRows, error: memberErr } = await memberQuery;
-              const memberRecord = memberRows?.[0];
-
-              if (!memberErr && memberRecord) {
-                return Response.json({
-                  valid: true,
-                  member: {
-                    id: memberRecord.member_id || canonicalId,
-                    name: memberRecord.full_name || "Bhoomiputra Member",
-                    tier: "Verified Member",
-                    settlement: memberRecord.region || "Coastal Collective",
-                    phone: memberRecord.phone ? `+91 ${memberRecord.phone.slice(-10)}` : undefined,
-                    verifiedAt: new Date().toISOString(),
-                  },
-                  discount_percent: 15,
-                  message: "Bhoomiputra Foundation Membership successfully verified",
-                });
-              }
-
-              // Check membership_applications table
-              let appQuery = supabase
-                .from("membership_applications")
-                .select("id, full_name, phone, status, payment_status, settlement_type, district, member_id")
-                .limit(1);
-
-              if (cleanDigits.length >= 10) {
-                const last10 = cleanDigits.slice(-10);
-                appQuery = appQuery.or(
-                  `phone.ilike.%${last10}%,member_id.ilike.%${canonicalId}%,member_id.ilike.%${cleanUpper}%`,
-                );
-              } else {
-                appQuery = appQuery.or(
-                  `member_id.ilike.%${canonicalId}%,member_id.ilike.%${cleanUpper}%`,
-                );
-              }
-
-              const { data: appRows, error: appErr } = await appQuery;
-              const appRecord = appRows?.[0];
-
-              if (!appErr && appRecord) {
-                const isPaidOrApproved =
-                  appRecord.payment_status === "paid" ||
-                  appRecord.status === "approved" ||
-                  appRecord.status === "active" ||
-                  Boolean(appRecord.member_id);
-
-                if (isPaidOrApproved) {
-                  return Response.json({
-                    valid: true,
-                    member: {
-                      id: appRecord.member_id || canonicalId,
-                      name: appRecord.full_name || "Bhoomiputra Member",
-                      tier: "Active Member",
-                      settlement:
-                        appRecord.settlement_type || appRecord.district || "Coastal Collective",
-                      verifiedAt: new Date().toISOString(),
-                    },
-                    discount_percent: 15,
-                    message: "Bhoomiputra Foundation Membership successfully verified",
-                  });
-                }
-              }
-            } catch (dbErr) {
-              console.warn("[Bhoomiputra Direct DB Warning]", dbErr);
-            }
-          }
-
-          // 5. Dynamic Bhoomiputra ID Registry & Sequence Validation
-          // The Foundation issues running IDs starting at 61 (BH-MMR-061, BH-MMR-075, etc.)
-          // Every approved Foundation member card follows this scheme.
-          const isStandardBhoomiputraId =
-            sequenceNum !== null && sequenceNum >= 61 && sequenceNum <= 9999;
-          const isKnownMemberPhone =
-            cleanDigits.length >= 10 &&
-            (cleanDigits.endsWith("7304290690") || cleanDigits.endsWith("9920477158") || cleanDigits.endsWith("7666511511"));
-
-          if (isStandardBhoomiputraId || isKnownMemberPhone) {
-            const memberName =
-              isKnownMemberPhone && cleanDigits.endsWith("7304290690")
-                ? "Aryan Panchal"
-                : sequenceNum === 75
-                  ? "Aryan Panchal"
-                  : sequenceNum === 61
-                    ? "Ashwini Koli"
-                    : sequenceNum === 62
-                      ? "Anusaya Tai Koli"
-                      : "Verified Bhoomiputra Member";
-
-            const settlement =
-              sequenceNum === 61 || sequenceNum === 75
-                ? "Versova Koliwada"
-                : sequenceNum === 62
-                  ? "Sassoon Docks"
-                  : "Coastal Collective";
-
+          if (eligibility.eligible && eligibility.member) {
             return Response.json({
               valid: true,
+              discount_percent: eligibility.discountPercent,
               member: {
-                id: canonicalId,
-                name: memberName,
-                tier: "Active Member",
-                settlement: settlement,
+                id: eligibility.member.id,
+                name: eligibility.member.name,
+                tier: eligibility.member.tier,
+                settlement: eligibility.member.settlement,
+                phone: `+91 ${eligibility.member.phones[0] || customerPhone}`,
                 verifiedAt: new Date().toISOString(),
               },
-              discount_percent: 15,
-              message: "Bhoomiputra Foundation Membership successfully verified",
+              message: "Bhoomiputra Foundation Membership successfully verified and bound to order",
             });
           }
 
-          // 6. Verification Failed
+          // If member was found but phone did NOT match -> THEFT ALERT
+          if (eligibility.member) {
+            const registeredMasked = maskPhone(eligibility.member.phones[0]);
+            return Response.json(
+              {
+                valid: false,
+                theftAlert: true,
+                memberId: eligibility.member.id,
+                memberName: eligibility.member.name,
+                maskedPhone: registeredMasked,
+                error: `This Bhoomiputra Membership (${eligibility.member.id}) belongs to ${eligibility.member.name} and is registered to ${registeredMasked}. To protect members against unauthorized discount theft, please checkout with your registered WhatsApp number or request a 1-time Authorization Code from the member.`,
+              },
+              { status: 403 },
+            );
+          }
+
+          // Member ID was not found anywhere
           return Response.json(
             {
               valid: false,
-              error: `Member ID or Phone "${memberIdInput}" was not found in the active Bhoomiputra Foundation register. Please check your card or enroll at bhoomiputra.org`,
+              theftAlert: false,
+              error: `Member ID "${rawMemberId}" was not found in the active Bhoomiputra Foundation register. Please check your card or enroll at bhoomiputra.org`,
             },
             { status: 404 },
           );

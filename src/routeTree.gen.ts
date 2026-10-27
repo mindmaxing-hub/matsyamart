@@ -32,6 +32,8 @@ import { Route as ApiOtpSendRouteImport } from './routes/api/otp.send'
 import { Route as ApiOtpVerifyRouteImport } from './routes/api/otp.verify'
 import { Route as ApiWhatsappSendRouteImport } from './routes/api/whatsapp.send'
 import { Route as OrderConfirmationOrderRefRouteImport } from './routes/order.confirmation.$orderRef'
+import { Route as ApiBhoomiputraDelegationOtpSendRouteImport } from './routes/api/bhoomiputra.delegation-otp.send'
+import { Route as ApiBhoomiputraDelegationOtpVerifyRouteImport } from './routes/api/bhoomiputra.delegation-otp.verify'
 import { Route as ApiRazorpayOrderCreateRouteImport } from './routes/api/razorpay.order.create'
 import { Route as ApiWhatsappOtpSendRouteImport } from './routes/api/whatsapp.otp.send'
 import { Route as ApiWhatsappOtpVerifyRouteImport } from './routes/api/whatsapp.otp.verify'
@@ -155,6 +157,18 @@ const OrderConfirmationOrderRefRoute =
     path: '/order/confirmation/$orderRef',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiBhoomiputraDelegationOtpSendRoute =
+  ApiBhoomiputraDelegationOtpSendRouteImport.update({
+    id: '/api/bhoomiputra/delegation-otp/send',
+    path: '/api/bhoomiputra/delegation-otp/send',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiBhoomiputraDelegationOtpVerifyRoute =
+  ApiBhoomiputraDelegationOtpVerifyRouteImport.update({
+    id: '/api/bhoomiputra/delegation-otp/verify',
+    path: '/api/bhoomiputra/delegation-otp/verify',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiRazorpayOrderCreateRoute = ApiRazorpayOrderCreateRouteImport.update({
   id: '/api/razorpay/order/create',
   path: '/api/razorpay/order/create',
@@ -201,6 +215,8 @@ export interface FileRoutesByFullPath {
   '/api/otp/verify': typeof ApiOtpVerifyRoute
   '/api/whatsapp/send': typeof ApiWhatsappSendRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
+  '/api/bhoomiputra/delegation-otp/send': typeof ApiBhoomiputraDelegationOtpSendRoute
+  '/api/bhoomiputra/delegation-otp/verify': typeof ApiBhoomiputraDelegationOtpVerifyRoute
   '/api/razorpay/order/create': typeof ApiRazorpayOrderCreateRoute
   '/api/whatsapp/otp/send': typeof ApiWhatsappOtpSendRoute
   '/api/whatsapp/otp/verify': typeof ApiWhatsappOtpVerifyRoute
@@ -230,6 +246,8 @@ export interface FileRoutesByTo {
   '/api/otp/verify': typeof ApiOtpVerifyRoute
   '/api/whatsapp/send': typeof ApiWhatsappSendRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
+  '/api/bhoomiputra/delegation-otp/send': typeof ApiBhoomiputraDelegationOtpSendRoute
+  '/api/bhoomiputra/delegation-otp/verify': typeof ApiBhoomiputraDelegationOtpVerifyRoute
   '/api/razorpay/order/create': typeof ApiRazorpayOrderCreateRoute
   '/api/whatsapp/otp/send': typeof ApiWhatsappOtpSendRoute
   '/api/whatsapp/otp/verify': typeof ApiWhatsappOtpVerifyRoute
@@ -260,6 +278,8 @@ export interface FileRoutesById {
   '/api/otp/verify': typeof ApiOtpVerifyRoute
   '/api/whatsapp/send': typeof ApiWhatsappSendRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
+  '/api/bhoomiputra/delegation-otp/send': typeof ApiBhoomiputraDelegationOtpSendRoute
+  '/api/bhoomiputra/delegation-otp/verify': typeof ApiBhoomiputraDelegationOtpVerifyRoute
   '/api/razorpay/order/create': typeof ApiRazorpayOrderCreateRoute
   '/api/whatsapp/otp/send': typeof ApiWhatsappOtpSendRoute
   '/api/whatsapp/otp/verify': typeof ApiWhatsappOtpVerifyRoute
@@ -291,6 +311,8 @@ export interface FileRouteTypes {
     | '/api/otp/verify'
     | '/api/whatsapp/send'
     | '/order/confirmation/$orderRef'
+    | '/api/bhoomiputra/delegation-otp/send'
+    | '/api/bhoomiputra/delegation-otp/verify'
     | '/api/razorpay/order/create'
     | '/api/whatsapp/otp/send'
     | '/api/whatsapp/otp/verify'
@@ -320,6 +342,8 @@ export interface FileRouteTypes {
     | '/api/otp/verify'
     | '/api/whatsapp/send'
     | '/order/confirmation/$orderRef'
+    | '/api/bhoomiputra/delegation-otp/send'
+    | '/api/bhoomiputra/delegation-otp/verify'
     | '/api/razorpay/order/create'
     | '/api/whatsapp/otp/send'
     | '/api/whatsapp/otp/verify'
@@ -349,6 +373,8 @@ export interface FileRouteTypes {
     | '/api/otp/verify'
     | '/api/whatsapp/send'
     | '/order/confirmation/$orderRef'
+    | '/api/bhoomiputra/delegation-otp/send'
+    | '/api/bhoomiputra/delegation-otp/verify'
     | '/api/razorpay/order/create'
     | '/api/whatsapp/otp/send'
     | '/api/whatsapp/otp/verify'
@@ -379,6 +405,8 @@ export interface RootRouteChildren {
   ApiOtpVerifyRoute: typeof ApiOtpVerifyRoute
   ApiWhatsappSendRoute: typeof ApiWhatsappSendRoute
   OrderConfirmationOrderRefRoute: typeof OrderConfirmationOrderRefRoute
+  ApiBhoomiputraDelegationOtpSendRoute: typeof ApiBhoomiputraDelegationOtpSendRoute
+  ApiBhoomiputraDelegationOtpVerifyRoute: typeof ApiBhoomiputraDelegationOtpVerifyRoute
   ApiRazorpayOrderCreateRoute: typeof ApiRazorpayOrderCreateRoute
   ApiWhatsappOtpSendRoute: typeof ApiWhatsappOtpSendRoute
   ApiWhatsappOtpVerifyRoute: typeof ApiWhatsappOtpVerifyRoute
@@ -548,6 +576,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrderConfirmationOrderRefRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/bhoomiputra/delegation-otp/send': {
+      id: '/api/bhoomiputra/delegation-otp/send'
+      path: '/api/bhoomiputra/delegation-otp/send'
+      fullPath: '/api/bhoomiputra/delegation-otp/send'
+      preLoaderRoute: typeof ApiBhoomiputraDelegationOtpSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/bhoomiputra/delegation-otp/verify': {
+      id: '/api/bhoomiputra/delegation-otp/verify'
+      path: '/api/bhoomiputra/delegation-otp/verify'
+      fullPath: '/api/bhoomiputra/delegation-otp/verify'
+      preLoaderRoute: typeof ApiBhoomiputraDelegationOtpVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/razorpay/order/create': {
       id: '/api/razorpay/order/create'
       path: '/api/razorpay/order/create'
@@ -603,6 +645,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiOtpVerifyRoute: ApiOtpVerifyRoute,
   ApiWhatsappSendRoute: ApiWhatsappSendRoute,
   OrderConfirmationOrderRefRoute: OrderConfirmationOrderRefRoute,
+  ApiBhoomiputraDelegationOtpSendRoute: ApiBhoomiputraDelegationOtpSendRoute,
+  ApiBhoomiputraDelegationOtpVerifyRoute:
+    ApiBhoomiputraDelegationOtpVerifyRoute,
   ApiRazorpayOrderCreateRoute: ApiRazorpayOrderCreateRoute,
   ApiWhatsappOtpSendRoute: ApiWhatsappOtpSendRoute,
   ApiWhatsappOtpVerifyRoute: ApiWhatsappOtpVerifyRoute,

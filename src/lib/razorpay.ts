@@ -27,6 +27,8 @@ export interface RazorpayCheckoutOptions {
   customerPhone: string;
   description: string;
   isExperience?: boolean;
+  bhoomiMemberId?: string | undefined;
+  delegationToken?: string | undefined;
   onSuccess: (response: {
     razorpay_payment_id: string;
     razorpay_order_id?: string | undefined;
@@ -74,6 +76,8 @@ export async function initiatePayment(
         customerPhone: options.customerPhone,
         customerEmail: options.customerEmail,
         description: options.description,
+        bhoomiMemberId: options.bhoomiMemberId,
+        delegationToken: options.delegationToken,
       }),
       signal: AbortSignal.timeout(4000),
     });
@@ -83,8 +87,16 @@ export async function initiatePayment(
       if (orderData.success && orderData.orderId) {
         razorpayOrderId = orderData.orderId;
       }
+    } else {
+      const errData = await orderRes.json().catch(() => ({}));
+      if (errData?.theftAlert) {
+        throw new Error(errData.error || "Bhoomiputra Membership verification failed.");
+      }
     }
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.message && e.message.includes("Bhoomiputra")) {
+      throw e;
+    }
     console.warn("[Razorpay Order API Notice] Proceeding with direct checkout:", e);
   }
 

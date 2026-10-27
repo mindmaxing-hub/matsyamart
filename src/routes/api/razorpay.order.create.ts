@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { verifyMemberDiscountEligibility } from "../../lib/bhoomiputraSecurity";
 
 export const RAZORPAY_KEY_ID =
   (typeof process !== "undefined" && process.env?.["RAZORPAY_KEY_ID"]) ||
@@ -33,12 +34,41 @@ export const Route = createFileRoute("/api/razorpay/order/create")({
             );
           }
 
-          const amountPaise = Math.round(amountInr * 100);
           const orderRef = String(body?.orderRef || `MM-${Date.now().toString(36).toUpperCase()}`);
           const customerName = String(body?.customerName || "Valued Patron");
           const customerPhone = String(body?.customerPhone || "");
           const customerEmail = String(body?.customerEmail || "");
           const description = String(body?.description || "MatsyaMart Coastal Reservation");
+          const bhoomiMemberId = String(body?.bhoomiMemberId || body?.notes?.bhoomiputra_member_id || "").trim();
+          const delegationToken = String(body?.delegationToken || "").trim();
+
+          // Server-Side Anti-Theft Verification Gate:
+          // If a Bhoomiputra discount is claimed, verify caller ownership or valid delegation
+          if (bhoomiMemberId) {
+            const eligibility = await verifyMemberDiscountEligibility({
+              memberId: bhoomiMemberId,
+              customerPhone,
+              delegationToken,
+            });
+
+            if (!eligibility.eligible) {
+              console.warn(
+                `[Razorpay Anti-Theft Warning] Phone ${customerPhone} attempted to claim member ID ${bhoomiMemberId}. Blocked.`,
+              );
+              return Response.json(
+                {
+                  success: false,
+                  theftAlert: true,
+                  error:
+                    eligibility.reason ||
+                    "Security Verification Failed: Bhoomiputra Membership is registered to a different mobile number. Payment token creation blocked.",
+                },
+                { status: 403 },
+              );
+            }
+          }
+
+          const amountPaise = Math.round(amountInr * 100);
 
           const authHeader = `Basic ${Buffer.from(
             `${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`,
@@ -60,6 +90,7 @@ export const Route = createFileRoute("/api/razorpay/order/create")({
                 customer_phone: customerPhone,
                 customer_email: customerEmail,
                 description: description.slice(0, 100),
+                bhoomiputra_member_id: bhoomiMemberId || undefined,
               },
             }),
             signal: AbortSignal.timeout(5000),
@@ -100,3 +131,4 @@ export const Route = createFileRoute("/api/razorpay/order/create")({
     },
   },
 });
+
