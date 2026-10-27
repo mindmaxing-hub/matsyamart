@@ -41,10 +41,15 @@ export const WhatsAppChat: React.FC = () => {
 
   const waUrl = buildWhatsAppUrl(MATSYAMART_WHATSAPP_NUMBER, defaultMsg);
 
+  // When on an experience page on mobile, lift above the sticky bottom booking bar
+  const positionClasses = isExperience
+    ? "bottom-20 lg:bottom-6 right-4 sm:right-6"
+    : "bottom-6 right-4 sm:right-6";
+
   return (
     <div
-      className="fixed bottom-6 right-6 z-40 print:hidden flex items-end gap-3"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      className={`fixed ${positionClasses} z-40 print:hidden flex items-end gap-3 transition-all duration-300`}
+      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
       {/* Pill Tooltip */}
       {showTooltip && (

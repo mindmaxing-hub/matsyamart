@@ -206,6 +206,18 @@ const SEED_COUPONS: Coupon[] = [
     created_at: new Date(Date.now() - 3600000 * 72).toISOString(),
   },
   {
+    id: "coup-deal-100",
+    code: "DEAL100",
+    description: "Live Order Verification Deal · Flat ₹549 Off (₹1 Test Checkout)",
+    discount_type: "flat",
+    discount_value: 549,
+    min_order_inr: 0,
+    applicable_pillars: ["goods", "food", "walks", "workshops"],
+    used_count: 0,
+    is_active: true,
+    created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
+  },
+  {
     id: "coup-fish-100",
     code: "FISHFEAST100",
     description: "Special Flat ₹100 Off on Coastal Feasts",
@@ -623,7 +635,23 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   const [coupons, setCoupons] = useState<Coupon[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_COUPONS);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed: Coupon[] = JSON.parse(saved);
+        // Seamlessly merge any new codebase seed coupons that don't exist yet in the user's storage
+        const missingSeeds = SEED_COUPONS.filter(
+          (seed) => !parsed.some((c) => c.code.toUpperCase() === seed.code.toUpperCase())
+        );
+        if (missingSeeds.length > 0) {
+          const merged = [...parsed, ...missingSeeds];
+          try {
+            localStorage.setItem(STORAGE_COUPONS, JSON.stringify(merged));
+          } catch {
+            // Storage quota fallback
+          }
+          return merged;
+        }
+        return parsed;
+      }
       return SEED_COUPONS;
     } catch {
       return SEED_COUPONS;

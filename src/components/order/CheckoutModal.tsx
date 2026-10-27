@@ -856,45 +856,46 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[#29100b] rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden border border-[#dab38c]/30 animate-scale-in text-[#f5edeb]">
-        {/* Header */}
-        <div className="bg-[#1f0b07] text-[#f5edeb] p-6 flex items-center justify-between border-b border-[#dab38c]/20">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-display font-bold text-xl text-[#f5edeb]">
-                Instant Checkout
-              </span>
-              <span className="text-[10px] font-semibold bg-[#e3a157]/15 text-[#e3a157] border border-[#e3a157]/40 px-2 py-0.5 rounded-full uppercase">
+    <div className="fixed inset-0 z-[60] overflow-y-auto bg-black/90 backdrop-blur-md p-2 sm:p-4 py-4 sm:py-8">
+      <div className="min-h-full flex items-start sm:items-center justify-center">
+        <div className="relative w-full max-w-xl bg-[#29100b] rounded-2xl sm:rounded-3xl border border-[#dab38c]/30 shadow-2xl overflow-hidden my-auto animate-scale-in text-[#f5edeb]">
+          {/* Sticky Header */}
+          <div className="sticky top-0 z-20 bg-[#1f0b07] text-[#f5edeb] p-4 sm:p-6 flex items-start sm:items-center justify-between gap-3 border-b border-[#dab38c]/20">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-display font-bold text-lg sm:text-xl text-[#f5edeb] tracking-tight">
+                  Instant Checkout
+                </span>
+                <span className="text-[9px] sm:text-[10px] font-semibold bg-[#e3a157]/15 text-[#e3a157] border border-[#e3a157]/40 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  {isPureGoods
+                    ? "Coastal Artisan Pantry"
+                    : isMixedCart
+                      ? "Mixed Experience & Pantry"
+                      : "Curated Experience"}
+                </span>
+              </div>
+              <p className="text-[11px] sm:text-xs text-[#dab38c] mt-1 line-clamp-2 sm:line-clamp-none">
                 {isPureGoods
-                  ? "Coastal Artisan Pantry"
+                  ? "Direct dispatch from indigenous coastal fisher collectives & artisans"
                   : isMixedCart
-                    ? "Mixed Experience & Pantry Order"
-                    : "Curated Experience"}
-              </span>
+                    ? "Curated coastal experiences combined with direct artisanal pantry dispatch"
+                    : "Curated and operated in direct partnership with local coastal communities"}
+              </p>
             </div>
-            <p className="text-xs text-[#dab38c] mt-1">
-              {isPureGoods
-                ? "Direct dispatch from indigenous coastal fisher collectives & artisans"
-                : isMixedCart
-                  ? "Curated coastal experiences combined with direct artisanal pantry dispatch"
-                  : "Curated and operated in direct partnership with local coastal communities"}
-            </p>
+            <button
+              onClick={onClose}
+              className="p-2 text-[#dab38c] hover:text-[#f5edeb] rounded-xl hover:bg-[#35160e] transition-colors cursor-pointer shrink-0"
+              aria-label="Close checkout"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-[#dab38c] hover:text-[#f5edeb] rounded-xl hover:bg-[#35160e] transition-colors cursor-pointer"
-            aria-label="Close checkout"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
 
-        {/* Content & Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="p-6 space-y-6 max-h-[80vh] overflow-y-auto"
-        >
+          {/* Content & Form */}
+          <form
+            onSubmit={handleSubmit}
+            className="p-3.5 sm:p-6 space-y-4 sm:space-y-6"
+          >
           {/* Order Summary Strip */}
           <div className="bg-[#1f0b07] border border-[#dab38c]/20 rounded-2xl p-4 space-y-3 text-xs">
             <div className="font-semibold text-[#dab38c] uppercase tracking-wider text-[11px]">
@@ -918,7 +919,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             {/* Bhoomiputra Member Privilege Card */}
             {bhoomiputraConfig.is_enabled && (
               <div className="p-3.5 rounded-xl bg-[#140604] border border-[#dab38c]/30 space-y-2.5">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
@@ -938,7 +939,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       I am a Bhoomiputra Foundation Member
                     </span>
                   </label>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#e3a157]/20 text-[#e3a157] border border-[#e3a157]/40">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#e3a157]/20 text-[#e3a157] border border-[#e3a157]/40 shrink-0">
                     {bhoomiputraConfig.discount_percent}% Member Off
                   </span>
                 </div>
@@ -1138,11 +1139,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             )}
 
             {/* MatsyaPoints Loyalty Redemption */}
-            <div className="p-2.5 rounded-xl bg-[#140604] border border-[#dab38c]/20 flex items-center justify-between text-xs">
+            <div className="p-2.5 rounded-xl bg-[#140604] border border-[#dab38c]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#e3a157]" />
+                <Sparkles className="w-4 h-4 text-[#e3a157] shrink-0" />
                 <div>
-                  <div className="font-bold text-[#f5edeb] flex items-center gap-1.5">
+                  <div className="font-bold text-[#f5edeb] flex flex-wrap items-center gap-1.5">
                     <span>{availableLoyaltyPoints} MatsyaPoints Available</span>
                     {member && (
                       <span className="text-[10px] px-1.5 py-0.5 bg-[#e3a157]/20 text-[#e3a157] rounded-md uppercase font-semibold">
@@ -1158,7 +1159,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <button
                 type="button"
                 onClick={() => setUseLoyaltyPoints(!useLoyaltyPoints)}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`w-full sm:w-auto px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
                   useLoyaltyPoints
                     ? "bg-[#e3a157] text-[#29100b]"
                     : "bg-[#29100b] text-[#dab38c] hover:text-white border border-[#dab38c]/30"
@@ -1638,6 +1639,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

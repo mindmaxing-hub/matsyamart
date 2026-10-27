@@ -17,7 +17,6 @@ import { formatINR } from "../lib/utils";
 import { getOptimizedImageUrl } from "../lib/images";
 import { CheckoutModal } from "../components/order/CheckoutModal";
 import { trackViewContent } from "../lib/metaPixel";
-import { CoastalConciergeWidget } from "../components/site/CoastalConciergeWidget";
 
 interface ProductDetailPageProps {
   slug?: string;
@@ -315,14 +314,6 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           onClose={() => setIsInstantCheckoutOpen(false)}
         />
       )}
-
-      {/* Floating Coastal WhatsApp Concierge */}
-      <CoastalConciergeWidget
-        listingTitle={listing.title}
-        pillar="goods"
-        hostName={listing.artisan_collective || listing.host_name}
-        hostPhone={listing.host_phone}
-      />
     </div>
   );
 };

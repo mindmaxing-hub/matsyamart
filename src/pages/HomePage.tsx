@@ -360,7 +360,7 @@ export const HomePage: React.FC = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredListings.map((listing) => (
-                  <ListingCard key={listing.id} listing={listing} />
+                  <ListingCard key={listing.id} listing={listing} className="w-full" />
                 ))}
               </div>
             )}

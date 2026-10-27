@@ -5,7 +5,6 @@ import { useWishlist } from "../context/WishlistContext";
 import { SlotBookingSheet } from "../components/experience/SlotBookingSheet";
 import { ItineraryTimeline } from "../components/experience/ItineraryTimeline";
 import { HostProfileCard } from "../components/experience/HostProfileCard";
-import { CoastalConciergeWidget } from "../components/site/CoastalConciergeWidget";
 import { trackViewContent } from "../lib/metaPixel";
 import {
   ArrowLeft,
@@ -326,14 +325,6 @@ export const ExperienceDetailPage: React.FC<ExperienceDetailPageProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Floating Coastal WhatsApp Concierge */}
-      <CoastalConciergeWidget
-        listingTitle={listing.title}
-        pillar={listing.pillar}
-        hostName={listing.host_name}
-        hostPhone={listing.host_phone}
-      />
     </div>
   );
 };

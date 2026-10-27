@@ -150,7 +150,7 @@ export const GoodsOrderTracker: React.FC<GoodsOrderTrackerProps> = ({
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Top Banner: Order Confirmed & Support Headline */}
-      <div className="bg-[#29100b] border border-[#dab38c]/25 rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+      <div className="bg-[#29100b] border border-[#dab38c]/25 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-[#e3a157]/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#dab38c]/15">
@@ -188,9 +188,9 @@ export const GoodsOrderTracker: React.FC<GoodsOrderTrackerProps> = ({
 
         {/* Real-Time Fulfillment Progress Stepper */}
         <div className="pt-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-4 mb-4">
             <h2 className="text-xs font-bold uppercase tracking-wider text-[#dab38c] flex items-center gap-2">
-              <Truck className="w-4 h-4 text-[#e3a157]" />
+              <Truck className="w-4 h-4 text-[#e3a157] shrink-0" />
               <span>Fulfillment & Dispatch Tracker</span>
             </h2>
             <span className="text-[11px] text-[#e3a157] font-medium">

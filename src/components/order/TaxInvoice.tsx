@@ -33,9 +33,10 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
   } = calculateOrderGstBreakdown(totalAmount, order.shipping_address?.state);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs">
-      {/* Strict Print Isolation Stylesheet */}
-      <style>{`
+    <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/90 backdrop-blur-md p-2 sm:p-4 py-4 sm:py-8">
+      <div className="min-h-full flex items-start sm:items-center justify-center">
+        {/* Strict Print Isolation Stylesheet */}
+        <style>{`
         @page {
           size: A4 portrait;
           margin: 10mm;
@@ -76,18 +77,18 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
         }
       `}</style>
 
-      <div className="bg-[#29100b] border border-[#dab38c]/30 rounded-3xl max-w-2xl w-full p-6 space-y-4 shadow-2xl relative max-h-[92vh] flex flex-col text-[#f5edeb]">
-        {/* Modal Controls (Not printed) */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#dab38c]/15 print:hidden">
-          <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-[#e3a157]" />
-            <h3 className="font-display font-bold text-base text-[#f5edeb]">
-              Tax Invoice · Kolibaba Seafood Inc
-            </h3>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handlePrint}
+        <div className="bg-[#29100b] border border-[#dab38c]/30 rounded-2xl sm:rounded-3xl max-w-2xl w-full p-3.5 sm:p-6 space-y-4 shadow-2xl relative max-h-[92vh] flex flex-col text-[#f5edeb] my-auto">
+          {/* Modal Controls (Not printed) */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#dab38c]/15 print:hidden">
+            <div className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-[#e3a157]" />
+              <h3 className="font-display font-bold text-base text-[#f5edeb]">
+                Tax Invoice · Kolibaba Seafood Inc
+              </h3>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handlePrint}
               className="px-4 py-2 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Printer className="w-4 h-4 text-[#29100b]" />
@@ -297,6 +298,7 @@ export const TaxInvoice: React.FC<TaxInvoiceProps> = ({ order, onClose }) => {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

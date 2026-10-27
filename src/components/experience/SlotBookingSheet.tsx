@@ -326,7 +326,10 @@ export const SlotBookingSheet: React.FC<SlotBookingSheetProps> = ({
       </div>
 
       {/* Mobile Floating Sticky Bottom Bar */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 bg-[#29100b]/95 backdrop-blur-md border-t border-[#dab38c]/20 p-3.5 z-40 shadow-2xl flex items-center justify-between">
+      <div
+        className="lg:hidden fixed bottom-0 inset-x-0 bg-[#29100b]/95 backdrop-blur-md border-t border-[#dab38c]/20 p-3.5 z-40 shadow-2xl flex items-center justify-between"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.875rem)" }}
+      >
         <div>
           <span className="text-[10px] text-[#dab38c]/70 uppercase font-semibold block">
             Total Price

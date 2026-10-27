@@ -10,9 +10,13 @@ import { getOptimizedImageUrl } from "../../lib/images";
 
 interface ListingCardProps {
   listing: Listing;
+  className?: string;
 }
 
-export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
+export const ListingCard: React.FC<ListingCardProps> = ({
+  listing,
+  className,
+}) => {
   const { addItem } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { slots } = useData();
@@ -66,7 +70,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
   return (
     <Link
       to={detailPath}
-      className="group block bg-[#35160e]/85 hover:bg-[#481f14] border border-[#dab38c]/20 hover:border-[#e3a157]/45 rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 flex flex-col cursor-pointer backdrop-blur-md shrink-0 w-[270px] sm:w-auto snap-start"
+      className={`group block bg-[#35160e]/85 hover:bg-[#481f14] border border-[#dab38c]/20 hover:border-[#e3a157]/45 rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 flex flex-col cursor-pointer backdrop-blur-md ${className ? className : "shrink-0 w-[270px] sm:w-auto snap-start"}`}
     >
       {/* Thumbnail Aspect Container */}
       <div className="relative aspect-[16/10] overflow-hidden bg-[#29100b]">
