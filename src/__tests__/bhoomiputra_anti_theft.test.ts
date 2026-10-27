@@ -57,6 +57,41 @@ describe("Bhoomiputra Membership Anti-Theft Security Suite", () => {
     expect(result.reason).toContain("belongs to +91 ••••••");
   });
 
+  it("NEVER leaks or auto-substitutes a member when an invalid or wrong card ID (e.g. BH-MMR-074) is entered with a registered phone", async () => {
+    // Regression test for the exact leak reported by user:
+    // User enters another member's card BH-MMR-074 and their phone 7304290690.
+    // The system must NOT swap the identity to BH-MMR-075 (Aryan Panchal).
+    // It must recognize BH-MMR-074 belongs to Krushal S. and strictly BLOCK the discount.
+    const result = await verifyMemberDiscountEligibility({
+      memberId: "BH-MMR-074",
+      customerPhone: "7304290690",
+    });
+    expect(result.eligible).toBe(false);
+    expect(result.discountPercent).toBe(0);
+    // Member must be the actual card owner (Krushal S.), NEVER substituted with Aryan Panchal
+    expect(result.member?.id).toBe("BH-MMR-074");
+    expect(result.member?.name).not.toBe("Aryan Panchal");
+    expect(result.reason).toContain("belongs to +91 ••••••");
+
+    // An unregistered/made-up card must return no member at all
+    const nonExistent = await verifyMemberDiscountEligibility({
+      memberId: "BH-MMR-99999",
+      customerPhone: "7304290690",
+    });
+    expect(nonExistent.eligible).toBe(false);
+    expect(nonExistent.member).toBeUndefined();
+  });
+
+  it("discovers member cleanly by phone number alone for seamless 1-click self checkout", async () => {
+    const result = await verifyMemberDiscountEligibility({
+      customerPhone: "7304290690",
+    });
+    expect(result.eligible).toBe(true);
+    expect(result.discountPercent).toBe(15);
+    expect(result.member?.id).toBe("BH-MMR-075");
+    expect(result.member?.name).toBe("Aryan Panchal");
+  });
+
   it("allows authorized delegation via WhatsApp 4-digit delegation code", async () => {
     const requesterPhone = "9820199999"; // Friend/Family phone
     const memberId = "BH-MMR-075";

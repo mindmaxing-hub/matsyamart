@@ -97,7 +97,9 @@ export function maskPhone(phone?: string | null): string {
 }
 
 /**
- * Looks up a member across Supabase and the core registry by Member ID or Phone
+ * Looks up a member across Supabase and the core registry by Member ID or Phone.
+ * Security Invariant: When memberId is provided, lookup strictly matches that ID.
+ * Phone number is NEVER used to substitute or override an invalid/mismatched Member ID.
  */
 export async function findBhoomiputraMember(query: {
   memberId?: string;
@@ -106,18 +108,20 @@ export async function findBhoomiputraMember(query: {
   const cleanId = (query.memberId || "").trim().toUpperCase();
   const cleanPhone = clean10DigitPhone(query.phone);
 
-  // 1. Core Seed Registry fast memory match (instant, offline resilient)
-  for (const record of CORE_BHOOMIPUTRA_REGISTRY) {
-    if (cleanId && record.id.toUpperCase() === cleanId) {
-      return record;
-    }
-    if (cleanPhone && record.phones.includes(cleanPhone)) {
-      return record;
-    }
-  }
-
-  // Normalized sequence ID match (e.g. "BH-MMR-75" or "75" -> "BH-MMR-075")
+  // When memberId is provided, search strictly for that specific ID
   if (cleanId) {
+    // 1. Core Seed Registry fast memory match (exact ID only)
+    for (const record of CORE_BHOOMIPUTRA_REGISTRY) {
+      if (record.id.toUpperCase() === cleanId) {
+        const phoneMatch = cleanPhone ? record.phones.includes(cleanPhone) : false;
+        return {
+          ...record,
+          phoneVerified: phoneMatch,
+        };
+      }
+    }
+
+    // Normalized sequence ID match (e.g. "BH-MMR-75" or "75" -> "BH-MMR-075")
     const digits = cleanId.replace(/\D/g, "");
     if (digits.length < 10 && digits.length > 0) {
       const seq = parseInt(digits, 10);
@@ -125,34 +129,54 @@ export async function findBhoomiputraMember(query: {
       const found = CORE_BHOOMIPUTRA_REGISTRY.find(
         (r) => r.id.toUpperCase() === canonical,
       );
-      if (found) return found;
-    }
-  }
-
-  // 2. Secure masked lookup via the verify_bhoomiputra_member function only.
-  // Never read member tables directly and never accept unregistered IDs.
-  if (supabase && cleanId) {
-    try {
-      const { data, error } = await supabase.rpc("verify_bhoomiputra_member", {
-        p_member_id: cleanId,
-        p_phone: cleanPhone || null,
-      });
-      const rpc = data as
-        | { valid?: boolean; member_id?: string; masked_name?: string; region?: string; phone_match?: boolean }
-        | null;
-      if (!error && rpc?.valid) {
+      if (found) {
+        const phoneMatch = cleanPhone ? found.phones.includes(cleanPhone) : false;
         return {
-          id: rpc.member_id || cleanId,
-          name: rpc.masked_name || "Verified Bhoomiputra Member",
-          phones: [],
-          phoneVerified: rpc.phone_match === true,
-          tier: "Verified Member",
-          settlement: rpc.region || "Coastal Collective",
-          status: "active",
+          ...found,
+          phoneVerified: phoneMatch,
         };
       }
-    } catch (err) {
-      console.warn("[Bhoomiputra Security] member lookup failed:", err);
+    }
+
+    // 2. Secure masked lookup via the verify_bhoomiputra_member function only.
+    if (supabase) {
+      try {
+        const { data, error } = await supabase.rpc("verify_bhoomiputra_member", {
+          p_member_id: cleanId,
+          p_phone: cleanPhone || null,
+        });
+        const rpc = data as
+          | { valid?: boolean; member_id?: string; masked_name?: string; region?: string; phone_match?: boolean; masked_phone?: string }
+          | null;
+        if (!error && rpc?.valid) {
+          return {
+            id: rpc.member_id || cleanId,
+            name: rpc.masked_name || "Verified Bhoomiputra Member",
+            phones: rpc.masked_phone ? [clean10DigitPhone(rpc.masked_phone)] : [],
+            phoneVerified: rpc.phone_match === true,
+            tier: "Verified Member",
+            settlement: rpc.region || "Coastal Collective",
+            status: "active",
+          };
+        }
+      } catch (err) {
+        console.warn("[Bhoomiputra Security] member lookup failed:", err);
+      }
+    }
+
+    // ID was specified but not found. Strictly return null to prevent leaking another member's identity.
+    return null;
+  }
+
+  // If NO memberId was provided, look up strictly by registered phone number
+  if (cleanPhone) {
+    for (const record of CORE_BHOOMIPUTRA_REGISTRY) {
+      if (record.phones.includes(cleanPhone)) {
+        return {
+          ...record,
+          phoneVerified: true,
+        };
+      }
     }
   }
 
@@ -318,18 +342,24 @@ export async function verifyMemberDiscountEligibility(params: {
   requiresPhone?: boolean;
   member?: BhoomiputraMemberRecord;
 }> {
-  if (!params.memberId) {
-    return { eligible: false, discountPercent: 0, reason: "No member ID provided" };
+  const cleanId = (params.memberId || "").trim().toUpperCase();
+  const cleanPhone = clean10DigitPhone(params.customerPhone);
+
+  if (!cleanId && !cleanPhone) {
+    return { eligible: false, discountPercent: 0, reason: "No member ID or phone provided" };
   }
 
-  const cleanPhone = clean10DigitPhone(params.customerPhone);
-  const member = await findBhoomiputraMember({ memberId: params.memberId, phone: cleanPhone });
+  const member = cleanId
+    ? await findBhoomiputraMember({ memberId: cleanId, phone: cleanPhone })
+    : await findBhoomiputraMember({ phone: cleanPhone });
 
   if (!member) {
     return {
       eligible: false,
       discountPercent: 0,
-      reason: `Member ID "${params.memberId}" does not exist in active registry`,
+      reason: cleanId
+        ? `Member ID "${cleanId}" does not exist in active registry`
+        : `No Bhoomiputra Membership registered to mobile number +91 ${cleanPhone}`,
     };
   }
 

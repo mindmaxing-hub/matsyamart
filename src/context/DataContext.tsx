@@ -175,7 +175,7 @@ const STORAGE_SAFETY_POLICY = "matsyamart_safety_policy_v1";
 export const DEFAULT_BHOOMI_CONFIG: BhoomiputraDiscountConfig = {
   is_enabled: true,
   discount_percent: 15,
-  applicable_pillars: ["food", "walks", "workshops"],
+  applicable_pillars: ["food", "walks", "workshops", "goods"],
   min_order_inr: 0,
   code_alias: "BHOOMIPUTRA",
 };
@@ -184,11 +184,11 @@ const SEED_COUPONS: Coupon[] = [
   {
     id: "coup-bhoomi-2025",
     code: "BHOOMI2025",
-    description: "Bhoomiputra Foundation Member Discount (Food, Walks, Workshops)",
+    description: "Bhoomiputra Foundation Member Discount (All Store Items)",
     discount_type: "percent",
     discount_value: 15,
     min_order_inr: 0,
-    applicable_pillars: ["food", "walks", "workshops"],
+    applicable_pillars: ["food", "walks", "workshops", "goods"],
     used_count: 3,
     is_active: true,
     created_at: new Date(Date.now() - 3600000 * 48).toISOString(),
@@ -694,7 +694,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   const [bhoomiputraConfig, setBhoomiputraConfig] = useState<BhoomiputraDiscountConfig>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_BHOOMI_CONFIG);
-      return saved ? JSON.parse(saved) : DEFAULT_BHOOMI_CONFIG;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed.applicable_pillars) && !parsed.applicable_pillars.includes("goods")) {
+          parsed.applicable_pillars = [...parsed.applicable_pillars, "goods"];
+        }
+        return parsed;
+      }
+      return DEFAULT_BHOOMI_CONFIG;
     } catch {
       return DEFAULT_BHOOMI_CONFIG;
     }

@@ -215,6 +215,49 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     maskedPhone: string;
   } | null>(null);
 
+  // Phone-First Bhoomiputra Member Discovery
+  const autoDetectedPhoneRef = React.useRef<string>("");
+
+  useEffect(() => {
+    const clean = customerPhone.replace(/\D/g, "");
+    if (clean.length !== 10) {
+      return;
+    }
+    if (autoDetectedPhoneRef.current === clean) {
+      return;
+    }
+
+    let active = true;
+    const checkPhone = async () => {
+      try {
+        const res = await fetch("/api/bhoomiputra/verify-member", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone: clean }),
+        });
+        const data = await res.json();
+        if (active && res.ok && data.valid && data.member) {
+          autoDetectedPhoneRef.current = clean;
+          setIsBhoomiMember(true);
+          setBhoomiMemberId(data.member.id);
+          setBhoomiVerifyStatus("verified");
+          setVerifiedMemberInfo(data.member);
+          setBhoomiVerifyError("");
+          setTheftWarningInfo(null);
+          toast.success(`Welcome, ${data.member.name}! Bhoomiputra 15% Member Discount unlocked.`);
+        }
+      } catch {
+        // silent on background check
+      }
+    };
+
+    const timer = setTimeout(checkPhone, 350);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [customerPhone]);
+
   const handleVerifyBhoomiMember = async () => {
     // Normalize Unicode dashes (en-dash, em-dash, minus, etc) to standard '-'
     const normalized = bhoomiMemberId

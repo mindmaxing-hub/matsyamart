@@ -110,8 +110,31 @@ export const Route = createFileRoute("/api/bhoomiputra/verify-member")({
           const customerPhone = clean10DigitPhone(body?.customerPhone || body?.phone);
           const delegationToken = String(body?.delegationToken || "").trim();
 
-          // Explicit Membership Only: Customer must explicitly provide Member ID
+          // If no Member ID is provided, check for Phone-First discovery
           if (!rawMemberId || rawMemberId.length < 3) {
+            if (customerPhone && customerPhone.length === 10) {
+              const eligibility = await verifyMemberDiscountEligibility({
+                customerPhone,
+                delegationToken,
+              });
+
+              if (eligibility.eligible && eligibility.member) {
+                return Response.json({
+                  valid: true,
+                  discount_percent: eligibility.discountPercent,
+                  member: {
+                    id: eligibility.member.id,
+                    name: eligibility.member.name,
+                    tier: eligibility.member.tier,
+                    settlement: eligibility.member.settlement,
+                    phone: `+91 ${eligibility.member.phones[0] || customerPhone}`,
+                    verifiedAt: new Date().toISOString(),
+                  },
+                  message: "Bhoomiputra Foundation Membership recognized by registered phone number",
+                });
+              }
+            }
+
             return Response.json(
               {
                 valid: false,
