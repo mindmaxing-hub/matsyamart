@@ -110,40 +110,12 @@ export const Route = createFileRoute("/api/bhoomiputra/verify-member")({
           const customerPhone = clean10DigitPhone(body?.customerPhone || body?.phone);
           const delegationToken = String(body?.delegationToken || "").trim();
 
-          // CASE 1: Seamless Phone Auto-Discovery (Zero-friction auto-recognition)
-          // If customer provided their phone and no member ID, check if this phone is registered
-          if (!rawMemberId && customerPhone) {
-            const member = await findBhoomiputraMember({ phone: customerPhone });
-            if (member && member.status === "active") {
-              return Response.json({
-                valid: true,
-                autoDetected: true,
-                discount_percent: 15,
-                member: {
-                  id: member.id,
-                  name: member.name,
-                  tier: member.tier,
-                  settlement: member.settlement,
-                  phone: `+91 ${customerPhone}`,
-                  verifiedAt: new Date().toISOString(),
-                },
-                message: `🎉 Welcome back Bhoomiputra Member ${member.name} (${member.id})! Your 15% patron privilege is automatically applied.`,
-              });
-            }
-            return Response.json({
-              valid: false,
-              autoDetected: false,
-              message: "Phone number is not registered with Bhoomiputra Foundation",
-            });
-          }
-
-          // If neither memberId nor phone is provided
+          // Explicit Membership Only: Customer must explicitly provide Member ID
           if (!rawMemberId || rawMemberId.length < 3) {
             return Response.json(
               {
                 valid: false,
-                error:
-                  "Please enter a valid Bhoomiputra Member ID (e.g. BH-MMR-075) or registered 10-digit mobile number.",
+                error: "Please enter your official Bhoomiputra Member ID (e.g. BH-MMR-075).",
               },
               { status: 400 },
             );

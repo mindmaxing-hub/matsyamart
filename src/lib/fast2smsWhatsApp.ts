@@ -5,8 +5,7 @@
  */
 
 export const FAST2SMS_API_KEY =
-  (typeof process !== "undefined" && process.env?.["FAST2SMS_API_KEY"]) ||
-  "oR4byDS7ZRxOMArq9rCOHqf6IYJD8fhprfSHWD8bCjVBVNNw1bs2SMM15o7M1W2l3sA6RgnHoBVWuXOe";
+  (typeof process !== "undefined" && process.env?.["FAST2SMS_API_KEY"]) || "";
 
 export const FAST2SMS_WABA_ID = "1749937716073750";
 export const FAST2SMS_PHONE_NUMBER_ID = "1442308258960303"; // Meta Cloud API Phone Number ID verified on Fast2SMS

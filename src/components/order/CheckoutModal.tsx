@@ -65,9 +65,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   // Fast2SMS WhatsApp OTP Verification State
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const [lastVerifiedPhone, setLastVerifiedPhone] = useState("");
+  const [verificationToken, setVerificationToken] = useState<string | null>(null);
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
   const [otpCode, setOtpCode] = useState("");
-  const [whatsappLink, setWhatsappLink] = useState("");
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
@@ -107,14 +107,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       if (res.ok && data.success) {
         setIsOtpModalOpen(true);
         setOtpTimer(30);
-        if (data.waLink) {
-          setWhatsappLink(data.waLink);
-        }
-        setOtpSuccessMessage(`Verification code sent to your WhatsApp at +91 ${cleaned.slice(-10)}`);
-        toast.success(`Verification code sent to WhatsApp (+91 ${cleaned.slice(-10)})`);
+        setOtpSuccessMessage(data.message || `Verification code sent to your mobile (+91 ${cleaned.slice(-10)})`);
+        toast.success(data.message || `Verification code sent (+91 ${cleaned.slice(-10)})`);
         return true;
       } else {
-        const err = data.error || "Failed to dispatch WhatsApp verification code.";
+        const err = data.error || "Failed to dispatch verification code.";
         setOtpError(err);
         toast.error(err);
         if (data.cooldownRemaining) {
@@ -123,12 +120,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         return false;
       }
     } catch (err) {
-      console.error("[WhatsApp OTP Send Failure]", err);
-      setIsOtpModalOpen(true);
-      setOtpTimer(30);
-      setOtpSuccessMessage(`Verification code sent to your WhatsApp at +91 ${cleaned.slice(-10)}`);
-      toast.success("Verification code dispatched via WhatsApp");
-      return true;
+      console.error("[OTP Send Failure]", err);
+      setOtpError("Unable to reach verification gateway. Please check connection.");
+      toast.error("Unable to send verification code. Please try again.");
+      return false;
     } finally {
       setIsSendingOtp(false);
     }
@@ -169,25 +164,25 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       if (res.ok && data.success && data.verified) {
         setIsPhoneVerified(true);
         setLastVerifiedPhone(cleaned);
+        if (data.verificationToken) {
+          setVerificationToken(data.verificationToken);
+        }
         setIsOtpModalOpen(false);
         setOtpCode("");
         setOtpError("");
-        toast.success(`✓ Mobile +91 ${cleaned} verified via WhatsApp!`);
-
-        // Check if verified WhatsApp phone belongs to a Bhoomiputra member
-        checkBhoomiputraMembershipForPhone(cleaned);
+        toast.success(`✓ Mobile +91 ${cleaned} verified!`);
 
         if (pendingPaymentTrigger) {
           setPendingPaymentTrigger(false);
-          proceedToPayment(cleaned);
+          proceedToPayment(cleaned, data.verificationToken);
         }
       } else {
-        const err = data.error || "Invalid WhatsApp verification code. Please check and try again.";
+        const err = data.error || "Invalid verification code. Please check and try again.";
         setOtpError(err);
         toast.error(err);
       }
     } catch (err) {
-      console.error("[WhatsApp OTP Verify Failure]", err);
+      console.error("[OTP Verify Failure]", err);
       setOtpError("Verification failed. Please check network connection and try again.");
       toast.error("Verification failed");
     } finally {
@@ -219,34 +214,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     memberName: string;
     maskedPhone: string;
   } | null>(null);
-
-  // Auto-Discovery: Checks if customer's verified WhatsApp phone belongs to a member
-  const checkBhoomiputraMembershipForPhone = async (phoneDigits: string) => {
-    try {
-      const res = await fetch("/api/bhoomiputra/verify-member", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customerPhone: phoneDigits }),
-      });
-      const data = await res.json();
-      if (res.ok && data.valid && data.autoDetected && data.member) {
-        setIsBhoomiMember(true);
-        setBhoomiMemberId(data.member.id);
-        setBhoomiVerifyStatus("verified");
-        setVerifiedMemberInfo(data.member);
-        setBhoomiVerifyError("");
-        setTheftWarningInfo(null);
-        if (appliedCoupon) {
-          setAppliedCoupon(null);
-        }
-        toast.success(
-          `🎉 Bhoomiputra Member Recognized: ${data.member.name} (${data.member.id}) · 15% discount applied!`,
-        );
-      }
-    } catch (e) {
-      console.debug("[Bhoomiputra Auto-Discovery Note]", e);
-    }
-  };
 
   const handleVerifyBhoomiMember = async () => {
     // Normalize Unicode dashes (en-dash, em-dash, minus, etc) to standard '-'
@@ -284,9 +251,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         setBhoomiVerifyError("");
         setTheftWarningInfo(null);
         setIsDelegationMode(false);
-        if (appliedCoupon) {
-          setAppliedCoupon(null);
-        }
         toast.success(`Verified: ${data.member.name} (${data.member.id})`);
       } else if (data.theftAlert) {
         setBhoomiVerifyStatus("error");
@@ -362,7 +326,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         setBhoomiVerifyError("");
         setTheftWarningInfo(null);
         setIsDelegationMode(false);
-        if (appliedCoupon) setAppliedCoupon(null);
         toast.success(
           `✓ Member Authorized: ${data.member.name} (15% discount unlocked)`,
         );
@@ -379,11 +342,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   // Dynamic Phone-Keyed Loyalty Membership (Westside-style)
   const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false);
   const member = customerPhone ? getMembershipByPhone(customerPhone) : undefined;
-  const availableLoyaltyPoints = member
+  const availableLoyaltyPoints = isPhoneVerified && member
     ? member.spendable_points
-    : customerPhone.replace(/[^0-9]/g, "").length >= 10
-      ? 100 // Welcome bonus for new coastal patrons
-      : 450;
+    : 0;
   const loyaltyRate = loyaltyProgram?.config?.pointValueINR || 0.1;
   const pointsCashValue = Math.floor(availableLoyaltyPoints * loyaltyRate);
 
@@ -469,7 +430,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       : 0;
 
   const promoDiscountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
-  const activeDiscountAmount = isBhoomiMember ? bhoomiDiscountAmount : promoDiscountAmount;
+  // If Bhoomiputra discount applies and is > 0, use it. If 0 (e.g. Goods item), preserve promo coupon.
+  const activeDiscountAmount =
+    isBhoomiMember && bhoomiDiscountAmount > 0
+      ? bhoomiDiscountAmount
+      : promoDiscountAmount;
 
   const loyaltyDiscountINR = useLoyaltyPoints
     ? Math.min(Math.floor(subtotalAmount * 0.5), pointsCashValue)
@@ -645,17 +610,55 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       return;
     }
 
-    await proceedToPayment(cleanedPhone);
+    await proceedToPayment(cleanedPhone, verificationToken || undefined);
   };
 
-  const proceedToPayment = async (verifiedPhone: string) => {
+  const proceedToPayment = async (verifiedPhone: string, token?: string) => {
     setIsSubmitting(true);
     setErrorMessage("");
 
     try {
+      const activeToken = token || verificationToken;
+      let authoritativeQuote: any = null;
+      let quoteSignature: string | undefined = undefined;
+
+      try {
+        const quoteRes = await fetch("/api/checkout/quote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: items.map((i) => ({
+              listingId: i.listing.id,
+              quantity: i.quantity,
+              slotId: i.slotId,
+            })),
+            couponCode: appliedCoupon?.code,
+            bhoomiMemberId:
+              isBhoomiMember && bhoomiVerifyStatus === "verified"
+                ? verifiedMemberInfo?.id || bhoomiMemberId.trim()
+                : undefined,
+            customerPhone: verifiedPhone,
+            verificationToken: activeToken || undefined,
+            pointsRedeemed: useLoyaltyPoints ? availableLoyaltyPoints : 0,
+          }),
+        });
+
+        if (quoteRes.ok) {
+          const quoteData = await quoteRes.json();
+          if (quoteData.success && quoteData.quote) {
+            authoritativeQuote = quoteData.quote;
+            quoteSignature = quoteData.signature;
+          }
+        }
+      } catch (qErr) {
+        console.warn("[Quote API Fallback]", qErr);
+      }
+
+      const chargeAmount = authoritativeQuote ? authoritativeQuote.finalAmount : finalAmount;
+
       // Trigger Razorpay Modal / Sandbox Bridge
       await initiatePayment({
-        amountInr: finalAmount,
+        amountInr: chargeAmount,
         orderRef:
           "MM-" + Math.random().toString(36).substring(2, 8).toUpperCase(),
         customerName,
@@ -670,6 +673,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             ? verifiedMemberInfo?.id || bhoomiMemberId.trim().toUpperCase()
             : undefined,
         delegationToken: delegationToken || undefined,
+        verificationToken: activeToken || undefined,
+        quote: authoritativeQuote,
+        quoteSignature: quoteSignature,
         onSuccess: async (rzpResult) => {
           try {
             const confirmedOrder = await createOrder({
@@ -956,9 +962,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                               {verifiedMemberInfo.id}
                             </span>
                           </div>
-                          <div className="text-[11px] text-emerald-400 font-medium">
-                            ✓ {bhoomiputraConfig.discount_percent}% discount applied (-{formatINR(bhoomiDiscountAmount)})
-                          </div>
+                          {bhoomiDiscountAmount > 0 ? (
+                            <div className="text-[11px] text-emerald-400 font-medium">
+                              ✓ {bhoomiputraConfig.discount_percent}% discount applied (-{formatINR(bhoomiDiscountAmount)})
+                            </div>
+                          ) : (
+                            <div className="text-[11px] text-amber-300 font-medium">
+                              Membership verified ({verifiedMemberInfo.id}) · Cart items ({bhoomiEligibleItems.length === 0 ? "Artisan Goods" : "Selected Items"}) not eligible for member discount (applies to Coastal Food, Walks & Workshops).
+                            </div>
+                          )}
                         </div>
                         <button
                           type="button"
@@ -1085,58 +1097,56 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               </div>
             )}
 
-            {/* Promo Code Input & Status (Disabled if Bhoomiputra member active) */}
-            {!isBhoomiMember && (
-              <div className="pt-2 border-t border-[#dab38c]/15 space-y-2">
-                {appliedCoupon ? (
-                  <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300">
-                    <div className="flex items-center gap-1.5 font-mono">
-                      <span className="font-bold text-emerald-400">{appliedCoupon.code}</span>
-                      <span className="text-[11px] text-emerald-300/80 font-sans">
-                        (Saved {formatINR(appliedCoupon.discountAmount)})
-                      </span>
-                    </div>
+            {/* Promo Code Input & Status */}
+            <div className="pt-2 border-t border-[#dab38c]/15 space-y-2">
+              {appliedCoupon ? (
+                <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300">
+                  <div className="flex items-center gap-1.5 font-mono">
+                    <span className="font-bold text-emerald-400">{appliedCoupon.code}</span>
+                    <span className="text-[11px] text-emerald-300/80 font-sans">
+                      (Saved {formatINR(appliedCoupon.discountAmount)})
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveCoupon}
+                    className="text-[11px] text-emerald-400 hover:text-emerald-200 underline cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Promo code (e.g. DEAL100, BHOOMI2025)"
+                      value={couponCodeInput}
+                      onChange={(e) => setCouponCodeInput(e.target.value.toUpperCase())}
+                      className="flex-1 px-3 py-1.5 rounded-xl bg-[#29100b] border border-[#dab38c]/30 text-xs font-mono text-[#f5edeb] placeholder:text-[#dab38c]/40 focus:outline-none focus:border-[#e3a157]"
+                    />
                     <button
                       type="button"
-                      onClick={handleRemoveCoupon}
-                      className="text-[11px] text-emerald-400 hover:text-emerald-200 underline cursor-pointer"
+                      onClick={handleApplyCoupon}
+                      className="px-3 py-1.5 rounded-xl bg-[#35160e] hover:bg-[#481f14] border border-[#dab38c]/30 text-[#e3a157] font-semibold text-xs cursor-pointer transition-colors"
                     >
-                      Remove
+                      Apply
                     </button>
                   </div>
-                ) : (
-                  <div>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="Promo code (e.g. BHOOMI2025)"
-                        value={couponCodeInput}
-                        onChange={(e) => setCouponCodeInput(e.target.value.toUpperCase())}
-                        className="flex-1 px-3 py-1.5 rounded-xl bg-[#29100b] border border-[#dab38c]/30 text-xs font-mono text-[#f5edeb] placeholder:text-[#dab38c]/40 focus:outline-none focus:border-[#e3a157]"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleApplyCoupon}
-                        className="px-3 py-1.5 rounded-xl bg-[#35160e] hover:bg-[#481f14] border border-[#dab38c]/30 text-[#e3a157] font-semibold text-xs cursor-pointer transition-colors"
-                      >
-                        Apply
-                      </button>
+                  {couponFeedback && (
+                    <div
+                      className={`text-[11px] mt-1.5 ${
+                        couponFeedback.type === "success"
+                          ? "text-emerald-400"
+                          : "text-rose-400"
+                      }`}
+                    >
+                      {couponFeedback.message}
                     </div>
-                    {couponFeedback && (
-                      <div
-                        className={`text-[11px] mt-1.5 ${
-                          couponFeedback.type === "success"
-                            ? "text-emerald-400"
-                            : "text-rose-400"
-                        }`}
-                      >
-                        {couponFeedback.message}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* MatsyaPoints Loyalty Redemption */}
             <div className="p-2.5 rounded-xl bg-[#140604] border border-[#dab38c]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
@@ -1183,7 +1193,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   <span>-{formatINR(bhoomiDiscountAmount)}</span>
                 </div>
               )}
-              {!isBhoomiMember && appliedCoupon && (
+              {(!isBhoomiMember || bhoomiDiscountAmount === 0) && appliedCoupon && (
                 <div className="flex justify-between items-center text-emerald-400 font-semibold">
                   <span>Promo Discount ({appliedCoupon.code})</span>
                   <span>-{formatINR(promoDiscountAmount)}</span>
@@ -1520,27 +1530,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
               <div className="space-y-1.5">
                 <h3 className="text-lg font-bold font-display text-[#f5edeb]">
-                  Verify via WhatsApp
+                  Verify Your Mobile
                 </h3>
                 <p className="text-xs text-[#dab38c]/80 leading-relaxed max-w-xs mx-auto">
-                  We sent a 6-digit verification code to your WhatsApp at
+                  We sent a 6-digit verification code via WhatsApp / SMS to
                   <span className="font-bold text-[#f5edeb] block mt-0.5">
                     +91 {customerPhone.replace(/\D/g, "").slice(-10)}
                   </span>
                 </p>
               </div>
-
-              {whatsappLink && (
-                <a
-                  href={whatsappLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-2.5 px-3 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/70 border border-emerald-500/40 text-emerald-300 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                >
-                  <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Open WhatsApp to View Code</span>
-                </a>
-              )}
 
               <div className="space-y-2">
                 <input

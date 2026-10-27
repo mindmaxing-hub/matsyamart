@@ -29,6 +29,9 @@ export interface RazorpayCheckoutOptions {
   isExperience?: boolean;
   bhoomiMemberId?: string | undefined;
   delegationToken?: string | undefined;
+  verificationToken?: string | undefined;
+  quote?: any;
+  quoteSignature?: string | undefined;
   onSuccess: (response: {
     razorpay_payment_id: string;
     razorpay_order_id?: string | undefined;
@@ -78,6 +81,9 @@ export async function initiatePayment(
         description: options.description,
         bhoomiMemberId: options.bhoomiMemberId,
         delegationToken: options.delegationToken,
+        verificationToken: options.verificationToken,
+        quote: options.quote,
+        quoteSignature: options.quoteSignature,
       }),
       signal: AbortSignal.timeout(4000),
     });

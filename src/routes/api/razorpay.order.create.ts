@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyMemberDiscountEligibility } from "../../lib/bhoomiputraSecurity";
+import { verifyQuoteData } from "./checkout.quote";
+import { verifyPhoneVerificationToken } from "../../lib/serverAuthToken";
 
 export const RAZORPAY_KEY_ID =
   (typeof process !== "undefined" && process.env?.["RAZORPAY_KEY_ID"]) ||
@@ -26,7 +28,32 @@ export const Route = createFileRoute("/api/razorpay/order/create")({
             );
           }
 
-          const amountInr = Number(body?.amountInr);
+          const quote = body?.quote;
+          const quoteSignature = body?.quoteSignature;
+          let amountInr = Number(body?.amountInr);
+
+          // Authoritative Quote Validation Gate:
+          // If quote is provided, verify cryptographic HMAC signature
+          if (quote && quoteSignature) {
+            const isQuoteValid = verifyQuoteData(
+              {
+                quoteId: quote.quoteId,
+                finalAmount: quote.finalAmount,
+                customerPhone: body?.customerPhone,
+                exp: quote.exp,
+              },
+              quoteSignature,
+            );
+
+            if (!isQuoteValid) {
+              return Response.json(
+                { success: false, error: "Quote validation failed or expired. Please refresh your checkout summary." },
+                { status: 403 },
+              );
+            }
+            amountInr = quote.finalAmount;
+          }
+
           if (!amountInr || isNaN(amountInr) || amountInr <= 0) {
             return Response.json(
               { success: false, error: "Valid amount in INR required" },
@@ -41,6 +68,18 @@ export const Route = createFileRoute("/api/razorpay/order/create")({
           const description = String(body?.description || "MatsyaMart Coastal Reservation");
           const bhoomiMemberId = String(body?.bhoomiMemberId || body?.notes?.bhoomiputra_member_id || "").trim();
           const delegationToken = String(body?.delegationToken || "").trim();
+          const verificationToken = String(body?.verificationToken || "").trim();
+
+          // Server-Side Phone Verification Verification
+          if (verificationToken) {
+            const tokenCheck = verifyPhoneVerificationToken(verificationToken, customerPhone);
+            if (!tokenCheck.valid) {
+              return Response.json(
+                { success: false, error: tokenCheck.error || "Phone verification expired" },
+                { status: 401 },
+              );
+            }
+          }
 
           // Server-Side Anti-Theft Verification Gate:
           // If a Bhoomiputra discount is claimed, verify caller ownership or valid delegation

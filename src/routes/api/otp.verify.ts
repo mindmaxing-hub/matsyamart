@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { cleanIndianMobile, verifyWhatsAppOtpSession } from "../../lib/whatsappOtp";
+import { signPhoneVerificationToken } from "../../lib/serverAuthToken";
 
 export const Route = createFileRoute("/api/otp/verify")({
   server: {
@@ -51,10 +52,13 @@ export const Route = createFileRoute("/api/otp/verify")({
             );
           }
 
+          const verificationToken = signPhoneVerificationToken(cleanPhone);
+
           return Response.json({
             success: true,
             verified: true,
             phone: cleanPhone,
+            verificationToken,
             message: "Mobile phone verified successfully.",
           });
         } catch (err: unknown) {

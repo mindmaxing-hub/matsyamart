@@ -108,33 +108,38 @@ export function createWhatsAppOtpSession(phone: string): {
   };
 }
 
+export interface SendOtpResult {
+  success: boolean;
+  status: "accepted" | "delivered" | "failed";
+  provider?: "whatsapp-fast2sms" | "fast2sms-sms" | undefined;
+  message: string;
+  requestId?: string | undefined;
+  error?: string | undefined;
+}
+
 /**
- * Dispatches an OTP via Fast2SMS WhatsApp API with resilient direct wa.me fallback
+ * Dispatches an OTP via Fast2SMS WhatsApp or SMS Gateway.
+ * Strict zero-leak security: Never returns raw OTP or compose links containing secrets.
  */
 export async function sendWhatsAppOtp(
   phone: string,
   otp: string,
-): Promise<{
-  success: boolean;
-  message: string;
-  provider: "whatsapp-fast2sms" | "whatsapp-direct";
-  waLink: string;
-  fast2smsResponse?: unknown;
-}> {
+): Promise<SendOtpResult> {
   const cleanPhone = cleanIndianMobile(phone);
   const normalizedPhone = normalizeWhatsAppNumber(cleanPhone);
   const otpMessage = buildWhatsAppOtpMessage(otp, cleanPhone);
 
-  // Direct 1-Click WhatsApp verification link
-  const directWaLink = `https://wa.me/91${FAST2SMS_SENDER_PHONE_NUMBER}?text=${encodeURIComponent(
-    `Verify MatsyaMart Patron +91${cleanPhone} (Ref: ${otp})`
-  )}`;
+  if (!FAST2SMS_API_KEY) {
+    return {
+      success: false,
+      status: "failed",
+      message: "Fast2SMS provider configuration missing.",
+      error: "Fast2SMS provider configuration missing. Please configure FAST2SMS_API_KEY.",
+    };
+  }
 
-  // Also patron direct receive link
-  const patronChatLink = `https://wa.me/${normalizedPhone}?text=${encodeURIComponent(otpMessage)}`;
-
+  // Attempt 1: Fast2SMS WhatsApp session dispatch
   try {
-    // Attempt 1: Fast2SMS WhatsApp session dispatch (phone_number_id & to in query params, body: { type, text })
     const sessionUrl = `https://www.fast2sms.com/dev/whatsapp-session?phone_number_id=${encodeURIComponent(FAST2SMS_PHONE_NUMBER_ID)}&to=${encodeURIComponent(normalizedPhone)}`;
     const res = await fetch(sessionUrl, {
       method: "POST",
@@ -156,38 +161,58 @@ export async function sendWhatsAppOtp(
       request_id?: string;
     };
 
-    console.log("[Fast2SMS WhatsApp OTP Response]", { phone: cleanPhone, data });
-
     if (data.return === true || data.status_code === 200) {
       return {
         success: true,
-        message: `Verification code sent to your WhatsApp at +91 ${cleanPhone}.`,
+        status: "accepted",
         provider: "whatsapp-fast2sms",
-        waLink: patronChatLink,
-        fast2smsResponse: data,
+        message: `Verification code dispatched to WhatsApp (+91 ${cleanPhone}).`,
+        requestId: data.request_id,
+      };
+    }
+  } catch (err: unknown) {
+    console.warn(`[WhatsApp Dispatch Warning] Phone: ${cleanPhone}. Attempting high-priority SMS route.`);
+  }
+
+  // Attempt 2: High-priority transactional SMS fallback via Fast2SMS (instant 100% Indian delivery)
+  try {
+    const smsUrl = `https://www.fast2sms.com/dev/bulkV2?authorization=${encodeURIComponent(FAST2SMS_API_KEY)}&variables_values=${encodeURIComponent(otp)}&route=otp&numbers=${encodeURIComponent(cleanPhone)}`;
+    const smsRes = await fetch(smsUrl, {
+      method: "GET",
+      signal: typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(5000) : null,
+    });
+
+    const smsData = (await smsRes.json().catch(() => ({}))) as {
+      return?: boolean;
+      status_code?: number;
+      message?: string | string[];
+      request_id?: string;
+    };
+
+    if (smsData.return === true || smsData.status_code === 200) {
+      return {
+        success: true,
+        status: "delivered",
+        provider: "fast2sms-sms",
+        message: `Verification code dispatched via SMS (+91 ${cleanPhone}).`,
+        requestId: smsData.request_id,
       };
     }
 
-    // Silent server logging without leaking to client
-    const errorMsg = Array.isArray(data.message)
-      ? data.message.join(", ")
-      : String(data.message || "WhatsApp session pending");
-    console.warn(`[WhatsApp Gateway Server Log] Phone: ${cleanPhone}, Code: ${otp}. Status: ${errorMsg}`);
-
+    const errDetail = Array.isArray(smsData.message) ? smsData.message.join(", ") : String(smsData.message || "Provider error");
     return {
-      success: true,
-      message: `Verification code sent to your WhatsApp at +91 ${cleanPhone}.`,
-      provider: "whatsapp-direct",
-      waLink: patronChatLink,
-      fast2smsResponse: data,
+      success: false,
+      status: "failed",
+      message: `Fast2SMS delivery unavailable: ${errDetail}`,
+      error: `Fast2SMS delivery unavailable: ${errDetail}`,
     };
-  } catch (err: unknown) {
-    console.warn(`[WhatsApp Dispatch Server Log] Phone: ${cleanPhone}, Code: ${otp}. Network/Timeout notice.`);
+  } catch (smsErr: unknown) {
+    console.error(`[OTP Dispatch Error] Phone: ${cleanPhone}`, smsErr);
     return {
-      success: true,
-      message: `Verification code sent to your WhatsApp at +91 ${cleanPhone}.`,
-      provider: "whatsapp-direct",
-      waLink: patronChatLink,
+      success: false,
+      status: "failed",
+      message: "Unable to deliver verification code. Please check your mobile number and network connection.",
+      error: "Unable to deliver verification code. Please check your mobile number and network connection.",
     };
   }
 }

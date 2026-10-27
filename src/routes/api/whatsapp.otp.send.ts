@@ -45,16 +45,27 @@ export const Route = createFileRoute("/api/whatsapp/otp/send")({
             );
           }
 
-          // Dispatch code via WhatsApp
+          // Dispatch code via Fast2SMS WhatsApp / SMS Gateway
           const waResult = await sendWhatsAppOtp(cleanPhone, sessionResult.otp);
 
-          // Zero-leak security: Never return raw OTP in public client payload!
+          if (!waResult.success) {
+            return Response.json(
+              {
+                success: false,
+                status: "failed",
+                error: waResult.error || "Failed to deliver verification code",
+              },
+              { status: 502 },
+            );
+          }
+
+          // Zero-leak security: Never return raw OTP or compose links in public client payload!
           return Response.json({
             success: true,
+            status: waResult.status,
             phone: cleanPhone,
             message: waResult.message,
             provider: waResult.provider,
-            waLink: waResult.waLink,
           });
         } catch (err: unknown) {
           console.error("[WhatsApp OTP Send Route Error]", err);

@@ -239,7 +239,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   const [listings, setListings] = useState<Listing[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_LISTINGS);
-      return saved ? JSON.parse(saved) : SEED_LISTINGS;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Merge custom created listings with canonical seed listings
+          // Seed listings always take precedence for canonical IDs to ensure catalog consistency across devices
+          const seedMap = new Map(SEED_LISTINGS.map((s) => [s.id, s]));
+          const customListings = parsed.filter((p: Listing) => !seedMap.has(p.id));
+          return [...SEED_LISTINGS, ...customListings];
+        }
+      }
+      return SEED_LISTINGS;
     } catch {
       return SEED_LISTINGS;
     }
@@ -406,10 +416,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         {
           id: "item-test-interstate-01",
           order_id: "ord-test-interstate",
-          listing_id: "prd-jawla-dry-prawns",
+          listing_id: "prd-jawla-basket",
           quantity: 2,
-          unit_price_inr: 450,
-          listing: SEED_LISTINGS.find((l) => l.id === "prd-jawla-dry-prawns"),
+          unit_price_inr: 650,
+          listing: SEED_LISTINGS.find((l) => l.id === "prd-jawla-basket"),
         },
         {
           id: "item-test-interstate-02",
@@ -423,44 +433,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     },
   ];
 
-  const SEED_MEMBERSHIPS: LoyaltyMembership[] = [
-    {
-      id: "mem-seed-01",
-      phone: "9920477158",
-      name: "Aryan Panchal",
-      email: "aryan@matsyamart.in",
-      current_tier: "gold",
-      lifetime_spend_inr: 12400,
-      spendable_points: 450,
-      pending_points: 0,
-      created_at: new Date(Date.now() - 3600000 * 24 * 30).toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: "mem-seed-02",
-      phone: "7304290690",
-      name: "Aryan Panchal",
-      email: "mindmaxxxing@gmail.com",
-      current_tier: "silver",
-      lifetime_spend_inr: 5500,
-      spendable_points: 450,
-      pending_points: 0,
-      created_at: new Date(Date.now() - 3600000 * 24 * 20).toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: "mem-seed-03",
-      phone: "9820012345",
-      name: "Rahul Sharma",
-      email: "rahul@example.com",
-      current_tier: "bronze",
-      lifetime_spend_inr: 2400,
-      spendable_points: 450,
-      pending_points: 0,
-      created_at: new Date(Date.now() - 3600000 * 24 * 10).toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-  ];
+  // Genuine Loyalty Memberships ledger (no fabricated balances in production)
+  const SEED_MEMBERSHIPS: LoyaltyMembership[] = [];
 
   const [orders, setOrders] = useState<Order[]>(() => {
     try {
@@ -637,20 +611,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
       const saved = localStorage.getItem(STORAGE_COUPONS);
       if (saved) {
         const parsed: Coupon[] = JSON.parse(saved);
-        // Seamlessly merge any new codebase seed coupons that don't exist yet in the user's storage
+        // Canonical system coupons always take precedence to ensure correct applicable_pillars across all devices
+        const seedMap = new Map(SEED_COUPONS.map((s) => [s.code.toUpperCase(), s]));
+        const updatedParsed = parsed.map((c) => {
+          const canonical = seedMap.get(c.code.toUpperCase());
+          return canonical ? { ...c, ...canonical } : c;
+        });
         const missingSeeds = SEED_COUPONS.filter(
-          (seed) => !parsed.some((c) => c.code.toUpperCase() === seed.code.toUpperCase())
+          (seed) => !parsed.some((c) => c.code.toUpperCase() === seed.code.toUpperCase()),
         );
-        if (missingSeeds.length > 0) {
-          const merged = [...parsed, ...missingSeeds];
-          try {
-            localStorage.setItem(STORAGE_COUPONS, JSON.stringify(merged));
-          } catch {
-            // Storage quota fallback
-          }
-          return merged;
+        const merged = [...updatedParsed, ...missingSeeds];
+        try {
+          localStorage.setItem(STORAGE_COUPONS, JSON.stringify(merged));
+        } catch {
+          // Storage quota fallback
         }
-        return parsed;
+        return merged;
       }
       return SEED_COUPONS;
     } catch {

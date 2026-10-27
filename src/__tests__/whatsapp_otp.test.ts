@@ -118,12 +118,15 @@ describe("MatsyaMart WhatsApp-First OTP & Verification Engine Suite", () => {
     });
   });
 
-  describe("3. Dispatch Resilience & Deep Link Gateway", () => {
-    it("generates official wa.me direct links with sender phone ID", async () => {
-      const dispatch = await sendWhatsAppOtp("9820012345", "123456");
-      expect(dispatch.success).toBe(true);
-      expect(dispatch.message).toContain("+91 9820012345");
-      expect(dispatch.waLink).toContain("wa.me/919820012345");
+  describe("3. Dispatch Security & Zero-Disclosure Delivery", () => {
+    it("never exposes OTP codes or waLink in client dispatch payloads", async () => {
+      const testOtp = "123456";
+      const dispatch = await sendWhatsAppOtp("9820012345", testOtp);
+      expect(dispatch).toBeDefined();
+      // Zero-Disclosure Gate: waLink containing OTP bypass must NEVER be returned
+      expect((dispatch as any).waLink).toBeUndefined();
+      // Message must never disclose the raw OTP code
+      expect(dispatch.message).not.toContain(testOtp);
       expect(FAST2SMS_PHONE_NUMBER_ID).toBe("1442308258960303");
       expect(FAST2SMS_SENDER_PHONE_NUMBER).toBe("7666511511");
     }, 15000);

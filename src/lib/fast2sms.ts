@@ -4,8 +4,9 @@
  */
 
 export const FAST2SMS_API_KEY =
-  (typeof process !== "undefined" && process.env?.["FAST2SMS_API_KEY"]) ||
-  "oR4byDS7ZRxOMArq9rCOHqf6IYJD8fhprfSHWD8bCjVBVNNw1bs2SMM15o7M1W2l3sA6RgnHoBVWuXOe";
+  (typeof process !== "undefined" &&
+    (process.env?.["FAST2SMS_API_KEY"] || process.env?.["VITE_FAST2SMS_API_KEY"])) ||
+  "";
 
 export interface OtpSession {
   phone: string;
@@ -83,27 +84,22 @@ export async function sendFast2SmsOtp(
       };
     }
 
-    // Fast2SMS status 996: website verification pending on Fast2SMS dashboard
-    // Fast2SMS status 999: transaction requirement
-    // Gracefully provide resilience so checkout flow is never blocked
     const errorMsg = Array.isArray(data.message)
       ? data.message.join(", ")
       : String(data.message || "Fast2SMS dispatch pending");
 
-    console.warn(`[OTP Gateway Server Log] Phone: ${cleanPhone}, Code: ${otp}. Carrier Note: ${errorMsg}`);
-
     return {
-      success: true,
-      message: `Verification code sent to +91 ${cleanPhone}. Please enter the 6-digit code below.`,
-      provider: "fast2sms-simulated",
+      success: false,
+      message: errorMsg || `Fast2SMS delivery failed for +91 ${cleanPhone}`,
+      provider: "fast2sms",
       fast2smsResponse: data,
     };
   } catch (err: unknown) {
     console.error("[OTP Gateway Network Error]", err);
     return {
-      success: true,
-      message: `Verification code sent to +91 ${cleanPhone}. Please enter the 6-digit code below.`,
-      provider: "fast2sms-simulated",
+      success: false,
+      message: "Network error communicating with SMS gateway.",
+      provider: "fast2sms",
     };
   }
 }

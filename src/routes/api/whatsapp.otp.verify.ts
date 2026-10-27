@@ -3,6 +3,7 @@ import {
   cleanIndianMobile,
   verifyWhatsAppOtpSession,
 } from "../../lib/whatsappOtp";
+import { signPhoneVerificationToken } from "../../lib/serverAuthToken";
 
 export const Route = createFileRoute("/api/whatsapp/otp/verify")({
   server: {
@@ -57,11 +58,14 @@ export const Route = createFileRoute("/api/whatsapp/otp/verify")({
             );
           }
 
+          const verificationToken = signPhoneVerificationToken(cleanPhone);
+
           return Response.json({
             success: true,
             verified: true,
             phone: cleanPhone,
-            message: "Mobile phone verified successfully via WhatsApp.",
+            verificationToken,
+            message: "Mobile phone verified successfully.",
           });
         } catch (err: unknown) {
           console.error("[WhatsApp OTP Verify Route Error]", err);

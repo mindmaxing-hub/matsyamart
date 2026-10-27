@@ -45,18 +45,29 @@ export const Route = createFileRoute("/api/otp/send")({
             );
           }
 
-          // Dispatch via WhatsApp (bypassing carrier SMS DLT restrictions)
+          // Dispatch via Fast2SMS WhatsApp / SMS Gateway
           const waResult = await sendWhatsAppOtp(
             cleanPhone,
             sessionResult.otp,
           );
 
+          if (!waResult.success) {
+            return Response.json(
+              {
+                success: false,
+                status: "failed",
+                error: waResult.error || "Failed to deliver OTP",
+              },
+              { status: 502 },
+            );
+          }
+
           return Response.json({
             success: true,
+            status: waResult.status,
             phone: cleanPhone,
             message: waResult.message,
             provider: waResult.provider,
-            waLink: waResult.waLink,
           });
         } catch (err: unknown) {
           console.error("[OTP Send Route Error]", err);

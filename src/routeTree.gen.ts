@@ -28,6 +28,7 @@ import { Route as ApiSendBookingConfirmationRouteImport } from './routes/api/sen
 import { Route as ExperienceSlugRouteImport } from './routes/experience.$slug'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as ApiBhoomiputraVerifyMemberRouteImport } from './routes/api/bhoomiputra.verify-member'
+import { Route as ApiCheckoutQuoteRouteImport } from './routes/api/checkout.quote'
 import { Route as ApiOtpSendRouteImport } from './routes/api/otp.send'
 import { Route as ApiOtpVerifyRouteImport } from './routes/api/otp.verify'
 import { Route as ApiWhatsappSendRouteImport } from './routes/api/whatsapp.send'
@@ -136,6 +137,11 @@ const ApiBhoomiputraVerifyMemberRoute =
     path: '/api/bhoomiputra/verify-member',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiCheckoutQuoteRoute = ApiCheckoutQuoteRouteImport.update({
+  id: '/api/checkout/quote',
+  path: '/api/checkout/quote',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiOtpSendRoute = ApiOtpSendRouteImport.update({
   id: '/api/otp/send',
   path: '/api/otp/send',
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/api/bhoomiputra/verify-member': typeof ApiBhoomiputraVerifyMemberRoute
+  '/api/checkout/quote': typeof ApiCheckoutQuoteRoute
   '/api/otp/send': typeof ApiOtpSendRoute
   '/api/otp/verify': typeof ApiOtpVerifyRoute
   '/api/whatsapp/send': typeof ApiWhatsappSendRoute
@@ -242,6 +249,7 @@ export interface FileRoutesByTo {
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/api/bhoomiputra/verify-member': typeof ApiBhoomiputraVerifyMemberRoute
+  '/api/checkout/quote': typeof ApiCheckoutQuoteRoute
   '/api/otp/send': typeof ApiOtpSendRoute
   '/api/otp/verify': typeof ApiOtpVerifyRoute
   '/api/whatsapp/send': typeof ApiWhatsappSendRoute
@@ -274,6 +282,7 @@ export interface FileRoutesById {
   '/experience/$slug': typeof ExperienceSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/api/bhoomiputra/verify-member': typeof ApiBhoomiputraVerifyMemberRoute
+  '/api/checkout/quote': typeof ApiCheckoutQuoteRoute
   '/api/otp/send': typeof ApiOtpSendRoute
   '/api/otp/verify': typeof ApiOtpVerifyRoute
   '/api/whatsapp/send': typeof ApiWhatsappSendRoute
@@ -307,6 +316,7 @@ export interface FileRouteTypes {
     | '/experience/$slug'
     | '/product/$slug'
     | '/api/bhoomiputra/verify-member'
+    | '/api/checkout/quote'
     | '/api/otp/send'
     | '/api/otp/verify'
     | '/api/whatsapp/send'
@@ -338,6 +348,7 @@ export interface FileRouteTypes {
     | '/experience/$slug'
     | '/product/$slug'
     | '/api/bhoomiputra/verify-member'
+    | '/api/checkout/quote'
     | '/api/otp/send'
     | '/api/otp/verify'
     | '/api/whatsapp/send'
@@ -369,6 +380,7 @@ export interface FileRouteTypes {
     | '/experience/$slug'
     | '/product/$slug'
     | '/api/bhoomiputra/verify-member'
+    | '/api/checkout/quote'
     | '/api/otp/send'
     | '/api/otp/verify'
     | '/api/whatsapp/send'
@@ -401,6 +413,7 @@ export interface RootRouteChildren {
   ExperienceSlugRoute: typeof ExperienceSlugRoute
   ProductSlugRoute: typeof ProductSlugRoute
   ApiBhoomiputraVerifyMemberRoute: typeof ApiBhoomiputraVerifyMemberRoute
+  ApiCheckoutQuoteRoute: typeof ApiCheckoutQuoteRoute
   ApiOtpSendRoute: typeof ApiOtpSendRoute
   ApiOtpVerifyRoute: typeof ApiOtpVerifyRoute
   ApiWhatsappSendRoute: typeof ApiWhatsappSendRoute
@@ -548,6 +561,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBhoomiputraVerifyMemberRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/checkout/quote': {
+      id: '/api/checkout/quote'
+      path: '/api/checkout/quote'
+      fullPath: '/api/checkout/quote'
+      preLoaderRoute: typeof ApiCheckoutQuoteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/otp/send': {
       id: '/api/otp/send'
       path: '/api/otp/send'
@@ -641,6 +661,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExperienceSlugRoute: ExperienceSlugRoute,
   ProductSlugRoute: ProductSlugRoute,
   ApiBhoomiputraVerifyMemberRoute: ApiBhoomiputraVerifyMemberRoute,
+  ApiCheckoutQuoteRoute: ApiCheckoutQuoteRoute,
   ApiOtpSendRoute: ApiOtpSendRoute,
   ApiOtpVerifyRoute: ApiOtpVerifyRoute,
   ApiWhatsappSendRoute: ApiWhatsappSendRoute,
