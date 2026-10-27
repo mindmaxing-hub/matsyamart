@@ -94,6 +94,11 @@ describe("Fast2SMS WhatsApp Universal Dispatch Engine Suite", () => {
   });
 
   it("dispatches via Fast2SMS with reliable direct wa.me fallback", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ status_code: 200, return: true, message_id: "test-msg-123" }),
+    } as any);
+
     const result = await sendFast2SMSWhatsApp(
       "9820144512",
       "Test message",
@@ -102,5 +107,7 @@ describe("Fast2SMS WhatsApp Universal Dispatch Engine Suite", () => {
 
     expect(result.success).toBe(true);
     expect(result.waLink).toContain("https://wa.me/919820144512");
-  }, 15000);
+    expect(result.messageId).toBe("test-msg-123");
+    fetchSpy.mockRestore();
+  });
 });

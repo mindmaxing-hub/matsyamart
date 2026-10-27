@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "../ui/Link";
-import { ShoppingBag, Heart, Menu, X, Plus } from "lucide-react";
+import { ShoppingBag, Heart, Menu, X, Plus, Ticket } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { BrandLogo } from "../site/BrandLogo";
@@ -48,16 +48,20 @@ export const Navbar: React.FC = () => {
           >
             Workshops
           </a>
-          <Link
-            to="/track"
-            className="text-xs font-medium px-3 py-1 rounded-full text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#481f14] transition-colors"
-          >
-            Track Passes
-          </Link>
         </nav>
 
-        {/* Right Actions: Wishlist + Cart + Submit Experience Button */}
+        {/* Right Actions: Track Passes Icon + Wishlist + Cart + Submit Experience Button */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Track Passes Icon (Just left to Wishlist) */}
+          <Link
+            to="/track"
+            className="p-2 text-[#dab38c] hover:text-[#f5edeb] hover:bg-[#35160e] rounded-full transition-colors relative cursor-pointer group"
+            title="Track Passes & Orders"
+            aria-label="Track Passes & Orders"
+          >
+            <Ticket className="w-4 h-4 text-[#dab38c] group-hover:text-[#f5edeb] transition-colors" />
+          </Link>
+
           {/* Wishlist Icon */}
           <button
             onClick={() => setIsWishlistOpen(true)}

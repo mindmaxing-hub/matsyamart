@@ -167,6 +167,7 @@ export async function sendFast2SMSWhatsApp(
         authorization: apiKey,
         "Content-Type": "application/json",
       },
+      signal: typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(4000) : null,
       body: JSON.stringify({
         phone_number_id: phoneId,
         to: normalizedPhone,
@@ -194,6 +195,7 @@ export async function sendFast2SMSWhatsApp(
         headers: {
           authorization: apiKey,
         },
+        signal: typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(4000) : null,
       });
       const tplData = await tplRes.json().catch(() => ({}));
       if (tplRes.ok && (tplData.status_code === 200 || tplData.return === true)) {
