@@ -102,3 +102,13 @@ describe("Invoices Workspace Theme Verification", () => {
     expect(content.includes("#E3A157")).toBe(true);
   });
 });
+
+import { describe as d2, it as i2, expect as e2 } from "vitest";
+import { verifyMemberDiscountEligibility as vmde } from "../lib/bhoomiputraSecurity";
+d2("Unregistered member IDs", () => {
+  i2("does not grant the 15% discount to a made-up card number", async () => {
+    const r = await vmde({ memberId: "BH-MMR-4321", customerPhone: "9000000001" });
+    e2(r.eligible).toBe(false);
+    e2(r.discountPercent).toBe(0);
+  });
+});
