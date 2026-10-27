@@ -19,6 +19,7 @@ import {
   Compass,
   ArrowRight,
   ShieldCheck,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { openWhatsApp, buildPassMessage } from "../lib/whatsapp";
@@ -30,6 +31,7 @@ export const TrackOrdersPage: React.FC = () => {
   const [phone, setPhone] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+  const [waLink, setWaLink] = useState("");
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
@@ -46,23 +48,23 @@ export const TrackOrdersPage: React.FC = () => {
 
     setIsSendingOtp(true);
     try {
-      const res = await fetch("/api/otp/send", {
+      const res = await fetch("/api/whatsapp/otp/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: cleanPhone }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        toast.error(data.error || "Failed to send SMS OTP.");
+        toast.error(data.error || "Failed to send WhatsApp verification code.");
       } else {
         setIsOtpSent(true);
-        toast.success(`6-digit SMS OTP dispatched to +91 ${cleanPhone}`);
-        if (data.devOtp) {
-          toast.info(`[Demo Mode] OTP: ${data.devOtp}`);
+        if (data.waLink) {
+          setWaLink(data.waLink);
         }
+        toast.success(`6-digit code sent to your WhatsApp (+91 ${cleanPhone})`);
       }
     } catch (err) {
-      toast.error("Network error sending OTP. Please try again.");
+      toast.error("Network error sending WhatsApp code. Please try again.");
     } finally {
       setIsSendingOtp(false);
     }
@@ -74,24 +76,24 @@ export const TrackOrdersPage: React.FC = () => {
     const trimmedOtp = otpCode.trim();
 
     if (trimmedOtp.length < 4) {
-      toast.error("Please enter the complete 6-digit OTP code.");
+      toast.error("Please enter the complete 6-digit WhatsApp code.");
       return;
     }
 
     setIsVerifyingOtp(true);
     try {
-      const res = await fetch("/api/otp/verify", {
+      const res = await fetch("/api/whatsapp/otp/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: cleanPhone, otp: trimmedOtp }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        toast.error(data.error || "Invalid OTP code.");
+        toast.error(data.error || "Invalid WhatsApp verification code.");
       } else {
         setIsVerified(true);
         setVerifiedPhone(cleanPhone);
-        toast.success("Mobile number verified successfully!");
+        toast.success("Mobile number verified via WhatsApp!");
 
         // Filter all matching orders
         const found = orders.filter((o) => {
@@ -119,7 +121,7 @@ export const TrackOrdersPage: React.FC = () => {
           Track Orders &amp; Access Digital Passes
         </h1>
         <p className="text-xs sm:text-sm text-[#dab38c] max-w-xl mx-auto leading-relaxed">
-          Verify your mobile number via SMS OTP to instantly lookup your 9:16 mobile admission passes, GST tax invoices, and real-time courier tracking.
+          Verify your mobile number via WhatsApp to instantly lookup your 9:16 mobile admission passes, GST tax invoices, and real-time courier tracking.
         </p>
       </div>
 
@@ -127,15 +129,15 @@ export const TrackOrdersPage: React.FC = () => {
       {!isVerified ? (
         <div className="max-w-md mx-auto p-6 sm:p-8 rounded-3xl bg-[#35160e]/85 backdrop-blur-md border border-[#dab38c]/30 shadow-2xl space-y-6">
           <div className="flex items-center gap-3 pb-4 border-b border-[#dab38c]/15">
-            <div className="w-10 h-10 rounded-2xl bg-[#1f0b07] border border-[#e3a157]/40 flex items-center justify-center text-[#e3a157]">
-              <Smartphone className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+              <MessageSquare className="w-5 h-5" />
             </div>
             <div>
               <h3 className="font-display font-bold text-base text-[#f5edeb]">
-                Mobile OTP Verification
+                WhatsApp Verification
               </h3>
               <p className="text-[11px] text-[#dab38c]/70">
-                Secured Mobile Gateway
+                Official MatsyaMart Gateway (+91 76665 11511)
               </p>
             </div>
           </div>
@@ -164,17 +166,17 @@ export const TrackOrdersPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSendingOtp || phone.replace(/\D/g, "").length < 10}
-                className="w-full py-3 rounded-xl bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50 cursor-pointer"
+                className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50 cursor-pointer"
               >
                 {isSendingOtp ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Sending SMS OTP...</span>
+                    <span>Sending WhatsApp Code...</span>
                   </>
                 ) : (
                   <>
-                    <Smartphone className="w-4 h-4" />
-                    <span>Send SMS OTP</span>
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Send Verification Code via WhatsApp</span>
                   </>
                 )}
               </button>
@@ -183,12 +185,24 @@ export const TrackOrdersPage: React.FC = () => {
             <form onSubmit={handleVerifyOtp} className="space-y-4">
               <div className="text-center space-y-1">
                 <p className="text-xs text-[#dab38c]">
-                  Enter the 6-digit verification code sent to:
+                  Enter the 6-digit verification code sent to your WhatsApp at:
                 </p>
                 <p className="font-mono font-bold text-sm text-[#e3a157]">
                   +91 {phone.replace(/\D/g, "")}
                 </p>
               </div>
+
+              {waLink && (
+                <a
+                  href={waLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 px-3 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/70 border border-emerald-500/40 text-emerald-300 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                >
+                  <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Open WhatsApp to View Code</span>
+                </a>
+              )}
 
               <div>
                 <input
@@ -216,7 +230,7 @@ export const TrackOrdersPage: React.FC = () => {
                   disabled={isSendingOtp}
                   className="text-[#e3a157] font-bold hover:underline"
                 >
-                  Resend SMS OTP
+                  Resend WhatsApp Code
                 </button>
               </div>
 
@@ -233,7 +247,7 @@ export const TrackOrdersPage: React.FC = () => {
                 ) : (
                   <>
                     <KeyRound className="w-4 h-4" />
-                    <span>Verify &amp; View Passes</span>
+                    <span>Verify Code &amp; View Passes</span>
                   </>
                 )}
               </button>

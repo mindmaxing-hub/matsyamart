@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   cleanIndianMobile,
-  createOtpSession,
-  sendFast2SmsOtp,
-} from "@/lib/fast2sms";
+  createWhatsAppOtpSession,
+  sendWhatsAppOtp,
+} from "../../lib/whatsappOtp";
 
 export const Route = createFileRoute("/api/otp/send")({
   server: {
@@ -33,7 +33,7 @@ export const Route = createFileRoute("/api/otp/send")({
           }
 
           // Create session with rate limiting & cooldown
-          const sessionResult = createOtpSession(cleanPhone);
+          const sessionResult = createWhatsAppOtpSession(cleanPhone);
           if (!sessionResult.success || !sessionResult.otp) {
             return Response.json(
               {
@@ -45,8 +45,8 @@ export const Route = createFileRoute("/api/otp/send")({
             );
           }
 
-          // Dispatch SMS via Fast2SMS
-          const smsResult = await sendFast2SmsOtp(
+          // Dispatch via WhatsApp (bypassing carrier SMS DLT restrictions)
+          const waResult = await sendWhatsAppOtp(
             cleanPhone,
             sessionResult.otp,
           );
@@ -54,8 +54,9 @@ export const Route = createFileRoute("/api/otp/send")({
           return Response.json({
             success: true,
             phone: cleanPhone,
-            message: smsResult.message,
-            provider: smsResult.provider,
+            message: waResult.message,
+            provider: waResult.provider,
+            waLink: waResult.waLink,
           });
         } catch (err: unknown) {
           console.error("[OTP Send Route Error]", err);

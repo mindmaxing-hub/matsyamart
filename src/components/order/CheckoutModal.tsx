@@ -61,11 +61,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [customerPhone, setCustomerPhone] = useState("");
   const [emergencyContact, setEmergencyContact] = useState("");
 
-  // Fast2SMS Number-Based OTP Verification State
+  // Fast2SMS WhatsApp OTP Verification State
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const [lastVerifiedPhone, setLastVerifiedPhone] = useState("");
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+  const [whatsappLink, setWhatsappLink] = useState("");
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
@@ -95,7 +96,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     setOtpSuccessMessage("");
 
     try {
-      const res = await fetch("/api/otp/send", {
+      const res = await fetch("/api/whatsapp/otp/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: cleaned }),
@@ -105,11 +106,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       if (res.ok && data.success) {
         setIsOtpModalOpen(true);
         setOtpTimer(30);
-        setOtpSuccessMessage(`Verification code sent to +91 ${cleaned.slice(-10)}`);
-        toast.success(`Verification code sent to +91 ${cleaned.slice(-10)}`);
+        if (data.waLink) {
+          setWhatsappLink(data.waLink);
+        }
+        setOtpSuccessMessage(`Verification code sent to your WhatsApp at +91 ${cleaned.slice(-10)}`);
+        toast.success(`Verification code sent to WhatsApp (+91 ${cleaned.slice(-10)})`);
         return true;
       } else {
-        const err = data.error || "Failed to dispatch verification code.";
+        const err = data.error || "Failed to dispatch WhatsApp verification code.";
         setOtpError(err);
         toast.error(err);
         if (data.cooldownRemaining) {
@@ -118,11 +122,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         return false;
       }
     } catch (err) {
-      console.error("[OTP Send Failure]", err);
+      console.error("[WhatsApp OTP Send Failure]", err);
       setIsOtpModalOpen(true);
       setOtpTimer(30);
-      setOtpSuccessMessage(`Verification code sent to +91 ${cleaned.slice(-10)}`);
-      toast.success("Verification code sent");
+      setOtpSuccessMessage(`Verification code sent to your WhatsApp at +91 ${cleaned.slice(-10)}`);
+      toast.success("Verification code dispatched via WhatsApp");
       return true;
     } finally {
       setIsSendingOtp(false);
@@ -146,7 +150,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     const trimmedOtp = otpCode.trim();
 
     if (!trimmedOtp || trimmedOtp.length < 4) {
-      setOtpError("Please enter the complete 6-digit OTP code.");
+      setOtpError("Please enter the complete 6-digit WhatsApp verification code.");
       return;
     }
 
@@ -154,7 +158,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     setOtpError("");
 
     try {
-      const res = await fetch("/api/otp/verify", {
+      const res = await fetch("/api/whatsapp/otp/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: cleaned, otp: trimmedOtp }),
@@ -167,28 +171,21 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         setIsOtpModalOpen(false);
         setOtpCode("");
         setOtpError("");
-        toast.success(`✓ Mobile +91 ${cleaned} verified successfully!`);
+        toast.success(`✓ Mobile +91 ${cleaned} verified via WhatsApp!`);
 
         if (pendingPaymentTrigger) {
           setPendingPaymentTrigger(false);
           proceedToPayment(cleaned);
         }
       } else {
-        const err = data.error || "Invalid OTP code. Please check and try again.";
+        const err = data.error || "Invalid WhatsApp verification code. Please check and try again.";
         setOtpError(err);
         toast.error(err);
       }
     } catch (err) {
-      console.error("[OTP Verify Failure]", err);
-      setIsPhoneVerified(true);
-      setLastVerifiedPhone(cleaned);
-      setIsOtpModalOpen(false);
-      setOtpCode("");
-      toast.success(`✓ Mobile +91 ${cleaned} verified successfully!`);
-      if (pendingPaymentTrigger) {
-        setPendingPaymentTrigger(false);
-        proceedToPayment(cleaned);
-      }
+      console.error("[WhatsApp OTP Verify Failure]", err);
+      setOtpError("Verification failed. Please check network connection and try again.");
+      toast.error("Verification failed");
     } finally {
       setIsVerifyingOtp(false);
     }
@@ -1069,7 +1066,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   {isPhoneVerified && lastVerifiedPhone === customerPhone.replace(/\D/g, "") ? (
                     <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-400">
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      Verified Mobile Number
+                      Verified via WhatsApp
                     </span>
                   ) : (
                     customerPhone.replace(/\D/g, "").length === 10 && (
@@ -1077,9 +1074,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         type="button"
                         onClick={() => handleSendOtp()}
                         disabled={isSendingOtp}
-                        className="text-[11px] font-semibold text-[#e3a157] hover:underline cursor-pointer disabled:opacity-50"
+                        className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 hover:underline cursor-pointer disabled:opacity-50 inline-flex items-center gap-1"
                       >
-                        {isSendingOtp ? "Sending OTP..." : "Verify with OTP"}
+                        <MessageSquare className="w-3 h-3" />
+                        {isSendingOtp ? "Sending code..." : "Verify via WhatsApp"}
                       </button>
                     )
                   )}
@@ -1325,7 +1323,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           </div>
         </form>
 
-        {/* Mobile Number Verification Modal */}
+        {/* WhatsApp Verification Modal */}
         {isOtpModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
             <div className="max-w-md w-full bg-[#170906] border border-[#dab38c]/40 rounded-3xl p-6 shadow-2xl space-y-5 text-center relative">
@@ -1341,21 +1339,33 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="w-12 h-12 rounded-2xl bg-[#e3a157]/15 border border-[#e3a157]/30 flex items-center justify-center mx-auto text-[#e3a157]">
-                <Smartphone className="w-6 h-6" />
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
+                <MessageSquare className="w-6 h-6" />
               </div>
 
               <div className="space-y-1.5">
                 <h3 className="text-lg font-bold font-display text-[#f5edeb]">
-                  Verify Mobile Number
+                  Verify via WhatsApp
                 </h3>
                 <p className="text-xs text-[#dab38c]/80 leading-relaxed max-w-xs mx-auto">
-                  We sent a 6-digit verification code to
+                  We sent a 6-digit verification code to your WhatsApp at
                   <span className="font-bold text-[#f5edeb] block mt-0.5">
                     +91 {customerPhone.replace(/\D/g, "").slice(-10)}
                   </span>
                 </p>
               </div>
+
+              {whatsappLink && (
+                <a
+                  href={whatsappLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 px-3 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/70 border border-emerald-500/40 text-emerald-300 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                >
+                  <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Open WhatsApp to View Code</span>
+                </a>
+              )}
 
               <div className="space-y-2">
                 <input
@@ -1405,7 +1415,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     disabled={isSendingOtp}
                     className="text-[#e3a157] hover:underline font-semibold cursor-pointer disabled:opacity-50"
                   >
-                    {isSendingOtp ? "Sending..." : "Resend Code"}
+                    {isSendingOtp ? "Sending..." : "Resend WhatsApp Code"}
                   </button>
                 )}
 
@@ -1426,10 +1436,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <button
                   type="button"
                   onClick={handleSendWhatsAppFallback}
-                  className="w-full py-2 px-3 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/30 text-emerald-300 text-xs font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  className="w-full py-2 px-3 rounded-xl bg-[#29100b] hover:bg-[#35160e] border border-[#dab38c]/20 text-[#dab38c] text-xs font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
-                  <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Didn't receive SMS? Verify via WhatsApp</span>
+                  <MessageSquare className="w-3.5 h-3.5 text-[#e3a157]" />
+                  <span>Direct WhatsApp Support (+91 76665 11511)</span>
                 </button>
               </div>
 
@@ -1447,7 +1457,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 ) : (
                   <>
                     <KeyRound className="w-4 h-4" />
-                    <span>Verify OTP &amp; Proceed to Pay</span>
+                    <span>Verify Code &amp; Proceed to Pay</span>
                   </>
                 )}
               </button>

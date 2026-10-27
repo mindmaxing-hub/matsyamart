@@ -163,14 +163,14 @@ export const HostAttendancePortal: React.FC = () => {
     }
 
     setIsOtpSent(true);
-    toast.success(`6-digit OTP dispatched via SMS to ${formatPhoneDisplay(clean)}`);
+    toast.success(`6-digit OTP dispatched via WhatsApp to ${formatPhoneDisplay(clean)}`);
   };
 
   const handleVerifyOtp = (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError("");
     if (!otpInput.trim() || otpInput.trim().length < 4) {
-      setAuthError("Please enter the 6-digit OTP code sent to your phone.");
+      setAuthError("Please enter the 6-digit WhatsApp code sent to your phone.");
       return;
     }
 
@@ -465,14 +465,14 @@ export const HostAttendancePortal: React.FC = () => {
                   type="submit"
                   className="w-full py-3.5 bg-[#e3a157] hover:bg-[#dab38c] text-[#29100b] font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
                 >
-                  Send Verification SMS
+                  Send Verification Code via WhatsApp
                 </button>
               </form>
             ) : (
               <form onSubmit={handleVerifyOtp} className="space-y-4">
                 <div>
                   <label className="text-xs font-semibold text-[#dab38c] block mb-1.5">
-                    Enter 6-Digit SMS Code
+                    Enter 6-Digit WhatsApp Code
                   </label>
                   <input
                     type="text"

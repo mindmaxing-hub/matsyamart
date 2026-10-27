@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { cleanIndianMobile, verifyOtpSession } from "@/lib/fast2sms";
+import { cleanIndianMobile, verifyWhatsAppOtpSession } from "../../lib/whatsappOtp";
 
 export const Route = createFileRoute("/api/otp/verify")({
   server: {
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/api/otp/verify")({
             );
           }
 
-          const verifyResult = verifyOtpSession(cleanPhone, otpInput);
+          const verifyResult = verifyWhatsAppOtpSession(cleanPhone, otpInput);
 
           if (!verifyResult.valid) {
             return Response.json(

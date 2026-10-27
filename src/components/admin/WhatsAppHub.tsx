@@ -100,22 +100,46 @@ export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) =>
     toast.success("Opened WhatsApp with pre-filled recovery link!");
   };
 
-  const handleRecoverViaSms = async (cart: AbandonedCartRecord) => {
+  const handleAutoDispatchWhatsApp = async (cart: AbandonedCartRecord) => {
     const cleanPhone = (cart.customerPhone || "").replace(/\D/g, "");
     if (cleanPhone.length < 10) {
-      toast.error("Valid 10-digit mobile number required for SMS.");
+      toast.error("Valid 10-digit mobile number required for WhatsApp.");
       return;
     }
     const restoreUrl = buildCartRestoreUrl(cart);
-    toast.info("Dispatching recovery link via Fast2SMS gateway...");
+    const summary = cart.items.map((i) => `${i.title} (${i.quantity}x)`).join(", ");
+    const text = buildAbandonedCartWhatsAppMessage({
+      customerName: cart.customerName,
+      itemsSummary: summary,
+      totalINR: cart.totalINR,
+      restoreUrl,
+      discountPercentage: cart.memberDiscountApplied ? 15 : undefined,
+    });
+
+    toast.info("Dispatching recovery link via Fast2SMS WhatsApp API...");
 
     try {
-      // In production calls Fast2SMS endpoint, or opens fallback
-      updateAbandonedCartStatus(cart.id, "contacted", "sms");
-      reloadCarts();
-      toast.success(`Recovery link dispatched via SMS to +91 ${cleanPhone.slice(-10)}`);
+      const res = await fetch("/api/whatsapp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: cleanPhone,
+          customText: text,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        updateAbandonedCartStatus(cart.id, "contacted", "whatsapp");
+        reloadCarts();
+        toast.success(`WhatsApp recovery link sent to +91 ${cleanPhone.slice(-10)}`);
+        if (data.mode === "direct_wa_link" && data.waLink) {
+          window.open(data.waLink, "_blank");
+        }
+      } else {
+        toast.error(data.error || "Failed to dispatch WhatsApp message.");
+      }
     } catch {
-      toast.error("Failed to send recovery SMS.");
+      toast.error("Network error dispatching WhatsApp recovery message.");
     }
   };
 
@@ -364,12 +388,12 @@ export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) =>
                     </button>
 
                     <button
-                      onClick={() => handleRecoverViaSms(cart)}
+                      onClick={() => handleAutoDispatchWhatsApp(cart)}
                       className="flex-1 sm:flex-initial px-3 py-2 rounded-xl bg-[#1f0b07] hover:bg-[#29100b] border border-[#dab38c]/30 text-[#dab38c] text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
-                      title="Send recovery SMS via Fast2SMS"
+                      title="Auto-dispatch recovery message via Fast2SMS WhatsApp API"
                     >
-                      <Smartphone className="w-3.5 h-3.5 text-[#e3a157]" />
-                      <span>SMS</span>
+                      <Send className="w-3.5 h-3.5 text-[#e3a157]" />
+                      <span>Auto WhatsApp</span>
                     </button>
 
                     <button
