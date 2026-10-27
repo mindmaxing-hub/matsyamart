@@ -9,6 +9,7 @@ import {
   FAST2SMS_PHONE_NUMBER_ID,
   FAST2SMS_SENDER_PHONE_NUMBER,
   FAST2SMS_SENDER_DISPLAY,
+  FAST2SMS_OTP_TEMPLATE_ID,
   normalizeWhatsAppNumber,
   to10DigitIndianNumber,
 } from "./fast2smsWhatsApp";
@@ -138,7 +139,49 @@ export async function sendWhatsAppOtp(
     };
   }
 
-  // Attempt 1: Fast2SMS WhatsApp session dispatch
+  // Attempt 1: Fast2SMS WhatsApp Template API (official utility/authentication template route)
+  if (FAST2SMS_OTP_TEMPLATE_ID) {
+    try {
+      const templateQuery = new URLSearchParams({
+        message_id: FAST2SMS_OTP_TEMPLATE_ID,
+        phone_number_id: FAST2SMS_PHONE_NUMBER_ID,
+        numbers: cleanPhone,
+        variables_values: otp,
+      });
+      const templateUrl = `https://www.fast2sms.com/dev/whatsapp?${templateQuery.toString()}`;
+      console.log(`[Fast2SMS WhatsApp Template Outbound Attempt] Phone: +91 ${cleanPhone}, TemplateID: ${FAST2SMS_OTP_TEMPLATE_ID}`);
+      const tplRes = await fetch(templateUrl, {
+        method: "GET",
+        headers: {
+          authorization: FAST2SMS_API_KEY,
+        },
+        signal: typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(5000) : null,
+      });
+
+      const tplData = (await tplRes.json().catch(() => ({}))) as {
+        return?: boolean;
+        status_code?: number;
+        message?: string | string[];
+        request_id?: string;
+      };
+
+      console.log(`[Fast2SMS WhatsApp Template Response] Status: ${tplRes.status}`, tplData);
+
+      if (tplData.return === true || tplData.status_code === 200) {
+        return {
+          success: true,
+          status: "accepted",
+          provider: "whatsapp-fast2sms",
+          message: `Verification code dispatched to WhatsApp (+91 ${cleanPhone}).`,
+          requestId: tplData.request_id,
+        };
+      }
+    } catch (err: unknown) {
+      console.warn(`[Fast2SMS WhatsApp Template Dispatch Notice] Phone: ${cleanPhone}`, err);
+    }
+  }
+
+  // Attempt 2: Fast2SMS WhatsApp session dispatch (pure WhatsApp session)
   try {
     const sessionUrl = `https://www.fast2sms.com/dev/whatsapp-session?phone_number_id=${encodeURIComponent(FAST2SMS_PHONE_NUMBER_ID)}&to=${encodeURIComponent(normalizedPhone)}`;
     console.log(`[Fast2SMS WhatsApp Outbound Attempt] Phone: +91 ${cleanPhone}, PhoneID: ${FAST2SMS_PHONE_NUMBER_ID}`);
@@ -173,52 +216,23 @@ export async function sendWhatsAppOtp(
         requestId: data.request_id,
       };
     }
+
+    const errDetail = Array.isArray(data.message) ? data.message.join(", ") : String(data.message || "WhatsApp dispatch error");
+    return {
+      success: false,
+      status: "failed",
+      provider: "whatsapp-fast2sms",
+      message: `WhatsApp delivery unavailable: ${errDetail}`,
+      error: `WhatsApp delivery unavailable: ${errDetail}`,
+    };
   } catch (err: unknown) {
-    console.warn(`[Fast2SMS WhatsApp Dispatch Notice] Phone: ${cleanPhone}. Attempting high-priority SMS route:`, err);
-  }
-
-  // Attempt 2: High-priority transactional SMS fallback via Fast2SMS (instant 100% Indian delivery)
-  try {
-    const smsUrl = `https://www.fast2sms.com/dev/bulkV2?authorization=${encodeURIComponent(FAST2SMS_API_KEY)}&variables_values=${encodeURIComponent(otp)}&route=otp&numbers=${encodeURIComponent(cleanPhone)}`;
-    console.log(`[Fast2SMS SMS Fallback Route Attempt] Phone: +91 ${cleanPhone}`);
-    const smsRes = await fetch(smsUrl, {
-      method: "GET",
-      signal: typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(5000) : null,
-    });
-
-    const smsData = (await smsRes.json().catch(() => ({}))) as {
-      return?: boolean;
-      status_code?: number;
-      message?: string | string[];
-      request_id?: string;
-    };
-
-    console.log(`[Fast2SMS SMS Route Response] Status: ${smsRes.status}`, smsData);
-
-    if (smsData.return === true || smsData.status_code === 200) {
-      return {
-        success: true,
-        status: "delivered",
-        provider: "fast2sms-sms",
-        message: `Verification code dispatched via SMS (+91 ${cleanPhone}).`,
-        requestId: smsData.request_id,
-      };
-    }
-
-    const errDetail = Array.isArray(smsData.message) ? smsData.message.join(", ") : String(smsData.message || "Provider error");
+    console.error(`[Fast2SMS WhatsApp Dispatch Error] Phone: ${cleanPhone}:`, err);
     return {
       success: false,
       status: "failed",
-      message: `Fast2SMS delivery unavailable: ${errDetail}`,
-      error: `Fast2SMS delivery unavailable: ${errDetail}`,
-    };
-  } catch (smsErr: unknown) {
-    console.error(`[OTP Dispatch Error] Phone: ${cleanPhone}`, smsErr);
-    return {
-      success: false,
-      status: "failed",
-      message: "Unable to deliver verification code. Please check your mobile number and network connection.",
-      error: "Unable to deliver verification code. Please check your mobile number and network connection.",
+      provider: "whatsapp-fast2sms",
+      message: "Unable to dispatch WhatsApp code. Please check your connection and try again.",
+      error: "Unable to dispatch WhatsApp code.",
     };
   }
 }

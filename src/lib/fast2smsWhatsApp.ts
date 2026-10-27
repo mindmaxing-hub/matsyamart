@@ -15,6 +15,10 @@ export const FAST2SMS_SENDER_PHONE_NUMBER = "7666511511"; // Official 10-digit W
 export const FAST2SMS_SENDER_PHONE_ID = FAST2SMS_PHONE_NUMBER_ID; // Backward-compatibility alias for API calls
 export const FAST2SMS_SENDER_DISPLAY = "+91 76665 11511";
 export const FAST2SMS_PAYMENT_TEMPLATE_ID = "39898"; // Template 'payment_completed'
+export const FAST2SMS_OTP_TEMPLATE_ID =
+  (typeof process !== "undefined" &&
+    (process.env?.["FAST2SMS_OTP_TEMPLATE_ID"] || process.env?.["VITE_FAST2SMS_OTP_TEMPLATE_ID"])) ||
+  "";
 
 /**
  * Normalizes any Indian/international phone into clean digits.
