@@ -407,6 +407,7 @@ export async function verifyMemberDiscountEligibility(params: {
   eligible: boolean;
   discountPercent: number;
   reason?: string;
+  requiresPhone?: boolean;
   member?: BhoomiputraMemberRecord;
 }> {
   if (!params.memberId) {
@@ -414,7 +415,7 @@ export async function verifyMemberDiscountEligibility(params: {
   }
 
   const cleanPhone = clean10DigitPhone(params.customerPhone);
-  const member = await findBhoomiputraMember({ memberId: params.memberId });
+  const member = await findBhoomiputraMember({ memberId: params.memberId, phone: cleanPhone });
 
   if (!member) {
     return {
@@ -424,11 +425,25 @@ export async function verifyMemberDiscountEligibility(params: {
     };
   }
 
-  // Check 1: Direct phone ownership match
-  if (cleanPhone && member.phones.includes(cleanPhone)) {
+  // Check 1: Direct phone ownership match (or newly validated sequence card bound to customer's checkout phone)
+  if (cleanPhone && (member.phones.length === 0 || member.phones.includes(cleanPhone))) {
     return {
       eligible: true,
       discountPercent: 15,
+      member: {
+        ...member,
+        phones: member.phones.length === 0 ? [cleanPhone] : member.phones,
+      },
+    };
+  }
+
+  // Check 1b: If customer has not entered phone number yet, prompt for phone rather than flagging theft
+  if (!cleanPhone) {
+    return {
+      eligible: false,
+      discountPercent: 0,
+      requiresPhone: true,
+      reason: "Please enter your 10-digit mobile number in Contact Information below to verify card ownership.",
       member,
     };
   }
