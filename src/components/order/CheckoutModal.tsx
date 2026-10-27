@@ -73,6 +73,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [otpTimer, setOtpTimer] = useState(0);
   const [otpError, setOtpError] = useState("");
   const [otpSuccessMessage, setOtpSuccessMessage] = useState("");
+  const [isTooManyAttempts, setIsTooManyAttempts] = useState(false);
   const [pendingPaymentTrigger, setPendingPaymentTrigger] = useState(false);
 
   useEffect(() => {
@@ -92,6 +93,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       return false;
     }
 
+    // Immediately open verification modal so customer is never kept waiting
+    setIsOtpModalOpen(true);
     setIsSendingOtp(true);
     setOtpError("");
     setOtpSuccessMessage("");
@@ -105,23 +108,28 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
       const data = await res.json();
       if (res.ok && data.success) {
-        setIsOtpModalOpen(true);
+        setIsTooManyAttempts(false);
         setOtpTimer(30);
-        setOtpSuccessMessage(data.message || `Verification code sent to your mobile (+91 ${cleaned.slice(-10)})`);
+        setOtpSuccessMessage(data.message || `Verification code sent to your WhatsApp (+91 ${cleaned.slice(-10)})`);
         toast.success(data.message || `Verification code sent (+91 ${cleaned.slice(-10)})`);
         return true;
       } else {
         const err = data.error || "Failed to dispatch verification code.";
         setOtpError(err);
-        toast.error(err);
+
+        if (data.tooManyAttempts) {
+          setIsTooManyAttempts(true);
+          toast.error("You have tried requesting verification codes way too many times! Please wait before trying again or verify via WhatsApp directly.");
+        } else {
+          toast.error(err);
+        }
+
         if (data.cooldownRemaining) {
           setOtpTimer(data.cooldownRemaining);
-          setIsOtpModalOpen(true);
-          setOtpSuccessMessage("A verification code was recently dispatched to your mobile. Please enter it below.");
+          setOtpSuccessMessage("A verification code was recently dispatched to your WhatsApp. Please enter it below.");
         } else if (res.status === 429) {
-          setIsOtpModalOpen(true);
           setOtpTimer(30);
-          setOtpSuccessMessage("A verification code was recently dispatched to your mobile. Please enter it below.");
+          setOtpSuccessMessage("A verification code was recently dispatched to your WhatsApp. Please enter it below.");
         }
         return false;
       }
@@ -1398,12 +1406,28 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   Verify Your Mobile
                 </h3>
                 <p className="text-xs text-[#dab38c]/80 leading-relaxed max-w-xs mx-auto">
-                  We sent a 6-digit verification code via WhatsApp / SMS to
+                  We sent a 6-digit verification code via WhatsApp to
                   <span className="font-bold text-[#f5edeb] block mt-0.5">
                     +91 {customerPhone.replace(/\D/g, "").slice(-10)}
                   </span>
                 </p>
               </div>
+
+              {isSendingOtp && (
+                <div className="text-[11px] text-[#e3a157] bg-[#e3a157]/10 p-2 rounded-xl border border-[#e3a157]/20 flex items-center justify-center gap-1.5">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Dispatching WhatsApp code...</span>
+                </div>
+              )}
+
+              {isTooManyAttempts && (
+                <div className="text-[11px] text-amber-300 bg-amber-950/50 p-2.5 rounded-xl border border-amber-500/30 text-left flex items-start gap-1.5">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400" />
+                  <span>
+                    You have requested verification codes multiple times. If your code delivery is delayed, please tap Direct WhatsApp Support below to verify immediately.
+                  </span>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <input

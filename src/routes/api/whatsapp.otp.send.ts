@@ -38,6 +38,7 @@ export const Route = createFileRoute("/api/whatsapp/otp/send")({
             return Response.json(
               {
                 success: false,
+                tooManyAttempts: sessionResult.tooManyAttempts || false,
                 error: sessionResult.error || "Failed to generate WhatsApp code",
                 cooldownRemaining: sessionResult.cooldownRemaining,
               },
@@ -45,7 +46,7 @@ export const Route = createFileRoute("/api/whatsapp/otp/send")({
             );
           }
 
-          // Dispatch code via Fast2SMS WhatsApp / SMS Gateway
+          // Dispatch code via Fast2SMS WhatsApp Gateway
           const waResult = await sendWhatsAppOtp(cleanPhone, sessionResult.otp);
 
           if (!waResult.success) {

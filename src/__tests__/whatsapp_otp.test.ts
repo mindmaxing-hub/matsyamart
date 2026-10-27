@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   cleanIndianMobile,
   generateWhatsAppOtp,
@@ -115,6 +115,32 @@ describe("MatsyaMart WhatsApp-First OTP & Verification Engine Suite", () => {
       const sixth = verifyWhatsAppOtpSession("9920477158", "999999");
       expect(sixth.valid).toBe(false);
       expect(sixth.error).toContain("No active WhatsApp verification request");
+    });
+
+    it("tracks send attempts and enforces lockout after 5 requests", () => {
+      const phone = "9920477158";
+      let currentTime = 1000000000;
+      const dateSpy = vi.spyOn(Date, "now");
+
+      try {
+        for (let i = 1; i <= 5; i++) {
+          dateSpy.mockReturnValue(currentTime);
+          const res = createWhatsAppOtpSession(phone);
+          expect(res.success).toBe(true);
+          // Advance time by 31 seconds to pass the 30s resend cooldown
+          currentTime += 31000;
+        }
+
+        // 6th attempt: should trigger tooManyAttempts lockout
+        dateSpy.mockReturnValue(currentTime);
+        const lockedRes = createWhatsAppOtpSession(phone);
+        expect(lockedRes.success).toBe(false);
+        expect(lockedRes.tooManyAttempts).toBe(true);
+        expect(lockedRes.cooldownRemaining).toBeGreaterThan(0);
+        expect(lockedRes.error).toContain("requested verification codes too many times");
+      } finally {
+        dateSpy.mockRestore();
+      }
     });
   });
 
