@@ -103,13 +103,28 @@ describe("Fast2SMS OTP Verification Gateway Suite", () => {
     });
 
     it("handles Fast2SMS network dispatch honestly with zero OTP leakage", async () => {
-      const testCode = "543210";
-      const result = await sendFast2SmsOtp("9920477158", testCode);
-      expect(result).toBeDefined();
-      expect(result.provider).toBe("fast2sms");
-      // Zero-Leak Security Invariant: The raw OTP code must NEVER be exposed in the returned message!
-      expect(result.message).not.toContain(testCode);
-      expect(result.message).not.toContain("Note: Code is");
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = async () =>
+        new Response(
+          JSON.stringify({
+            return: false,
+            status_code: 996,
+            message: "Before using OTP Message API, complete website verification.",
+          }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        );
+
+      try {
+        const testCode = "543210";
+        const result = await sendFast2SmsOtp("9920477158", testCode);
+        expect(result).toBeDefined();
+        expect(result.provider).toBe("fast2sms");
+        // Zero-Leak Security Invariant: The raw OTP code must NEVER be exposed in the returned message!
+        expect(result.message).not.toContain(testCode);
+        expect(result.message).not.toContain("Note: Code is");
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
     }, 15000);
   });
 });
