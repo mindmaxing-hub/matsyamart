@@ -6,12 +6,12 @@ import { verifyPhoneVerificationToken } from "../../lib/serverAuthToken";
 export const RAZORPAY_KEY_ID =
   (typeof process !== "undefined" && process.env?.["RAZORPAY_KEY_ID"]) ||
   (typeof process !== "undefined" && process.env?.["VITE_RAZORPAY_KEY_ID"]) ||
-  "rzp_live_TOorX9SfyIq1Au";
+  "rzp_live_TsxeJqBUCJLHdx";
 
 export const RAZORPAY_KEY_SECRET =
   (typeof process !== "undefined" && process.env?.["RAZORPAY_KEY_SECRET"]) ||
   (typeof process !== "undefined" && process.env?.["VITE_RAZORPAY_KEY_SECRET"]) ||
-  "";
+  "76QgXL8gEMFS01FStzJJDtbr";
 
 export const Route = createFileRoute("/api/razorpay/order/create")({
   server: {

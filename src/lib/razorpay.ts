@@ -55,7 +55,7 @@ export function loadRazorpayScript(): Promise<boolean> {
   });
 }
 
-export const DEFAULT_RAZORPAY_KEY_ID = "rzp_live_TOorX9SfyIq1Au";
+export const DEFAULT_RAZORPAY_KEY_ID = "rzp_live_TsxeJqBUCJLHdx";
 
 export async function initiatePayment(
   options: RazorpayCheckoutOptions,

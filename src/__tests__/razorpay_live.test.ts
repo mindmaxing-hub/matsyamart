@@ -9,9 +9,9 @@ import { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } from "../routes/api/razorpay.ord
 
 describe("MatsyaMart Live Razorpay Integration Suite", () => {
   it("has live Razorpay Key ID and Secret configured", () => {
-    expect(DEFAULT_RAZORPAY_KEY_ID).toBe("rzp_live_TOorX9SfyIq1Au");
-    expect(RAZORPAY_KEY_ID).toBe("rzp_live_TOorX9SfyIq1Au");
-    expect(RAZORPAY_KEY_SECRET.length).toBeGreaterThan(10);
+    expect(DEFAULT_RAZORPAY_KEY_ID).toBe("rzp_live_TsxeJqBUCJLHdx");
+    expect(RAZORPAY_KEY_ID).toBe("rzp_live_TsxeJqBUCJLHdx");
+    expect(RAZORPAY_KEY_SECRET).toBe("76QgXL8gEMFS01FStzJJDtbr");
   });
 
   it("converts INR amounts correctly into integer paise for Razorpay", () => {
