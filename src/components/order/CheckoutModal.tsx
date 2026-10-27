@@ -252,6 +252,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         setTheftWarningInfo(null);
         setIsDelegationMode(false);
         toast.success(`Verified: ${data.member.name} (${data.member.id})`);
+      } else if (data.requiresPhone) {
+        setBhoomiVerifyStatus("error");
+        setTheftWarningInfo(null);
+        setBhoomiVerifyError(
+          data.error ||
+            "Member card found! Please enter your 10-digit mobile number in Contact Information below to verify card ownership.",
+        );
+        toast.info("Member card recognized! Please enter your mobile number below to link your 15% privilege.");
       } else if (data.theftAlert) {
         setBhoomiVerifyStatus("error");
         setTheftWarningInfo({
