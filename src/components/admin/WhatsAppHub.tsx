@@ -38,6 +38,7 @@ import {
   ChevronRight,
   ShieldCheck,
   ArrowRight,
+  KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -101,6 +102,35 @@ export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) =>
       }
     } catch (err: any) {
       toast.error(err?.message || "Network error testing pass");
+      setTestPassResult({ error: err?.message });
+    } finally {
+      setIsTestingPass(false);
+    }
+  };
+
+  const handleTestOtpDispatch = async () => {
+    setIsTestingPass(true);
+    setTestPassResult(null);
+    toast.info("Testing WhatsApp OTP Dispatch...");
+
+    try {
+      const res = await fetch("/api/whatsapp/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: testPassPhone,
+        }),
+      });
+
+      const data = await res.json();
+      setTestPassResult(data);
+      if (res.ok && data.success) {
+        toast.success(`OTP dispatched to +91 ${testPassPhone}!`);
+      } else {
+        toast.error(data.error || "OTP dispatch test failed");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Network error testing OTP");
       setTestPassResult({ error: err?.message });
     } finally {
       setIsTestingPass(false);
@@ -866,6 +896,47 @@ Dawn catches and harbor seats fill quickly with the tide. Tap below to restore y
                 <RefreshCw className={`w-3.5 h-3.5 ${isTestingPass ? "animate-spin" : ""}`} />
                 <span>4. Test Full Waterfall Cascade</span>
               </button>
+
+              <button
+                type="button"
+                onClick={handleTestOtpDispatch}
+                disabled={isTestingPass || !testPassPhone.trim()}
+                className="px-3.5 py-2 rounded-xl bg-amber-700 hover:bg-amber-600 text-white font-bold text-xs cursor-pointer transition-colors disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>5. Test OTP Dispatch (6-Digit Code)</span>
+              </button>
+            </div>
+
+            {/* Clear Side-by-Side Message Previews */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              <div className="p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/30 text-xs space-y-1.5">
+                <span className="font-bold text-emerald-800 flex items-center gap-1">
+                  <span>🎟️ Pass WhatsApp Message Appearance</span>
+                </span>
+                <div className="p-2.5 rounded-lg bg-stone-900 text-stone-200 font-mono text-[11px] leading-relaxed">
+                  <p className="text-stone-400">Dear user,</p>
+                  <p className="text-stone-400">Your last payment completed successfully</p>
+                  <p className="text-emerald-300 font-bold mt-2">
+                    amount: 🎟️ YOUR DIGITAL BOARDING PASS LINK: https://matsyamart.com/order/confirmation/{testPassOrderRef} (Order Ref: {testPassOrderRef} · Admission Confirmed)
+                  </p>
+                  <p className="text-stone-400 mt-2">Thank you.</p>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-amber-950/20 border border-amber-500/30 text-xs space-y-1.5">
+                <span className="font-bold text-amber-800 flex items-center gap-1">
+                  <span>🔐 OTP WhatsApp Message Appearance</span>
+                </span>
+                <div className="p-2.5 rounded-lg bg-stone-900 text-stone-200 font-mono text-[11px] leading-relaxed">
+                  <p className="text-stone-400">Dear user,</p>
+                  <p className="text-stone-400">Your last payment completed successfully</p>
+                  <p className="text-amber-300 font-bold mt-2">
+                    amount: 🔐 OTP CODE: 849201 · MatsyaMart Mobile Verification (Valid for 10 mins · Do not share)
+                  </p>
+                  <p className="text-stone-400 mt-2">Thank you.</p>
+                </div>
+              </div>
             </div>
 
             {testPassResult && (

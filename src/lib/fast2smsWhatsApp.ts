@@ -234,10 +234,12 @@ export async function sendPassWhatsAppCascade(
 
   // ─────────────────────────────────────────────────────────────────────────────
   // TIER 1: DIRECT LINK TEMPLATE (First in line!)
+  // Meta Cloud API Rule: variables_values CANNOT contain newlines (\n) or tabs (\t).
+  // Single-line string explicitly labels this as the Digital Boarding Pass Link.
   // ─────────────────────────────────────────────────────────────────────────────
   if (requestedMode === "auto" || requestedMode === "link") {
     const linkTemplateId = FAST2SMS_PASS_LINK_TEMPLATE_ID || "39898";
-    const passLinkFormatted = `₹${params.totalAmountInr || 1} · YOUR DIGITAL BOARDING PASS LINK:\n${params.digitalPassUrl}\n\n(Order Ref: ${params.orderRef})`;
+    const passLinkFormatted = `🎟️ YOUR DIGITAL BOARDING PASS LINK: ${params.digitalPassUrl} (Order Ref: ${params.orderRef} · Admission Confirmed)`;
 
     try {
       const query = new URLSearchParams({
@@ -320,7 +322,7 @@ export async function sendPassWhatsAppCascade(
     const imageUrl =
       params.imageUrl ||
       "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80";
-    const passImageFormatted = `₹${params.totalAmountInr || 1} · Coastal Admission Pass (Ref: ${params.orderRef})\n${params.digitalPassUrl}`;
+    const passImageFormatted = `🎟️ YOUR PHOTO PASS LINK: ${params.digitalPassUrl} (Order Ref: ${params.orderRef} · Admission Confirmed)`;
 
     try {
       const query = new URLSearchParams({
@@ -405,7 +407,7 @@ export async function sendPassWhatsAppCascade(
       params.pdfUrl ||
       "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
     const filename = `MatsyaMart_Boarding_Pass_${params.orderRef || "MM"}.pdf`;
-    const passPdfFormatted = `₹${params.totalAmountInr || 1} · Official Pass & GST Invoice (Ref: ${params.orderRef})\n${params.digitalPassUrl}`;
+    const passPdfFormatted = `🎟️ YOUR PASS & INVOICE LINK: ${params.digitalPassUrl} (Order Ref: ${params.orderRef} · GST Verified)`;
 
     try {
       const query = new URLSearchParams({
@@ -647,7 +649,7 @@ export async function sendFast2SMSWhatsApp(
 
     // Attempt 2: Fallback to WhatsApp template route
     if (FAST2SMS_PAYMENT_TEMPLATE_ID && tenDigit) {
-      const tplUrl = `https://www.fast2sms.com/dev/whatsapp?message_id=${FAST2SMS_PAYMENT_TEMPLATE_ID}&phone_number_id=${phoneId}&numbers=${tenDigit}&variables_values=${encodeURIComponent("MatsyaMart Order Confirmed")}`;
+      const tplUrl = `https://www.fast2sms.com/dev/whatsapp?message_id=${FAST2SMS_PAYMENT_TEMPLATE_ID}&phone_number_id=${phoneId}&numbers=${tenDigit}&variables_values=${encodeURIComponent("🎟️ YOUR MATSYAMART PASS & ORDER CONFIRMED")}`;
       const tplRes = await fetch(tplUrl, {
         method: "GET",
         headers: {

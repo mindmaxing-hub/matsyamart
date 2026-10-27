@@ -58,9 +58,14 @@ describe("Multi-Template WhatsApp Pass Waterfall Dispatch Suite", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
     const callUrl = fetchMock.mock.calls[0]![0] as string;
-    expect(callUrl).toContain("message_id=39898");
-    expect(callUrl).toContain("numbers=7304290690");
-    expect(callUrl).toContain(encodeURIComponent("https://matsyamart.com/order/confirmation/MM-TESTLINK"));
+    const decodedUrl = decodeURIComponent(callUrl.replace(/\+/g, " "));
+    expect(decodedUrl).toContain("message_id=39898");
+    expect(decodedUrl).toContain("numbers=7304290690");
+    expect(decodedUrl).toContain("https://matsyamart.com/order/confirmation/MM-TESTLINK");
+    expect(decodedUrl).toContain("🎟️ YOUR DIGITAL BOARDING PASS LINK:");
+    // Meta Cloud API Rule: variables_values must never contain newlines (\n) or tabs (\t)
+    expect(decodedUrl).not.toContain("\n");
+    expect(decodedUrl).not.toContain("\t");
   });
 
   it("falls back to Tier 2 (Image Media Template) when Tier 1 fails", async () => {

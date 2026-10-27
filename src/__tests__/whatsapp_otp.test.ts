@@ -146,9 +146,11 @@ describe("MatsyaMart WhatsApp-First OTP & Verification Engine Suite", () => {
 
   describe("3. Dispatch Security & Zero-Disclosure Delivery", () => {
     it("never exposes OTP codes or waLink in client dispatch payloads", async () => {
+      let interceptedUrl = "";
       const originalFetch = globalThis.fetch;
-      globalThis.fetch = async () =>
-        new Response(
+      globalThis.fetch = async (url: any) => {
+        interceptedUrl = typeof url === "string" ? url : url.url || "";
+        return new Response(
           JSON.stringify({
             return: true,
             status_code: 200,
@@ -157,6 +159,7 @@ describe("MatsyaMart WhatsApp-First OTP & Verification Engine Suite", () => {
           }),
           { status: 200, headers: { "Content-Type": "application/json" } },
         );
+      };
 
       try {
         const testOtp = "123456";
@@ -168,6 +171,12 @@ describe("MatsyaMart WhatsApp-First OTP & Verification Engine Suite", () => {
         expect(dispatch.message).not.toContain(testOtp);
         expect(FAST2SMS_PHONE_NUMBER_ID).toBe("1442308258960303");
         expect(FAST2SMS_SENDER_PHONE_NUMBER).toBe("7666511511");
+
+        // Verify formatted variable is crystal clear and compliant with Meta Cloud API rules (no newlines/tabs)
+        const decoded = decodeURIComponent(interceptedUrl.replace(/\+/g, " "));
+        expect(decoded).toContain("🔐 OTP CODE: 123456");
+        expect(decoded).not.toContain("\n");
+        expect(decoded).not.toContain("\t");
       } finally {
         globalThis.fetch = originalFetch;
       }

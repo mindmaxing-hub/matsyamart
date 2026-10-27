@@ -415,7 +415,7 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
                 )}
               </div>
               <p className="text-[11px] text-[#dab38c]/80 mt-1">
-                Your mobile pass link is dispatched directly to WhatsApp. You can also re-send or open chat anytime.
+                Your mobile pass link is dispatched directly to WhatsApp from <b className="text-[#f5edeb]">+91 76665 11511</b> (labeled <span className="text-[#e3a157] font-semibold">🎟️ YOUR DIGITAL BOARDING PASS LINK</span>). You can also re-send or open chat anytime.
               </p>
             </div>
           </div>

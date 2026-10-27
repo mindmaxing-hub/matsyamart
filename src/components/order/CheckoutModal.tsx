@@ -1510,6 +1510,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   className="w-full text-center text-2xl font-mono font-bold tracking-[0.4em] py-3.5 px-4 rounded-xl bg-[#29100b] border border-[#dab38c]/40 text-[#f5edeb] placeholder:text-[#dab38c]/20 focus:outline-none focus:border-[#e3a157] focus:ring-1 focus:ring-[#e3a157]"
                 />
 
+                <p className="text-[11px] text-[#dab38c]/75 text-center">
+                  Look for WhatsApp message from <b className="text-[#f5edeb]">+91 76665 11511</b> labeled <span className="font-mono text-[#e3a157] font-semibold">🔐 OTP CODE: ······</span>
+                </p>
+
                 {otpError && (
                   <div className="text-[11px] text-red-400 bg-red-950/40 p-2.5 rounded-xl border border-red-500/30 text-left flex items-start gap-1.5">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
