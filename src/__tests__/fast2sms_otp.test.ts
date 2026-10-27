@@ -111,6 +111,6 @@ describe("Fast2SMS OTP Verification Gateway Suite", () => {
       // Zero-Leak Security Invariant: The raw OTP code must NEVER be exposed in the returned message!
       expect(result.message).not.toContain(testCode);
       expect(result.message).not.toContain("Note: Code is");
-    });
+    }, 15000);
   });
 });

@@ -32,6 +32,7 @@ import { Route as ApiOtpSendRouteImport } from './routes/api/otp.send'
 import { Route as ApiOtpVerifyRouteImport } from './routes/api/otp.verify'
 import { Route as ApiWhatsappSendRouteImport } from './routes/api/whatsapp.send'
 import { Route as OrderConfirmationOrderRefRouteImport } from './routes/order.confirmation.$orderRef'
+import { Route as ApiRazorpayOrderCreateRouteImport } from './routes/api/razorpay.order.create'
 import { Route as ApiWhatsappOtpSendRouteImport } from './routes/api/whatsapp.otp.send'
 import { Route as ApiWhatsappOtpVerifyRouteImport } from './routes/api/whatsapp.otp.verify'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -154,6 +155,11 @@ const OrderConfirmationOrderRefRoute =
     path: '/order/confirmation/$orderRef',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiRazorpayOrderCreateRoute = ApiRazorpayOrderCreateRouteImport.update({
+  id: '/api/razorpay/order/create',
+  path: '/api/razorpay/order/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWhatsappOtpSendRoute = ApiWhatsappOtpSendRouteImport.update({
   id: '/api/whatsapp/otp/send',
   path: '/api/whatsapp/otp/send',
@@ -195,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/api/otp/verify': typeof ApiOtpVerifyRoute
   '/api/whatsapp/send': typeof ApiWhatsappSendRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
+  '/api/razorpay/order/create': typeof ApiRazorpayOrderCreateRoute
   '/api/whatsapp/otp/send': typeof ApiWhatsappOtpSendRoute
   '/api/whatsapp/otp/verify': typeof ApiWhatsappOtpVerifyRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -223,6 +230,7 @@ export interface FileRoutesByTo {
   '/api/otp/verify': typeof ApiOtpVerifyRoute
   '/api/whatsapp/send': typeof ApiWhatsappSendRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
+  '/api/razorpay/order/create': typeof ApiRazorpayOrderCreateRoute
   '/api/whatsapp/otp/send': typeof ApiWhatsappOtpSendRoute
   '/api/whatsapp/otp/verify': typeof ApiWhatsappOtpVerifyRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -252,6 +260,7 @@ export interface FileRoutesById {
   '/api/otp/verify': typeof ApiOtpVerifyRoute
   '/api/whatsapp/send': typeof ApiWhatsappSendRoute
   '/order/confirmation/$orderRef': typeof OrderConfirmationOrderRefRoute
+  '/api/razorpay/order/create': typeof ApiRazorpayOrderCreateRoute
   '/api/whatsapp/otp/send': typeof ApiWhatsappOtpSendRoute
   '/api/whatsapp/otp/verify': typeof ApiWhatsappOtpVerifyRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/api/otp/verify'
     | '/api/whatsapp/send'
     | '/order/confirmation/$orderRef'
+    | '/api/razorpay/order/create'
     | '/api/whatsapp/otp/send'
     | '/api/whatsapp/otp/verify'
     | '/lovable/email/transactional/preview'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/api/otp/verify'
     | '/api/whatsapp/send'
     | '/order/confirmation/$orderRef'
+    | '/api/razorpay/order/create'
     | '/api/whatsapp/otp/send'
     | '/api/whatsapp/otp/verify'
     | '/lovable/email/transactional/preview'
@@ -338,6 +349,7 @@ export interface FileRouteTypes {
     | '/api/otp/verify'
     | '/api/whatsapp/send'
     | '/order/confirmation/$orderRef'
+    | '/api/razorpay/order/create'
     | '/api/whatsapp/otp/send'
     | '/api/whatsapp/otp/verify'
     | '/lovable/email/transactional/preview'
@@ -367,6 +379,7 @@ export interface RootRouteChildren {
   ApiOtpVerifyRoute: typeof ApiOtpVerifyRoute
   ApiWhatsappSendRoute: typeof ApiWhatsappSendRoute
   OrderConfirmationOrderRefRoute: typeof OrderConfirmationOrderRefRoute
+  ApiRazorpayOrderCreateRoute: typeof ApiRazorpayOrderCreateRoute
   ApiWhatsappOtpSendRoute: typeof ApiWhatsappOtpSendRoute
   ApiWhatsappOtpVerifyRoute: typeof ApiWhatsappOtpVerifyRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -535,6 +548,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrderConfirmationOrderRefRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/razorpay/order/create': {
+      id: '/api/razorpay/order/create'
+      path: '/api/razorpay/order/create'
+      fullPath: '/api/razorpay/order/create'
+      preLoaderRoute: typeof ApiRazorpayOrderCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/whatsapp/otp/send': {
       id: '/api/whatsapp/otp/send'
       path: '/api/whatsapp/otp/send'
@@ -583,6 +603,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiOtpVerifyRoute: ApiOtpVerifyRoute,
   ApiWhatsappSendRoute: ApiWhatsappSendRoute,
   OrderConfirmationOrderRefRoute: OrderConfirmationOrderRefRoute,
+  ApiRazorpayOrderCreateRoute: ApiRazorpayOrderCreateRoute,
   ApiWhatsappOtpSendRoute: ApiWhatsappOtpSendRoute,
   ApiWhatsappOtpVerifyRoute: ApiWhatsappOtpVerifyRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,

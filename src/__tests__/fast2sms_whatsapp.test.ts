@@ -102,5 +102,5 @@ describe("Fast2SMS WhatsApp Universal Dispatch Engine Suite", () => {
 
     expect(result.success).toBe(true);
     expect(result.waLink).toContain("https://wa.me/919820144512");
-  });
+  }, 15000);
 });

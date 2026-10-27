@@ -50,47 +50,79 @@ export function loadRazorpayScript(): Promise<boolean> {
   });
 }
 
+export const DEFAULT_RAZORPAY_KEY_ID = "rzp_live_TOorX9SfyIq1Au";
+
 export async function initiatePayment(
   options: RazorpayCheckoutOptions,
 ): Promise<void> {
-  const razorpayKey = import.meta.env["VITE_RAZORPAY_KEY_ID"];
+  const razorpayKey =
+    import.meta.env["VITE_RAZORPAY_KEY_ID"] ||
+    (typeof process !== "undefined" && process.env?.["VITE_RAZORPAY_KEY_ID"]) ||
+    DEFAULT_RAZORPAY_KEY_ID;
 
-  // If live key is provided, use actual Razorpay modal
-  if (razorpayKey) {
-    const loaded = await loadRazorpayScript();
-    if (loaded && window.Razorpay) {
-      const rzpOptions = {
-        key: razorpayKey,
-        amount: Math.round(options.amountInr * 100), // amount in paise
-        currency: "INR",
-        name: "MatsyaMart",
+  // Attempt to generate official server-verified Razorpay Order ID
+  let razorpayOrderId: string | undefined = undefined;
+
+  try {
+    const orderRes = await fetch("/api/razorpay/order/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        amountInr: options.amountInr,
+        orderRef: options.orderRef,
+        customerName: options.customerName,
+        customerPhone: options.customerPhone,
+        customerEmail: options.customerEmail,
         description: options.description,
-        image: "/favicon.png",
-        prefill: {
-          name: options.customerName,
-          email: options.customerEmail,
-          contact: options.customerPhone,
-        },
-        theme: {
-          color: "#0F172A",
-        },
-        handler: function (response: RazorpaySuccessResponse) {
-          options.onSuccess({
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_order_id: response.razorpay_order_id,
-          });
-        },
-        modal: {
-          ondismiss: function () {
-            if (options.onDismiss) options.onDismiss();
-          },
-        },
-      };
+      }),
+      signal: AbortSignal.timeout(4000),
+    });
 
-      const rzp = new window.Razorpay(rzpOptions);
-      rzp.open();
-      return;
+    if (orderRes.ok) {
+      const orderData = await orderRes.json();
+      if (orderData.success && orderData.orderId) {
+        razorpayOrderId = orderData.orderId;
+      }
     }
+  } catch (e) {
+    console.warn("[Razorpay Order API Notice] Proceeding with direct checkout:", e);
+  }
+
+  // Load official Razorpay checkout script
+  const loaded = await loadRazorpayScript();
+  if (loaded && window.Razorpay && razorpayKey) {
+    const rzpOptions: Record<string, unknown> = {
+      key: razorpayKey,
+      amount: Math.round(options.amountInr * 100), // amount in paise
+      currency: "INR",
+      name: "MatsyaMart",
+      description: options.description,
+      image: "/favicon.png",
+      ...(razorpayOrderId ? { order_id: razorpayOrderId } : {}),
+      prefill: {
+        name: options.customerName,
+        email: options.customerEmail,
+        contact: options.customerPhone,
+      },
+      theme: {
+        color: "#E3A157",
+      },
+      handler: function (response: RazorpaySuccessResponse) {
+        options.onSuccess({
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_order_id: response.razorpay_order_id || razorpayOrderId,
+        });
+      },
+      modal: {
+        ondismiss: function () {
+          if (options.onDismiss) options.onDismiss();
+        },
+      },
+    };
+
+    const rzp = new window.Razorpay(rzpOptions);
+    rzp.open();
+    return;
   }
 
   // Seamless Sandbox Test Fallback:

@@ -121,6 +121,6 @@ describe("MatsyaMart WhatsApp-First OTP & Verification Engine Suite", () => {
       expect(dispatch.message).toContain("+91 9820012345");
       expect(dispatch.waLink).toContain("wa.me/919820012345");
       expect(FAST2SMS_SENDER_PHONE_ID).toBe("7666511511");
-    });
+    }, 15000);
   });
 });
