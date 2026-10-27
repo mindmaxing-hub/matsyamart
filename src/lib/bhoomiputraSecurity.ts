@@ -18,6 +18,8 @@ export interface BhoomiputraMemberRecord {
   tier: string;
   settlement: string;
   status: "active" | "inactive";
+  /** Set by the secure database check: true when the checkout phone matches the member's own number */
+  phoneVerified?: boolean;
 }
 
 // Official seed registry for core Foundation cards
@@ -127,124 +129,30 @@ export async function findBhoomiputraMember(query: {
     }
   }
 
-  // 2. Direct Supabase Query or RPC if available
-  if (supabase) {
+  // 2. Secure masked lookup via the verify_bhoomiputra_member function only.
+  // Never read member tables directly and never accept unregistered IDs.
+  if (supabase && cleanId) {
     try {
-      // Check if secure verify_bhoomiputra_member RPC is installed
-      try {
-        const { data: rpcData, error: rpcErr } = await supabase.rpc(
-          "verify_bhoomiputra_member",
-          {
-            p_member_id: cleanId || null,
-            p_phone: cleanPhone || null,
-          },
-        );
-        if (!rpcErr && rpcData && rpcData.valid) {
-          const rpcPhone = clean10DigitPhone(rpcData.phone);
-          return {
-            id: rpcData.member_id || cleanId,
-            name: rpcData.name || "Verified Bhoomiputra Member",
-            phones: rpcPhone ? [rpcPhone] : cleanPhone ? [cleanPhone] : [],
-            tier: "Verified Member",
-            settlement: rpcData.region || "Coastal Collective",
-            status: "active",
-          };
-        }
-      } catch {
-        // RPC not defined yet, continue with table check
-      }
-
-      // Check members table
-      let memberQuery = supabase
-        .from("members")
-        .select("id, member_id, full_name, phone, region, status")
-        .limit(1);
-
-      if (cleanPhone && cleanId) {
-        memberQuery = memberQuery.or(
-          `member_id.ilike.%${cleanId}%,phone.ilike.%${cleanPhone}%`,
-        );
-      } else if (cleanPhone) {
-        memberQuery = memberQuery.ilike("phone", `%${cleanPhone}%`);
-      } else if (cleanId) {
-        memberQuery = memberQuery.ilike("member_id", `%${cleanId}%`);
-      }
-
-      const { data: memberRows } = await memberQuery;
-      const mem = memberRows?.[0];
-      if (mem) {
-        const memPhone = clean10DigitPhone(mem.phone);
+      const { data, error } = await supabase.rpc("verify_bhoomiputra_member", {
+        p_member_id: cleanId,
+        p_phone: cleanPhone || null,
+      });
+      const rpc = data as
+        | { valid?: boolean; member_id?: string; masked_name?: string; region?: string; phone_match?: boolean }
+        | null;
+      if (!error && rpc?.valid) {
         return {
-          id: mem.member_id || cleanId,
-          name: mem.full_name || "Verified Bhoomiputra Member",
-          phones: memPhone ? [memPhone] : [],
+          id: rpc.member_id || cleanId,
+          name: rpc.masked_name || "Verified Bhoomiputra Member",
+          phones: [],
+          phoneVerified: rpc.phone_match === true,
           tier: "Verified Member",
-          settlement: mem.region || "Coastal Collective",
-          status: mem.status === "inactive" ? "inactive" : "active",
-        };
-      }
-
-      // Check membership_applications table
-      let appQuery = supabase
-        .from("membership_applications")
-        .select(
-          "id, full_name, phone, status, payment_status, settlement_type, district, member_id",
-        )
-        .limit(1);
-
-      if (cleanPhone && cleanId) {
-        appQuery = appQuery.or(
-          `member_id.ilike.%${cleanId}%,phone.ilike.%${cleanPhone}%`,
-        );
-      } else if (cleanPhone) {
-        appQuery = appQuery.ilike("phone", `%${cleanPhone}%`);
-      } else if (cleanId) {
-        appQuery = appQuery.ilike("member_id", `%${cleanId}%`);
-      }
-
-      const { data: appRows } = await appQuery;
-      const app = appRows?.[0];
-      if (app) {
-        const isApprovedOrPaid =
-          app.payment_status === "paid" ||
-          app.status === "approved" ||
-          app.status === "active" ||
-          Boolean(app.member_id);
-
-        if (isApprovedOrPaid) {
-          const appPhone = clean10DigitPhone(app.phone);
-          return {
-            id: app.member_id || cleanId,
-            name: app.full_name || "Bhoomiputra Member",
-            phones: appPhone ? [appPhone] : [],
-            tier: "Active Member",
-            settlement: app.settlement_type || app.district || "Coastal Collective",
-            status: "active",
-          };
-        }
-      }
-    } catch (err) {
-      console.warn("[Bhoomiputra Security] Supabase lookup notice:", err);
-    }
-  }
-
-  // 3. Bhoomiputra Foundation card format validation fallback (sequence starting at 061)
-  // Aligns with official Bhoomiputra card issuance (sequence starts at 061)
-  if (cleanId) {
-    const digits = cleanId.replace(/\D/g, "");
-    if (digits.length < 10 && digits.length > 0) {
-      const seq = parseInt(digits, 10);
-      if (seq >= 61 && seq <= 9999) {
-        const canonical = `BH-MMR-${String(seq).padStart(3, "0")}`;
-        return {
-          id: canonical,
-          name: "Verified Bhoomiputra Member",
-          phones: cleanPhone ? [cleanPhone] : [],
-          tier: "Active Member",
-          settlement: "Coastal Collective",
+          settlement: rpc.region || "Coastal Collective",
           status: "active",
         };
       }
+    } catch (err) {
+      console.warn("[Bhoomiputra Security] member lookup failed:", err);
     }
   }
 
@@ -295,7 +203,7 @@ export async function sendDelegationOtp(params: {
   }
 
   // 4-digit cryptographically random delegation code
-  const code = Math.floor(1000 + Math.random() * 9000).toString();
+  const code = (1000 + (crypto.getRandomValues(new Uint32Array(1))[0]! % 9000)).toString();
 
   const session: DelegationSession = {
     memberId: member.id,
@@ -378,7 +286,7 @@ export function verifyDelegationOtp(params: {
 
   // Successful verification -> generate single-use delegation token
   session.verified = true;
-  const delegationToken = `bpf_auth_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  const delegationToken = `bpf_auth_${crypto.randomUUID().replace(/-/g, "")}`;
   session.delegationToken = delegationToken;
 
   verifiedTokens.set(delegationToken, session);
@@ -425,16 +333,9 @@ export async function verifyMemberDiscountEligibility(params: {
     };
   }
 
-  // Check 1: Direct phone ownership match (or newly validated sequence card bound to customer's checkout phone)
-  if (cleanPhone && (member.phones.length === 0 || member.phones.includes(cleanPhone))) {
-    return {
-      eligible: true,
-      discountPercent: 15,
-      member: {
-        ...member,
-        phones: member.phones.length === 0 ? [cleanPhone] : member.phones,
-      },
-    };
+  // Check 1: Direct phone ownership match against the registered number only
+  if (cleanPhone && (member.phones.includes(cleanPhone) || member.phoneVerified === true)) {
+    return { eligible: true, discountPercent: 15, member };
   }
 
   // Check 1b: If customer has not entered phone number yet, prompt for phone rather than flagging theft
