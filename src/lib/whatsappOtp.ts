@@ -181,13 +181,14 @@ export async function sendWhatsAppOtp(
   // Attempt 1: Fast2SMS WhatsApp Template API (Approved Template 39898 for guaranteed delivery)
   const templateId = FAST2SMS_OTP_TEMPLATE_ID || "39898";
   if (templateId) {
+    const otpFormatted = `${otp}\n👉 MatsyaMart Mobile Verification Code\n(Valid for 10 minutes · Do not share)`;
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
         const templateQuery = new URLSearchParams({
           message_id: templateId,
           phone_number_id: FAST2SMS_PHONE_NUMBER_ID,
           numbers: cleanPhone,
-          variables_values: otp,
+          variables_values: otpFormatted,
         });
         const templateUrl = `https://www.fast2sms.com/dev/whatsapp?${templateQuery.toString()}`;
         console.log(`[Fast2SMS WhatsApp Template Outbound Attempt ${attempt}] Phone: +91 ${cleanPhone}, TemplateID: ${templateId}`);

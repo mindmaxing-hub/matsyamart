@@ -57,6 +57,56 @@ export const WhatsAppHub: React.FC<WhatsAppHubProps> = ({ orders, listings }) =>
   const [composerText, setComposerText] = useState("");
   const [isSendingDirect, setIsSendingDirect] = useState(false);
 
+  // Pass Waterfall Test State
+  const [testPassPhone, setTestPassPhone] = useState("7304290690");
+  const [testPassOrderRef, setTestPassOrderRef] = useState("MM-TESTPASS");
+  const [isTestingPass, setIsTestingPass] = useState(false);
+  const [testPassResult, setTestPassResult] = useState<any>(null);
+
+  const handleTestPassDispatch = async (mode: "auto" | "link" | "image" | "pdf") => {
+    setIsTestingPass(true);
+    setTestPassResult(null);
+    toast.info(`Testing Pass Dispatch (Mode: ${mode})...`);
+
+    try {
+      const res = await fetch("/api/whatsapp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: testPassPhone,
+          mode,
+          passParams: {
+            guestName: "Aryan Panchal",
+            orderRef: testPassOrderRef,
+            items: [
+              {
+                title: "Versova Dawn Seafood Feast & Harbor Walk",
+                pillar: "walks",
+                passRef: `${testPassOrderRef}-1`,
+                attendeeName: "Aryan Panchal",
+              },
+            ],
+            totalPaidINR: 1,
+            digitalPassUrl: `https://matsyamart.com/order/confirmation/${testPassOrderRef}?p=test_pass`,
+          },
+        }),
+      });
+
+      const data = await res.json();
+      setTestPassResult(data);
+      if (res.ok && data.success) {
+        toast.success(`Pass dispatched via ${data.mode}!`);
+      } else {
+        toast.error(data.error || "Pass dispatch test failed");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Network error testing pass");
+      setTestPassResult({ error: err?.message });
+    } finally {
+      setIsTestingPass(false);
+    }
+  };
+
   // Load saved abandoned carts
   const reloadCarts = () => {
     setAbandonedCarts(getSavedAbandonedCarts());
@@ -732,6 +782,105 @@ Dawn catches and harbor seats fill quickly with the tide. Tap below to restore y
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* Interactive Multi-Template Pass Testing Console */}
+          <div className="p-5 rounded-2xl bg-[#FFFDFB] border border-[rgba(41,16,11,0.12)] shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[rgba(41,16,11,0.08)] pb-3">
+              <div>
+                <h4 className="font-bold text-sm text-[#29100B] flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#C67F2A]" />
+                  <span>Live Pass Dispatch Waterfall Testing Console</span>
+                </h4>
+                <p className="text-xs text-[rgba(41,16,11,0.64)] mt-0.5">
+                  Test and inspect each pass template mode independently or run the full automated waterfall cascade.
+                </p>
+              </div>
+              <span className="text-[11px] font-mono text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                Priority 1: Link First Active
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-[11px] font-bold text-[#29100B] block mb-1">
+                  Recipient Indian Mobile (10-digits)
+                </label>
+                <input
+                  type="text"
+                  value={testPassPhone}
+                  onChange={(e) => setTestPassPhone(e.target.value)}
+                  placeholder="e.g. 7304290690"
+                  className="w-full px-3 py-2 rounded-xl bg-stone-50 border border-[rgba(41,16,11,0.15)] text-xs font-mono text-[#29100B] focus:outline-none focus:border-[#C67F2A]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-[#29100B] block mb-1">
+                  Test Order Reference
+                </label>
+                <input
+                  type="text"
+                  value={testPassOrderRef}
+                  onChange={(e) => setTestPassOrderRef(e.target.value.toUpperCase())}
+                  placeholder="e.g. MM-TESTPASS"
+                  className="w-full px-3 py-2 rounded-xl bg-stone-50 border border-[rgba(41,16,11,0.15)] text-xs font-mono text-[#29100B] focus:outline-none focus:border-[#C67F2A]"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => handleTestPassDispatch("link")}
+                disabled={isTestingPass || !testPassPhone.trim()}
+                className="px-3.5 py-2 rounded-xl bg-[#29100B] hover:bg-[#3D1A12] text-[#E3A157] font-bold text-xs cursor-pointer transition-colors disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+              >
+                <span>1. Test Direct Link Pass (Priority 1)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTestPassDispatch("image")}
+                disabled={isTestingPass || !testPassPhone.trim()}
+                className="px-3.5 py-2 rounded-xl bg-sky-900 hover:bg-sky-800 text-sky-100 font-bold text-xs cursor-pointer transition-colors disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+              >
+                <span>2. Test Image Media Pass</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTestPassDispatch("pdf")}
+                disabled={isTestingPass || !testPassPhone.trim()}
+                className="px-3.5 py-2 rounded-xl bg-purple-900 hover:bg-purple-800 text-purple-100 font-bold text-xs cursor-pointer transition-colors disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+              >
+                <span>3. Test PDF Document Pass</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTestPassDispatch("auto")}
+                disabled={isTestingPass || !testPassPhone.trim()}
+                className="px-4 py-2 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer transition-colors disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isTestingPass ? "animate-spin" : ""}`} />
+                <span>4. Test Full Waterfall Cascade</span>
+              </button>
+            </div>
+
+            {testPassResult && (
+              <div className="p-3.5 rounded-xl bg-stone-900 text-stone-100 border border-stone-800 text-xs font-mono space-y-2 mt-2">
+                <div className="flex items-center justify-between text-[11px] border-b border-stone-800 pb-1.5">
+                  <span className="text-emerald-400 font-bold">
+                    Gateway Response · Mode: {testPassResult.mode || "unknown"}
+                  </span>
+                  <span>Status: {testPassResult.success ? "✓ Success" : "✕ Failed"}</span>
+                </div>
+                <div className="text-[10px] text-stone-300 overflow-x-auto whitespace-pre-wrap max-h-40">
+                  {JSON.stringify(testPassResult, null, 2)}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

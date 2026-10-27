@@ -7,7 +7,8 @@ import { TaxInvoice } from "../components/order/TaxInvoice";
 import { decodePassPayload, encodePassPayload } from "../lib/passPayload";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
 import { Order } from "../types";
-import { ArrowLeft, AlertCircle, FileText, Loader2 } from "lucide-react";
+import { ArrowLeft, AlertCircle, FileText, Loader2, MessageCircle, RotateCcw, CheckCircle2, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import { trackPurchase } from "../lib/metaPixel";
 import { formatDate, formatTime } from "../lib/utils";
 
@@ -213,22 +214,25 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
     }
   }, [activeOrder]);
 
-  // Automated Fast2SMS WhatsApp Dispatch on Order Confirmation
+  // Automated Fast2SMS WhatsApp Dispatch on Order Confirmation with Multi-Template Waterfall
   const waDispatchedRef = React.useRef(false);
-  useEffect(() => {
-    if (
-      activeOrder &&
-      activeOrder.customer_phone &&
-      !waDispatchedRef.current &&
-      typeof window !== "undefined"
-    ) {
-      waDispatchedRef.current = true;
-      const passUrl = window.location.href;
-      fetch("/api/whatsapp/send", {
+  const [waDeliveryStatus, setWaDeliveryStatus] = useState<"idle" | "sending" | "sent" | "failed">("idle");
+  const [waDeliveryMode, setWaDeliveryMode] = useState<string>("");
+  const [waDirectUrl, setWaDirectUrl] = useState<string>("");
+  const [isResendingWa, setIsResendingWa] = useState(false);
+
+  const dispatchWhatsAppPass = async (mode: "auto" | "link" | "image" | "pdf" = "auto") => {
+    if (!activeOrder || !activeOrder.customer_phone) return false;
+    const passUrl = typeof window !== "undefined" ? window.location.href : "";
+    setWaDeliveryStatus("sending");
+
+    try {
+      const res = await fetch("/api/whatsapp/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           phone: activeOrder.customer_phone,
+          mode,
           passParams: {
             guestName: activeOrder.customer_name || "Valued Patron",
             orderRef: activeOrder.order_ref,
@@ -252,11 +256,49 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
             emergencyPhone: activeOrder.emergency_contact,
           },
         }),
-      }).catch((err) => {
-        console.warn("[WhatsApp Auto-Dispatch] Attempt failed gracefully:", err);
       });
+
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
+        setWaDeliveryStatus("sent");
+        setWaDeliveryMode(data.mode || "whatsapp_template_link");
+        if (data.waLink) setWaDirectUrl(data.waLink);
+        return true;
+      } else {
+        setWaDeliveryStatus("failed");
+        if (data.waLink) setWaDirectUrl(data.waLink);
+        return false;
+      }
+    } catch (err) {
+      console.warn("[WhatsApp Dispatch Error]", err);
+      setWaDeliveryStatus("failed");
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    if (
+      activeOrder &&
+      activeOrder.customer_phone &&
+      !waDispatchedRef.current &&
+      typeof window !== "undefined"
+    ) {
+      waDispatchedRef.current = true;
+      dispatchWhatsAppPass("auto");
     }
   }, [activeOrder]);
+
+  const handleManualResendWhatsApp = async (targetMode: "auto" | "link" | "image" | "pdf" = "link") => {
+    setIsResendingWa(true);
+    toast.info("Dispatching WhatsApp pass...");
+    const ok = await dispatchWhatsAppPass(targetMode);
+    setIsResendingWa(false);
+    if (ok) {
+      toast.success("Boarding pass sent to your WhatsApp!");
+    } else {
+      toast.error("Automated delivery encountered an issue. Tap 'Open WhatsApp' below.");
+    }
+  };
 
   // Auto-sync: Silently keep browser address bar hydrated with ?p= payload while preserving params
   useEffect(() => {
@@ -347,6 +389,74 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
           <span>GST Tax Invoice</span>
         </button>
       </div>
+
+      {/* WhatsApp Boarding Pass Action Banner */}
+      {activeOrder.customer_phone && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#1a0805] border border-[#dab38c]/30 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-950/70 border border-emerald-500/40 text-emerald-400 flex items-center justify-center shrink-0">
+              <MessageCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="font-bold text-[#f5edeb] text-sm flex flex-wrap items-center gap-2">
+                <span>WhatsApp Digital Pass Dispatch</span>
+                <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/40">
+                  +91 {activeOrder.customer_phone.replace(/\D/g, "").slice(-10)}
+                </span>
+                {waDeliveryStatus === "sent" && (
+                  <span className="text-[10px] text-emerald-400 font-normal flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Dispatched
+                  </span>
+                )}
+                {waDeliveryStatus === "sending" && (
+                  <span className="text-[10px] text-amber-300 font-normal flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin" /> Dispatching...
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-[#dab38c]/80 mt-1">
+                Your mobile pass link is dispatched directly to WhatsApp. You can also re-send or open chat anytime.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => handleManualResendWhatsApp("link")}
+              disabled={isResendingWa}
+              className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-[#35160e] hover:bg-[#481f14] border border-[#dab38c]/35 text-[#e3a157] font-semibold text-xs cursor-pointer transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+            >
+              {isResendingWa ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Resending...</span>
+                </>
+              ) : (
+                <>
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Resend Pass</span>
+                </>
+              )}
+            </button>
+
+            <a
+              href={
+                waDirectUrl ||
+                `https://wa.me/917666511511?text=${encodeURIComponent(
+                  `Hello MatsyaMart! Viewing digital boarding pass for Order ${activeOrder.order_ref}:\n${typeof window !== "undefined" ? window.location.href : ""}`,
+                )}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              <span>Open WhatsApp</span>
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Case 1: Pure Physical Goods Order (e.g. Mangrove Wild Honey) -> Shopify-Style Delivery Tracker */}
       {isAllGoods && (

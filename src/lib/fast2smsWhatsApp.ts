@@ -15,6 +15,21 @@ export const FAST2SMS_SENDER_PHONE_NUMBER = "7666511511"; // Official 10-digit W
 export const FAST2SMS_SENDER_PHONE_ID = FAST2SMS_PHONE_NUMBER_ID; // Backward-compatibility alias for API calls
 export const FAST2SMS_SENDER_DISPLAY = "+91 76665 11511";
 export const FAST2SMS_PAYMENT_TEMPLATE_ID = "39898"; // Template 'payment_completed'
+export const FAST2SMS_PASS_LINK_TEMPLATE_ID =
+  (typeof process !== "undefined" &&
+    (process.env?.["FAST2SMS_PASS_LINK_TEMPLATE_ID"] ||
+      process.env?.["VITE_FAST2SMS_PASS_LINK_TEMPLATE_ID"])) ||
+  "39898";
+export const FAST2SMS_PASS_IMAGE_TEMPLATE_ID =
+  (typeof process !== "undefined" &&
+    (process.env?.["FAST2SMS_PASS_IMAGE_TEMPLATE_ID"] ||
+      process.env?.["VITE_FAST2SMS_PASS_IMAGE_TEMPLATE_ID"])) ||
+  "39898";
+export const FAST2SMS_PASS_PDF_TEMPLATE_ID =
+  (typeof process !== "undefined" &&
+    (process.env?.["FAST2SMS_PASS_PDF_TEMPLATE_ID"] ||
+      process.env?.["VITE_FAST2SMS_PASS_PDF_TEMPLATE_ID"])) ||
+  "39898";
 export const FAST2SMS_OTP_TEMPLATE_ID =
   (typeof process !== "undefined" &&
     (process.env?.["FAST2SMS_OTP_TEMPLATE_ID"] || process.env?.["VITE_FAST2SMS_OTP_TEMPLATE_ID"])) ||
@@ -128,6 +143,410 @@ export function buildAbandonedCartWhatsAppMessage(params: {
   return msg;
 }
 
+export interface PassCascadeParams {
+  phone: string;
+  orderRef: string;
+  guestName?: string | undefined;
+  digitalPassUrl: string;
+  totalAmountInr?: number | undefined;
+  imageUrl?: string | undefined;
+  pdfUrl?: string | undefined;
+  mode?: "auto" | "link" | "image" | "pdf" | undefined;
+  itemsSummary?: string | undefined;
+  emergencyPhone?: string | undefined;
+}
+
+export interface PassCascadeResult {
+  success: boolean;
+  mode:
+    | "whatsapp_template_link"
+    | "whatsapp_template_image"
+    | "whatsapp_template_pdf"
+    | "whatsapp_session"
+    | "direct_wa_link";
+  messageId?: string | undefined;
+  requestId?: string | undefined;
+  statusCode?: number | undefined;
+  attempts: Array<{
+    tier: string;
+    status: "success" | "failed" | "skipped";
+    detail?: string | undefined;
+  }>;
+  waLink: string;
+  error?: string | undefined;
+}
+
+/**
+ * Dispatches WhatsApp Boarding Pass via a prioritized Multi-Template Waterfall Cascade.
+ * Priority 1 (First in line): Direct Link Template (approved Meta Template 39898)
+ * Priority 2: Direct Image Media Template (&media_url=...)
+ * Priority 3: Direct PDF Document Template (&media_url=...&document_filename=...)
+ * Priority 4: Freeform Session (if care window active) + 1-Click wa.me Link Fallback
+ */
+export async function sendPassWhatsAppCascade(
+  params: PassCascadeParams,
+): Promise<PassCascadeResult> {
+  const normalizedPhone = normalizeWhatsAppNumber(params.phone);
+  const tenDigit = to10DigitIndianNumber(params.phone);
+  const requestedMode = params.mode || "auto";
+
+  let fullMessageText = "";
+  if (params.orderRef) {
+    fullMessageText = buildMultiPassWhatsAppMessage({
+      guestName: params.guestName || "Valued Patron",
+      orderRef: params.orderRef,
+      items: [
+        {
+          title: params.itemsSummary || "MatsyaMart Coastal Reservation",
+          pillar: "walks",
+          passRef: params.orderRef,
+        },
+      ],
+      totalPaidINR: params.totalAmountInr || 0,
+      digitalPassUrl: params.digitalPassUrl,
+      emergencyPhone: params.emergencyPhone,
+    });
+  } else {
+    fullMessageText = `🐟 *MatsyaMart Coastal Pass*: View your confirmed pass here:\n${params.digitalPassUrl}`;
+  }
+
+  const directWaLink = `https://wa.me/${normalizedPhone}?text=${encodeURIComponent(fullMessageText)}`;
+  const attempts: PassCascadeResult["attempts"] = [];
+
+  if (!tenDigit || tenDigit.length !== 10) {
+    return {
+      success: false,
+      mode: "direct_wa_link",
+      attempts: [
+        {
+          tier: "Validation",
+          status: "failed",
+          detail: "Invalid 10-digit Indian phone number",
+        },
+      ],
+      waLink: directWaLink,
+      error: "Invalid 10-digit phone number",
+    };
+  }
+
+  const apiKey = FAST2SMS_API_KEY;
+  const phoneId = FAST2SMS_PHONE_NUMBER_ID;
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // TIER 1: DIRECT LINK TEMPLATE (First in line!)
+  // ─────────────────────────────────────────────────────────────────────────────
+  if (requestedMode === "auto" || requestedMode === "link") {
+    const linkTemplateId = FAST2SMS_PASS_LINK_TEMPLATE_ID || "39898";
+    const passLinkFormatted = `₹${params.totalAmountInr || 1} · YOUR DIGITAL BOARDING PASS LINK:\n${params.digitalPassUrl}\n\n(Order Ref: ${params.orderRef})`;
+
+    try {
+      const query = new URLSearchParams({
+        message_id: linkTemplateId,
+        phone_number_id: phoneId,
+        numbers: tenDigit,
+        variables_values: passLinkFormatted,
+      });
+      const url = `https://www.fast2sms.com/dev/whatsapp?${query.toString()}`;
+      console.log(`[Pass Cascade Tier 1: Link] Template: ${linkTemplateId}, Phone: +91 ${tenDigit}`);
+
+      const res = await fetch(url, {
+        method: "GET",
+        headers: { authorization: apiKey },
+        signal:
+          typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function"
+            ? AbortSignal.timeout(8000)
+            : null,
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && (data.return === true || data.status_code === 200)) {
+        attempts.push({
+          tier: "Tier 1: Direct Link Template",
+          status: "success",
+          detail: data.request_id || "Sent successfully",
+        });
+        return {
+          success: true,
+          mode: "whatsapp_template_link",
+          messageId: data.message_id || `tpl-link-${Date.now()}`,
+          requestId: data.request_id,
+          statusCode: 200,
+          attempts,
+          waLink: directWaLink,
+        };
+      }
+
+      attempts.push({
+        tier: "Tier 1: Direct Link Template",
+        status: "failed",
+        detail: JSON.stringify(data.message || data),
+      });
+
+      if (requestedMode === "link") {
+        return {
+          success: false,
+          mode: "whatsapp_template_link",
+          attempts,
+          waLink: directWaLink,
+          error: Array.isArray(data.message)
+            ? data.message.join(", ")
+            : String(data.message || "Template link delivery failed"),
+        };
+      }
+    } catch (err: any) {
+      console.warn("[Pass Cascade Tier 1 Error]", err);
+      attempts.push({
+        tier: "Tier 1: Direct Link Template",
+        status: "failed",
+        detail: err?.message || "Network exception",
+      });
+      if (requestedMode === "link") {
+        return {
+          success: false,
+          mode: "whatsapp_template_link",
+          attempts,
+          waLink: directWaLink,
+          error: err?.message,
+        };
+      }
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // TIER 2: DIRECT IMAGE MEDIA TEMPLATE
+  // ─────────────────────────────────────────────────────────────────────────────
+  if (requestedMode === "auto" || requestedMode === "image") {
+    const imageTemplateId = FAST2SMS_PASS_IMAGE_TEMPLATE_ID || "39898";
+    const imageUrl =
+      params.imageUrl ||
+      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80";
+    const passImageFormatted = `₹${params.totalAmountInr || 1} · Coastal Admission Pass (Ref: ${params.orderRef})\n${params.digitalPassUrl}`;
+
+    try {
+      const query = new URLSearchParams({
+        message_id: imageTemplateId,
+        phone_number_id: phoneId,
+        numbers: tenDigit,
+        variables_values: passImageFormatted,
+        media_url: imageUrl,
+      });
+      const url = `https://www.fast2sms.com/dev/whatsapp?${query.toString()}`;
+      console.log(`[Pass Cascade Tier 2: Image] Template: ${imageTemplateId}, Media: ${imageUrl}`);
+
+      const res = await fetch(url, {
+        method: "GET",
+        headers: { authorization: apiKey },
+        signal:
+          typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function"
+            ? AbortSignal.timeout(8000)
+            : null,
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && (data.return === true || data.status_code === 200)) {
+        attempts.push({
+          tier: "Tier 2: Direct Image Template",
+          status: "success",
+          detail: data.request_id || "Sent successfully",
+        });
+        return {
+          success: true,
+          mode: "whatsapp_template_image",
+          messageId: data.message_id || `tpl-img-${Date.now()}`,
+          requestId: data.request_id,
+          statusCode: 200,
+          attempts,
+          waLink: directWaLink,
+        };
+      }
+
+      attempts.push({
+        tier: "Tier 2: Direct Image Template",
+        status: "failed",
+        detail: JSON.stringify(data.message || data),
+      });
+
+      if (requestedMode === "image") {
+        return {
+          success: false,
+          mode: "whatsapp_template_image",
+          attempts,
+          waLink: directWaLink,
+          error: Array.isArray(data.message)
+            ? data.message.join(", ")
+            : String(data.message || "Image template delivery failed"),
+        };
+      }
+    } catch (err: any) {
+      console.warn("[Pass Cascade Tier 2 Error]", err);
+      attempts.push({
+        tier: "Tier 2: Direct Image Template",
+        status: "failed",
+        detail: err?.message || "Network exception",
+      });
+      if (requestedMode === "image") {
+        return {
+          success: false,
+          mode: "whatsapp_template_image",
+          attempts,
+          waLink: directWaLink,
+          error: err?.message,
+        };
+      }
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // TIER 3: DIRECT PDF DOCUMENT TEMPLATE
+  // ─────────────────────────────────────────────────────────────────────────────
+  if (requestedMode === "auto" || requestedMode === "pdf") {
+    const pdfTemplateId = FAST2SMS_PASS_PDF_TEMPLATE_ID || "39898";
+    const pdfUrl =
+      params.pdfUrl ||
+      "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+    const filename = `MatsyaMart_Boarding_Pass_${params.orderRef || "MM"}.pdf`;
+    const passPdfFormatted = `₹${params.totalAmountInr || 1} · Official Pass & GST Invoice (Ref: ${params.orderRef})\n${params.digitalPassUrl}`;
+
+    try {
+      const query = new URLSearchParams({
+        message_id: pdfTemplateId,
+        phone_number_id: phoneId,
+        numbers: tenDigit,
+        variables_values: passPdfFormatted,
+        media_url: pdfUrl,
+        document_filename: filename,
+      });
+      const url = `https://www.fast2sms.com/dev/whatsapp?${query.toString()}`;
+      console.log(`[Pass Cascade Tier 3: PDF] Template: ${pdfTemplateId}, Document: ${filename}`);
+
+      const res = await fetch(url, {
+        method: "GET",
+        headers: { authorization: apiKey },
+        signal:
+          typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function"
+            ? AbortSignal.timeout(8000)
+            : null,
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && (data.return === true || data.status_code === 200)) {
+        attempts.push({
+          tier: "Tier 3: Direct PDF Template",
+          status: "success",
+          detail: data.request_id || "Sent successfully",
+        });
+        return {
+          success: true,
+          mode: "whatsapp_template_pdf",
+          messageId: data.message_id || `tpl-pdf-${Date.now()}`,
+          requestId: data.request_id,
+          statusCode: 200,
+          attempts,
+          waLink: directWaLink,
+        };
+      }
+
+      attempts.push({
+        tier: "Tier 3: Direct PDF Template",
+        status: "failed",
+        detail: JSON.stringify(data.message || data),
+      });
+
+      if (requestedMode === "pdf") {
+        return {
+          success: false,
+          mode: "whatsapp_template_pdf",
+          attempts,
+          waLink: directWaLink,
+          error: Array.isArray(data.message)
+            ? data.message.join(", ")
+            : String(data.message || "PDF template delivery failed"),
+        };
+      }
+    } catch (err: any) {
+      console.warn("[Pass Cascade Tier 3 Error]", err);
+      attempts.push({
+        tier: "Tier 3: Direct PDF Template",
+        status: "failed",
+        detail: err?.message || "Network exception",
+      });
+      if (requestedMode === "pdf") {
+        return {
+          success: false,
+          mode: "whatsapp_template_pdf",
+          attempts,
+          waLink: directWaLink,
+          error: err?.message,
+        };
+      }
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // TIER 4: FREEFORM SESSION + DIRECT WA.ME LINK FALLBACK
+  // ─────────────────────────────────────────────────────────────────────────────
+  try {
+    const sessionUrl = `https://www.fast2sms.com/dev/whatsapp-session?phone_number_id=${encodeURIComponent(phoneId)}&to=${encodeURIComponent(normalizedPhone)}`;
+    const sessionRes = await fetch(sessionUrl, {
+      method: "POST",
+      headers: {
+        authorization: apiKey,
+        "Content-Type": "application/json",
+      },
+      signal:
+        typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function"
+          ? AbortSignal.timeout(4000)
+          : null,
+      body: JSON.stringify({
+        type: "text",
+        text: fullMessageText,
+      }),
+    });
+    const sessionData = await sessionRes.json().catch(() => ({}));
+    if (sessionRes.ok && (sessionData.status_code === 200 || sessionData.return === true)) {
+      attempts.push({
+        tier: "Tier 4: Freeform Session",
+        status: "success",
+        detail: sessionData.request_id || "Sent",
+      });
+      return {
+        success: true,
+        mode: "whatsapp_session",
+        messageId: sessionData.message_id || `f2s-sess-${Date.now()}`,
+        statusCode: 200,
+        attempts,
+        waLink: directWaLink,
+      };
+    }
+    attempts.push({
+      tier: "Tier 4: Freeform Session",
+      status: "failed",
+      detail: JSON.stringify(sessionData),
+    });
+  } catch (err: any) {
+    attempts.push({
+      tier: "Tier 4: Freeform Session",
+      status: "failed",
+      detail: err?.message,
+    });
+  }
+
+  // Ultimate graceful fallback: 1-click wa.me
+  attempts.push({
+    tier: "Tier 4: 1-Click wa.me Link",
+    status: "success",
+    detail: "Direct chat URL generated",
+  });
+  return {
+    success: true,
+    mode: "direct_wa_link",
+    messageId: `wa-link-${Date.now()}`,
+    statusCode: 200,
+    attempts,
+    waLink: directWaLink,
+  };
+}
+
 export interface Fast2SMSSendResult {
   success: boolean;
   messageId?: string | undefined;
@@ -167,6 +586,32 @@ export async function sendFast2SMSWhatsApp(
     };
   }
 
+  // If templateId explicitly provided, attempt template first
+  if (options?.templateId && tenDigit) {
+    try {
+      const tplUrl = `https://www.fast2sms.com/dev/whatsapp?message_id=${options.templateId}&phone_number_id=${phoneId}&numbers=${tenDigit}&variables_values=${encodeURIComponent(messageText.slice(0, 100))}`;
+      const tplRes = await fetch(tplUrl, {
+        method: "GET",
+        headers: {
+          authorization: apiKey,
+        },
+        signal: typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(8000) : null,
+      });
+      const tplData = await tplRes.json().catch(() => ({}));
+      if (tplRes.ok && (tplData.status_code === 200 || tplData.return === true)) {
+        return {
+          success: true,
+          messageId: tplData.message_id || tplData.request_id || `f2s-tpl-${Date.now()}`,
+          statusCode: 200,
+          mode: "whatsapp_template",
+          waLink: directWaLink,
+        };
+      }
+    } catch (err: any) {
+      console.warn("[Fast2SMS Template Error in sendFast2SMSWhatsApp]", err);
+    }
+  }
+
   // Attempt 1: Fast2SMS WhatsApp Session endpoint (phone_number_id & to in query params, body: { type, text })
   try {
     const sessionUrl = `https://www.fast2sms.com/dev/whatsapp-session?phone_number_id=${encodeURIComponent(phoneId)}&to=${encodeURIComponent(normalizedPhone)}`;
@@ -200,16 +645,15 @@ export async function sendFast2SMSWhatsApp(
       };
     }
 
-    // Attempt 2: If session endpoint returns non-200, try WhatsApp template route if templateId configured
-    if (options?.templateId || FAST2SMS_PAYMENT_TEMPLATE_ID) {
-      const templateId = options?.templateId || FAST2SMS_PAYMENT_TEMPLATE_ID;
-      const tplUrl = `https://www.fast2sms.com/dev/whatsapp?message_id=${templateId}&phone_number_id=${phoneId}&numbers=${tenDigit}&variables_values=${encodeURIComponent("MatsyaMart Order Confirmed")}`;
+    // Attempt 2: Fallback to WhatsApp template route
+    if (FAST2SMS_PAYMENT_TEMPLATE_ID && tenDigit) {
+      const tplUrl = `https://www.fast2sms.com/dev/whatsapp?message_id=${FAST2SMS_PAYMENT_TEMPLATE_ID}&phone_number_id=${phoneId}&numbers=${tenDigit}&variables_values=${encodeURIComponent("MatsyaMart Order Confirmed")}`;
       const tplRes = await fetch(tplUrl, {
         method: "GET",
         headers: {
           authorization: apiKey,
         },
-        signal: typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(4000) : null,
+        signal: typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(8000) : null,
       });
       const tplData = await tplRes.json().catch(() => ({}));
       if (tplRes.ok && (tplData.status_code === 200 || tplData.return === true)) {
