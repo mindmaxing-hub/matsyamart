@@ -141,6 +141,7 @@ export async function sendWhatsAppOtp(
   // Attempt 1: Fast2SMS WhatsApp session dispatch
   try {
     const sessionUrl = `https://www.fast2sms.com/dev/whatsapp-session?phone_number_id=${encodeURIComponent(FAST2SMS_PHONE_NUMBER_ID)}&to=${encodeURIComponent(normalizedPhone)}`;
+    console.log(`[Fast2SMS WhatsApp Outbound Attempt] Phone: +91 ${cleanPhone}, PhoneID: ${FAST2SMS_PHONE_NUMBER_ID}`);
     const res = await fetch(sessionUrl, {
       method: "POST",
       headers: {
@@ -161,6 +162,8 @@ export async function sendWhatsAppOtp(
       request_id?: string;
     };
 
+    console.log(`[Fast2SMS WhatsApp Response] Status: ${res.status}`, data);
+
     if (data.return === true || data.status_code === 200) {
       return {
         success: true,
@@ -171,12 +174,13 @@ export async function sendWhatsAppOtp(
       };
     }
   } catch (err: unknown) {
-    console.warn(`[WhatsApp Dispatch Warning] Phone: ${cleanPhone}. Attempting high-priority SMS route.`);
+    console.warn(`[Fast2SMS WhatsApp Dispatch Notice] Phone: ${cleanPhone}. Attempting high-priority SMS route:`, err);
   }
 
   // Attempt 2: High-priority transactional SMS fallback via Fast2SMS (instant 100% Indian delivery)
   try {
     const smsUrl = `https://www.fast2sms.com/dev/bulkV2?authorization=${encodeURIComponent(FAST2SMS_API_KEY)}&variables_values=${encodeURIComponent(otp)}&route=otp&numbers=${encodeURIComponent(cleanPhone)}`;
+    console.log(`[Fast2SMS SMS Fallback Route Attempt] Phone: +91 ${cleanPhone}`);
     const smsRes = await fetch(smsUrl, {
       method: "GET",
       signal: typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(5000) : null,
@@ -188,6 +192,8 @@ export async function sendWhatsAppOtp(
       message?: string | string[];
       request_id?: string;
     };
+
+    console.log(`[Fast2SMS SMS Route Response] Status: ${smsRes.status}`, smsData);
 
     if (smsData.return === true || smsData.status_code === 200) {
       return {

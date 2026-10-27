@@ -54,8 +54,9 @@ export const Route = createFileRoute("/api/whatsapp/otp/send")({
                 success: false,
                 status: "failed",
                 error: waResult.error || "Failed to deliver verification code",
+                message: waResult.message,
               },
-              { status: 502 },
+              { status: 400 },
             );
           }
 

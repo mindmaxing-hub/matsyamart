@@ -110,7 +110,7 @@ export const TrackOrdersPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[80vh] py-12 px-4 sm:px-6 max-w-4xl mx-auto space-y-8">
+    <div className="min-h-[80vh] py-12 px-4 sm:px-6 max-w-4xl mx-auto space-y-8 w-full max-w-full overflow-x-hidden">
       {/* Header */}
       <div className="text-center space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#35160e] text-[#e3a157] border border-[#dab38c]/25 text-xs font-bold uppercase tracking-wider">

@@ -39,10 +39,10 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
     >
       <div className="relative z-20 w-full max-w-md sm:max-w-2xl lg:max-w-4xl text-center space-y-4 sm:space-y-5 mx-auto px-4">
         {/* Big Headline: 3-line Lu.ma Stacked Layout (Immediate LCP paint without hydration delay) */}
-        <h1 className="font-display text-[clamp(2.35rem,11vw,6.25rem)] font-bold tracking-[-0.035em] text-[#f5edeb] leading-[0.93] sm:leading-[0.92] px-2 opacity-100">
-          <span className="block whitespace-nowrap">Coastal</span>
-          <span className="block whitespace-nowrap">experiences</span>
-          <span className="ocean-glow-text block whitespace-nowrap">
+        <h1 className="font-display text-[clamp(2.15rem,8.5vw,5.5rem)] font-bold tracking-tight text-[#f5edeb] leading-[0.98] sm:leading-[0.92] px-2 opacity-100 max-w-full break-words">
+          <span className="block">Coastal</span>
+          <span className="block">experiences</span>
+          <span className="ocean-glow-text block">
             start here
           </span>
         </h1>
@@ -80,9 +80,9 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       </div>
 
       {/* 2. BOTTOM SECTION: Event Card Collage */}
-      <div className="w-full max-w-6xl mx-auto pt-8 sm:pt-12 px-4 opacity-100">
+      <div className="w-full max-w-6xl mx-auto pt-8 sm:pt-12 px-4 opacity-100 overflow-hidden">
         {/* Responsive Scrolling/Fanning Card Deck */}
-        <div className="flex items-center justify-start sm:justify-center gap-3 sm:gap-4 md:gap-5 overflow-x-auto pb-4 pt-2 scrollbar-none px-2 sm:px-4">
+        <div className="flex items-center justify-start sm:justify-center gap-3 sm:gap-4 md:gap-5 overflow-x-auto pb-4 pt-2 scrollbar-none px-2 sm:px-4 max-w-full">
           {displayListings.map((listing, index) => {
             const rotation = ROTATIONS[index % ROTATIONS.length];
             const detailPath =

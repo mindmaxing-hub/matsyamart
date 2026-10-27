@@ -112,14 +112,14 @@ export const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#29100b] text-[#f5edeb] min-h-screen pb-24 selection:bg-[#e3a157] selection:text-[#29100b]">
+    <div className="bg-[#29100b] text-[#f5edeb] min-h-screen pb-24 selection:bg-[#e3a157] selection:text-[#29100b] overflow-x-hidden max-w-full">
       {/* 1. Minimal Hero with Roast Radial Gradient & Focal Typography */}
       <HeroBanner onScrollToCatalog={scrollToCatalog} />
 
       {/* 2. Main Discovery Section */}
       <main
         id="catalog-feed"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 space-y-10 sm:space-y-14"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 space-y-10 sm:space-y-14 w-full max-w-full overflow-x-hidden"
       >
         {/* 2. Browse by Category Squircle Tile Grid (Goods → Food → Walks → Workshops) */}
         <section className="space-y-4 pt-0">
@@ -367,9 +367,9 @@ export const HomePage: React.FC = () => {
           </div>
         ) : (
           /* Default Feed: Goods → Food → Walks → Workshops */
-          <div className="space-y-16">
+          <div className="space-y-16 w-full max-w-full overflow-hidden">
             {/* Pillar 1: Goods */}
-            <section id="goods" className="space-y-4 scroll-mt-24">
+            <section id="goods" className="space-y-4 scroll-mt-24 w-full max-w-full overflow-hidden">
               <div className="flex items-end justify-between border-b border-[#dab38c]/15 pb-3">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
@@ -386,7 +386,7 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 max-w-full">
                 {goodsListings.map((listing) => (
                   <ListingCard key={listing.id} listing={listing} />
                 ))}
@@ -394,7 +394,7 @@ export const HomePage: React.FC = () => {
             </section>
 
             {/* Pillar 2: Food */}
-            <section id="food" className="space-y-4 scroll-mt-24">
+            <section id="food" className="space-y-4 scroll-mt-24 w-full max-w-full overflow-hidden">
               <div className="flex items-end justify-between border-b border-[#dab38c]/15 pb-3">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
@@ -411,7 +411,7 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 max-w-full">
                 {foodListings.map((listing) => (
                   <ListingCard key={listing.id} listing={listing} />
                 ))}
@@ -419,7 +419,7 @@ export const HomePage: React.FC = () => {
             </section>
 
             {/* Pillar 3: Walks */}
-            <section id="walks" className="space-y-4 scroll-mt-24">
+            <section id="walks" className="space-y-4 scroll-mt-24 w-full max-w-full overflow-hidden">
               <div className="flex items-end justify-between border-b border-[#dab38c]/15 pb-3">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
@@ -436,7 +436,7 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 max-w-full">
                 {walksListings.map((listing) => (
                   <ListingCard key={listing.id} listing={listing} />
                 ))}
@@ -444,7 +444,7 @@ export const HomePage: React.FC = () => {
             </section>
 
             {/* Pillar 4: Workshops */}
-            <section id="workshops" className="space-y-4 scroll-mt-24">
+            <section id="workshops" className="space-y-4 scroll-mt-24 w-full max-w-full overflow-hidden">
               <div className="flex items-end justify-between border-b border-[#dab38c]/15 pb-3">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
@@ -461,7 +461,7 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+              <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 scrollbar-none pb-2 max-w-full">
                 {workshopsListings.map((listing) => (
                   <ListingCard key={listing.id} listing={listing} />
                 ))}

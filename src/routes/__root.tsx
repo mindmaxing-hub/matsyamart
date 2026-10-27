@@ -69,7 +69,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     head: () => ({
       meta: [
         { charSet: "utf-8" },
-        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        {
+          name: "viewport",
+          content: "width=device-width, initial-scale=1, viewport-fit=cover",
+        },
         {
           title:
             "MatsyaMart | Direct-to-Community Coastal Experiences & Crafts",
@@ -137,7 +140,7 @@ fbq('track', 'PageView');`,
           }}
         />
       </head>
-      <body className="bg-[#29100b] text-[#f5edeb] antialiased min-h-screen selection:bg-[#e3a157] selection:text-[#29100b]">
+      <body className="bg-[#29100b] text-[#f5edeb] antialiased min-h-screen selection:bg-[#e3a157] selection:text-[#29100b] overflow-x-hidden max-w-full">
         {/* Meta Pixel NoScript Fallback */}
         <noscript>
           <img
@@ -190,7 +193,7 @@ function RootComponent() {
       <DataProvider>
         <CartProvider>
           <WishlistProvider>
-            <div className="min-h-screen flex flex-col bg-[#29100b] text-[#f5edeb]">
+            <div className="min-h-screen flex flex-col bg-[#29100b] text-[#f5edeb] overflow-x-hidden w-full max-w-full">
               <CartRestoreListener />
               <Navbar />
               <main className="flex-1">

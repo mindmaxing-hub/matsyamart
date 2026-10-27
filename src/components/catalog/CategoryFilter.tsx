@@ -23,9 +23,9 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
   pillarCounts,
 }) => {
   return (
-    <div className="w-full flex items-center justify-between border-b border-[#dab38c]/15 pb-4 gap-4">
+    <div className="w-full max-w-full overflow-hidden flex items-center justify-between border-b border-[#dab38c]/15 pb-4 gap-4">
       {/* 4 Pillars Pill Tabs — Goods → Food → Walks → Workshops */}
-      <div className="w-full sm:w-auto flex items-center gap-1.5 p-1 sm:p-1.5 bg-[#35160e]/80 rounded-full border border-[#dab38c]/20 backdrop-blur-md overflow-x-auto scrollbar-none shadow-md">
+      <div className="w-full sm:w-auto max-w-full flex items-center gap-1.5 p-1 sm:p-1.5 bg-[#35160e]/80 rounded-full border border-[#dab38c]/20 backdrop-blur-md overflow-x-auto scrollbar-none shadow-md">
         <button
           onClick={() => setSelectedPillar("all")}
           className={`px-4 py-2 text-xs font-semibold rounded-full transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${

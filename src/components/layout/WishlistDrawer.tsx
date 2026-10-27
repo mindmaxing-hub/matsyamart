@@ -33,8 +33,8 @@ export const WishlistDrawer: React.FC = () => {
       />
 
       {/* Drawer */}
-      <div className="fixed inset-y-0 right-0 max-w-full flex z-50">
-        <div className="w-screen max-w-md bg-[#29100b] text-[#f5edeb] shadow-2xl flex flex-col border-l border-[#dab38c]/20">
+      <div className="fixed inset-0 sm:left-auto sm:right-0 z-50 flex justify-end max-w-full pointer-events-none">
+        <div className="w-full sm:w-[420px] max-w-full bg-[#29100b] text-[#f5edeb] shadow-2xl flex flex-col border-l border-[#dab38c]/20 h-full pointer-events-auto">
           {/* Header */}
           <div className="p-5 border-b border-[#dab38c]/15 flex items-center justify-between bg-[#1f0b07]">
             <div className="flex items-center gap-2.5">
