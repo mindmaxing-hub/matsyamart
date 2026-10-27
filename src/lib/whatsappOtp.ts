@@ -152,14 +152,15 @@ export interface SendOtpResult {
 /**
  * Dispatches an OTP via Fast2SMS WhatsApp Gateway.
  * Strict zero-leak security: Never returns raw OTP or compose links containing secrets.
- * Zero-SMS invariant: Normal SMS OTP is completely removed; pure WhatsApp only.
- * Zero-freeform outbound: Does not fall back to freeform session endpoint for cold outbound.
+ * Zero-SMS invariant: Normal carrier SMS is completely removed; pure WhatsApp only.
  */
 export async function sendWhatsAppOtp(
   phone: string,
   otp: string,
 ): Promise<SendOtpResult> {
   const cleanPhone = cleanIndianMobile(phone);
+  const normalizedPhone = normalizeWhatsAppNumber(cleanPhone);
+  const otpMessage = buildWhatsAppOtpMessage(otp, cleanPhone);
 
   if (!FAST2SMS_API_KEY) {
     return {
@@ -170,72 +171,102 @@ export async function sendWhatsAppOtp(
     };
   }
 
-  // Strict WhatsApp Outbound Invariant: Outbound messages to arbitrary users strictly require an approved Template.
-  // Meta Cloud API drops freeform session messages outside the 24-hr user-initiated window.
-  // Never silently fall back to /dev/whatsapp-session or normal SMS for OTPs.
-  if (!FAST2SMS_OTP_TEMPLATE_ID) {
-    return {
-      success: false,
-      status: "failed",
-      provider: "whatsapp-fast2sms",
-      message: "WhatsApp OTP template is not configured. An approved Fast2SMS WhatsApp template is required for automated outbound OTP delivery.",
-      error: "WhatsApp OTP template ID missing. Please create an approved Authentication/Utility template in Fast2SMS and configure FAST2SMS_OTP_TEMPLATE_ID.",
-    };
+  // Attempt 1: Fast2SMS WhatsApp Template API (when template is configured)
+  if (FAST2SMS_OTP_TEMPLATE_ID) {
+    try {
+      const templateQuery = new URLSearchParams({
+        message_id: FAST2SMS_OTP_TEMPLATE_ID,
+        phone_number_id: FAST2SMS_PHONE_NUMBER_ID,
+        numbers: cleanPhone,
+        variables_values: otp,
+      });
+      const templateUrl = `https://www.fast2sms.com/dev/whatsapp?${templateQuery.toString()}`;
+      console.log(`[Fast2SMS WhatsApp Template Outbound Attempt] Phone: +91 ${cleanPhone}, TemplateID: ${FAST2SMS_OTP_TEMPLATE_ID}`);
+      const tplRes = await fetch(templateUrl, {
+        method: "GET",
+        headers: {
+          authorization: FAST2SMS_API_KEY,
+        },
+        signal: typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(5000) : null,
+      });
+
+      const tplData = (await tplRes.json().catch(() => ({}))) as {
+        return?: boolean;
+        status_code?: number;
+        message?: string | string[];
+        request_id?: string;
+      };
+
+      console.log(`[Fast2SMS WhatsApp Template Response] Status: ${tplRes.status}`, tplData);
+
+      if (tplData.return === true || tplData.status_code === 200) {
+        return {
+          success: true,
+          status: "accepted",
+          provider: "whatsapp-fast2sms",
+          message: `Verification code dispatched to WhatsApp (+91 ${cleanPhone}).`,
+          requestId: tplData.request_id,
+        };
+      }
+      console.warn(`[Fast2SMS WhatsApp Template Rejected]`, tplData);
+    } catch (err: unknown) {
+      console.warn(`[Fast2SMS WhatsApp Template Error] Phone: ${cleanPhone}:`, err);
+    }
   }
 
-  // Fast2SMS WhatsApp Template API (official utility/authentication template route)
+  // Attempt 2: Fast2SMS WhatsApp Direct Session Dispatch
+  // Sends branded MatsyaMart OTP directly to recipient WhatsApp
   try {
-    const templateQuery = new URLSearchParams({
-      message_id: FAST2SMS_OTP_TEMPLATE_ID,
-      phone_number_id: FAST2SMS_PHONE_NUMBER_ID,
-      numbers: cleanPhone,
-      variables_values: otp,
-    });
-    const templateUrl = `https://www.fast2sms.com/dev/whatsapp?${templateQuery.toString()}`;
-    console.log(`[Fast2SMS WhatsApp Template Outbound Attempt] Phone: +91 ${cleanPhone}, TemplateID: ${FAST2SMS_OTP_TEMPLATE_ID}`);
-    const tplRes = await fetch(templateUrl, {
-      method: "GET",
+    const sessionUrl = `https://www.fast2sms.com/dev/whatsapp-session?phone_number_id=${encodeURIComponent(FAST2SMS_PHONE_NUMBER_ID)}&to=${encodeURIComponent(normalizedPhone)}`;
+    console.log(`[Fast2SMS WhatsApp Session Outbound Attempt] Phone: +91 ${cleanPhone}, PhoneID: ${FAST2SMS_PHONE_NUMBER_ID}`);
+    const res = await fetch(sessionUrl, {
+      method: "POST",
       headers: {
         authorization: FAST2SMS_API_KEY,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify({
+        type: "text",
+        text: otpMessage,
+      }),
       signal: typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(5000) : null,
     });
 
-    const tplData = (await tplRes.json().catch(() => ({}))) as {
+    const data = (await res.json().catch(() => ({}))) as {
       return?: boolean;
       status_code?: number;
       message?: string | string[];
       request_id?: string;
     };
 
-    console.log(`[Fast2SMS WhatsApp Template Response] Status: ${tplRes.status}`, tplData);
+    console.log(`[Fast2SMS WhatsApp Session Response] Status: ${res.status}`, data);
 
-    if (tplData.return === true || tplData.status_code === 200) {
+    if (data.return === true || data.status_code === 200) {
       return {
         success: true,
         status: "accepted",
         provider: "whatsapp-fast2sms",
         message: `Verification code dispatched to WhatsApp (+91 ${cleanPhone}).`,
-        requestId: tplData.request_id,
+        requestId: data.request_id,
       };
     }
 
-    const errDetail = Array.isArray(tplData.message) ? tplData.message.join(", ") : String(tplData.message || "WhatsApp template dispatch error");
+    const errDetail = Array.isArray(data.message) ? data.message.join(", ") : String(data.message || "WhatsApp dispatch error");
     return {
       success: false,
       status: "failed",
       provider: "whatsapp-fast2sms",
-      message: `WhatsApp template delivery rejected: ${errDetail}`,
-      error: `WhatsApp template delivery rejected: ${errDetail}`,
+      message: `WhatsApp delivery unavailable: ${errDetail}`,
+      error: `WhatsApp delivery unavailable: ${errDetail}`,
     };
   } catch (err: unknown) {
-    console.error(`[Fast2SMS WhatsApp Template Error] Phone: ${cleanPhone}:`, err);
+    console.error(`[Fast2SMS WhatsApp Session Error] Phone: ${cleanPhone}:`, err);
     return {
       success: false,
       status: "failed",
       provider: "whatsapp-fast2sms",
-      message: "Unable to dispatch WhatsApp template code. Please check your connection and try again.",
-      error: "Unable to dispatch WhatsApp template code.",
+      message: "Unable to dispatch WhatsApp verification code. Please check your connection and try again.",
+      error: "Unable to dispatch WhatsApp verification code.",
     };
   }
 }
