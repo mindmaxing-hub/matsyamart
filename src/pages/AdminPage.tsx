@@ -474,7 +474,7 @@ const AdminPageContent: React.FC = () => {
 
   // 2. Main Authenticated Dashboard Shell
   return (
-    <div className="min-h-screen flex bg-[#F5EDEB] text-[#29100B] font-sans selection:bg-[#29100B] selection:text-[#F5EDEB]">
+    <div className="min-h-screen flex bg-[#F5EDEB] overflow-x-hidden text-[#29100B] font-sans selection:bg-[#29100B] selection:text-[#F5EDEB]">
       {/* LEFT SIDEBAR: Roast Anchor #29100B */}
       <aside className="w-[272px] shrink-0 bg-[#29100B] text-[#F5EDEB] border-r border-[#29100B] flex flex-col justify-between sticky top-0 h-screen z-30 p-[22px_16px_16px]">
         <div>
@@ -546,7 +546,7 @@ const AdminPageContent: React.FC = () => {
       </aside>
 
       {/* RIGHT MAIN WORKSPACE: Warm Creme Canvas */}
-      <main className="flex-1 flex flex-col min-w-0 bg-[#F5EDEB] overflow-y-auto min-h-screen">
+      <main className="flex-1 flex flex-col min-w-0 bg-[#F5EDEB] overflow-y-auto overflow-x-hidden min-h-screen">
         {/* Top Header Chrome */}
         <header className="sticky top-0 z-20 bg-[#F5EDEB]/90 backdrop-blur-md border-b border-[rgba(41,16,11,0.13)] px-6 sm:px-8 py-3 flex items-center justify-between">
           <div className="text-[13px] text-[rgba(41,16,11,0.44)] flex items-center gap-1.5">
@@ -693,7 +693,7 @@ const AdminPageContent: React.FC = () => {
         </section>
 
         {/* Section Content Area */}
-        <div className="p-6 sm:p-8 flex-1 max-w-7xl w-full">
+        <div className="p-6 sm:p-8 flex-1 max-w-7xl w-full mx-auto">
           {/* 1. OVERVIEW */}
           {activeSection === "overview" && (
             <div className="space-y-8">

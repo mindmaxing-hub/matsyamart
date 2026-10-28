@@ -180,4 +180,78 @@ describe("Multi-Template WhatsApp Pass Waterfall Dispatch Suite", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(res.waLink).toContain("https://wa.me/917304290690");
   });
+
+  it("strips oversized ?p= Base64 state payload to prevent Fast2SMS >1000 char 400 error", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        return: true,
+        status_code: 200,
+        request_id: "req_sanitized",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    // Simulate huge 1,200 char Base64 token in URL
+    const giantToken = "eyJyZWYiOiJNTS1GRC0yMDI2LTQ5OTQiLCJuYW1lIjoi".repeat(30);
+    const hugeUrl = `https://matsyamart.com/order/confirmation/MM-FD-2026-4994?p=${giantToken}`;
+
+    const res = await sendPassWhatsAppCascade({
+      phone: "7304290690",
+      orderRef: "MM-FD-2026-4994",
+      guestName: "Aryan Panchal",
+      digitalPassUrl: hugeUrl,
+      mode: "link",
+    });
+
+    expect(res.success).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    const callUrl = fetchMock.mock.calls[0]![0] as string;
+    const urlObj = new URL(callUrl);
+    const variablesValues = urlObj.searchParams.get("variables_values") || "";
+
+    // Invariant 1: Variables values must strictly be under 1000 characters
+    expect(variablesValues.length).toBeLessThan(900);
+    // Invariant 2: Base64 payload is stripped out
+    expect(variablesValues).not.toContain(giantToken);
+    // Invariant 3: Canonical pass URL is preserved
+    expect(variablesValues).toContain("https://matsyamart.com/order/confirmation/MM-FD-2026-4994");
+  });
+
+  it("discriminates physical goods orders with order receipt label and dock dispatch copy", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        return: true,
+        status_code: 200,
+        request_id: "req_goods",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const res = await sendPassWhatsAppCascade({
+      phone: "7304290690",
+      orderRef: "MM-GD-2026-1630",
+      guestName: "Aryan Panchal",
+      digitalPassUrl: "https://matsyamart.com/order/confirmation/MM-GD-2026-1630",
+      isGoods: true,
+      mode: "link",
+    });
+
+    expect(res.success).toBe(true);
+    const callUrl = fetchMock.mock.calls[0]![0] as string;
+    const urlObj = new URL(callUrl);
+    const variablesValues = urlObj.searchParams.get("variables_values") || "";
+
+    // Invariant: Goods orders must never be labeled as Boarding Pass
+    expect(variablesValues).toContain("📦 MATSYAMART ORDER RECEIPT:");
+    expect(variablesValues).not.toContain("BOARDING PASS");
+
+    // Invariant: Direct waLink must have goods dispatch header
+    expect(res.waLink).toContain(encodeURIComponent("Official Goods Order Confirmation"));
+    expect(res.waLink).toContain(encodeURIComponent("Pan-India Coastal Goods Dispatch"));
+  });
 });

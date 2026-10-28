@@ -200,9 +200,20 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
   const totalAmountInr = props?.totalAmountInr ?? 2900;
   const dateFormatted = props?.dateFormatted || "Sunday, 12 December 2026";
   const timeFormatted = props?.timeFormatted || "1:00 PM IST";
-  const meetingAddress =
-    props?.meetingAddress ||
-    "Versova Gaothan Dining Courtyard, Andheri West, Mumbai – 400061";
+
+  const category = resolveEmailCategory(props?.pillar, experienceTitle, orderRef);
+  const theme = THEMES[category];
+  const isGoodsOrder =
+    category === "goods" ||
+    (props?.items &&
+      props.items.length > 0 &&
+      props.items.every(
+        (it) => it.type === "product" || it.pillar === "goods",
+      ));
+
+  const meetingAddress = isGoodsOrder
+    ? undefined
+    : (props?.meetingAddress || "Versova Gaothan Dining Courtyard, Andheri West, Mumbai - 400061");
 
   // Google Maps link
   const rawMapsUrl = props?.mapsUrl;
@@ -227,9 +238,6 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
     `https://matsyamart.com/order/confirmation/${orderRef}?view=invoice`;
   const invoiceNumber = props?.invoiceNumber || `INV-${orderRef}`;
   const gstin = props?.gstin || "27ABBFK9637R1ZF";
-
-  const category = resolveEmailCategory(props?.pillar, experienceTitle, orderRef);
-  const theme = THEMES[category];
 
   // GST calculations
   const taxableValue =
@@ -295,7 +303,9 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
     <Html>
       <Head />
       <Preview>
-        Pass &amp; Tax Invoice for {experienceTitle} ({orderRef})
+        {isGoodsOrder
+          ? `Order Receipt & Tax Invoice for ${experienceTitle} (${orderRef})`
+          : `Pass & Tax Invoice for ${experienceTitle} (${orderRef})`}
       </Preview>
       <Body
         style={{
@@ -343,7 +353,7 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
                         color: theme.accentColor,
                       }}
                     >
-                      MATSYAMART · OFFICIAL PASS
+                      {isGoodsOrder ? "MATSYAMART · OFFICIAL ORDER RECEIPT" : "MATSYAMART · OFFICIAL PASS"}
                     </Text>
                   </td>
                   <td style={{ textAlign: "right", verticalAlign: "middle" }}>
@@ -405,11 +415,15 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
                 lineHeight: "1.4",
               }}
             >
-              Reserved for <b>{customerName}</b> ({customerEmail})
+              {isGoodsOrder ? (
+                <>Order placed by <b>{customerName}</b> ({customerEmail})</>
+              ) : (
+                <>Reserved for <b>{customerName}</b> ({customerEmail})</>
+              )}
             </Text>
           </Section>
 
-          {/* Apple Wallet-Style Boarding Pass Card with Category Theming */}
+          {/* Apple Wallet-Style Boarding Pass or Goods Fulfillment Card */}
           <Section style={{ padding: "0 32px 28px" }}>
             <div
               style={{
@@ -421,212 +435,347 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
                 boxShadow: "0 2px 12px rgba(0, 0, 0, 0.03)",
               }}
             >
-              <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
-                <tbody>
-                  <tr>
-                    <td style={{ width: "50%", verticalAlign: "top", paddingRight: "12px" }}>
-                      <Text
-                        style={{
-                          margin: "0 0 4px",
-                          fontSize: "11px",
-                          fontWeight: "600",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.06em",
-                          color: "#86868b",
-                        }}
-                      >
-                        SCHEDULE &amp; TIME
-                      </Text>
-                      <Text
-                        style={{
-                          margin: 0,
-                          fontSize: "14px",
-                          fontWeight: "600",
-                          color: "#1d1d1f",
-                          lineHeight: "1.35",
-                        }}
-                      >
-                        {dateFormatted}
-                      </Text>
-                      <Text
-                        style={{
-                          margin: "2px 0 0",
-                          fontSize: "13px",
-                          color: "#6e6e73",
-                        }}
-                      >
-                        Reporting: {timeFormatted}
-                      </Text>
-                    </td>
+              {isGoodsOrder ? (
+                <>
+                  <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                    <tbody>
+                      <tr>
+                        <td style={{ width: "50%", verticalAlign: "top", paddingRight: "12px" }}>
+                          <Text
+                            style={{
+                              margin: "0 0 4px",
+                              fontSize: "11px",
+                              fontWeight: "600",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.06em",
+                              color: "#86868b",
+                            }}
+                          >
+                            ESTIMATED DISPATCH
+                          </Text>
+                          <Text
+                            style={{
+                              margin: 0,
+                              fontSize: "14px",
+                              fontWeight: "600",
+                              color: "#1d1d1f",
+                              lineHeight: "1.35",
+                            }}
+                          >
+                            Handcrafted Dawn Catch
+                          </Text>
+                          <Text
+                            style={{
+                              margin: "2px 0 0",
+                              fontSize: "13px",
+                              color: "#6e6e73",
+                            }}
+                          >
+                            Ships within 24 - 48 Hours
+                          </Text>
+                        </td>
 
-                    <td style={{ width: "50%", verticalAlign: "top", paddingLeft: "12px" }}>
-                      <Text
-                        style={{
-                          margin: "0 0 4px",
-                          fontSize: "11px",
-                          fontWeight: "600",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.06em",
-                          color: "#86868b",
-                        }}
-                      >
-                        GUEST ADMISSION
-                      </Text>
-                      <Text
-                        style={{
-                          margin: 0,
-                          fontSize: "14px",
-                          fontWeight: "600",
-                          color: "#1d1d1f",
-                          lineHeight: "1.35",
-                        }}
-                      >
-                        {customerName}
-                      </Text>
-                      <Text
-                        style={{
-                          margin: "2px 0 0",
-                          fontSize: "13px",
-                          color: "#6e6e73",
-                        }}
-                      >
-                        {seatsCount} Reserved {seatsCount === 1 ? "Seat" : "Seats"}
-                      </Text>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                        <td style={{ width: "50%", verticalAlign: "top", paddingLeft: "12px" }}>
+                          <Text
+                            style={{
+                              margin: "0 0 4px",
+                              fontSize: "11px",
+                              fontWeight: "600",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.06em",
+                              color: "#86868b",
+                            }}
+                          >
+                            ORDER FULFILLMENT
+                          </Text>
+                          <Text
+                            style={{
+                              margin: 0,
+                              fontSize: "14px",
+                              fontWeight: "600",
+                              color: "#1d1d1f",
+                              lineHeight: "1.35",
+                            }}
+                          >
+                            Confirmed &amp; Dock Packing
+                          </Text>
+                          <Text
+                            style={{
+                              margin: "2px 0 0",
+                              fontSize: "13px",
+                              color: "#6e6e73",
+                            }}
+                          >
+                            {itemsList.reduce((acc, it) => acc + it.quantity, 0)} Items Ordered
+                          </Text>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-              {/* Rendezvous Point with Category Theming */}
-              {meetingAddress && (
-                <div
-                  style={{
-                    padding: "14px 16px",
-                    borderRadius: "12px",
-                    backgroundColor: "#ffffff",
-                    border: `1px solid ${theme.cardBorder}`,
-                    borderLeft: `4px solid ${theme.accentColor}`,
-                    marginBottom: "20px",
-                  }}
-                >
-                  <Text
+                  {/* Delivery Address for Goods */}
+                  <div
                     style={{
-                      margin: "0 0 2px",
-                      fontSize: "10px",
-                      fontWeight: "700",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.08em",
-                      color: theme.accentColor,
+                      padding: "14px 16px",
+                      borderRadius: "12px",
+                      backgroundColor: "#ffffff",
+                      border: `1px solid ${theme.cardBorder}`,
+                      borderLeft: `4px solid ${theme.accentColor}`,
+                      marginBottom: "20px",
                     }}
                   >
-                    RENDEZVOUS &amp; GPS MEETING PIN
-                  </Text>
-                  <Text
-                    style={{
-                      margin: "0 0 6px",
-                      fontSize: "13px",
-                      color: "#1d1d1f",
-                      lineHeight: "1.4",
-                    }}
-                  >
-                    {meetingAddress}
-                  </Text>
-                  {mapsUrl && (
-                    <Link
-                      href={mapsUrl}
+                    <Text
                       style={{
-                        fontSize: "12px",
-                        color: theme.pinLinkColor,
-                        textDecoration: "none",
-                        fontWeight: "600",
+                        margin: "0 0 2px",
+                        fontSize: "10px",
+                        fontWeight: "700",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.08em",
+                        color: theme.accentColor,
                       }}
                     >
-                      📍 Open Meeting Point in Google Maps →
-                    </Link>
-                  )}
-                </div>
-              )}
+                      DELIVERY SHIPPING ADDRESS
+                    </Text>
+                    <Text
+                      style={{
+                        margin: 0,
+                        fontSize: "13px",
+                        color: "#1d1d1f",
+                        lineHeight: "1.4",
+                      }}
+                    >
+                      {shipping?.addressLine ? (
+                        <>
+                          {shipping.addressLine}
+                          {shipping.city ? `, ${shipping.city}` : ""}
+                          {shipping.state ? `, ${shipping.state}` : ""}
+                          {shipping.pincode ? ` - ${shipping.pincode}` : ""}
+                        </>
+                      ) : (
+                        "Shipping address confirmed during checkout. Track order below for live courier updates."
+                      )}
+                    </Text>
+                    <Text
+                      style={{
+                        margin: "6px 0 0",
+                        fontSize: "11px",
+                        color: "#6e6e73",
+                      }}
+                    >
+                      📦 Live courier AWB tracking will be sent to your WhatsApp once dispatched from our dock.
+                    </Text>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                    <tbody>
+                      <tr>
+                        <td style={{ width: "50%", verticalAlign: "top", paddingRight: "12px" }}>
+                          <Text
+                            style={{
+                              margin: "0 0 4px",
+                              fontSize: "11px",
+                              fontWeight: "600",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.06em",
+                              color: "#86868b",
+                            }}
+                          >
+                            SCHEDULE &amp; TIME
+                          </Text>
+                          <Text
+                            style={{
+                              margin: 0,
+                              fontSize: "14px",
+                              fontWeight: "600",
+                              color: "#1d1d1f",
+                              lineHeight: "1.35",
+                            }}
+                          >
+                            {dateFormatted}
+                          </Text>
+                          <Text
+                            style={{
+                              margin: "2px 0 0",
+                              fontSize: "13px",
+                              color: "#6e6e73",
+                            }}
+                          >
+                            Reporting: {timeFormatted}
+                          </Text>
+                        </td>
 
-              {/* Delivery Address (Physical Products) */}
-              {shipping && shipping.addressLine && (
-                <div
-                  style={{
-                    padding: "14px 16px",
-                    borderRadius: "12px",
-                    backgroundColor: "#ffffff",
-                    border: `1px solid ${theme.cardBorder}`,
-                    borderLeft: `4px solid ${theme.accentColor}`,
-                    marginBottom: "20px",
-                  }}
-                >
-                  <Text
-                    style={{
-                      margin: "0 0 2px",
-                      fontSize: "10px",
-                      fontWeight: "700",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.08em",
-                      color: theme.accentColor,
-                    }}
-                  >
-                    DELIVERY ADDRESS
-                  </Text>
-                  <Text
-                    style={{
-                      margin: 0,
-                      fontSize: "13px",
-                      color: "#1d1d1f",
-                    }}
-                  >
-                    {shipping.addressLine}
-                    {shipping.city ? `, ${shipping.city}` : ""}
-                    {shipping.state ? `, ${shipping.state}` : ""}
-                    {shipping.pincode ? ` – ${shipping.pincode}` : ""}
-                  </Text>
-                </div>
-              )}
+                        <td style={{ width: "50%", verticalAlign: "top", paddingLeft: "12px" }}>
+                          <Text
+                            style={{
+                              margin: "0 0 4px",
+                              fontSize: "11px",
+                              fontWeight: "600",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.06em",
+                              color: "#86868b",
+                            }}
+                          >
+                            GUEST ADMISSION
+                          </Text>
+                          <Text
+                            style={{
+                              margin: 0,
+                              fontSize: "14px",
+                              fontWeight: "600",
+                              color: "#1d1d1f",
+                              lineHeight: "1.35",
+                            }}
+                          >
+                            {customerName}
+                          </Text>
+                          <Text
+                            style={{
+                              margin: "2px 0 0",
+                              fontSize: "13px",
+                              color: "#6e6e73",
+                            }}
+                          >
+                            {seatsCount} Reserved {seatsCount === 1 ? "Seat" : "Seats"}
+                          </Text>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-              {/* Multi-Ticket Attendee Roster (Clean Category Cards) */}
-              {passTickets.length > 1 && (
-                <div style={{ marginBottom: "20px" }}>
-                  <Text
-                    style={{
-                      margin: "0 0 8px",
-                      fontSize: "11px",
-                      fontWeight: "700",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.06em",
-                      color: theme.accentColor,
-                    }}
-                  >
-                    {`ADMISSION PASS ROSTER (${passTickets.length} TICKETS)`}
-                  </Text>
-                  <div>
-                    {passTickets.map((t) => (
-                      <div
-                        key={t.ticketNumber}
+                  {/* Rendezvous Point with Category Theming */}
+                  {meetingAddress && (
+                    <div
+                      style={{
+                        padding: "14px 16px",
+                        borderRadius: "12px",
+                        backgroundColor: "#ffffff",
+                        border: `1px solid ${theme.cardBorder}`,
+                        borderLeft: `4px solid ${theme.accentColor}`,
+                        marginBottom: "20px",
+                      }}
+                    >
+                      <Text
                         style={{
-                          padding: "10px 14px",
-                          borderRadius: "10px",
-                          backgroundColor: "#ffffff",
-                          border: `1px solid ${theme.cardBorder}`,
-                          borderLeft: `3px solid ${theme.accentColor}`,
-                          marginBottom: "8px",
+                          margin: "0 0 2px",
+                          fontSize: "10px",
+                          fontWeight: "700",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.08em",
+                          color: theme.accentColor,
                         }}
                       >
-                        <div style={{ fontSize: "12px", fontWeight: "700", color: "#1d1d1f" }}>
-                          {`TICKET #${t.ticketNumber} · ${t.title}`}
-                        </div>
-                        <div style={{ fontSize: "12px", color: "#6e6e73", marginTop: "2px" }}>
-                          {`Guest: ${t.attendeeName}`}
-                        </div>
+                        RENDEZVOUS &amp; GPS MEETING PIN
+                      </Text>
+                      <Text
+                        style={{
+                          margin: "0 0 6px",
+                          fontSize: "13px",
+                          color: "#1d1d1f",
+                          lineHeight: "1.4",
+                        }}
+                      >
+                        {meetingAddress}
+                      </Text>
+                      {mapsUrl && (
+                        <Link
+                          href={mapsUrl}
+                          style={{
+                            fontSize: "12px",
+                            color: theme.pinLinkColor,
+                            textDecoration: "none",
+                            fontWeight: "600",
+                          }}
+                        >
+                          📍 Open Meeting Point in Google Maps →
+                        </Link>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Delivery Address (Physical Products in Mixed Orders) */}
+                  {shipping && shipping.addressLine && (
+                    <div
+                      style={{
+                        padding: "14px 16px",
+                        borderRadius: "12px",
+                        backgroundColor: "#ffffff",
+                        border: `1px solid ${theme.cardBorder}`,
+                        borderLeft: `4px solid ${theme.accentColor}`,
+                        marginBottom: "20px",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          margin: "0 0 2px",
+                          fontSize: "10px",
+                          fontWeight: "700",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.08em",
+                          color: theme.accentColor,
+                        }}
+                      >
+                        DELIVERY ADDRESS
+                      </Text>
+                      <Text
+                        style={{
+                          margin: 0,
+                          fontSize: "13px",
+                          color: "#1d1d1f",
+                        }}
+                      >
+                        {shipping.addressLine}
+                        {shipping.city ? `, ${shipping.city}` : ""}
+                        {shipping.state ? `, ${shipping.state}` : ""}
+                        {shipping.pincode ? ` - ${shipping.pincode}` : ""}
+                      </Text>
+                    </div>
+                  )}
+
+                  {/* Multi-Ticket Attendee Roster (Clean Category Cards) */}
+                  {passTickets.length > 1 && (
+                    <div style={{ marginBottom: "20px" }}>
+                      <Text
+                        style={{
+                          margin: "0 0 8px",
+                          fontSize: "11px",
+                          fontWeight: "700",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                          color: theme.accentColor,
+                        }}
+                      >
+                        {`ADMISSION PASS ROSTER (${passTickets.length} TICKETS)`}
+                      </Text>
+                      <div>
+                        {passTickets.map((t) => (
+                          <div
+                            key={t.ticketNumber}
+                            style={{
+                              padding: "10px 14px",
+                              borderRadius: "10px",
+                              backgroundColor: "#ffffff",
+                              border: `1px solid ${theme.cardBorder}`,
+                              borderLeft: `3px solid ${theme.accentColor}`,
+                              marginBottom: "8px",
+                            }}
+                          >
+                            <div style={{ fontSize: "12px", fontWeight: "700", color: "#1d1d1f" }}>
+                              {`TICKET #${t.ticketNumber} · ${t.title}`}
+                            </div>
+                            <div style={{ fontSize: "12px", color: "#6e6e73", marginTop: "2px" }}>
+                              {`Guest: ${t.attendeeName}`}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </div>
+                  )}
+                </>
               )}
 
-              {/* Primary Boarding Pass CTA (Category Pill Button) */}
+              {/* Primary Boarding Pass or Order Tracking CTA */}
               <div style={{ textAlign: "center", paddingTop: "6px" }}>
                 <Button
                   href={passUrl}
@@ -642,7 +791,9 @@ export const BookingConfirmationEmail: React.FC<BookingConfirmationEmailProps> =
                     boxShadow: "0 3px 12px rgba(0, 0, 0, 0.12)",
                   }}
                 >
-                  🎫 Open Boarding Pass on Mobile
+                  {isGoodsOrder
+                    ? "📦 Track Your Order & View Tax Invoice"
+                    : "🎫 Open Boarding Pass on Mobile"}
                 </Button>
               </div>
             </div>

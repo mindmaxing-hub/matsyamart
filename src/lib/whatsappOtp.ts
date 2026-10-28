@@ -180,10 +180,10 @@ export async function sendWhatsAppOtp(
 
   // Attempt 1: Fast2SMS WhatsApp Template API (Approved Template 39898 for guaranteed delivery)
   // Meta Cloud API Rule: variables_values CANNOT contain newlines (\n) or tabs (\t).
-  // Single-line format explicitly announces "🔐 OTP CODE: XXXXXX" so users immediately recognize it.
+  // Single-line format explicitly clarifies that this is a pre-payment OTP verification code.
   const templateId = FAST2SMS_OTP_TEMPLATE_ID || "39898";
   if (templateId) {
-    const otpFormatted = `🔐 OTP CODE: ${otp} · MatsyaMart Mobile Verification (Valid for 10 mins · Do not share)`;
+    const otpFormatted = `[LOGIN OTP - NO PAYMENT CHARGED]: 🔐 OTP CODE: ${otp} · MatsyaMart Checkout Verification (Valid 10 mins · Do not share)`;
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
         const templateQuery = new URLSearchParams({

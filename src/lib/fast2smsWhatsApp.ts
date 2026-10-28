@@ -83,8 +83,18 @@ export function buildMultiPassWhatsAppMessage(p: MultiPassParams): string {
   const experiences = p.items.filter((i) => i.pillar !== "goods");
   const physicalGoods = p.items.filter((i) => i.pillar === "goods");
 
-  let body = `🐟 *MatsyaMart Official Coastal Boarding Passes*\n`;
-  body += `Namaste *${p.guestName}*, your coastal reservation is confirmed!\n\n`;
+  let body = "";
+  if (experiences.length > 0 && physicalGoods.length > 0) {
+    body += `🐟 *MatsyaMart Coastal Reservation & Order Confirmation*\n`;
+    body += `Namaste *${p.guestName}*, your coastal reservation & goods order are confirmed!\n\n`;
+  } else if (experiences.length > 0) {
+    body += `🐟 *MatsyaMart Official Coastal Boarding Passes*\n`;
+    body += `Namaste *${p.guestName}*, your coastal reservation is confirmed!\n\n`;
+  } else {
+    body += `🐟 *MatsyaMart Official Goods Order Confirmation*\n`;
+    body += `Namaste *${p.guestName}*, your coastal goods order is confirmed!\n\n`;
+  }
+
   body += `*Order Reference:* ${p.orderRef}\n`;
   body += `*Payment Verified:* ₹${p.totalPaidINR.toLocaleString("en-IN")}\n\n`;
 
@@ -107,7 +117,8 @@ export function buildMultiPassWhatsAppMessage(p: MultiPassParams): string {
     physicalGoods.forEach((g) => {
       body += `• ${g.title} (Order Ref: ${g.passRef})\n`;
     });
-    body += `Dispatch window: Handcrafted at dawn dock, tracking updates will follow via SMS.\n\n`;
+    body += `Dispatch window: Handcrafted at dawn dock, tracking updates will follow via SMS/WhatsApp.\n`;
+    body += `📱 *Track Order & View Invoice:*\n${p.digitalPassUrl}\n\n`;
   }
 
   body += `🛡️ *Kolibaba Seafood Inc · Bhoomiputra Foundation*\n`;
@@ -154,6 +165,8 @@ export interface PassCascadeParams {
   mode?: "auto" | "link" | "image" | "pdf" | undefined;
   itemsSummary?: string | undefined;
   emergencyPhone?: string | undefined;
+  isGoods?: boolean | undefined;
+  orderType?: "goods" | "experience" | "mixed" | undefined;
 }
 
 export interface PassCascadeResult {
@@ -190,6 +203,20 @@ export async function sendPassWhatsAppCascade(
   const tenDigit = to10DigitIndianNumber(params.phone);
   const requestedMode = params.mode || "auto";
 
+  // Enforce clean canonical URL (strip ?p=... Base64 state payload to prevent Fast2SMS >1000 char error)
+  const rawPassUrl =
+    params.digitalPassUrl ||
+    `https://matsyamart.com/order/confirmation/${params.orderRef || "MM"}`;
+  const canonicalPassUrl =
+    rawPassUrl.split("?")[0]?.split("#")[0]?.trim() ||
+    `https://matsyamart.com/order/confirmation/${params.orderRef || "MM"}`;
+
+  const isGoodsOrder =
+    params.isGoods === true ||
+    params.orderType === "goods" ||
+    params.orderRef.toUpperCase().includes("-GD-") ||
+    params.orderRef.toUpperCase().includes("-PRD-");
+
   let fullMessageText = "";
   if (params.orderRef) {
     fullMessageText = buildMultiPassWhatsAppMessage({
@@ -197,17 +224,23 @@ export async function sendPassWhatsAppCascade(
       orderRef: params.orderRef,
       items: [
         {
-          title: params.itemsSummary || "MatsyaMart Coastal Reservation",
-          pillar: "walks",
+          title:
+            params.itemsSummary ||
+            (isGoodsOrder
+              ? "Artisanal Coastal Goods"
+              : "MatsyaMart Coastal Reservation"),
+          pillar: isGoodsOrder ? "goods" : "walks",
           passRef: params.orderRef,
         },
       ],
       totalPaidINR: params.totalAmountInr || 0,
-      digitalPassUrl: params.digitalPassUrl,
+      digitalPassUrl: canonicalPassUrl,
       emergencyPhone: params.emergencyPhone,
     });
   } else {
-    fullMessageText = `🐟 *MatsyaMart Coastal Pass*: View your confirmed pass here:\n${params.digitalPassUrl}`;
+    fullMessageText = isGoodsOrder
+      ? `📦 *MatsyaMart Order Receipt*: View your confirmed order tracking & tax invoice:\n${canonicalPassUrl}`
+      : `🐟 *MatsyaMart Coastal Pass*: View your confirmed pass here:\n${canonicalPassUrl}`;
   }
 
   const directWaLink = `https://wa.me/${normalizedPhone}?text=${encodeURIComponent(fullMessageText)}`;
@@ -235,11 +268,15 @@ export async function sendPassWhatsAppCascade(
   // ─────────────────────────────────────────────────────────────────────────────
   // TIER 1: DIRECT LINK TEMPLATE (First in line!)
   // Meta Cloud API Rule: variables_values CANNOT contain newlines (\n) or tabs (\t).
-  // Single-line string explicitly labels this as the Digital Boarding Pass Link.
+  // Single-line string explicitly labels this as Boarding Pass or Order Receipt.
   // ─────────────────────────────────────────────────────────────────────────────
   if (requestedMode === "auto" || requestedMode === "link") {
     const linkTemplateId = FAST2SMS_PASS_LINK_TEMPLATE_ID || "39898";
-    const passLinkFormatted = `🎟️ YOUR DIGITAL BOARDING PASS LINK: ${params.digitalPassUrl} (Order Ref: ${params.orderRef} · Admission Confirmed)`;
+    const rawPassLink = isGoodsOrder
+      ? `📦 MATSYAMART ORDER RECEIPT: ${canonicalPassUrl} (Order Ref: ${params.orderRef} · Confirmed)`
+      : `🎟️ YOUR DIGITAL BOARDING PASS LINK: ${canonicalPassUrl} (Order Ref: ${params.orderRef} · Admission Confirmed)`;
+    const passLinkFormatted =
+      rawPassLink.length > 900 ? rawPassLink.slice(0, 900) : rawPassLink;
 
     try {
       const query = new URLSearchParams({
@@ -322,7 +359,11 @@ export async function sendPassWhatsAppCascade(
     const imageUrl =
       params.imageUrl ||
       "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80";
-    const passImageFormatted = `🎟️ YOUR PHOTO PASS LINK: ${params.digitalPassUrl} (Order Ref: ${params.orderRef} · Admission Confirmed)`;
+    const rawPassImage = isGoodsOrder
+      ? `📦 MATSYAMART ORDER RECEIPT: ${canonicalPassUrl} (Order Ref: ${params.orderRef} · Confirmed)`
+      : `🎟️ YOUR PHOTO PASS LINK: ${canonicalPassUrl} (Order Ref: ${params.orderRef} · Admission Confirmed)`;
+    const passImageFormatted =
+      rawPassImage.length > 900 ? rawPassImage.slice(0, 900) : rawPassImage;
 
     try {
       const query = new URLSearchParams({
@@ -406,8 +447,14 @@ export async function sendPassWhatsAppCascade(
     const pdfUrl =
       params.pdfUrl ||
       "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
-    const filename = `MatsyaMart_Boarding_Pass_${params.orderRef || "MM"}.pdf`;
-    const passPdfFormatted = `🎟️ YOUR PASS & INVOICE LINK: ${params.digitalPassUrl} (Order Ref: ${params.orderRef} · GST Verified)`;
+    const filename = isGoodsOrder
+      ? `MatsyaMart_Order_Invoice_${params.orderRef || "MM"}.pdf`
+      : `MatsyaMart_Boarding_Pass_${params.orderRef || "MM"}.pdf`;
+    const rawPassPdf = isGoodsOrder
+      ? `📦 ORDER INVOICE LINK: ${canonicalPassUrl} (Order Ref: ${params.orderRef} · GST Verified)`
+      : `🎟️ YOUR PASS & INVOICE LINK: ${canonicalPassUrl} (Order Ref: ${params.orderRef} · GST Verified)`;
+    const passPdfFormatted =
+      rawPassPdf.length > 900 ? rawPassPdf.slice(0, 900) : rawPassPdf;
 
     try {
       const query = new URLSearchParams({

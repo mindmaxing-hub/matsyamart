@@ -743,7 +743,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   hour: "2-digit",
                   minute: "2-digit",
                 })
-              : "Check pass for timing";
+              : undefined;
+
+            const isPureGoodsOrder = confirmedOrder.items.every(
+              (it) => it.listing?.type === "product" || it.listing?.pillar === "goods",
+            );
 
             const emailPayload = {
               orderRef: confirmedOrder.order_ref,
@@ -751,17 +755,25 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               customerEmail: confirmedOrder.customer_email,
               experienceTitle:
                 primaryListing?.title || "MatsyaMart Coastal Order",
-              pillar: primaryListing?.pillar || "food",
-              seatsCount:
-                seatsCount > 0 ? seatsCount : confirmedOrder.items.length,
+              pillar: primaryListing?.pillar || (isPureGoodsOrder ? "goods" : "food"),
+              seatsCount: isPureGoodsOrder
+                ? confirmedOrder.items.reduce((acc, it) => acc + it.quantity, 0)
+                : seatsCount > 0
+                  ? seatsCount
+                  : confirmedOrder.items.length,
               totalAmountInr: confirmedOrder.total_amount_inr,
-              dateFormatted: slotDate,
-              timeFormatted: slotTime,
-              meetingAddress:
-                primaryListing?.secret_meeting_point ||
-                primaryListing?.location_name,
-              mapsUrl: primaryListing?.meeting_point_maps_url,
-              passUrl,
+              dateFormatted: isPureGoodsOrder ? undefined : slotDate,
+              timeFormatted: isPureGoodsOrder ? undefined : slotTime,
+              meetingAddress: isPureGoodsOrder
+                ? undefined
+                : primaryListing?.secret_meeting_point ||
+                  primaryListing?.location_name,
+              mapsUrl: isPureGoodsOrder
+                ? undefined
+                : primaryListing?.meeting_point_maps_url,
+              passUrl: typeof window !== "undefined"
+                ? `${window.location.origin}/order/confirmation/${confirmedOrder.order_ref}`
+                : passUrl,
               invoiceUrl,
               invoiceNumber: `INV-${confirmedOrder.order_ref}`,
               gstin: "27ABBFK9637R1ZF",
@@ -770,8 +782,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 title: it.listing?.title || "Coastal Item",
                 quantity: it.quantity,
                 unitPrice: it.unit_price_inr,
-                pillar: it.listing?.pillar,
-                type: it.listing?.type,
+                pillar: it.listing?.pillar || (isPureGoodsOrder ? "goods" : "food"),
+                type: it.listing?.type || (isPureGoodsOrder ? "product" : "experience"),
               })),
             };
 
@@ -1511,8 +1523,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 />
 
                 <p className="text-[11px] text-[#dab38c]/75 text-center">
-                  Look for WhatsApp message from <b className="text-[#f5edeb]">+91 76665 11511</b> labeled <span className="font-mono text-[#e3a157] font-semibold">🔐 OTP CODE: ······</span>
+                  Look for WhatsApp message from <b className="text-[#f5edeb]">+91 76665 11511</b> labeled <span className="font-mono text-[#e3a157] font-semibold">[LOGIN OTP - NO PAYMENT CHARGED]</span>
                 </p>
+                <div className="text-[10px] text-[#dab38c]/60 bg-[#29100b]/60 p-2 rounded-lg border border-[#dab38c]/15 text-center leading-relaxed">
+                  Note: Official Meta template shows &apos;payment completed amount: [OTP Code]&apos;. No payment has been charged yet; this is strictly your login verification code.
+                </div>
 
                 {otpError && (
                   <div className="text-[11px] text-red-400 bg-red-950/40 p-2.5 rounded-xl border border-red-500/30 text-left flex items-start gap-1.5">

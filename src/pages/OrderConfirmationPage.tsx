@@ -107,7 +107,8 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
             return;
           }
         } catch (err) {
-          console.error("Failed to fetch remote order:", err);
+          // Gracefully fall back to local order context or bare-URL synthesis without console error noise
+          console.warn("[Order Sync Notice] Remote order lookup skipped; using resilient local hydration.", err);
         } finally {
           setIsLoading(false);
         }
@@ -223,7 +224,16 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
 
   const dispatchWhatsAppPass = async (mode: "auto" | "link" | "image" | "pdf" = "auto") => {
     if (!activeOrder || !activeOrder.customer_phone) return false;
-    const passUrl = typeof window !== "undefined" ? window.location.href : "";
+    const cleanPassUrl =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/order/confirmation/${activeOrder.order_ref}`
+        : `https://matsyamart.com/order/confirmation/${activeOrder.order_ref}`;
+    const isGoods =
+      activeOrder.items.length > 0 &&
+      activeOrder.items.every(
+        (it) => it.listing?.type === "product" || it.listing?.pillar === "goods",
+      );
+
     setWaDeliveryStatus("sending");
 
     try {
@@ -233,12 +243,16 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
         body: JSON.stringify({
           phone: activeOrder.customer_phone,
           mode,
+          isGoods,
+          orderType: isGoods ? "goods" : "experience",
           passParams: {
             guestName: activeOrder.customer_name || "Valued Patron",
             orderRef: activeOrder.order_ref,
+            isGoods,
+            orderType: isGoods ? "goods" : "experience",
             items: (activeOrder.items || []).map((it, idx) => ({
-              title: it.listing?.title || "Coastal Reservation",
-              pillar: it.listing?.pillar || "walks",
+              title: it.listing?.title || (isGoods ? "Artisanal Coastal Goods" : "Coastal Reservation"),
+              pillar: it.listing?.pillar || (isGoods ? "goods" : "walks"),
               dateStr: it.slot?.slot_start
                 ? formatDate(it.slot.slot_start)
                 : undefined,
@@ -252,7 +266,7 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
                 it.attendee_details?.[0]?.fullName || activeOrder.customer_name,
             })),
             totalPaidINR: activeOrder.total_amount_inr,
-            digitalPassUrl: passUrl,
+            digitalPassUrl: cleanPassUrl,
             emergencyPhone: activeOrder.emergency_contact,
           },
         }),
@@ -399,7 +413,11 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
             </div>
             <div>
               <div className="font-bold text-[#f5edeb] text-sm flex flex-wrap items-center gap-2">
-                <span>WhatsApp Digital Pass Dispatch</span>
+                <span>
+                  {isAllGoods
+                    ? "WhatsApp Order Confirmation & Tracker"
+                    : "WhatsApp Digital Pass Dispatch"}
+                </span>
                 <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/40">
                   +91 {activeOrder.customer_phone.replace(/\D/g, "").slice(-10)}
                 </span>
@@ -415,7 +433,19 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
                 )}
               </div>
               <p className="text-[11px] text-[#dab38c]/80 mt-1">
-                Your mobile pass link is dispatched directly to WhatsApp from <b className="text-[#f5edeb]">+91 76665 11511</b> (labeled <span className="text-[#e3a157] font-semibold">🎟️ YOUR DIGITAL BOARDING PASS LINK</span>). You can also re-send or open chat anytime.
+                {isAllGoods ? (
+                  <>
+                    Your order receipt and tracking link are dispatched directly to WhatsApp from{" "}
+                    <b className="text-[#f5edeb]">+91 76665 11511</b> (labeled{" "}
+                    <span className="text-emerald-400 font-semibold">📦 MATSYAMART ORDER RECEIPT</span>). You can track fulfillment and view tax invoice anytime.
+                  </>
+                ) : (
+                  <>
+                    Your mobile pass link is dispatched directly to WhatsApp from{" "}
+                    <b className="text-[#f5edeb]">+91 76665 11511</b> (labeled{" "}
+                    <span className="text-[#e3a157] font-semibold">🎟️ YOUR DIGITAL BOARDING PASS LINK</span>). You can also re-send or open chat anytime.
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -435,7 +465,7 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
               ) : (
                 <>
                   <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Resend Pass</span>
+                  <span>{isAllGoods ? "Resend Receipt" : "Resend Pass"}</span>
                 </>
               )}
             </button>
@@ -444,7 +474,9 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
               href={
                 waDirectUrl ||
                 `https://wa.me/917666511511?text=${encodeURIComponent(
-                  `Hello MatsyaMart! Viewing digital boarding pass for Order ${activeOrder.order_ref}:\n${typeof window !== "undefined" ? window.location.href : ""}`,
+                  isAllGoods
+                    ? `Hello MatsyaMart! Viewing order tracking for Order ${activeOrder.order_ref}:\n${typeof window !== "undefined" ? `${window.location.origin}/order/confirmation/${activeOrder.order_ref}` : ""}`
+                    : `Hello MatsyaMart! Viewing digital boarding pass for Order ${activeOrder.order_ref}:\n${typeof window !== "undefined" ? `${window.location.origin}/order/confirmation/${activeOrder.order_ref}` : ""}`,
                 )}`
               }
               target="_blank"

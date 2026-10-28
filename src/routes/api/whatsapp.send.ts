@@ -34,10 +34,19 @@ export const Route = createFileRoute("/api/whatsapp/send")({
 
           // Case 1: Pass dispatch requested (via passParams or digitalPassUrl)
           if (passParams || body.digitalPassUrl) {
-            const digitalPassUrl =
+            const rawUrl =
               body.digitalPassUrl ||
               passParams?.digitalPassUrl ||
-              `https://matsyamart.com/order/confirmation/${passParams?.orderRef || "MM"}`;
+              `https://matsyamart.com/order/confirmation/${passParams?.orderRef || body.orderRef || "MM"}`;
+            const digitalPassUrl =
+              rawUrl.split("?")[0]?.split("#")[0]?.trim() || rawUrl;
+
+            const isGoods =
+              body.isGoods ??
+              passParams?.isGoods ??
+              (passParams?.items && passParams.items.length > 0
+                ? passParams.items.every((it: any) => it.pillar === "goods")
+                : undefined);
 
             const cascadeResult = await sendPassWhatsAppCascade({
               phone: cleanPhone,
@@ -50,6 +59,8 @@ export const Route = createFileRoute("/api/whatsapp/send")({
               mode: mode || "auto",
               itemsSummary: passParams?.items?.[0]?.title || body.itemsSummary,
               emergencyPhone: passParams?.emergencyPhone || body.emergencyPhone,
+              isGoods,
+              orderType: body.orderType || passParams?.orderType,
             });
 
             return Response.json({
