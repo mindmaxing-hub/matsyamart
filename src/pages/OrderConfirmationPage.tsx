@@ -62,6 +62,26 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
       if (token) {
         const decoded = decodePassPayload(token);
         if (decoded) {
+          const queryName = searchParams.get("n");
+          const queryPhone = searchParams.get("ph");
+          if (queryName) {
+            decoded.customer_name = queryName;
+          } else if (
+            decoded.customer_name === "Verified Passholder" &&
+            decoded.items.every(
+              (it) => it.listing?.type === "product" || it.listing?.pillar === "goods",
+            )
+          ) {
+            decoded.customer_name = "Valued Patron";
+          }
+          if (queryPhone) {
+            decoded.customer_phone = `+91 ${queryPhone.replace(/\D/g, "").slice(-10)}`;
+          } else if (
+            decoded.customer_phone?.includes("9920477158") ||
+            decoded.customer_phone?.includes("99204 77158")
+          ) {
+            decoded.customer_phone = "";
+          }
           addOrHydrateOrder(decoded);
           setHydratedOrder(decoded);
           return;
@@ -122,6 +142,19 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
       const isWalk = refUpper.includes("-WK-");
       const isWorkshop = refUpper.includes("-WS-");
 
+      const searchParams =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search)
+          : null;
+      const queryName = searchParams?.get("n");
+      const queryPhone = searchParams?.get("ph");
+
+      const resolvedName =
+        queryName || (isPureGoods ? "Valued Patron" : "Valued Guest");
+      const resolvedPhone = queryPhone
+        ? `+91 ${queryPhone.replace(/\D/g, "").slice(-10)}`
+        : "";
+
       let defaultListing: typeof listings[0] | undefined;
       if (isPureGoods) {
         defaultListing = listings.find((l) => l.type === "product") || listings[0];
@@ -165,24 +198,28 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
       const synthesizedOrder: Order = {
         id: `ord-synth-${orderRef.toLowerCase()}`,
         order_ref: orderRef.toUpperCase(),
-        customer_name: "Verified Passholder",
+        customer_name: resolvedName,
         customer_email: "guest@matsyamart.com",
-        customer_phone: "+91 99204 77158",
-        total_amount_inr: isExp ? (defaultListing?.price_inr || 1450) * 2 : 1200,
+        customer_phone: resolvedPhone,
+        total_amount_inr: isExp
+          ? (defaultListing?.price_inr || 1450) * 2
+          : defaultListing?.price_inr || 1200,
         status: "confirmed",
         created_at: new Date().toISOString(),
         items: [
           {
             id: `item-synth-${orderRef.toLowerCase()}-1`,
             order_id: `ord-synth-${orderRef.toLowerCase()}`,
-            listing_id: defaultListing?.id || "exp-seafood-feast-01",
+            listing_id:
+              defaultListing?.id ||
+              (isPureGoods ? "prod-wild-honey-01" : "exp-seafood-feast-01"),
             slot_id: fallbackSlot?.id,
             quantity: isExp ? 2 : 1,
             unit_price_inr: defaultListing?.price_inr || (isExp ? 1450 : 1200),
             attendee_details: isExp
               ? [
-                  { fullName: "Verified Passholder", phone: "+91 99204 77158", checked_in: false },
-                  { fullName: "Guest 2", phone: "+91 99204 77158", checked_in: false },
+                  { fullName: resolvedName, phone: resolvedPhone, checked_in: false },
+                  { fullName: "Guest 2", phone: resolvedPhone, checked_in: false },
                 ]
               : undefined,
             listing: defaultListing,
@@ -224,6 +261,11 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
 
   const dispatchWhatsAppPass = async (mode: "auto" | "link" | "image" | "pdf" = "auto") => {
     if (!activeOrder || !activeOrder.customer_phone) return false;
+    const rawDigits = (activeOrder.customer_phone || "").replace(/\D/g, "");
+    if (!rawDigits || rawDigits.length < 10 || rawDigits.endsWith("9920477158")) {
+      return false;
+    }
+
     const cleanPassUrl =
       typeof window !== "undefined"
         ? `${window.location.origin}/order/confirmation/${activeOrder.order_ref}`
@@ -291,9 +333,11 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
   };
 
   useEffect(() => {
+    const rawDigits = (activeOrder?.customer_phone || "").replace(/\D/g, "");
     if (
       activeOrder &&
-      activeOrder.customer_phone &&
+      rawDigits.length >= 10 &&
+      !rawDigits.endsWith("9920477158") &&
       !waDispatchedRef.current &&
       typeof window !== "undefined"
     ) {
@@ -405,7 +449,9 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
       </div>
 
       {/* WhatsApp Boarding Pass Action Banner */}
-      {activeOrder.customer_phone && (
+      {activeOrder.customer_phone &&
+        activeOrder.customer_phone.replace(/\D/g, "").length >= 10 &&
+        !activeOrder.customer_phone.includes("9920477158") && (
         <div className="p-4 sm:p-5 rounded-2xl bg-[#1a0805] border border-[#dab38c]/30 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
           <div className="flex items-start sm:items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-950/70 border border-emerald-500/40 text-emerald-400 flex items-center justify-center shrink-0">

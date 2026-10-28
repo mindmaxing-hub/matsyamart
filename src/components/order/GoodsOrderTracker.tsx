@@ -47,7 +47,7 @@ export const GoodsOrderTracker: React.FC<GoodsOrderTrackerProps> = ({
   };
 
   const handleWhatsAppAlerts = () => {
-    const phone = "919920477158";
+    const phone = "917666511511";
     const text = encodeURIComponent(
       `Hello MatsyaMart Logistics! I would like delivery and tracking updates for my coastal artisanal goods order: ${order.order_ref}.`,
     );
@@ -160,7 +160,12 @@ export const GoodsOrderTracker: React.FC<GoodsOrderTrackerProps> = ({
               <span>Order Confirmed • Hand-Packed at Source</span>
             </div>
             <h1 className="font-display font-bold text-2xl sm:text-3xl text-[#f5edeb]">
-              Thank you, {order.customer_name}!
+              {order.customer_name &&
+              !order.customer_name.toLowerCase().includes("passholder") &&
+              order.customer_name !== "Valued Patron" &&
+              order.customer_name !== "Valued Guest"
+                ? `Thank you, ${order.customer_name}!`
+                : "Thank you for your order!"}
             </h1>
             <p className="text-xs sm:text-sm text-[#dab38c]">
               Your order supports indigenous coastal artisans and Koli fisher collectives.

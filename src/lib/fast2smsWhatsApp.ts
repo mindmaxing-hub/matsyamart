@@ -203,13 +203,28 @@ export async function sendPassWhatsAppCascade(
   const tenDigit = to10DigitIndianNumber(params.phone);
   const requestedMode = params.mode || "auto";
 
-  // Enforce clean canonical URL (strip ?p=... Base64 state payload to prevent Fast2SMS >1000 char error)
+  // Enforce clean canonical URL (strip heavy ?p=... Base64 payload, preserve lightweight identity params)
   const rawPassUrl =
     params.digitalPassUrl ||
     `https://matsyamart.com/order/confirmation/${params.orderRef || "MM"}`;
-  const canonicalPassUrl =
+  const baseCanonical =
     rawPassUrl.split("?")[0]?.split("#")[0]?.trim() ||
     `https://matsyamart.com/order/confirmation/${params.orderRef || "MM"}`;
+
+  const queryParams = new URLSearchParams();
+  if (
+    params.guestName &&
+    !params.guestName.toLowerCase().includes("passholder") &&
+    params.guestName !== "Valued Patron" &&
+    params.guestName !== "Valued Guest"
+  ) {
+    queryParams.set("n", params.guestName);
+  }
+  if (tenDigit && tenDigit.length === 10 && !tenDigit.includes("9920477158")) {
+    queryParams.set("ph", tenDigit);
+  }
+  const queryStr = queryParams.toString();
+  const canonicalPassUrl = queryStr ? `${baseCanonical}?${queryStr}` : baseCanonical;
 
   const isGoodsOrder =
     params.isGoods === true ||

@@ -147,18 +147,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     }
   };
 
-  const handleSendWhatsAppFallback = async () => {
-    const cleaned = customerPhone.replace(/\D/g, "").slice(-10);
-    if (cleaned.length !== 10) return;
-    toast.info("Opening WhatsApp channel...");
-    window.open(
-      `https://wa.me/917666511511?text=${encodeURIComponent(
-        `Hello MatsyaMart, verifying mobile +91 ${cleaned} for order admission.`
-      )}`,
-      "_blank"
-    );
-  };
-
   const handleVerifyOtp = async () => {
     const cleaned = customerPhone.replace(/\D/g, "");
     const trimmedOtp = otpCode.trim();
@@ -1496,7 +1484,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <div className="text-[11px] text-amber-300 bg-amber-950/50 p-2.5 rounded-xl border border-amber-500/30 text-left flex items-start gap-1.5">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400" />
                   <span>
-                    You have requested verification codes multiple times. If your code delivery is delayed, please tap Direct WhatsApp Support below to verify immediately.
+                    You have requested verification codes multiple times. Please wait a few moments before requesting a new code.
                   </span>
                 </div>
               )}
@@ -1570,17 +1558,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   className="text-[#dab38c]/60 hover:text-[#dab38c] text-xs cursor-pointer"
                 >
                   Change Number
-                </button>
-              </div>
-
-              <div className="pt-2 border-t border-[#dab38c]/15">
-                <button
-                  type="button"
-                  onClick={handleSendWhatsAppFallback}
-                  className="w-full py-2 px-3 rounded-xl bg-[#29100b] hover:bg-[#35160e] border border-[#dab38c]/20 text-[#dab38c] text-xs font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                >
-                  <MessageSquare className="w-3.5 h-3.5 text-[#e3a157]" />
-                  <span>Direct WhatsApp Support (+91 76665 11511)</span>
                 </button>
               </div>
 
