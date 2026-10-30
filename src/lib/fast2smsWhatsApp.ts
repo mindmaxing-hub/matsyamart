@@ -4,6 +4,8 @@
  * Powered by Fast2SMS WhatsApp Developer Suite (dev/whatsapp & dev/whatsapp-session)
  */
 
+import { isDummyOrPlaceholderPhone } from "./utils";
+
 export const FAST2SMS_API_KEY =
   (typeof process !== "undefined" &&
     (process.env?.["FAST2SMS_API_KEY"] || process.env?.["VITE_FAST2SMS_API_KEY"])) ||
@@ -220,7 +222,7 @@ export async function sendPassWhatsAppCascade(
   ) {
     queryParams.set("n", params.guestName);
   }
-  if (tenDigit && tenDigit.length === 10 && !tenDigit.includes("9920477158")) {
+  if (tenDigit && !isDummyOrPlaceholderPhone(tenDigit)) {
     queryParams.set("ph", tenDigit);
   }
   const queryStr = queryParams.toString();

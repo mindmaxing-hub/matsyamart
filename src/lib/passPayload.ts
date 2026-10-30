@@ -141,7 +141,7 @@ export function decodePassPayload(token: string): Order | null {
         short_summary: ci.title,
         full_description: ci.title,
         host_name: ci.hostName || "Coastal Custodians",
-        host_phone: ci.hostPhone || "+91 99204 77158",
+        host_phone: ci.hostPhone || "+91 76665 11511",
         host_bio: "Local coastal custodian",
         location_name: ci.location || "Mumbai Coast",
         secret_meeting_point: ci.secretPoint,

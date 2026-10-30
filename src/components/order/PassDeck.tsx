@@ -282,7 +282,7 @@ export const PassDeck: React.FC<PassDeckProps> = ({ order }) => {
       ? buildGoogleMapsUrl(currentPass.listing.latitude, currentPass.listing.longitude)
       : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(meetingAddress)}`);
 
-  const displayHostPhone = currentPass.listing.host_phone || "+91 99204 77158";
+  const displayHostPhone = currentPass.listing.host_phone || "+91 76665 11511";
   const cleanPhone = displayHostPhone.replace(/[^0-9]/g, "");
   const hostWaUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
     `Hi, I hold verified ticket ${currentPass.ticketRef} for ${currentPass.listing.title}.`,
@@ -563,7 +563,7 @@ export const PassDeck: React.FC<PassDeckProps> = ({ order }) => {
                   <div><b>Date:</b> {formatPassDate(pass.slot?.slot_start)}</div>
                   <div><b>Reporting Time:</b> {formatReportingTime(pass.slot?.slot_start)}</div>
                   <div><b>Venue:</b> {passMeeting}</div>
-                  <div><b>Host Support:</b> {pass.listing.host_phone || "+91 99204 77158"}</div>
+                  <div><b>Host Support:</b> {pass.listing.host_phone || "+91 76665 11511"}</div>
                 </div>
               </div>
             );

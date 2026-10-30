@@ -119,7 +119,7 @@ export const MobilePass: React.FC<MobilePassProps> = ({
       ? buildGoogleMapsUrl(listing.latitude, listing.longitude)
       : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(meetingAddress)}`);
 
-  const displayHostPhone = listing?.host_phone || "+91 99204 77158";
+  const displayHostPhone = listing?.host_phone || "+91 76665 11511";
   const cleanPhone = displayHostPhone.replace(/[^0-9]/g, "");
 
   const handleShareWhatsApp = () => {

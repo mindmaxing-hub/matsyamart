@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type { Order } from "../types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -224,6 +225,59 @@ export function calculateOrderGstBreakdown(
     supplierGstin: "27ABBFK9637R1ZF",
     officialBillingName: "Kolibaba Seafood Inc.",
     registeredAddress:
-      "101, Samudra Darshan, Budha Lane 2, Versova, Andheri West, Mumbai – 400061",
+      "101, Samudra Darshan, Budha Lane 2, Versova, Andheri West, Mumbai - 400061",
+  };
+}
+
+/**
+ * Normalizes digits and determines whether a phone number represents a mock,
+ * test, or placeholder number (such as 9920477158 or any string < 10 digits).
+ */
+export function isDummyOrPlaceholderPhone(phone?: string | null): boolean {
+  if (!phone) return true;
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length < 10) return true;
+  if (digits.endsWith("9920477158")) return true;
+  if (
+    digits.endsWith("0000000000") ||
+    digits.endsWith("1111111111") ||
+    digits.endsWith("1234567890")
+  ) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Sanitizes an order's customer name and phone to ensure placeholder data
+ * (like dummy test numbers or 'Verified Passholder' on physical goods) does not leak into UI.
+ */
+export function sanitizeOrderIdentity(order: Order): Order {
+  if (!order) return order;
+  const isPureGoods =
+    order.items?.length > 0 &&
+    order.items.every(
+      (it) => it.listing?.type === "product" || it.listing?.pillar === "goods",
+    );
+
+  let cleanName = (order.customer_name || "").trim();
+  if (
+    cleanName.toLowerCase().includes("passholder") &&
+    (isPureGoods ||
+      order.order_ref?.toUpperCase().includes("-GD-") ||
+      order.order_ref?.toUpperCase().includes("-PRD-"))
+  ) {
+    cleanName = "Valued Patron";
+  }
+
+  let cleanPhone = (order.customer_phone || "").trim();
+  if (isDummyOrPlaceholderPhone(cleanPhone)) {
+    cleanPhone = "";
+  }
+
+  return {
+    ...order,
+    customer_name: cleanName,
+    customer_phone: cleanPhone,
   };
 }

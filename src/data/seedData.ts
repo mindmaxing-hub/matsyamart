@@ -405,7 +405,7 @@ export const SEED_LISTINGS: Listing[] = [
     meal_type: "breakfast",
     custom_tags: ["BREAKFAST", "HERITAGE WALK", "HARBOR FEAST"],
     host_name: "Ashwini Tandel & Colaba Coastal Collective",
-    host_phone: "+91 99204 77158",
+    host_phone: "+91 76665 11511",
     host_bio:
       "Ashwini is a community activist and culinary researcher advocating for fair seafood procurement and coastal food rights.",
   },
@@ -482,7 +482,7 @@ export const SEED_LISTINGS: Listing[] = [
     is_active: true,
     is_featured: true,
     host_name: "Aryan & Madh Gaothan Mahila Collective",
-    host_phone: "+91 99204 77158",
+    host_phone: "+91 73042 90690",
     host_bio:
       "Aryan works with indigenous coastal fishing families and women-led culinary cooperatives to safeguard centuries-old seafood heritage recipes.",
   },

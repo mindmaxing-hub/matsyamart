@@ -10,7 +10,7 @@ import { Order } from "../types";
 import { ArrowLeft, AlertCircle, FileText, Loader2, MessageCircle, RotateCcw, CheckCircle2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { trackPurchase } from "../lib/metaPixel";
-import { formatDate, formatTime } from "../lib/utils";
+import { formatDate, formatTime, isDummyOrPlaceholderPhone, sanitizeOrderIdentity } from "../lib/utils";
 
 interface OrderConfirmationPageProps {
   orderRef?: string;
@@ -51,7 +51,7 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
 
   useEffect(() => {
     if (contextOrder) {
-      setHydratedOrder(contextOrder);
+      setHydratedOrder(sanitizeOrderIdentity(contextOrder));
       return;
     }
 
@@ -66,24 +66,13 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
           const queryPhone = searchParams.get("ph");
           if (queryName) {
             decoded.customer_name = queryName;
-          } else if (
-            decoded.customer_name === "Verified Passholder" &&
-            decoded.items.every(
-              (it) => it.listing?.type === "product" || it.listing?.pillar === "goods",
-            )
-          ) {
-            decoded.customer_name = "Valued Patron";
           }
           if (queryPhone) {
             decoded.customer_phone = `+91 ${queryPhone.replace(/\D/g, "").slice(-10)}`;
-          } else if (
-            decoded.customer_phone?.includes("9920477158") ||
-            decoded.customer_phone?.includes("99204 77158")
-          ) {
-            decoded.customer_phone = "";
           }
-          addOrHydrateOrder(decoded);
-          setHydratedOrder(decoded);
+          const cleanDecoded = sanitizeOrderIdentity(decoded);
+          addOrHydrateOrder(cleanDecoded);
+          setHydratedOrder(cleanDecoded);
           return;
         }
       }
@@ -261,8 +250,7 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
 
   const dispatchWhatsAppPass = async (mode: "auto" | "link" | "image" | "pdf" = "auto") => {
     if (!activeOrder || !activeOrder.customer_phone) return false;
-    const rawDigits = (activeOrder.customer_phone || "").replace(/\D/g, "");
-    if (!rawDigits || rawDigits.length < 10 || rawDigits.endsWith("9920477158")) {
+    if (isDummyOrPlaceholderPhone(activeOrder.customer_phone)) {
       return false;
     }
 
@@ -333,11 +321,10 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
   };
 
   useEffect(() => {
-    const rawDigits = (activeOrder?.customer_phone || "").replace(/\D/g, "");
     if (
       activeOrder &&
-      rawDigits.length >= 10 &&
-      !rawDigits.endsWith("9920477158") &&
+      activeOrder.customer_phone &&
+      !isDummyOrPlaceholderPhone(activeOrder.customer_phone) &&
       !waDispatchedRef.current &&
       typeof window !== "undefined"
     ) {
@@ -358,12 +345,30 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
     }
   };
 
-  // Auto-sync: Silently keep browser address bar hydrated with ?p= payload while preserving params
+  // Auto-sync: Silently keep browser address bar hydrated with clean ?p= payload
   useEffect(() => {
     if (activeOrder && typeof window !== "undefined") {
+      const sanitized = sanitizeOrderIdentity(activeOrder);
       const searchParams = new URLSearchParams(window.location.search);
-      if (!searchParams.get("p")) {
-        const payload = encodePassPayload(activeOrder);
+      const existingToken = searchParams.get("p");
+      let needsReEncode = !existingToken;
+      if (existingToken) {
+        const decoded = decodePassPayload(existingToken);
+        if (
+          decoded &&
+          (isDummyOrPlaceholderPhone(decoded.customer_phone) ||
+            (decoded.customer_name?.toLowerCase().includes("passholder") &&
+              (activeOrder.items?.every(
+                (it) => it.listing?.type === "product" || it.listing?.pillar === "goods",
+              ) ||
+                activeOrder.order_ref.toUpperCase().includes("-GD-") ||
+                activeOrder.order_ref.toUpperCase().includes("-PRD-"))))
+        ) {
+          needsReEncode = true;
+        }
+      }
+      if (needsReEncode) {
+        const payload = encodePassPayload(sanitized);
         if (payload) {
           searchParams.set("p", payload);
           const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
@@ -450,8 +455,7 @@ export const OrderConfirmationPage: React.FC<OrderConfirmationPageProps> = ({
 
       {/* WhatsApp Boarding Pass Action Banner */}
       {activeOrder.customer_phone &&
-        activeOrder.customer_phone.replace(/\D/g, "").length >= 10 &&
-        !activeOrder.customer_phone.includes("9920477158") && (
+        !isDummyOrPlaceholderPhone(activeOrder.customer_phone) && (
         <div className="p-4 sm:p-5 rounded-2xl bg-[#1a0805] border border-[#dab38c]/30 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
           <div className="flex items-start sm:items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-950/70 border border-emerald-500/40 text-emerald-400 flex items-center justify-center shrink-0">

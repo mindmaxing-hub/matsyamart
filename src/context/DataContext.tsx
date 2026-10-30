@@ -27,7 +27,7 @@ import {
   SEED_PLACES,
   generateSeedSlots,
 } from "../data/seedData";
-import { generateOrderRef, getOrderCategoryPrefix } from "../lib/utils";
+import { generateOrderRef, getOrderCategoryPrefix, sanitizeOrderIdentity } from "../lib/utils";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
 import { DEFAULT_LOYALTY_CONFIG } from "../lib/services/loyalty";
 
@@ -303,10 +303,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
       order_ref: "MM-WK-2026-1002",
       customer_name: "Aryan Panchal",
       customer_email: "aryan@matsyamart.in",
-      customer_phone: "+91 99204 77158",
+      customer_phone: "+91 73042 90690",
       total_amount_inr: 2400,
       status: "confirmed",
-      emergency_contact: "Harsh Panchal (+91 98200 77159)",
+      emergency_contact: "Harsh Panchal (+91 73042 90690)",
       razorpay_payment_id: "pay_sim_walk_test_01",
       created_at: new Date(Date.now() - 3600000 * 3).toISOString(),
       shipping_address: {
@@ -324,7 +324,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
           quantity: 2,
           unit_price_inr: 1200,
           attendee_details: [
-            { fullName: "Aryan Panchal", phone: "+91 99204 77158", email: "aryan@matsyamart.in" },
+            { fullName: "Aryan Panchal", phone: "+91 73042 90690", email: "aryan@matsyamart.in" },
             { fullName: "Kunal Sharma", phone: "+91 98200 44556" },
           ],
           listing: SEED_LISTINGS.find((l) => l.id === "exp-sassoon-trail") || SEED_LISTINGS[0]!,
@@ -441,12 +441,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
       const saved = localStorage.getItem(STORAGE_ORDERS);
       if (saved) {
         const parsed = JSON.parse(saved) as Order[];
+        // Auto-scrub any cached orders containing dummy phones or stale passholder titles
+        const scrubbed = (parsed || []).map(sanitizeOrderIdentity);
         // Ensure all canonical test orders exist in the active ledger
-        const existingRefs = new Set(parsed.map((o) => o.order_ref.toUpperCase()));
+        const existingRefs = new Set(scrubbed.map((o) => o.order_ref.toUpperCase()));
         const missing = CANONICAL_TEST_ORDERS.filter(
           (to) => !existingRefs.has(to.order_ref.toUpperCase()),
         );
-        return [...parsed, ...missing];
+        return [...scrubbed, ...missing];
       }
 
       // Initial mock confirmed order for instant manifest testing
@@ -891,28 +893,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     const found = orders.find(
       (o) => o.order_ref.toLowerCase() === cleanRef || o.id === ref,
     );
-    if (found) return found;
-    return CANONICAL_TEST_ORDERS.find(
+    if (found) return sanitizeOrderIdentity(found);
+    const canonical = CANONICAL_TEST_ORDERS.find(
       (o) => o.order_ref.toLowerCase() === cleanRef || o.id === ref,
     );
+    return canonical ? sanitizeOrderIdentity(canonical) : undefined;
   };
 
   const addOrHydrateOrder = (incomingOrder: Order) => {
+    const cleanOrder = sanitizeOrderIdentity(incomingOrder);
     setOrders((prev) => {
       const exists = prev.some(
         (o) =>
-          o.order_ref.toLowerCase() === incomingOrder.order_ref.toLowerCase() ||
-          o.id === incomingOrder.id,
+          o.order_ref.toLowerCase() === cleanOrder.order_ref.toLowerCase() ||
+          o.id === cleanOrder.id,
       );
       if (exists) {
         return prev.map((o) =>
-          o.order_ref.toLowerCase() === incomingOrder.order_ref.toLowerCase() ||
-          o.id === incomingOrder.id
-            ? { ...o, ...incomingOrder }
+          o.order_ref.toLowerCase() === cleanOrder.order_ref.toLowerCase() ||
+          o.id === cleanOrder.id
+            ? { ...o, ...cleanOrder }
             : o,
         );
       }
-      return [incomingOrder, ...prev];
+      return [cleanOrder, ...prev];
     });
   };
 

@@ -162,8 +162,8 @@ export const GoodsOrderTracker: React.FC<GoodsOrderTrackerProps> = ({
             <h1 className="font-display font-bold text-2xl sm:text-3xl text-[#f5edeb]">
               {order.customer_name &&
               !order.customer_name.toLowerCase().includes("passholder") &&
-              order.customer_name !== "Valued Patron" &&
-              order.customer_name !== "Valued Guest"
+              !order.customer_name.toLowerCase().includes("patron") &&
+              !order.customer_name.toLowerCase().includes("guest")
                 ? `Thank you, ${order.customer_name}!`
                 : "Thank you for your order!"}
             </h1>

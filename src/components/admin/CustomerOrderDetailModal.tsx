@@ -244,7 +244,7 @@ export const CustomerOrderDetailModal: React.FC<
                     )}
                     <div className="text-[11px] text-[#e3a157] pt-1">
                       Lead Host: {firstExperience.listing?.host_name} (
-                      {firstExperience.listing?.host_phone || "+91 99204 77158"})
+                      {firstExperience.listing?.host_phone || "+91 76665 11511"})
                     </div>
                   </div>
                 ) : (
